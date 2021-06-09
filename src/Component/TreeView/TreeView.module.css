@@ -1,0 +1,53 @@
+.tree{
+  padding: 0 0 5px 0;
+}
+
+.tree ul{
+  list-style: none;
+  margin-top: 1px;
+  padding-left: 15px;
+}
+
+.tree li{
+  margin-bottom: 3px;
+  padding-left: 0px;
+}
+
+.tree input[type="checkbox"]{
+  display: none;
+}
+
+.tree input[type="checkbox"]:checked~ul{
+  
+  display: none;
+}
+
+.tree input[type="checkbox"]:checked~div label{
+  background-image: url('../../Image/folder4.png')
+}
+
+.folderImg {
+  width: 15px;
+  height: 15px;
+  background-size: 100%;
+  margin-top: 5px;
+  display: inline-block;
+  cursor: pointer;
+  background-image: url('../../Image/folder5.png')
+}
+
+.pgmImg {
+  width: 15px;
+  height: 15px;
+  background-size: 100%;
+  margin-top: 5px;
+  display: inline-block;
+  cursor: pointer;
+  background-image: url('../../Image/document.png')
+}
+
+.marginLeft{
+  margin-left: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+}

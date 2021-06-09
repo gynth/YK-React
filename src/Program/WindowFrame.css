@@ -1,0 +1,10 @@
+
+.content {height: 100%; width:100%; display: flex; flex-direction: column; border-radius: 3px; border: 2px;}
+.content .win_header {overflow:hidden; background:#8199B9; height:34px; line-height:34px; border-radius:3px; padding: 10; padding: unset;}
+.content h4 {float:left; font-weight:700; font-size:15px; color:#ffffff; padding-left:35px; background:url('../Image/win_icon@2x.png') no-repeat 11px 50%; background-size:17px 14px;}
+.content .win_header .win_controller {float:right; padding-right:6px; padding-top:6px;}
+.content .win_header .win_controller button {cursor:pointer; border-radius:2px; float:left; margin-right:3px; box-shadow:2px 2px #6C809B; width:24px; height:22px; background:#ffffff url('../Image/minwin@2x.png') no-repeat 50% 50%; background-size:14px 2px; border:none; text-indent:-9999px; overflow:hidden;}
+.content .win_header .win_controller button:last-child {margin-right:0;}
+.content .win_header .win_controller button.max {background:#ffffff url('../Image/maxwin@2x.png') no-repeat 50% 50%; background-size:14px 12px;}
+.content .win_header .win_controller button.close {background:#ffffff url('../Image/close@2x.png') no-repeat 50% 50%; background-size:12px 11px;}
+.content .win_body {overflow:hidden; background:#fff; height:100%; border:1px solid #A0B2CF; border-width:0px 1px 1px 1px; min-height:200px; border-radius:0px 0px 5px 5px;}
