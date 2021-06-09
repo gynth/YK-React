@@ -124,7 +124,6 @@ const applyWindow = (programId, programNam) => {
   if(programId === 'ED000') return <PgmTest pgm={programId} nam={programNam}/>
   else if (programId === 'ED010') return <PgmTest2 pgm={programId} nam={programNam}/>
   else if (programId === 'ED050') return <Menu pgm={programId} nam={programNam}/>
-  // return <PgmTest pgm={programId} nam={programNam}/>
 }
 
 const WindowFrame = (props) => {
