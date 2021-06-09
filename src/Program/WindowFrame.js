@@ -10,7 +10,6 @@ import Menu from './MES/Menu';
 import PgmTest2 from './MES/Chart/PgmTest2';
  
 //#region 이벤트 정의
-
 const onWindowClick = (programId, programNam) => {
   
   gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
@@ -103,7 +102,7 @@ const onDrag = (programId, programNam, width) => {
 };
 
 const onDragStop = (x, y, width, programId, programNam) => {
-  if(width !== '100%'){  
+  if(width !== '100%'){
     gfs_dispatch('WINDOWFRAME_REDUCER', 'DRAGWINDOW', 
       ({
         windowZindex: 0,
