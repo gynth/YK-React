@@ -116,7 +116,6 @@ const onDragStop = (x, y, width, programId, programNam) => {
     );
   }
 };
-
 //#endregion
 
 const applyWindow = (programId, programNam) => {
