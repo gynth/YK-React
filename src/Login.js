@@ -9,7 +9,7 @@ import Button from './Component/Control/Button';
 import { getDynamicSql_Mysql } from './db/Mysql/Mysql';
 import { setSessionCookie, getSessionCookie} from "./Cookies";
 
-import { gfs_getValue } from './Method/Store';
+import { gfs_getStoreValue } from './Method/Store';
 
 //#region 리듀서 생성
 const loginReducer = (nowState, action) => {
@@ -121,11 +121,11 @@ const Login = (props) => {
   
   let userIdParentBorder = undefined;
   let pwdParentBorder    = undefined;
-  if(gfs_getValue('LOGIN_REDUCER' , 'userIdFocus')){
+  if(gfs_getStoreValue('LOGIN_REDUCER' , 'userIdFocus')){
     userIdParentBorder = 'black';
   }
 
-  if(gfs_getValue('LOGIN_REDUCER', 'pwdFocus')){
+  if(gfs_getStoreValue('LOGIN_REDUCER', 'pwdFocus')){
     pwdParentBorder = 'black';
   }
 
@@ -133,8 +133,8 @@ const Login = (props) => {
   let userIdinputTop    = undefined;
   let pwdspanVisible    = undefined;
   let pwdinputTop       = undefined;
-  const userIdText = gfs_getValue('LOGIN_REDUCER', 'userIdText');
-  const pwdText = gfs_getValue('LOGIN_REDUCER', 'pwdText');
+  const userIdText = gfs_getStoreValue('LOGIN_REDUCER', 'userIdText');
+  const pwdText = gfs_getStoreValue('LOGIN_REDUCER', 'pwdText');
   if(userIdText !== ''){
     userIdspanVisible = 'visible';
     userIdinputTop    = '42%';

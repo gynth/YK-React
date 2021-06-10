@@ -1,7 +1,7 @@
-import { gfs_getValue } from '../Method/Store';
+import { gfs_getStoreValue } from '../Method/Store';
 
 export const gfg_getGrid = (pgm, gridId) => {
-  const storeValue = gfs_getValue(pgm, 'Grid');
+  const storeValue = gfs_getStoreValue(pgm, 'Grid');
   
   if(storeValue !== undefined && storeValue.length > 0) {
     const findValue = storeValue.find(e => e.id === gridId);

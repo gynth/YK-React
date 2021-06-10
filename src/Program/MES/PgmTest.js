@@ -7,7 +7,7 @@ import Layout from '../../Component/Layout/Layout';
 import { gfc_initPgm, gfc_getAtt, gfc_getMultiLang } from '../../Method/Comm';
 import { gfg_getGrid, gfg_appendRow, gfg_setValue, gfg_setSelectRow } from '../../Method/Grid';
 import { gfo_getInput, gfo_getCombo, gfo_getDateTime, gfo_getNumber } from '../../Method/Component';
-import { gfs_getValue } from '../../Method/Store';
+import { gfs_getStoreValue } from '../../Method/Store';
 import { getCallSP_Mysql } from '../../db/Mysql/Mysql';
 
 import { Number as columnNumber } from '../../Component/Grid/Column/Number';
@@ -98,7 +98,7 @@ class PgmTest extends Component{
       }],
       [{
         // ROWSTATUS : 'UU',
-        UPDCHR_NO : gfs_getValue('USER_REDUCER', 'USER_ID') //gfs_getValue
+        UPDCHR_NO : gfs_getStoreValue('USER_REDUCER', 'USER_ID') //gfs_getStoreValue
       }]
     ).then(
       e => {
@@ -138,7 +138,7 @@ class PgmTest extends Component{
         CRT_DT      : 'DATE'
       }],
       [{
-        UPDCHR_NO : gfs_getValue('USER_REDUCER', 'USER_ID')
+        UPDCHR_NO : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
       }],
       true
     ).then(
@@ -336,7 +336,7 @@ class PgmTest extends Component{
                               columnDateTime({name  : 'CRT_DT',
                                               header: gfc_getAtt('생성일자'),
                                               width : 150,
-                                              format: gfs_getValue('USER_REDUCER', 'YMD_FORMAT'),
+                                              format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
                                               time  : 'HH:mm',
                                               editor: { 
                                                timepicker: true
@@ -352,7 +352,7 @@ class PgmTest extends Component{
                               columnDateTime({name  : 'UPD_DT',
                                               header: gfc_getAtt('수정일시'),
                                               width : 150,
-                                              format: gfs_getValue('USER_REDUCER', 'YMD_FORMAT'),
+                                              format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
                                               // time  : 'HH:mm',
                                               readOnly: true
                                             })
@@ -392,8 +392,8 @@ class PgmTest extends Component{
               <td style={{width:'250'}}>
                 <Number pgm={this.props.pgm}
                         id='detail_user_age'
-                        num_format={gfs_getValue('USER_REDUCER', 'NUM_FORMAT')}
-                        num_round ={gfs_getValue('USER_REDUCER', 'NUM_ROUND')}  
+                        num_format={gfs_getStoreValue('USER_REDUCER', 'NUM_FORMAT')}
+                        num_round ={gfs_getStoreValue('USER_REDUCER', 'NUM_ROUND')}  
                         onBlur={(id, value, originalValue, input) => this.onBlur(id, value, originalValue, input)} 
                 />
               </td>
@@ -440,7 +440,7 @@ class PgmTest extends Component{
               <td style={{width:'250'}}>
                 <DateTime pgm        = {this.props.pgm}
                           id         = 'detail_crt_dt' 
-                          format     = {gfs_getValue('USER_REDUCER', 'YMD_FORMAT')}
+                          format     = {gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT')}
                           time       = 'HH:mm'
                           timePicker = {true}
                           onBlur     = {(id, value, originalValue, input) => this.onBlur(id, value, originalValue, input)} 

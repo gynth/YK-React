@@ -5,7 +5,7 @@ import Layout from '../../Component/Layout/Layout';
 import { gfc_initPgm, gfc_getAtt, gfc_getMultiLang } from '../../Method/Comm';
 import { gfg_getGrid, gfg_appendRow, gfg_setValue, gfg_setSelectRow } from '../../Method/Grid';
 import { gfo_getInput, gfo_getCombo, gfo_getDateTime, gfo_getNumber } from '../../Method/Component';
-import { gfs_getValue } from '../../Method/Store';
+import { gfs_getStoreValue } from '../../Method/Store';
 import { getCallSP_Mysql } from '../../db/Mysql/Mysql';
 
 import { Number as columnNumber } from '../../Component/Grid/Column/Number';
@@ -104,7 +104,7 @@ class Menu extends Component {
               UPDCHR_NO : 'VARCHAR'
             }],
             [{
-                UPDCHR_NO : gfs_getValue('USER_REDUCER', 'USER_ID') //gfs_getValue
+                UPDCHR_NO : gfs_getStoreValue('USER_REDUCER', 'USER_ID') //gfs_getStoreValue
             }]
         ).then(
             e=>{
@@ -151,7 +151,7 @@ class Menu extends Component {
               UPDCHR_NO : 'VARCHAR'
             }],
             [{
-                UPDCHR_NO : gfs_getValue('USER_REDUCER', 'USER_ID') //gfs_getValue
+                UPDCHR_NO : gfs_getStoreValue('USER_REDUCER', 'USER_ID') //gfs_getStoreValue
             }],
             true
         ).then(
@@ -403,7 +403,7 @@ class Menu extends Component {
                                 columnDateTime({name  : 'CRT_DT',
                                                 header: gfc_getAtt('생성일자'),
                                                 width : 0,
-                                                format: gfs_getValue('USER_REDUCER', 'YMD_FORMAT'),
+                                                format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
                                                 time  : 'HH:mm',
                                                 editor: { 
                                                  timepicker: true
@@ -419,7 +419,7 @@ class Menu extends Component {
                                 columnDateTime({name  : 'UPD_DT',
                                                 header: gfc_getAtt('수정일시'),
                                                 width : 0,
-                                                format: gfs_getValue('USER_REDUCER', 'YMD_FORMAT'),
+                                                format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
                                                 time  : 'HH:mm',
                                                 readOnly: true
                                               })
@@ -456,7 +456,7 @@ class Menu extends Component {
                         <td>
                             <DateTime pgm={this.props.pgm}
                                         id='detail_crt_dt'
-                                        format= {`${gfs_getValue('USER_REDUCER', 'YMD_FORMAT')} HH:mm`}
+                                        format= {`${gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT')} HH:mm`}
                                         readOnly={true}>
                             </DateTime>
                         </td>
@@ -473,7 +473,7 @@ class Menu extends Component {
                         <td>
                             <DateTime pgm={this.props.pgm}
                                         id='detail_up_dt'
-                                        format= {`${gfs_getValue('USER_REDUCER', 'YMD_FORMAT')} HH:mm`}
+                                        format= {`${gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT')} HH:mm`}
                                         readOnly={true}>                                            
                             </DateTime>
                         </td>

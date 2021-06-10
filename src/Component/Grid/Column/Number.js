@@ -1,6 +1,6 @@
 import { gfg_getRow } from '../../../Method/Grid';
 import { gfc_setNumberFormat, gfc_unNumberFormat } from '../../../Method/Comm';
-import { gfs_getValue } from '../../../Method/Store';
+import { gfs_getStoreValue } from '../../../Method/Store';
 
 /**
  * name : 컬럼명
@@ -93,8 +93,8 @@ class NumberEditor {
 
     el.type  = 'text';
     let value = String(props.value === null ? '' : props.value);
-    const NUM_FORMAT = gfs_getValue('USER_REDUCER', 'NUM_FORMAT');
-    const NUM_ROUND = gfs_getValue('USER_REDUCER', 'NUM_ROUND');
+    const NUM_FORMAT = gfs_getStoreValue('USER_REDUCER', 'NUM_FORMAT');
+    const NUM_ROUND = gfs_getStoreValue('USER_REDUCER', 'NUM_ROUND');
     value = gfc_setNumberFormat(props.value, NUM_FORMAT, NUM_ROUND)
 
     el.value = value;
@@ -141,8 +141,8 @@ class NumberRenderer {
     const orgData = props.grid.dataManager.getOriginData();
     let org = orgData.length <= props.rowKey ? '' : props.grid.dataManager.getOriginData()[props.rowKey][props.columnInfo.name];
     if(org === null) org = '';
-    const NUM_FORMAT = gfs_getValue('USER_REDUCER', 'NUM_FORMAT');
-    const NUM_ROUND = gfs_getValue('USER_REDUCER', 'NUM_ROUND');
+    const NUM_FORMAT = gfs_getStoreValue('USER_REDUCER', 'NUM_FORMAT');
+    const NUM_ROUND = gfs_getStoreValue('USER_REDUCER', 'NUM_ROUND');
     org = gfc_setNumberFormat(org, NUM_FORMAT, NUM_ROUND);
 
     let value = String(props.value === null ? '' : props.value);

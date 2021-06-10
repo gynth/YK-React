@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { gfs_getValue } from '../../../Method/Store';
+import { gfs_getStoreValue } from '../../../Method/Store';
 import { gfg_setValue } from '../../../Method/Grid';
 
 /**
@@ -44,7 +44,7 @@ export const DateTime = (props) => {
   const header    = props.header;
   const width     = props.width !== undefined ? props.width : 100;
   const readOnly  = props.readOnly !== undefined ? props.readOnly : true;
-  const format    = props.format !== undefined ? props.format : gfs_getValue('USER_REDUCER', 'YMD_FORMAT');
+  const format    = props.format !== undefined ? props.format : gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT');
   const time      = props.time;
   const align     = props.align !== undefined ? props.align : 'center';
   const valign    = props.valign !== undefined ? props.valign : 'middle';

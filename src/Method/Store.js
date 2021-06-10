@@ -1,7 +1,7 @@
 import { store, injectAsyncReducer } from '../Store/Store';
 import { jsonMaxValue, jsonRtn } from '../JSON/jsonControl';
 
-export const gfs_getValue = (reducer, value) => {
+export const gfs_getStoreValue = (reducer, value) => {
   let rtnValue = undefined;
 
   const getState = store.getState();

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import TabListItem from './TabListItem';
 import { gfc_sleep } from '../../../Method/Comm';
-import { gfs_getValue } from '../../../Method/Store';
+import { gfs_getStoreValue } from '../../../Method/Store';
 
 async function onClick(flag){
   // 1. Retrieve
@@ -13,15 +13,15 @@ async function onClick(flag){
   // 6. Print
   // 7. DtlInsert
   // 8. DelDelete
-  if(gfs_getValue('WINDOWFRAME_REDUCER') === undefined) return;
+  if(gfs_getStoreValue('WINDOWFRAME_REDUCER') === undefined) return;
 
   // const pgm = store.getState().WINDOWFRAME_REDUCER.activeWindow['programId'];
   // const window = store.getState().WINDOWFRAME_REDUCER.windowState.filter(e => e.programId === pgm)
-  const pgm = gfs_getValue('WINDOWFRAME_REDUCER').activeWindow['programId'];
-  const window = gfs_getValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === pgm)
+  const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER').activeWindow['programId'];
+  const window = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === pgm)
 
   if(flag !== 1 && flag !== 5 && flag !== 3){
-    gfs_getValue(pgm, 'Grid').map(e => e.Grid.blur())
+    gfs_getStoreValue(pgm, 'Grid').map(e => e.Grid.blur())
     await gfc_sleep(50);
   }
 

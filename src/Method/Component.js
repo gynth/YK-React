@@ -1,11 +1,11 @@
-import { gfs_getValue } from '../Method/Store';
+import { gfs_getStoreValue } from '../Method/Store';
 
 export const gfo_getInput = (parent, inputId) => {
   const type = typeof(parent);
   let storeValue;
 
   if(type === 'string'){
-    storeValue = gfs_getValue(parent, 'Input');
+    storeValue = gfs_getStoreValue(parent, 'Input');
   }else{
     storeValue = parent['Input'];
   }
@@ -23,7 +23,7 @@ export const gfo_getCombo = (parent, comboId) => {
   let storeValue;
 
   if(type === 'string'){
-    storeValue = gfs_getValue(parent, 'Combo');
+    storeValue = gfs_getStoreValue(parent, 'Combo');
   }else{
     storeValue = parent['Combo'];
   }
@@ -41,7 +41,7 @@ export const gfo_getDateTime = (parent, dateTimeId) => {
   let storeValue;
 
   if(type === 'string'){
-    storeValue = gfs_getValue(parent, 'DateTime');
+    storeValue = gfs_getStoreValue(parent, 'DateTime');
   }else{
     storeValue = parent['DateTime'];
   }
@@ -59,7 +59,7 @@ export const gfo_getNumber = (parent, numberId) => {
   let storeValue;
 
   if(type === 'string'){
-    storeValue = gfs_getValue(parent, 'Number');
+    storeValue = gfs_getStoreValue(parent, 'Number');
   }else{
     storeValue = parent['Number'];
   }

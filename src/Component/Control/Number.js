@@ -2,7 +2,7 @@ import { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { gfo_getNumber } from '../../Method/Component';
 import { gfc_getMultiLang, gfc_setNumberFormat, gfc_unNumberFormat } from '../../Method/Comm';
-import { gfs_getValue, gfs_dispatch } from '../../Method/Store';
+import { gfs_getStoreValue, gfs_dispatch } from '../../Method/Store';
 
 class Number extends Component{
   isNumber = require('is-number');
@@ -219,8 +219,8 @@ Number.defaultProps = {
   autoFocus   : false,
   maxLength   : undefined,
   className   : undefined,
-  num_format  : gfs_getValue('USER_REDUCER', 'NUM_FORMAT'),
-  num_round   : gfs_getValue('USER_REDUCER', 'NUM_ROUND'),
+  num_format  : gfs_getStoreValue('USER_REDUCER', 'NUM_FORMAT'),
+  num_round   : gfs_getStoreValue('USER_REDUCER', 'NUM_ROUND'),
 
   onBlur       : (e) => {},
   onChange     : (e) => {},

@@ -4,7 +4,7 @@ import { Component, createRef } from 'react';
 import DatePicker from 'tui-date-picker';
 import { gfo_getDateTime } from '../../Method/Component';
 import { gfc_getMultiLang } from '../../Method/Comm';
-import { gfs_getValue, gfs_dispatch } from '../../Method/Store';
+import { gfs_getStoreValue, gfs_dispatch } from '../../Method/Store';
 
 class DateTime extends Component{
   dateTime;
@@ -26,7 +26,7 @@ class DateTime extends Component{
       return 
     } 
 
-    this.format = this.props.format !== undefined ? this.props.format : gfs_getValue('USER_REDUCER', 'YMD_FORMAT');
+    this.format = this.props.format !== undefined ? this.props.format : gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT');
     this.time = this.props.time;
     this.dateTimeRef = createRef();
     this.inputRef = createRef();

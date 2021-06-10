@@ -1,5 +1,5 @@
 import {injectAsyncReducer} from '../../../Store/Store';
-import { gfs_getValue, gfs_dispatch } from '../../../Method/Store';
+import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
 
 const windowFrameReducer = (nowState, action) => {
 

@@ -10,7 +10,7 @@ import Grid from '@toast-ui/react-grid';
 
 import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
-import { gfs_getValue, gfs_dispatch } from '../../Method/Store';
+import { gfs_getStoreValue, gfs_dispatch } from '../../Method/Store';
 import { useResizeDetector } from 'react-resize-detector';
 
 import { gfc_getMultiLang, gfc_getAtt, gfc_sleep } from '../../Method/Comm';
@@ -272,7 +272,7 @@ const RtnGrid = (props) => {
     contextInit.innerHTML = gfc_getAtt('설정초기화');
     contextInit.onclick = () =>{
 
-      const CRTCHR_NO = gfs_getValue('USER_REDUCER', 'USER_ID');
+      const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
       const PGM_ID    = props.pgm;
       const GRID_ID   = props.id;
 
@@ -316,7 +316,7 @@ const RtnGrid = (props) => {
 
     contextSave.onclick = () =>{
 
-      const CRTCHR_NO = gfs_getValue('USER_REDUCER', 'USER_ID');
+      const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
       const PGM_ID    = props.pgm;
       const GRID_ID   = props.id;
       
@@ -374,7 +374,7 @@ const RtnGrid = (props) => {
       return 
     }
 
-    const CRTCHR_NO = gfs_getValue('USER_REDUCER', 'USER_ID');
+    const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
     const PGM_ID    = props.pgm;
     const GRID_ID   = props.id;
 

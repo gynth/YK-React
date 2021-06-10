@@ -1,7 +1,7 @@
 import React from 'react';
 import { jsonMaxValue, jsonRtn } from '../../../JSON/jsonControl';
 import { useSelector } from 'react-redux';
-import { gfs_getValue, gfs_dispatch } from '../../../Method/Store';
+import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
 
 const onClick = (e) => {
   e.stopPropagation();
@@ -30,8 +30,8 @@ const onCloseClick = (e) => {
     })
   );
   
-  let maxZindex = jsonMaxValue(gfs_getValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex');
-  let selJson = jsonRtn(gfs_getValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex', maxZindex);
+  let maxZindex = jsonMaxValue(gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex');
+  let selJson = jsonRtn(gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex', maxZindex);
   
   if(selJson !== undefined){
     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 

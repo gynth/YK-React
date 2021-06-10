@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Rnd } from 'react-rnd';
 import { useSelector } from 'react-redux';
-import { gfs_getValue, gfs_dispatch } from '../Method/Store';
+import { gfs_getStoreValue, gfs_dispatch } from '../Method/Store';
 import PropTypes from 'prop-types';
 import './WindowFrame.css';
 import { jsonMaxValue, jsonRtn } from '../JSON/jsonControl';
@@ -33,8 +33,8 @@ const onWindowCloseClick = (programId) => {
   gfs_dispatch(programId, 'DELPGM'
   );
 
-  let maxZindex = jsonMaxValue(gfs_getValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex');
-  let selJson = jsonRtn(gfs_getValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex', maxZindex);
+  let maxZindex = jsonMaxValue(gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex');
+  let selJson = jsonRtn(gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex', maxZindex);
   
   if(selJson !== undefined){
     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 

@@ -3,7 +3,7 @@ import { Component } from 'react';
 import { jsonMaxValue } from '../../JSON/jsonControl';
 import { Rnd } from 'react-rnd';
 import ReactDOM from 'react-dom';
-import { gfs_PGM_REDUCER, gfs_dispatch, gfs_getValue } from '../../Method/Store';
+import { gfs_PGM_REDUCER, gfs_dispatch, gfs_getStoreValue } from '../../Method/Store';
 
 class PopupFrame extends Component {
   popupOpenYn = null;
@@ -23,7 +23,7 @@ class PopupFrame extends Component {
     super(props);
     this.rootId = this.props.rootId;
 
-    this.zIndex = jsonMaxValue(gfs_getValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex');
+    this.zIndex = jsonMaxValue(gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex');
 
     this.popupOpenYn = document.querySelector('[id^="POPUP_OWNER"]');
     
@@ -47,7 +47,7 @@ class PopupFrame extends Component {
 
   componentWillUnmount(){
     const pgm = this.state.pgm + this.props.rootId;
-    const rtnValue = gfs_getValue(pgm);
+    const rtnValue = gfs_getStoreValue(pgm);
 
     gfs_dispatch('WINDOWFRAME_REDUCER', 'CLOSEWINDOW', 
       ({
