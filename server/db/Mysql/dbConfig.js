@@ -8,7 +8,7 @@ const dbPool = mysql.createPool({
     password : 'dk1234',
     database : '2crm_data',
     multipleStatements: true,
-    acquireTimeout: 1000000,
+    // acquireTimeout: 1000000,
     connectTimeout: 5000, //5초
     dateStrings: 'date'
 }); 

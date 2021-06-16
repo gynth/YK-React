@@ -49,12 +49,12 @@ class PopupFrame extends Component {
     const pgm = this.state.pgm + this.props.rootId;
     const rtnValue = gfs_getStoreValue(pgm);
 
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'CLOSEWINDOW', 
-      ({
-        activeWindow: {programId: pgm
-                      }
-      })
-    );
+    // gfs_dispatch('WINDOWFRAME_REDUCER', 'CLOSEWINDOW', 
+    //   ({
+    //     activeWindow: {programId: pgm
+    //                   }
+    //   })
+    // );
 
     this.props.callback(rtnValue);
   }

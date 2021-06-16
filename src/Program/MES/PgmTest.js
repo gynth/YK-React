@@ -233,7 +233,7 @@ class PgmTest extends Component{
             <button style={{width:80, height:45}}
               onClick={e => {
                 gfp_openPopup(this, 'PopupTest.js', 1000, 400, {}, popup => {
-                  gfo_getInput(popup, 'search_user_nam').getValue();
+                  console.log(gfo_getInput(popup, 'search_user_nam').getValue());
                 });
                 
               }}>POPUP</button>
