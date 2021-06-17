@@ -106,8 +106,8 @@ class Combobox extends Component{
     container: (base) => ({
       ...base,
       flex : 1,
-      // width: this.props.width,
-      width: '100%',
+      width: this.props.width === undefined ? '100%' : this.props.width,
+      // width: '100%',
       margin:0
     }),
   
@@ -120,7 +120,8 @@ class Combobox extends Component{
 
     valueContainer: (base) => ({
       ...base,
-      padding:0
+      padding:0,
+      zIndex: 100
     }),
 
     indicatorsContainer: (base) => ({
@@ -189,7 +190,7 @@ class Combobox extends Component{
     this.ref = React.createRef();
 
     return (
-      <div className='item'>
+      <div style={{zIndex:1000}} className='item'>
         {this.props.label !== '' && this.props.label !== undefined &&
           <div style={{float:'left', marginRight:'3px'}}>
             <label htmlFor={this.props.id}>{this.props.label}</label>
@@ -202,6 +203,7 @@ class Combobox extends Component{
                 menuPlacement= 'auto'
                 ref          = {this.ref}
                 onBlur       = {e => this.onBlurBase(e)}
+                // menuIsOpen
                   
                   // inputId={this.props.id}
                   // filterOption={null}
@@ -247,7 +249,7 @@ Combobox.propTypes = {
 };
 
 Combobox.defaultProps = {
-  width       : 150,
+  // width       : 150,
   height      : 23,
   fontSize    : 12,
   label       : '',

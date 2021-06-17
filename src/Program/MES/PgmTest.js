@@ -378,7 +378,6 @@ class PgmTest extends Component{
                           value   = 'UID_NO'
                           display = 'MINOR_NAM'
                           field   = {[]}
-                          width   = {100}
                           param   = {
                             {major_id: 'Z003'}
                           }
@@ -407,7 +406,6 @@ class PgmTest extends Component{
                           value   = 'SAP_CD'
                           display = 'SAP_NAM'
                           field   = {[]}
-                          width   = {100}
                           param   = {
                             []
                           }

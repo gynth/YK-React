@@ -194,7 +194,8 @@ class Menu extends Component {
         <Layout split   ='horizontal'
                 minSize     ={[54]}
                 defaultSize ={54}
-                resizerStyle='none' >
+                // resizerStyle='none'
+                >
         <SearchDiv>
             <Input pgm={this.props.pgm}
                     id='search_menu_id'
@@ -214,13 +215,13 @@ class Menu extends Component {
                         display = 'YN_STR'
                         field   = {[]}
                         param   = {[]}
-                        width   = {100}
-                        emptyRow= {true}>
+                        width   = {500}
+                        >
             </Combobox>            
         </SearchDiv>
 
             <Layout primary     = 'second'
-                    split   ='vertical'
+                    split       ='vertical'
                     defaultSize = {'0%'}
                     direction   = 'left'
             >

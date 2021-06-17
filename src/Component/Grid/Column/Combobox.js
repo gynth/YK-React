@@ -184,27 +184,31 @@ class ComboEditor {
       var event = document.createEvent("Events");
       event.initEvent('keydown', true, true);
       event.keyCode = 9;
-      el.dispatchEvent(event);
+      this.el.dispatchEvent(event);
     }
 
-    this.ref = React.createRef();
-    this.grid = props.grid;
+    const init = async(e) => {
 
-    const el = document.createElement('div'); 
-    ReactDOM.render(<Select options={optionList}
+      this.ref = React.createRef();
+      this.grid = props.grid;
+  
+      const el = document.createElement('div'); 
+      const combo = <Select options={optionList}
                             styles={customStyles}
                             defaultValue={optionList.find(e => e.value === props.value)}
                             
                             isMulti={false}
-                            defaultMenuIsOpen={true}
+                            defaultMenuIsOpen
                             ref={this.ref}
                             placeholder=''
                             menuPlacement='auto'
-
-                            blurInputOnSelect={true}
-                            
+  
+                            // blurInputOnSelect={true}
                             onBlur={(e) => onBlur(e)}
-
+                            // onMenuOpen={e => console.log(e)}                            
+                            
+  
+  
                             // onMenuClose={e => this.setBlur()}
                             // onChange={e => this.setBlur()}
                             
@@ -217,10 +221,23 @@ class ComboEditor {
                             //  onBlur={(e) => onBlurBase(e)}
                           
                             //  onInputChange={(value, action) => onInputChangeBase(value, action)}
-                    />, el)
-    
+                        />;
+      ReactDOM.render(combo, el)
+      this.el = el;
 
-    this.el = el;
+      const input = combo._self.el.getElementsByTagName('input');
+      if(input !== undefined && input !== null){
+        await gfc_sleep(50);
+        input[0].focus();
+      }
+
+      // combo._self.el.children[0].children[1].children[0].children[1].children[0].children[0].focus();
+
+      // console.log(combo._self.el.children[0].children[1].children[0].children[1].children[0].children[0]);
+      // console.log(combo._self.el.getElementsByTagName('input')[0]);
+    }
+
+    init();
   }
 
   getElement() {
