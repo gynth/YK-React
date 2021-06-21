@@ -1,5 +1,3 @@
-const { queryByRole } = require("@testing-library/dom");
-
 const Common = (fn, param) => {
   let query = '';
 

@@ -6,7 +6,7 @@ import styles from './Main.module.css';
 import ExplainInput from './Component/Control/ExplainInput';
 import Button from './Component/Control/Button';
 
-import { getDynamicSql_Mysql } from './db/Mysql/Mysql';
+import { getDynamicSql_Mysql, getDynamicSql_Mysql_async } from './db/Mysql/Mysql';
 import { setSessionCookie, getSessionCookie} from "./Cookies";
 
 import { gfs_getStoreValue } from './Method/Store';
@@ -80,15 +80,26 @@ const userReducer = (nowState, action) => {
 injectAsyncReducer('LOGIN_REDUCER', loginReducer);
 injectAsyncReducer('USER_REDUCER', userReducer);
 
-const onClick = (e, user_id, pass_cd) => {
+const onClick = async(e, user_id, pass_cd) => {
 
-  getDynamicSql_Mysql(
+  let result = await getDynamicSql_Mysql(
     'Common/Common',
     'login',
     [{user_id,
       pass_cd}]
-  ).then(
-    result => {
+  );
+
+  // console.log(result);
+  
+  // let result2 =  getDynamicSql_Mysql(
+  //   'Common/Common',
+  //   'fm_facchk_item_cd',
+  //   []
+  // );
+
+  // console.log(result2);
+  // result.then(
+  //   result => {
       if(result.data.result){
         if(result.data.data.length === 0){
           alert('로그인 정보가 잘못되었습니다.');
@@ -106,8 +117,8 @@ const onClick = (e, user_id, pass_cd) => {
       }else{
         alert('로그인에 실패했습니다.')
       }
-    }
-  )
+  //   }
+  // )
 };
 
 

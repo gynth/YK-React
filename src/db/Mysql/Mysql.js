@@ -1,14 +1,23 @@
-import { MysqlServerQuery, MysqlServerSP, MysqlServerTemp } from './MysqlServer.js';
+import { MysqlServerQuery, MysqlServerSP } from './MysqlServer.js';
 import { gfg_getModyfiedRow, gfg_getRow } from '../../Method/Grid';
 import { gfc_getAtt } from '../../Method/Comm';
 
-export const getDynamicSql_Mysql = (file, fn, param) => {
-  return MysqlServerQuery(file, fn, param);
+export const getDynamicSql_Mysql = async (file, fn, param) => {
+  return MysqlServerQuery(file, fn, param); 
 };
 
-export const getDynamicSql_Mysql_temp = (file, fn, param, query) => {
-  return MysqlServerTemp('Query', file, fn, param, query);
-};
+// const executeMysql_async = (file, fn, param) => {
+//   return MysqlServerQuery(file, fn, param).then(
+//     result => {
+//       return result.data;
+//     }
+//   )
+// }
+
+// export const getDynamicSql_Mysql_async = async(file, fn, param) => {
+//   const result = await executeMysql_async(file, fn, param);
+//   return result;
+// }
 
 export const getCallSP_Mysql = (param, gridInfo, mustValue, del) => {
 

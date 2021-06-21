@@ -1,7 +1,4 @@
-// import CommonQuery from './Query/CommonQuery.js';
-
 const express = require('express');
-// const { query } = require('./dbConfig');
 const router = express.Router();
 const dbPool = require('./dbConfig');
 
@@ -9,143 +6,143 @@ router.get('/', (req, res) => {
   res.send({data: 'hello world GET'});
 })
 
-router.get('/Query', (req, res) => {
+// router.get('/Query', (req, res) => {
 
-  dbPool.getConnection((err, connection) => {
+//   dbPool.getConnection((err, connection) => {
   
-    try{
-      if(!err){
+//     try{
+//       if(!err){
 
-        let Common;
-        try{
-          Common = require('./Query/Common/Common.js');
-        }catch{
+//         let Common;
+//         try{
+//           Common = require('./Query/Common/Common.js');
+//         }catch{
 
-        }
+//         }
 
-        const query = Common('test', {});
+//         const query = Common('test', {});
 
-        // console.log(query) 
-        connection.beginTransaction();
+//         // console.log(query) 
+//         connection.beginTransaction();
 
-        connection.query(query, (err, data) => {
-          if(data === undefined){
-            res.send({
-              "result": false,
-              "data": {
-                "code"    : 'undefined',
-                "message" : 'undefined',
-                "contents": [
+//         connection.query(query, (err, data) => {
+//           if(data === undefined){
+//             res.send({
+//               "result": false,
+//               "data": {
+//                 "code"    : 'undefined',
+//                 "message" : 'undefined',
+//                 "contents": [
                   
-                ],
-                "pagination": {
-                  "page": 1,
-                  "totalCount": 100
-                }
-              }
-            });
+//                 ],
+//                 "pagination": {
+//                   "page": 1,
+//                   "totalCount": 100
+//                 }
+//               }
+//             });
     
-            connection.rollback();
-          }
-          else if(!err){
-            // res.send({
-            //   result  : true,
-            //   data    : data,
-            //   applyRow: data.affectedRows === undefined ? data.length : data.affectedRows,
-            //   code    : '',
-            //   message : '' 
-            // });
+//             connection.rollback();
+//           }
+//           else if(!err){
+//             // res.send({
+//             //   result  : true,
+//             //   data    : data,
+//             //   applyRow: data.affectedRows === undefined ? data.length : data.affectedRows,
+//             //   code    : '',
+//             //   message : '' 
+//             // });
 
-            let _row = [];
-            for(let i = 0; i < data.length; i++){
-              _row.push({"COP_CD": data[i].COP_CD, 
-                         "SML_NO": data[i].SML_NO, 
-                         "YMD": data[i].YMD, 
-                         "FAC_CD": data[i].FAC_CD, 
-                         "SEQ_NO": data[i].SEQ_NO, 
-                         "ROUT_MID_CAT_CD": data[i].ROUT_MID_CAT_CD, 
-                         "STR_TM": data[i].STR_TM, 
-                         "END_TM": data[i].END_TM, 
-                         "TM": data[i].TM, 
-                         "TM_SEQ": data[i].TM_SEQ, 
-                         "HOLD_YN": data[i].HOLD_YN, 
-                         "STR_DT": data[i].STR_DT, 
-                         "END_DT": data[i].END_DT})
-            }
+//             let _row = [];
+//             for(let i = 0; i < data.length; i++){
+//               _row.push({"COP_CD": data[i].COP_CD, 
+//                          "SML_NO": data[i].SML_NO, 
+//                          "YMD": data[i].YMD, 
+//                          "FAC_CD": data[i].FAC_CD, 
+//                          "SEQ_NO": data[i].SEQ_NO, 
+//                          "ROUT_MID_CAT_CD": data[i].ROUT_MID_CAT_CD, 
+//                          "STR_TM": data[i].STR_TM, 
+//                          "END_TM": data[i].END_TM, 
+//                          "TM": data[i].TM, 
+//                          "TM_SEQ": data[i].TM_SEQ, 
+//                          "HOLD_YN": data[i].HOLD_YN, 
+//                          "STR_DT": data[i].STR_DT, 
+//                          "END_DT": data[i].END_DT})
+//             }
             
-            res.send({
-              "result": true,
-              "data": {
-                "code"    : "undefined",
-                "message" : "undefined",
-                // "contents": [
-                //         {'COP_CD': '10', 'SML_NO': '20'},
-                //         {'COP_CD': '20', 'SML_NO': '30'}
-                // ],
-                "contents": _row,
-                // "pagination": {
-                //   "page": 1,
-                //   "totalCount": 100
-                // }
-              }
-            });
+//             res.send({
+//               "result": true,
+//               "data": {
+//                 "code"    : "undefined",
+//                 "message" : "undefined",
+//                 // "contents": [
+//                 //         {'COP_CD': '10', 'SML_NO': '20'},
+//                 //         {'COP_CD': '20', 'SML_NO': '30'}
+//                 // ],
+//                 "contents": _row,
+//                 // "pagination": {
+//                 //   "page": 1,
+//                 //   "totalCount": 100
+//                 // }
+//               }
+//             });
     
-            connection.commit();
-          }else{ 
-            res.send({
-              "result": false, 
-              "data": {
-                "code"    : 'undefined',
-                "message" : 'undefined',
-                "contents": [
+//             connection.commit();
+//           }else{ 
+//             res.send({
+//               "result": false, 
+//               "data": {
+//                 "code"    : 'undefined',
+//                 "message" : 'undefined',
+//                 "contents": [
                   
-                ],
-                "pagination": {
-                  "page": 1,
-                  "totalCount": 100
-                }
-              }
-            });
+//                 ],
+//                 "pagination": {
+//                   "page": 1,
+//                   "totalCount": 100
+//                 }
+//               }
+//             });
     
-            connection.rollback();
-          }
-        })
+//             connection.rollback();
+//           }
+//         })
         
-        connection.release();
-      }
-    }catch(err){
-      res.send({
-        "result": false,
-        "data": {
-          "code"    : err.name,
-          "message" : err.stack,
-          "contents": [
+//         connection.release();
+//       }
+//     }catch(err){
+//       res.send({
+//         "result": false,
+//         "data": {
+//           "code"    : err.name,
+//           "message" : err.stack,
+//           "contents": [
             
-          ],
-          "pagination": {
-            "page": 1,
-            "totalCount": 100
-          }
-        }
-      });
-    }
-  })
+//           ],
+//           "pagination": {
+//             "page": 1,
+//             "totalCount": 100
+//           }
+//         }
+//       });
+//     }
+//   })
 
 
 
-  // res.send({
-  //   "result": true,
-  //   "data": {
-  //     "contents": [
-  //       {'COP_CD': '10'}
-  //     ],
-  //     "pagination": {
-  //       "page": 1,
-  //       "totalCount": 100
-  //     }
-  //   }
-  // });
-})
+//   // res.send({
+//   //   "result": true,
+//   //   "data": {
+//   //     "contents": [
+//   //       {'COP_CD': '10'}
+//   //     ],
+//   //     "pagination": {
+//   //       "page": 1,
+//   //       "totalCount": 100
+//   //     }
+//   //   }
+//   // });
+// })
 
 router.post('/SP', (req, res) => {
   const param = req.body.param;
@@ -314,19 +311,25 @@ router.post('/SP', (req, res) => {
 
 router.post('/Query', (req, res) => {
   
+  console.log('connection Wating');
+
   dbPool.getConnection((err, connection) => {
+    console.log(dbPool._allConnections.length);
+
     try{
       if(!err){
+        console.log('connection success');
 
         const file = req.body.file;
         let Common;
         try{
           Common = require('./Query/' + file);
-        }catch{
-
+        }catch(err){
+          console.log(err);
         }
 
         if(typeof(Common) !== 'function'){
+          console.log('Wrong file location');
           res.send({
             result  : false,
             data    : null,
@@ -334,6 +337,8 @@ router.post('/Query', (req, res) => {
             code    : '',
             message : 'Wrong file location'
           });
+
+          return;
         }
 
         const fn = req.body.fn;
@@ -341,10 +346,11 @@ router.post('/Query', (req, res) => {
         const query = Common(fn, param);
 
         connection.beginTransaction();
-
         connection.query(query, (err, data) => {
+          console.log(query);
 
           if(data === undefined){
+            console.log('data === undefined');
             res.send({
               result  : false,
               data    : null,
@@ -356,7 +362,7 @@ router.post('/Query', (req, res) => {
             connection.rollback();
           }
           else if(!err){
-            console.log(query);
+            console.log('data === success');
             res.send({
               result  : true,
               data    : data,
@@ -367,6 +373,7 @@ router.post('/Query', (req, res) => {
     
             connection.commit();
           }else{ 
+            console.log('data === else');
             res.send({
               result  : false,
               data    : null,
@@ -381,6 +388,7 @@ router.post('/Query', (req, res) => {
         
         connection.release();
       }else{
+        console.log('connection fail');
         res.send({
           result  : false,
           data    : null,
@@ -390,6 +398,7 @@ router.post('/Query', (req, res) => {
         });
       }
     }catch(err){
+      console.log(err);
       res.send({
         result  : false,
         data    : null,
