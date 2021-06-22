@@ -121,12 +121,11 @@ const onClick = async(e, user_id, pass_cd) => {
   // )
 };
 
-
-const winClose = () => {
+// const winClose = () => {
   // self.close();
   // window.open('','_self').close(); 
   // return false;
-}
+// }
 
 const Login = (props) => {
   
