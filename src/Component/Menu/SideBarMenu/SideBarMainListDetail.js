@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql.js';
+// import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql.js';
 
 import Component from './SideBarMainListDetailComponent';
 
@@ -9,15 +9,43 @@ const SideBarMainListDetail = (props) => {
   const [list, setList] = useState([]);
   
   useEffect(() => {
-    if(MENU_ID !== ''){
-      getDynamicSql_Mysql(
-        'Common/Common.js',
-        'ch_menu3',
+    // if(MENU_ID !== ''){
+    //   getDynamicSql_Mysql(
+    //     'Common/Common.js',
+    //     'ch_menu3',
+    //     [{
+    //       pr_menu: MENU_ID
+    //     }]
+    //   ).then(
+    //     e => {setList(e.data.data)}
+    //   )
+    // }
+    if(MENU_ID === 'INSP'){
+      setList(
         [{
-          pr_menu: MENU_ID
+          MENU_ID : 'INSP_PROC',
+          MENU_NAM: '검수진행'
+        },{
+          MENU_ID : 'INSP_HIST',
+          MENU_NAM: '검수이력'
+        },{
+          MENU_ID : 'INSP_INFO',
+          MENU_NAM: '배차정보'
         }]
-      ).then(
-        e => {setList(e.data.data)}
+      )
+    }else if(MENU_ID === 'DISP'){
+      setList(
+        [{
+          MENU_ID : 'DISP_WAIT',
+          MENU_NAM: '출차대기'
+        }]
+      )
+    }else if(MENU_ID === 'ENTR'){
+      setList(
+        [{
+          MENU_ID : 'ENTR_WAIT',
+          MENU_NAM: '입차대기'
+        }]
       )
     }
   }, [MENU_ID])

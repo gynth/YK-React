@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { useSelector } from 'react-redux';
 import { gfs_getStoreValue, gfs_dispatch } from '../Method/Store';
@@ -8,6 +8,7 @@ import { jsonMaxValue, jsonRtn } from '../JSON/jsonControl';
 import PgmTest from './MES/PgmTest';
 import Menu from './MES/Menu';
 import PgmTest2 from './MES/Chart/PgmTest2';
+import e from 'cors';
  
 //#region 이벤트 정의
 const onWindowClick = (programId, programNam) => {
@@ -119,9 +120,13 @@ const onDragStop = (x, y, width, programId, programNam) => {
 //#endregion
 
 const applyWindow = (programId, programNam) => {
-  if(programId === 'ED000') return <PgmTest pgm={programId} nam={programNam}/>
-  else if (programId === 'ED010') return <PgmTest2 pgm={programId} nam={programNam}/>
-  else if (programId === 'ED050') return <Menu pgm={programId} nam={programNam}/>
+  // if(programId === 'ED000') return <PgmTest pgm={programId} nam={programNam}/>
+  // else if (programId === 'ED010') return <PgmTest2 pgm={programId} nam={programNam}/>
+  // else if (programId === 'ED050') return <Menu pgm={programId} nam={programNam}/>
+
+  const pgm = require(`../Program/VMS/${programId}/${programId}.js`);
+
+  return <pgm.default pgm={programId} nam={programNam} />
 }
 
 const WindowFrame = (props) => {

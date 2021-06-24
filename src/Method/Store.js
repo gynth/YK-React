@@ -298,8 +298,12 @@ export const gfs_WINDOWFRAME_REDUCER = () => {
         })
       }
     };
-    injectAsyncReducer('WINDOWFRAME_REDUCER', windowFrameReducer);
+    gfs_injectAsyncReducer('WINDOWFRAME_REDUCER', windowFrameReducer);
   }
+}
+
+export const gfs_injectAsyncReducer = (name, asyncReducer) => {
+  injectAsyncReducer(name, asyncReducer);
 }
 
 export const gfs_PGM_REDUCER = (pgm) => {
@@ -353,6 +357,6 @@ export const gfs_PGM_REDUCER = (pgm) => {
         })
       }
     }
-    injectAsyncReducer(pgm, programReducer);
+    gfs_injectAsyncReducer(pgm, programReducer);
   }
 }

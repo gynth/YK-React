@@ -1,8 +1,7 @@
 import React from 'react';
 import '../Menu.css';
 import { useSelector } from 'react-redux';
-import {injectAsyncReducer} from '../../../Store/Store';
-import { gfs_dispatch } from '../../../Method/Store';
+import { gfs_dispatch, gfs_injectAsyncReducer } from '../../../Method/Store';
 
 import Li from './SideBarMainView';
 import Title from './SideBarMenuTitle';
@@ -46,7 +45,7 @@ const sidebarmenuReducer = (nowState, action) => {
   }
 };
 //#endregion
-injectAsyncReducer('SIDEBARMENU_REDUCER', sidebarmenuReducer);
+gfs_injectAsyncReducer('SIDEBARMENU_REDUCER', sidebarmenuReducer);
 
 //#region 이벤트
 
@@ -71,11 +70,9 @@ const SideBarMenu = (props) => {
           <h1><img src={require('../../../Image/logo@2x.png').default} alt='로고'/></h1>
           <button htmlFor='menuIcon' type='button' className='hmenu' onClick={(e) => onClick(e)}/>
           <ul>
-            {/* 김경현 하드코딩중 추후에 바꿔야함 WHO??? */}
-            {/* 지금 안하는 이유는 아이콘 이미지가 하드코딩임 */}
-            <Li MENU_ID='ED' index='0' nam='연습'></Li>
-            <Li MENU_ID='ZM' index='1' nam='공통'></Li>
-            <Li              index='2'           ></Li>
+            <Li MENU_ID='INSP' index='0' nam='검수'></Li>
+            <Li MENU_ID='DISP' index='1' nam='배차'></Li>
+            <Li MENU_ID='ENTR' index='2' nam='입차'></Li>
             <Li              index='3'           ></Li>
             <Li              index='4'           ></Li>
           </ul>
@@ -96,37 +93,6 @@ const SideBarMenu = (props) => {
           </div>
         </div>
       </div>
-    {/* <div className='content'>
-      <div className='header'>
-        <div className='tabs'>
-          <ul className='list'>
-            <li className='on'>메뉴이름<button type='button' className='close'>닫기</button></li>
-            <li>메뉴이름<button type='button' className='close'>닫기</button></li>
-            <li>메뉴이름<button type='button' className='close'>닫기</button></li>
-          </ul>
-        </div>
-        <div className='common_btns'>
-          <button type='button' className='save'><span>저장</span></button>
-          <button type='button' className='del'><span>삭제</span></button>
-          <button type='button' className='search'><span>조회</span></button>
-        </div>
-      </div>
-      <div className='body'>
-        <div className='win_box'>
-          <div className='win_header'>
-            <h4>고객등록</h4>
-            <div className='win_controller'>
-              <button type='button' className='min'>최소화</button>
-              <button type='button' className='max'>최대화</button>
-              <button type='button' className='close'>닫기</button>
-            </div>
-          </div>
-          <div className='win_body'>
-            
-          </div>
-        </div>
-      </div>
-    </div> */}
   </div>
   );
 };

@@ -30,4 +30,13 @@ export function injectAsyncReducer(name, asyncReducer) {
   return store;
 }
 
+// export function combineReducer(owner, reducer){
+//   const ownerReducer = store.asyncReducers[owner];
+
+//   store.asyncReducers[owner] = combineReducers({
+//     ownerReducer,
+//     reducer
+//   })
+// }
+
 export default store;

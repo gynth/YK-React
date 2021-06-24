@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql.js';
+// import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql.js';
 import { useSelector } from 'react-redux';
 
 import SideBarMainListDetail from './SideBarMainListDetail';
@@ -14,16 +14,40 @@ const SideBarMainList = (props) => {
   const [list, setList] = useState([]);
 
   useEffect(() => {
-    if(MENU_ID !== ''){
+    // if(MENU_ID !== ''){
 
-      getDynamicSql_Mysql(
-        'Common/Common.js',
-        'ch_menu2',
+    //   getDynamicSql_Mysql(
+    //     'Common/Common.js',
+    //     'ch_menu2',
+    //     [{
+    //       pr_menu: MENU_ID
+    //     }]
+    //   ).then(
+    //     e => {setList(e.data.data)}
+    //   )
+    // }
+    setList([]);
+
+    if(MENU_ID === 'INSP'){
+      setList(
         [{
-          pr_menu: MENU_ID
+          MENU_ID,
+          MENU_NAM: '검수'
         }]
-      ).then(
-        e => {setList(e.data.data)}
+      )
+    }else if(MENU_ID === 'DISP'){
+      setList(
+        [{
+          MENU_ID,
+          MENU_NAM: '배차'
+        }]
+      )
+    }else if(MENU_ID === 'ENTR'){
+      setList(
+        [{
+          MENU_ID,
+          MENU_NAM: '입차'
+        }]
       )
     }
   }, [MENU_ID])

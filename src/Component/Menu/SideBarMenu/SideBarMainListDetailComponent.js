@@ -14,6 +14,7 @@ const SideBarMainListDetailComponent = (props) => {
 
     //#region 프로그램 리듀서 생성
     gfs_PGM_REDUCER(select.pgm);
+    
     //#endregion
 
     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 

@@ -1,15 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import {injectAsyncReducer} from './Store/Store';
+
+import { gfs_injectAsyncReducer } from './Method/Store';
 
 import styles from './Main.module.css';
 import ExplainInput from './Component/Control/ExplainInput';
 import Button from './Component/Control/Button';
 
-import { getDynamicSql_Mysql, getDynamicSql_Mysql_async } from './db/Mysql/Mysql';
-import { setSessionCookie, getSessionCookie} from "./Cookies";
+import { getDynamicSql_Mysql } from './db/Mysql/Mysql';
+import { setSessionCookie, getSessionCookie} from './Cookies';
 
 import { gfs_getStoreValue } from './Method/Store';
+
+import * as YK_REQ from './WebReq/WebReq';
 
 //#region 리듀서 생성
 const loginReducer = (nowState, action) => {
@@ -77,8 +80,8 @@ const userReducer = (nowState, action) => {
 
 //#endregion
 
-injectAsyncReducer('LOGIN_REDUCER', loginReducer);
-injectAsyncReducer('USER_REDUCER', userReducer);
+gfs_injectAsyncReducer('LOGIN_REDUCER', loginReducer);
+gfs_injectAsyncReducer('USER_REDUCER', userReducer);
 
 const onClick = async(e, user_id, pass_cd) => {
 
@@ -89,43 +92,24 @@ const onClick = async(e, user_id, pass_cd) => {
       pass_cd}]
   );
 
-  // console.log(result);
-  
-  // let result2 =  getDynamicSql_Mysql(
-  //   'Common/Common',
-  //   'fm_facchk_item_cd',
-  //   []
-  // );
+  if(result.data.result){
+    if(result.data.data.length === 0){
+      alert('로그인 정보가 잘못되었습니다.');
+    }else{
+      const width = window.screen.availWidth;
+      const height = window.screen.availHeight;
 
-  // console.log(result2);
-  // result.then(
-  //   result => {
-      if(result.data.result){
-        if(result.data.data.length === 0){
-          alert('로그인 정보가 잘못되었습니다.');
-        }else{
-          const width = window.screen.availWidth;
-          const height = window.screen.availHeight;
+      const winProperties = 'location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
 
-          const winProperties = 'location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
-
-          e.preventDefault(); 
-          setSessionCookie("session", "SUCCESS", 1/1440);   
-          let win = window.open('Home', 'DK', winProperties);
-          win.moveTo(0, 0);
-        }
-      }else{
-        alert('로그인에 실패했습니다.')
-      }
-  //   }
-  // )
+      e.preventDefault(); 
+      setSessionCookie('session', 'SUCCESS', 1/1440);   
+      let win = window.open('Home', 'DK', winProperties);
+      win.moveTo(0, 0);
+    }
+  }else{
+    alert('로그인에 실패했습니다.')
+  }
 };
-
-// const winClose = () => {
-  // self.close();
-  // window.open('','_self').close(); 
-  // return false;
-// }
 
 const Login = (props) => {
   
