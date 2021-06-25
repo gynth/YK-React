@@ -17,6 +17,9 @@ const SideBarMainListDetailComponent = (props) => {
     
     //#endregion
 
+    //메뉴클릭시 사이드바메뉴 닫기.
+    gfs_dispatch('SIDEBARMENU_REDUCER', 'MENUOPEN');
+
     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
       ({
         windowZindex: 0,
@@ -25,6 +28,7 @@ const SideBarMainListDetailComponent = (props) => {
                       }
       })
     );
+
   };
 
   const selectWindow = useSelector((e) => {

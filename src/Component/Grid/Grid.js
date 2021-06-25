@@ -35,9 +35,10 @@ const RtnGrid = (props) => {
 
     if(grid){
       try{
-        window.dispatchEvent(new Event('resize'));
-        if(Object.keys(grid).length > 0)
+        if(Object.keys(grid).length > 0){
+          window.dispatchEvent(new Event('resize'));
           grid.setWidth(width);
+        }
       }catch(err){
         console.log(err)
       }
@@ -402,7 +403,8 @@ const RtnGrid = (props) => {
             //   end: [e.rowKey, gridRef.current.getInstance().getColumns().length - 1]
             // });
 
-            props.selectionChange(gridRef.current.getInstance().getRow(e.rowKey));
+            if(props.selectionChange !== undefined)
+              props.selectionChange(gridRef.current.getInstance().getRow(e.rowKey));
           }
         })
     
@@ -533,8 +535,8 @@ const RtnGrid = (props) => {
 
   return (
     <> 
-      <div ref={ref} style={{position:'absolute', width:'calc(100% - 10px)', height: 'calc(100% - 10px)', marginLeft: '5px', marginTop: '5px'}}>
-        {/* <div ref={gridRef} style={{overflow:'hidden',position:'absolute'}} /> */}
+      <div ref={ref} style={{width:'calc(100% - 10px)', height: 'calc(100% - 10px)', marginLeft: '5px', marginTop: '5px'}}>
+        
         <Grid header        = {props.colHeader}
               selectionUnit = 'row'
               minRowHeight  = {props.rowHeight < 34 ? 34 : props.rowHeight}
