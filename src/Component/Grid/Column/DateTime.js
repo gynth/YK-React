@@ -64,7 +64,7 @@ export const DateTime = (props) => {
                valign, 
                resizable}
 
-  // if(editor){
+  if(!readOnly){
     rtn.editor = {
       type   : 'datePicker',
       options: {
@@ -77,7 +77,7 @@ export const DateTime = (props) => {
 
     rtn.editor.options.format = format.replace('DD', 'dd');
     if(time !== undefined) rtn.editor.options.time = time;
-  // }
+  }
 
   rtn.renderer = {
     type   : DateTimeRenderer,
@@ -137,10 +137,11 @@ class DateTimeRenderer {
     }
 
     this.el.type = 'text';
-    this.el.setAttribute('style', `height: 27px; 
+    // this.el.setAttribute('style', `height: 27px; display: table-cell; width:calc(100% - 5px); padding: 0px 0px 0px 5px; border: 0px; text-align:${option['align']}; vertical-align:${option['valign']}; background-color:${backGround};`)
+
+    this.el.setAttribute('style', `height: 33px; 
                                    display: table-cell; 
-                                   width:calc(100% - 5px); 
-                                   padding: 0px 0px 0px 5px;
+                                   width:100%; 
                                    border: 0px; 
                                    text-align:${option['align']}; 
                                    vertical-align:${option['valign']}; 

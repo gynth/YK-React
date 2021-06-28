@@ -6,6 +6,8 @@ import { gfg_getRow } from '../../../Method/Grid';
  * 
  * width(100) : Width
  * 
+ * color : 폰트색상
+ * 
  * onRender: {(value, el, rows)}
  * 
  * readOnly(true): 리드온리
@@ -22,6 +24,7 @@ export const Input = (props) => {
   const name      = props.name;
   const header    = props.header;
   const width     = props.width !== undefined ? props.width : 100;
+  const color     = props.color !== undefined ? props.color : 'black';
   const password  = props.password !== undefined ? props.password : false;
   const align     = props.align !== undefined ? props.align : 'left';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
@@ -31,6 +34,7 @@ export const Input = (props) => {
   const rtn = {name,
                header,
                width,
+               color,
                align,
                valign,
                resizable,
@@ -65,7 +69,8 @@ export const Input = (props) => {
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
-      readOnly
+      readOnly,
+      color
     }
   }
 
@@ -76,7 +81,8 @@ export const Input = (props) => {
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
-      readOnly
+      readOnly,
+      color
     }
   }
 
@@ -166,6 +172,7 @@ class InputRenderer {
                                    text-align:${option['align']}; 
                                    vertical-align:${option['valign']}; 
                                    background-color:${backGround};
+                                   color:${option['color']};
                                    `)
 
     let value = String((props.value === null || props.value === undefined) ? '' : props.value);

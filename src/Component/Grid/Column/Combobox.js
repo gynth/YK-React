@@ -22,6 +22,7 @@ import { gfc_sleep } from '../../../Method/Comm';
  * 
  * resizable(true) : 컬럼넓이 조정여부
  * 
+ * data([{}]) : 데이터직접입력
  * 
  * editor: { 
  * 
@@ -52,6 +53,7 @@ export const Combobox = (props) => {
   const align     = props.align !== undefined ? props.align : 'center';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
   const resizable = props.resizable !== undefined ? props.resizable : true;
+  const data      = props.data !== undefined ? props.data : undefined;
   const editor    = props.editor;
 
   const rtn = {name,  
@@ -59,16 +61,18 @@ export const Combobox = (props) => {
                width, 
                align, 
                valign, 
-               resizable}
+               resizable,
+               data}
 
-  const queryResult = new ComboCreate({
-    location: editor.location,
-    fn      : editor.fn,
-    value   : editor.value,
-    display : editor.display,
-    field   : editor.field,
-    param   : editor.param,
-    emptyRow: editor.emptyRow
+  const queryResult = new ComboInit({
+    location: editor !== undefined ? editor.location : '',
+    fn      : editor !== undefined ? editor.fn : '',
+    value   : editor !== undefined ? editor.value : '',
+    display : editor !== undefined ? editor.display : '',
+    field   : editor !== undefined ? editor.field : '',
+    param   : editor !== undefined ? editor.param : '',
+    emptyRow: editor !== undefined ? editor.emptyRow : '',
+    data
   });
 
   // rtn.editor = {
@@ -81,16 +85,18 @@ export const Combobox = (props) => {
   if(!readOnly){
     rtn.editor = {
       type   : ComboEditor,
+      data,
       options: {
         align,
         queryResult,
-        onFilter: editor.onFilter
+        onFilter: editor !== undefined ? editor.onFilter : ''
       }
     }
   }
 
   rtn.renderer = {
     type   : ComboboxRenderer,
+    data,
     options: {
       align,
       valign,
@@ -110,7 +116,7 @@ class ComboEditor {
     const width = queryResult.width;
     const onFilter = option.onFilter;
 
-    if(onFilter !== undefined) optionList = onFilter(optionList)
+    if(onFilter !== undefined && onFilter !== '') optionList = onFilter(optionList)
     
     const dot = (text) => ({
       display: 'flex',
@@ -258,69 +264,79 @@ class ComboEditor {
   }
 }
 
-class ComboCreate {
+class ComboInit {
 
   optionList = []
   width = 0
-  constructor(props){
 
-    getDynamicSql_Mysql(
-      props.location,
-      props.fn,
-      [props.param]
-    ).then(
-      result => {
-        try{
-          if(result.data.result){
-            
-            for(let idx in result.data.data){
-              let canvas = document.createElement("canvas");
-              let context = canvas.getContext("2d");
-              context.font = props.fontSize + "px bold";
-              let metrics = context.measureText(result.data.data[idx][props.value]);
-  
-              if(this.width < metrics.width + 10) {
-                if(props.fontSize >= 9)
-                  this.width = Math.ceil(metrics.width) + 10
-                else
-                  this.width = Math.ceil(metrics.width) + 20
-              };
-            }
+  ComboCreate = async(props) => {
+    let result = {};
 
-            for(let idx in result.data.data){
-              let arrValue = {};
+    if(props.data === undefined){
+      result = await getDynamicSql_Mysql(
+        props.location,
+        props.fn,
+        [props.param]
+      );
+    }else{
+      result.data = {};
+      result.data.result = true;
+      result.data.data = props.data;
+    }
+    
+    try{
+      if(result.data.result){
+        
+        for(let idx in result.data.data){
+          let canvas = document.createElement("canvas");
+          let context = canvas.getContext("2d");
+          context.font = props.fontSize + "px bold";
+          let metrics = context.measureText(result.data.data[idx][props.value]);
 
-              const value = result.data.data[idx][props.value];
-              arrValue['value'] = value;
+          if(this.width < metrics.width + 10) {
+            if(props.fontSize >= 9)
+              this.width = Math.ceil(metrics.width) + 10
+            else
+              this.width = Math.ceil(metrics.width) + 20
+          };
+        }
 
-              const text = result.data.data[idx][props.display];
-              // arrValue['labelText'] = setCode(value, maxCode) + text;
-              
-              arrValue['label'] = text;
+        for(let idx in result.data.data){
+          let arrValue = {};
 
-              for(let idx2 in props.field){
-                arrValue[props.field[idx2]] = result.data.data[idx][props.field[idx2]];
-              }
+          const value = result.data.data[idx][props.value];
+          arrValue['value'] = value;
 
-              if(props.emptyRow){
-                if(idx === '0'){
-                  // this.optionList.push({'value': '', 'labelText': setCode('', maxCode) + '', 'label': ''})
-                  this.optionList.push({'value': '', 'label': ''})
-                }
-              }
+          const text = result.data.data[idx][props.display];
+          // arrValue['labelText'] = setCode(value, maxCode) + text;
+          
+          arrValue['label'] = text;
 
-              this.optionList.push(arrValue)
+          for(let idx2 in props.field){
+            arrValue[props.field[idx2]] = result.data.data[idx][props.field[idx2]];
+          }
+
+          if(props.emptyRow){
+            if(idx === '0'){
+              // this.optionList.push({'value': '', 'labelText': setCode('', maxCode) + '', 'label': ''})
+              this.optionList.push({'value': '', 'label': ''})
             }
           }
-        }catch{
-          let arrValue   = {};
-          arrValue['value'] = '';
-          // arrValue['labelText']  = '';
-          arrValue['label']  = '';
+
           this.optionList.push(arrValue)
         }
       }
-    )
+    }catch{
+      let arrValue   = {};
+      arrValue['value'] = '';
+      // arrValue['labelText']  = '';
+      arrValue['label']  = '';
+      this.optionList.push(arrValue)
+    }
+  }
+
+  constructor(props){
+    this.ComboCreate(props);
   }
 }
 
@@ -358,7 +374,12 @@ class ComboboxRenderer {
     if(org.toString() !== value.toString()) backGround = 'greenYellow'
     
     this.el.type = 'text';
-    this.el.setAttribute('style', `height:33px; margin:0 5px 0 5px; text-align:${option['align']}; border: 0px; background-color:${backGround};display:table-cell; width:calc(100% - 10px);`)
-
+    // this.el.setAttribute('style', `height:33px; margin:0 5px 0 5px; text-align:${option['align']}; border: 0px; background-color:${backGround};display:table-cell; width:calc(100% - 10px);`)
+    this.el.setAttribute('style', `height:33px; 
+                                   text-align:${option['align']}; 
+                                   border: 0px; 
+                                   background-color:${backGround};
+                                   display:table-cell; 
+                                   width:100%;`)
   }
 }

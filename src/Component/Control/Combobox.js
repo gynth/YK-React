@@ -17,6 +17,72 @@ class Combobox extends Component{
   optionList = []
   width = 0
 
+  ComboCreate = async(props) => {
+    let result = {};
+
+    if(props.data === undefined){
+      result = await getDynamicSql_Mysql(
+        props.location,
+        props.fn,
+        [props.param]
+      );
+    }else{
+      result.data = {};
+      result.data.result = true;
+      result.data.data = props.data;
+    }
+
+    try{
+      if(result.data.result){
+        
+        for(let idx in result.data.data){
+          let canvas = document.createElement("canvas");
+          let context = canvas.getContext("2d");
+          context.font = props.fontSize + "px bold";
+          let metrics = context.measureText(result.data.data[idx][props.value]);
+
+          if(this.width < metrics.width + 10) {
+            if(props.fontSize >= 9)
+              this.width = Math.ceil(metrics.width) + 25
+            else
+              this.width = Math.ceil(metrics.width) + 20
+          };
+        }
+
+        for(let idx in result.data.data){
+          let arrValue = {};
+
+          const value = result.data.data[idx][props.value];
+          arrValue['value'] = value;
+
+          const text = result.data.data[idx][props.display];
+          // arrValue['labelText'] = setCode(value, maxCode) + text;
+          
+          arrValue['label'] = text;
+
+          for(let idx2 in props.field){
+            arrValue[props.field[idx2]] = result.data.data[idx][props.field[idx2]];
+          }
+
+          if(props.emptyRow){
+            if(idx === '0'){
+              // this.optionList.push({'value': '', 'labelText': setCode('', maxCode) + '', 'label': ''})
+              this.optionList.push({'value': '', 'label': ''})
+            }
+          }
+
+          this.optionList.push(arrValue)
+        }
+      }
+    }catch{
+      let arrValue   = {};
+      arrValue['value'] = '';
+      // arrValue['labelText']  = '';
+      arrValue['label']  = '';
+      this.optionList.push(arrValue)
+    }
+  }
+
   constructor(props){
     super(props)
 
@@ -25,63 +91,7 @@ class Combobox extends Component{
       return 
     } 
 
-    getDynamicSql_Mysql(
-      props.location,
-      props.fn,
-      [props.param]
-    ).then(
-      result => {
-        try{
-          if(result.data.result){
-            
-            for(let idx in result.data.data){
-              let canvas = document.createElement("canvas");
-              let context = canvas.getContext("2d");
-              context.font = props.fontSize + "px bold";
-              let metrics = context.measureText(result.data.data[idx][props.value]);
-  
-              if(this.width < metrics.width + 10) {
-                if(props.fontSize >= 9)
-                  this.width = Math.ceil(metrics.width) + 25
-                else
-                  this.width = Math.ceil(metrics.width) + 20
-              };
-            }
-
-            for(let idx in result.data.data){
-              let arrValue = {};
-
-              const value = result.data.data[idx][props.value];
-              arrValue['value'] = value;
-
-              const text = result.data.data[idx][props.display];
-              // arrValue['labelText'] = setCode(value, maxCode) + text;
-              
-              arrValue['label'] = text;
-
-              for(let idx2 in props.field){
-                arrValue[props.field[idx2]] = result.data.data[idx][props.field[idx2]];
-              }
-
-              if(props.emptyRow){
-                if(idx === '0'){
-                  // this.optionList.push({'value': '', 'labelText': setCode('', maxCode) + '', 'label': ''})
-                  this.optionList.push({'value': '', 'label': ''})
-                }
-              }
-
-              this.optionList.push(arrValue)
-            }
-          }
-        }catch{
-          let arrValue   = {};
-          arrValue['value'] = '';
-          // arrValue['labelText']  = '';
-          arrValue['label']  = '';
-          this.optionList.push(arrValue)
-        }
-      }
-    )
+    this.ComboCreate(props);
 
     gfs_dispatch(props.pgm, 'INITCOMBO', 
       ({

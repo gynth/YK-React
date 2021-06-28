@@ -409,7 +409,8 @@ const RtnGrid = (props) => {
         })
     
         gridRef.current.getInstance().on('afterChange', (e) => {
-          props.afterChange(e.changes[0]);
+          if(props.afterChange !== undefined)
+            props.afterChange(e.changes[0]);
         })
        
         const header = gridRef.current.gridInst.el.querySelectorAll('div.tui-grid-header-area');   

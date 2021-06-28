@@ -51,8 +51,8 @@ const userReducer = (nowState, action) => {
       USER_ID   : nowState === undefined ? 'KKH'        : nowState.USER_ID,
       USER_NAM  : nowState === undefined ? '김경현'      : nowState.USER_NAM,
       LANGUAGE  : nowState === undefined ? 'KOR'        : nowState.LANGUAGE,
-      // YMD_FORMAT: nowState === undefined ? 'yyyy-MM-DD' : nowState.YMD_FORMAT,
-      YMD_FORMAT: nowState === undefined ? 'MM-DD-yyyy' : nowState.YMD_FORMAT,
+      YMD_FORMAT: nowState === undefined ? 'yyyy-MM-DD' : nowState.YMD_FORMAT,
+      // YMD_FORMAT: nowState === undefined ? 'MM-DD-yyyy' : nowState.YMD_FORMAT,
       YM_FORMAT : nowState === undefined ? 'yyyy-MM'    : nowState.YM_FORMAT,
       NUM_FORMAT: nowState === undefined ? '0,0'        : nowState.NUM_FORMAT,
       NUM_ROUND : nowState === undefined ? '2R'         : nowState.NUM_ROUND

@@ -58,9 +58,16 @@ class ImageRenderer {
     const option = props.columnInfo.renderer.options;
     const imgItem = option.imgItem;
 
-    // let value = String((props.value === null || props.value === undefined) ? '' : props.value);   
-    // this.el.appendChild(imgItem[1].value);
-    ReactDOM.render(imgItem[1].value, this.el);
+    let value = String((props.value === null || props.value === undefined) ? '' : props.value);   
+    const viewImg = imgItem.filter(e => e.code === value);
+
+    if(viewImg.length > 0) ReactDOM.render(viewImg[0].value, this.el);
+
+    this.el.setAttribute('style', `height: 32px; 
+                                   width:100%; 
+                                   border: 0px; 
+                                   background-color:white;
+                                   `)
 
 
     // this.el.setAttribute('style', `height: 27px; 

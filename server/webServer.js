@@ -1,7 +1,9 @@
 const express = require('express');
 const app = express();
+const router = express.Router();
 const Mysql = require('./db/Mysql/Mysql');
 const cors = require('cors');
+const axios = require('axios');
 
 // const http = require('http');
 // const io = require('socket.io');
@@ -12,17 +14,35 @@ app.use(cors());
 /* Mysql요청 */
 app.use('/Mysql', Mysql);
 
+// YK스틸 웹요청
+const yk_req = async(request) => {
+  let response;
+  try{
+    response = await axios.get('http://tally.yksteel.co.kr/tally_mstr_wait.jsp', {
+
+    })
+  }catch{
+
+  }
+
+  return response;
+}
+
+// app.get('/YK', (req, res) => {
+//   console.log(req.body);
+//   yk_req(req).then((response) => {
+//     res.json(response.data);
+//   })
+// });
+
+app.post('/YK', (req, res) => {
+  console.log(req.body);
+  yk_req(req).then((response) => {
+    res.json(response.data);
+  })
+});
+
 const port = 3001;
 app.listen(port, () => {
   console.log(`Listening on port ${port}..`)
 });  
-
-
-// const httpServer = http.createServer(app).listen(3003, () => { 
-//   console.log("포트 3003에 연결되었습니다."); 
-// });
-
-// const socketServer = io(httpServer); 
-// socketServer.on("connection", socket => { 
-//   console.log("connect client by Socket.io"); 
-// });

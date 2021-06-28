@@ -1,19 +1,17 @@
 import axios from 'axios';
 
-export function tally_mstr_wait(){
-  const host = 'http://tally.yksteel.co.kr/tally_mstr_wait.jsp';
-  // const host = 'http://211.95.111.139:80/tally_mstr_wait.jsp';
+export function YK_WEB_REQ(addr){
+  // const host = 'http://tally.yksteel.co.kr/tally_mstr_wait.jsp';
+  const host = 'http://localhost:3001/YK';
   const option = {
     url   : host,
-    method: 'GET',
+    method: 'POST',
     headers: {
       'Access-Control-Allow-Origin': '*'
     },
-    // data: {
-    //   file,
-    //   fn,
-    //   param
-    // } 
+    data: {
+      addr
+    } 
   };
 
   return axios(option)
