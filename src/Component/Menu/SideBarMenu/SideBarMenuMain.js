@@ -67,7 +67,7 @@ const SideBarMenu = (props) => {
     <div className={menuOpen? 'sidebarmenu open' : 'sidebarmenu'} id='moveOpen'>
       <div className='left_menu'>
         <div className='fixed_menu'>
-          <h1><img src={require('../../../Image/logo@2x.png').default} alt='로고'/></h1>
+          <h1><img src={require('../../../Image/yk_08@2x.png').default} alt='로고'/></h1>
           <button htmlFor='menuIcon' type='button' className='hmenu' onClick={(e) => onClick(e)}/>
           <ul>
             <Li MENU_ID='INSP' index='0' nam='검수'></Li>

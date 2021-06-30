@@ -5,7 +5,7 @@ import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_getAtt, gfc_getMultiLang } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
-import { gfo_getInput } from '../../../Method/Component';
+import { gfo_getInput, gfo_getCombo } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
@@ -18,6 +18,7 @@ import Combobox from '../../../Component/Control/Combobox';
 
 import Mainspan from './Mainspan';
 import Botspan from './Botspan';
+import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
 
@@ -36,15 +37,21 @@ class INSP_PROC extends Component {
 
       if(action.reducer !== 'INSP_PROC_MAIN') {
         return {
-          MAIN_WAIT   : nowState === undefined ? 0 : nowState.MAIN_WAIT,
-          MAIN_TOTAL  : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
-          MAIN_WEIGHT : nowState === undefined ? 0 : nowState.MAIN_WEIGHT,
-          BOT_TOTAL   : nowState === undefined ? 0 : nowState.BOT_TOTAL,
-
-          DETAIL_SCALE: nowState === undefined ? '' : nowState.DETAIL_SCALE,
-          DETAIL_CARNO: nowState === undefined ? '' : nowState.DETAIL_CARNO,
+          MAIN_WAIT    : nowState === undefined ? 0 : nowState.MAIN_WAIT,
+          MAIN_TOTAL   : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
+          MAIN_WEIGHT  : nowState === undefined ? 0 : nowState.MAIN_WEIGHT,
+          BOT_TOTAL    : nowState === undefined ? 0 : nowState.BOT_TOTAL,
+ 
+          DETAIL_SCALE : nowState === undefined ? '' : nowState.DETAIL_SCALE,
+          DETAIL_CARNO : nowState === undefined ? '' : nowState.DETAIL_CARNO,
           DETAIL_WEIGHT: nowState === undefined ? '' : nowState.DETAIL_WEIGHT,
-          DETAIL_DATE: nowState === undefined ? '' : nowState.DETAIL_DATE
+          DETAIL_DATE  : nowState === undefined ? '' : nowState.DETAIL_DATE,
+
+          STD_CAM_OPEN : nowState === undefined ? false : nowState.STD_CAM_OPEN,
+          DUM_CAM_OPEN : nowState === undefined ? false : nowState.DUM_CAM_OPEN,
+
+          STD_CAM_FOCUS: nowState === undefined ? false : nowState.STD_CAM_FOCUS,
+          DUM_CAM_FOCUS: nowState === undefined ? false : nowState.DUM_CAM_FOCUS
         };
       }
 
@@ -53,40 +60,60 @@ class INSP_PROC extends Component {
         return Object.assign({}, nowState, {
           MAIN_WAIT : action.MAIN_WAIT
         })
-      }if(action.type === 'MAIN_TOTAL'){
+      }else if(action.type === 'MAIN_TOTAL'){
 
         return Object.assign({}, nowState, {
           MAIN_TOTAL : action.MAIN_TOTAL
         })
-      }if(action.type === 'MAIN_WEIGHT'){
+      }else if(action.type === 'MAIN_WEIGHT'){
 
         return Object.assign({}, nowState, {
           MAIN_WEIGHT : action.MAIN_WEIGHT
         })
-      }if(action.type === 'BOT_TOTAL'){
+      }else if(action.type === 'BOT_TOTAL'){
 
         return Object.assign({}, nowState, {
           BOT_TOTAL : action.BOT_TOTAL
         })
-      }if(action.type === 'DETAIL_SCALE'){
+      }else if(action.type === 'DETAIL_SCALE'){
 
         return Object.assign({}, nowState, {
           DETAIL_SCALE : action.DETAIL_SCALE
         })
-      }if(action.type === 'DETAIL_CARNO'){
+      }else if(action.type === 'DETAIL_CARNO'){
 
         return Object.assign({}, nowState, {
           DETAIL_CARNO : action.DETAIL_CARNO
         })
-      }if(action.type === 'DETAIL_WEIGHT'){
+      }else if(action.type === 'DETAIL_WEIGHT'){
 
         return Object.assign({}, nowState, {
           DETAIL_WEIGHT : action.DETAIL_WEIGHT
         })
-      }if(action.type === 'DETAIL_DATE'){
+      }else if(action.type === 'DETAIL_DATE'){
 
         return Object.assign({}, nowState, {
           DETAIL_DATE : action.DETAIL_DATE
+        })
+      }else if(action.type === 'STD_CAM_OPEN'){
+
+        return Object.assign({}, nowState, {
+          STD_CAM_OPEN : action.STD_CAM_OPEN
+        })
+      }else if(action.type === 'DUM_CAM_OPEN'){
+
+        return Object.assign({}, nowState, {
+          DUM_CAM_OPEN : action.DUM_CAM_OPEN
+        })
+      }else if(action.type === 'STD_CAM_FOCUS'){
+
+        return Object.assign({}, nowState, {
+          STD_CAM_FOCUS : action.STD_CAM_FOCUS
+        })
+      }else if(action.type === 'DUM_CAM_FOCUS'){
+
+        return Object.assign({}, nowState, {
+          DUM_CAM_FOCUS : action.DUM_CAM_FOCUS
         })
       }
     }
@@ -99,15 +126,12 @@ class INSP_PROC extends Component {
     
     // console.log(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT'));
 
-    // YK_WEB_REQ('tally_process_pop.jsp')
-    //   .then(e => {
-    //     console.log(e);
-    //   })
+    let req = await YK_WEB_REQ('tally_process_pop.jsp?division=P005', {});
+    console.log(req);
 
     gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 1});
     gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 2});
     gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 3331333});
-    gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 15});
 
 
     const data = {'dataSend':[
@@ -138,6 +162,8 @@ class INSP_PROC extends Component {
       sort
     );
     gfg_setSelectRow(grid);
+
+    gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
   }
 
 
@@ -259,9 +285,9 @@ class INSP_PROC extends Component {
         </div>
 
         <div style={{width:'calc(100% - 2px)', height:'100%'}}>
-          <div style={{background:'#25262B', width:'100%', height:'145', overflow:'auto'}}>
+          <div style={{background:'#25262B', width:'100%', height:'145'}}>
 
-            <div style={{display:'flex', marginTop:'20px', width:'770'}}>
+            <div style={{display:'flex', width:'770', padding:'20px 0 0 0'}}>
               <div style={{width:'270', marginLeft: '30px'}}>
                 <Mainspan flag={5} fontSize={30}/>
               </div>
@@ -295,28 +321,191 @@ class INSP_PROC extends Component {
             </div>
           </div>
 
-          <div style={{width:'100%', height:'calc(100% - 400px)'}}>
-            <div style={{float:'left', width: '50%', height:'100%'}}>
-              <img style={{height:'100%', width:'100%'}} src={require('../../../Image/yk_exclamation.jpg').default} alt='yk_exclamation'/> 
+          <div style={{width:'100%', height:'200'}}>
+            <div style={{width:'1000', height:'48'}}>
+              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>등급책정</div>
+              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_grade1'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '고철등급 검색'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item'});
+                              })
+                          }}
+                />
+              </div>
+              <div style={{float:'left', height:'40', width:'297', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_grade2'
+                          value   = 'itemCode'
+                          display = 'item'
+
+                          onFocus = {ComboCreate => {
+                            const value = gfo_getCombo(this.props.pgm, 'detail_grade1').getValue();
+                            if(value === null) return;
+
+                            YK_WEB_REQ(`tally_process_pop.jsp?division=${value}`, {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item'});
+                              })
+                          }}
+                />
+              </div>
             </div>
-            <div style={{float:'left', width:'50%', height:'100%'}}>
-              <img style={{height:'100%', width:'100%'}} src={require('../../../Image/yk_05.png').default} alt='yk_05'/> 
+            <div style={{width:'1000', height:'48'}}>
+              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>감량중량</div>
+              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_subt'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '감량중량 검색(KG)'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                />
+              </div>
+              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>감량사유</div>
+              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_subt_leg'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '감량사유 검색'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                />
+              </div>
+            </div>
+            <div style={{width:'1000', height:'48'}}>
+              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>감가내역</div>
+              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_depr'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '감가내역 검색'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                />
+              </div>
+              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>하차구역</div>
+              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_out'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '하차구역 검색(SECTOR)'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',});
+                              })
+                          }}
+                />
+              </div>
+            </div>
+            <div style={{width:'1000', height:'48'}}>
+              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>차종구분</div>
+              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_car'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '차종선택'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item'});
+                              })
+                          }}
+                />
+              </div>
+              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>반품구분</div>
+              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_rtn'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '일부,전량 선택'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                />
+              </div>
+              <div style={{float:'left', height:'40', width:'297', margin:'5px 0 0 5px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_rtn_leg'
+                          value   = 'itemCode'
+                          display = 'item'
+
+                          onFocus = {ComboCreate => {
+
+                            YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                />
+              </div>
+            </div>
+
+            <div style={{width:'280px', height:'140px', position:'absolute', top: '150', left:'615'}}>
+              <button style={{width:'100%', height:'100%', background:'#F93C02', color:'white', fontSize:'40', borderRadius:'10px'}}>등록완료</button>
             </div>
           </div>
 
-          <div style={{width:'100%', height:'255'}}>
-            <div style={{width:'100%', height:'25%', background:'red'}}>
-
-            </div>
-            <div style={{width:'100%', height:'25%', background:'green'}}>
-
-            </div>
-            <div style={{width:'100%', height:'25%', background:'blue'}}>
-
-            </div>
-            <div style={{width:'100%', height:'25%', background:'purple'}}>
-
-            </div>
+          <div style={{width:'100%', height:'calc(100% - 360px)'}}>
+            <RecImage cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' image='yk_06.jpg'/>
+            <RecImage cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' image='yk_06.jpg'/>
           </div>
         </div>
       </Layout>

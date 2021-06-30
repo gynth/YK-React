@@ -11,25 +11,26 @@ class Combobox extends Component{
   originalValue = '';
 
   state = {
-    value: ''
+    value: '',
+    optionList: []
   }
 
-  optionList = []
   width = 0
 
   ComboCreate = async(props) => {
+    this.options = []
     let result = {};
 
-    if(props.data === undefined){
+    if(props.data !== undefined){
+      result.data = {};
+      result.data.result = true;
+      result.data.data = props.data;
+    }else{
       result = await getDynamicSql_Mysql(
         props.location,
         props.fn,
         [props.param]
       );
-    }else{
-      result.data = {};
-      result.data.result = true;
-      result.data.data = props.data;
     }
 
     try{
@@ -66,20 +67,23 @@ class Combobox extends Component{
 
           if(props.emptyRow){
             if(idx === '0'){
-              // this.optionList.push({'value': '', 'labelText': setCode('', maxCode) + '', 'label': ''})
-              this.optionList.push({'value': '', 'label': ''})
+              this.options.push({'value': '', 'label': ''})
             }
           }
 
-          this.optionList.push(arrValue)
+          this.options.push(arrValue)
         }
+
+        this.setState({
+          optionList: this.options
+        })
       }
     }catch{
       let arrValue   = {};
       arrValue['value'] = '';
       // arrValue['labelText']  = '';
       arrValue['label']  = '';
-      this.optionList.push(arrValue)
+      this.options.push(arrValue)
     }
   }
 
@@ -131,7 +135,7 @@ class Combobox extends Component{
     valueContainer: (base) => ({
       ...base,
       padding:0,
-      zIndex: 100
+      // zIndex: 100
     }),
 
     indicatorsContainer: (base) => ({
@@ -150,7 +154,7 @@ class Combobox extends Component{
       marginTop: 1,
       // width: this.width,
       width: '100%',
-      zIndex: 100
+      // zIndex: 100
       // width: 400
     }),
 
@@ -170,6 +174,12 @@ class Combobox extends Component{
       margin: '0px 0px 0px 4px',
       // display: isFoucs //'none', 'flex'
     })
+  }
+
+  onFocusBase = (e) => {
+    if(this.props.onFocus !== undefined){
+      this.props.onFocus(this.ComboCreate);
+    }
   }
 
   onBlurBase = (e) => {
@@ -193,26 +203,30 @@ class Combobox extends Component{
   }
 
   setValue = (value) => {
-    this.ref.current.select.setValue(this.optionList.find(e => e.value === value));
+    this.ref.current.select.setValue(this.options.find(e => e.value === value));
   } 
   
   render(){
     this.ref = React.createRef();
 
     return (
-      <div style={{zIndex:1000}} className='item'>
+      // <div style={{zIndex:1000}} className='item'>
+      <div className='item'>
         {this.props.label !== '' && this.props.label !== undefined &&
           <div style={{float:'left', marginRight:'3px'}}>
             <label htmlFor={this.props.id}>{this.props.label}</label>
           </div>
         }
   
-        <Select options      = {this.optionList}
+        <Select options      = {this.state.optionList}
                 styles       = {this.customStyles}
-                placeholder  = ''
+                placeholder  = {this.props.placeholder}
                 menuPlacement= 'auto'
                 ref          = {this.ref}
                 onBlur       = {e => this.onBlurBase(e)}
+
+                onFocus = {e => this.onFocusBase(e)}
+                
                 // menuIsOpen
                   
                   // inputId={this.props.id}
@@ -236,9 +250,9 @@ Combobox.propTypes = {
   id          : PropTypes.string.isRequired,
   value       : PropTypes.string.isRequired,
   display     : PropTypes.string.isRequired,
-  location    : PropTypes.string.isRequired,
-  fn          : PropTypes.string.isRequired,
-  field       : PropTypes.array.isRequired,
+  // location    : PropTypes.string.isRequired,
+  // fn          : PropTypes.string.isRequired,
+  // field       : PropTypes.array.isRequired,
 
   width       : PropTypes.number,
   height      : PropTypes.number,
@@ -250,6 +264,7 @@ Combobox.propTypes = {
   isMulti     : PropTypes.bool,
   blurInputOnSelect: PropTypes.bool,
   closeMenuOnSelect: PropTypes.bool,
+  placeholder : PropTypes.string,
 
   onChange    : PropTypes.func,
   onMenuOpen  : PropTypes.func,
@@ -269,6 +284,7 @@ Combobox.defaultProps = {
   isMulti     : false,
   blurInputOnSelect: false,
   closeMenuOnSelect: false,
+  placeholder : '',
 
   onChange    : (e) => {},
   onMenuOpen  : () => {},

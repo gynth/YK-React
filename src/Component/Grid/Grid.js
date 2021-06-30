@@ -30,14 +30,15 @@ const RtnGrid = (props) => {
     frozenCount = cnt;
   }
 
-  const onResize = (width) => {
+  const onResize = (width, height) => {
     const grid = gfg_getGrid(props.pgm, props.id);
 
     if(grid){
       try{
         if(Object.keys(grid).length > 0){
-          window.dispatchEvent(new Event('resize'));
+          // window.dispatchEvent(new Event('resize'));
           grid.setWidth(width);
+          grid.setHeight(height);
         }
       }catch(err){
         console.log(err)
@@ -375,162 +376,162 @@ const RtnGrid = (props) => {
       return 
     }
 
-    const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
-    const PGM_ID    = props.pgm;
-    const GRID_ID   = props.id;
+    gridRef.current.getInstance().on('focusChange', (e) => {
+      if(e.rowKey === e.prevRowKey)
+        return false;
+      else{
+        // gridRef.current.getInstance().setSelectionRange({
+        //   start: [e.rowKey, 0],
+        //   end: [e.rowKey, gridRef.current.getInstance().getColumns().length - 1]
+        // });
 
-    getCallSP_Mysql(
-      [{SP           : 'SP_PGM_GRID',
-        ROWSTATUS    : 'R',
-        PGM_ID,
-        GRID_ID,
-        GRID_COL_NAM : '',
-        HIDE_YN      : '',
-        LOCK_YN      : '',
-        WIDTH        : 0,
-        SEQ          : 0,
-        CRTCHR_NO
-      }]
-    ).then(
-      e => {
-
-        gridRef.current.getInstance().on('focusChange', (e) => {
-          if(e.rowKey === e.prevRowKey)
-            return false;
-          else{
-            // gridRef.current.getInstance().setSelectionRange({
-            //   start: [e.rowKey, 0],
-            //   end: [e.rowKey, gridRef.current.getInstance().getColumns().length - 1]
-            // });
-
-            if(props.selectionChange !== undefined)
-              props.selectionChange(gridRef.current.getInstance().getRow(e.rowKey));
-          }
-        })
-    
-        gridRef.current.getInstance().on('afterChange', (e) => {
-          if(props.afterChange !== undefined)
-            props.afterChange(e.changes[0]);
-        })
-       
-        const header = gridRef.current.gridInst.el.querySelectorAll('div.tui-grid-header-area');   
-    
-        for(let idx = 0; idx < header.length; idx++){
-          header[idx].addEventListener('contextmenu', e => {
-            let id = e.target.dataset.id;
-            let nam = e.target.dataset.nam;
-    
-            if(id === undefined){
-              id = e.target.dataset.columnName;
-            }
-    
-            if(nam === undefined){
-              nam = columns.find(e => e.name === id);
-              if(nam !== undefined){
-                nam = nam.header;
-              }
-            }
-    
-            if(nam === undefined) return;
-    
-            e.preventDefault()
-            
-            const contextDiv = document.createElement('div');
-            contextDiv.id = props.pgm + '_' + props.id + '_contextmenu';
-            contextDiv.style = 'position:fixed;width:150px; background: #fff;box-shadow:1px 1px 5px 0 rgba(0, 0, 0, 0.54)';
-    
-            const fDiv = document.getElementById(contextDiv.id);
-            if(fDiv !== null){
-              document.body.removeChild(fDiv);
-            }
-    
-            document.addEventListener('click', () => {
-              const fDiv = document.getElementById(contextDiv.id);
-              if(fDiv !== null){
-                document.body.removeChild(fDiv);
-              }
-            }); 
-            document.body.appendChild(contextDiv);
-            
-            const contextChild = document.createElement('input');
-            contextChild.style = 'width:148px; height:30; text-align:center; margin: 1 0 0 1';
-            contextChild.value = nam;
-            contextDiv.appendChild(contextChild);
-    
-            const contextUl = document.createElement('ul');
-            contextUl.style = 'width:148px; font-size:13;margin-top: 3px;';
-            contextDiv.appendChild(contextUl); 
-    
-            //설정 초기화
-            resetGrid(contextUl);
-    
-            //설정 저장
-            saveGrid(contextUl);
-    
-            //틀고정
-            fixedFrame(id, contextUl);
-    
-            //숨김
-            columnVisible(id, contextUl);
-            
-            if(e.which === 3){
-              let x = e.pageX + 'px'; // 현재 마우스의 X좌표
-              let y = e.pageY + 'px'; // 현재 마우스의 Y좌표
-              contextDiv.style.left = x;
-              contextDiv.style.top = y;
-            }
-          });
-          
-          const each = header[idx].querySelectorAll('th.tui-grid-cell.tui-grid-cell-header');
-          
-          for(let j = 0; j < each.length; j++){
-            const columnId  = each[j].dataset.columnName;
-            const columnNam = each[j].innerText;
-            setHeader(columnId, columnNam, each[j].clientWidth, each[j]);
-          }
-        }
-
-        if(e.data.length > 0){
-          let frozen = 0;
-
-          e.data.forEach(e => {
-            const index = columns.findIndex(e1 => e1.name === e.GRID_COL_NAM);
-            const from = columns[index];
-
-            from.width  = e.WIDTH * 1;
-            from.hidden = e.HIDE_YN === 'N' ? false : true;
-
-            if(e.SEQ - 1 !== index){
-              
-              columns.splice(index, 1);
-              columns.splice(e.SEQ - 1, 0, from);
-              gridRef.current.getInstance().setColumns(columns);
-            }
-
-            if(e.LOCK_YN === 'Y') {
-              frozen = frozen + 1;
-            }
-          })
-
-          gridRef.current.getInstance().setFrozenColumnCount(frozen);
-          setFrozenCount(frozen);
-        }
-        
-        gfs_dispatch(props.pgm, 'INITGRID', 
-          ({
-            Grid:{id  : props.id,
-                  Grid: gridRef.current.getInstance()}
-          })
-        );
-
-        if(e.data.result){
-
-        }else{
-          if(e.data.MSG_CODE !== 'NO')
-            gfc_getMultiLang('dup', '그리드 설정시 오류가 발생했습니다. > ' + props.pgm + ', ' + props.id);
-        }
+        if(props.selectionChange !== undefined)
+          props.selectionChange(gridRef.current.getInstance().getRow(e.rowKey));
       }
-    )    
+    })
+
+    gridRef.current.getInstance().on('afterChange', (e) => {
+      if(props.afterChange !== undefined)
+        props.afterChange(e.changes[0]);
+    })
+        
+    gfs_dispatch(props.pgm, 'INITGRID', 
+      ({
+        Grid:{id  : props.id,
+              Grid: gridRef.current.getInstance()}
+      })
+    );
+
+    // const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
+    // const PGM_ID    = props.pgm;
+    // const GRID_ID   = props.id;
+
+    // getCallSP_Mysql(
+    //   [{SP           : 'SP_PGM_GRID',
+    //     ROWSTATUS    : 'R',
+    //     PGM_ID,
+    //     GRID_ID,
+    //     GRID_COL_NAM : '',
+    //     HIDE_YN      : '',
+    //     LOCK_YN      : '',
+    //     WIDTH        : 0,
+    //     SEQ          : 0,
+    //     CRTCHR_NO
+    //   }]
+    // ).then(
+    //   e => {
+       
+    //     const header = gridRef.current.gridInst.el.querySelectorAll('div.tui-grid-header-area');   
+    
+    //     for(let idx = 0; idx < header.length; idx++){
+    //       header[idx].addEventListener('contextmenu', e => {
+    //         let id = e.target.dataset.id;
+    //         let nam = e.target.dataset.nam;
+    
+    //         if(id === undefined){
+    //           id = e.target.dataset.columnName;
+    //         }
+    
+    //         if(nam === undefined){
+    //           nam = columns.find(e => e.name === id);
+    //           if(nam !== undefined){
+    //             nam = nam.header;
+    //           }
+    //         }
+    
+    //         if(nam === undefined) return;
+    
+    //         e.preventDefault()
+            
+    //         const contextDiv = document.createElement('div');
+    //         contextDiv.id = props.pgm + '_' + props.id + '_contextmenu';
+    //         contextDiv.style = 'position:fixed;width:150px; background: #fff;box-shadow:1px 1px 5px 0 rgba(0, 0, 0, 0.54)';
+    
+    //         const fDiv = document.getElementById(contextDiv.id);
+    //         if(fDiv !== null){
+    //           document.body.removeChild(fDiv);
+    //         }
+    
+    //         document.addEventListener('click', () => {
+    //           const fDiv = document.getElementById(contextDiv.id);
+    //           if(fDiv !== null){
+    //             document.body.removeChild(fDiv);
+    //           }
+    //         }); 
+    //         document.body.appendChild(contextDiv);
+            
+    //         const contextChild = document.createElement('input');
+    //         contextChild.style = 'width:148px; height:30; text-align:center; margin: 1 0 0 1';
+    //         contextChild.value = nam;
+    //         contextDiv.appendChild(contextChild);
+    
+    //         const contextUl = document.createElement('ul');
+    //         contextUl.style = 'width:148px; font-size:13;margin-top: 3px;';
+    //         contextDiv.appendChild(contextUl); 
+    
+    //         //설정 초기화
+    //         resetGrid(contextUl);
+    
+    //         //설정 저장
+    //         saveGrid(contextUl);
+    
+    //         //틀고정
+    //         fixedFrame(id, contextUl);
+    
+    //         //숨김
+    //         columnVisible(id, contextUl);
+            
+    //         if(e.which === 3){
+    //           let x = e.pageX + 'px'; // 현재 마우스의 X좌표
+    //           let y = e.pageY + 'px'; // 현재 마우스의 Y좌표
+    //           contextDiv.style.left = x;
+    //           contextDiv.style.top = y;
+    //         }
+    //       });
+          
+    //       const each = header[idx].querySelectorAll('th.tui-grid-cell.tui-grid-cell-header');
+          
+    //       for(let j = 0; j < each.length; j++){
+    //         const columnId  = each[j].dataset.columnName;
+    //         const columnNam = each[j].innerText;
+    //         setHeader(columnId, columnNam, each[j].clientWidth, each[j]);
+    //       }
+    //     }
+
+    //     if(e.data.length > 0){
+    //       let frozen = 0;
+
+    //       e.data.forEach(e => {
+    //         const index = columns.findIndex(e1 => e1.name === e.GRID_COL_NAM);
+    //         const from = columns[index];
+
+    //         from.width  = e.WIDTH * 1;
+    //         from.hidden = e.HIDE_YN === 'N' ? false : true;
+
+    //         if(e.SEQ - 1 !== index){
+              
+    //           columns.splice(index, 1);
+    //           columns.splice(e.SEQ - 1, 0, from);
+    //           gridRef.current.getInstance().setColumns(columns);
+    //         }
+
+    //         if(e.LOCK_YN === 'Y') {
+    //           frozen = frozen + 1;
+    //         }
+    //       })
+
+    //       gridRef.current.getInstance().setFrozenColumnCount(frozen);
+    //       setFrozenCount(frozen);
+    //     }
+
+    //     if(e.data.result){
+
+    //     }else{
+    //       if(e.data.MSG_CODE !== 'NO')
+    //         gfc_getMultiLang('dup', '그리드 설정시 오류가 발생했습니다. > ' + props.pgm + ', ' + props.id);
+    //     }
+    //   }
+    // )    
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

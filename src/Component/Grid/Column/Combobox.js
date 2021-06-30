@@ -52,7 +52,7 @@ export const Combobox = (props) => {
   const readOnly  = props.readOnly !== undefined ? props.readOnly : true;
   const align     = props.align !== undefined ? props.align : 'center';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
-  const resizable = props.resizable !== undefined ? props.resizable : true;
+  const resizable = props.resizable !== undefined ? props.resizable : false;
   const data      = props.data !== undefined ? props.data : undefined;
   const editor    = props.editor;
 
@@ -211,6 +211,7 @@ class ComboEditor {
   
                             // blurInputOnSelect={true}
                             onBlur={(e) => onBlur(e)}
+                            onFocus={e => console.log(e)}
                             // onMenuOpen={e => console.log(e)}                            
                             
   
@@ -272,16 +273,16 @@ class ComboInit {
   ComboCreate = async(props) => {
     let result = {};
 
-    if(props.data === undefined){
+    if(props.data !== undefined){
+      result.data = {};
+      result.data.result = true;
+      result.data.data = props.data;
+    }else{
       result = await getDynamicSql_Mysql(
         props.location,
         props.fn,
         [props.param]
       );
-    }else{
-      result.data = {};
-      result.data.result = true;
-      result.data.data = props.data;
     }
     
     try{

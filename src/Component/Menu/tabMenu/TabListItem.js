@@ -29,6 +29,9 @@ const onCloseClick = (e) => {
                     }
     })
   );
+
+  gfs_dispatch(select.pgm, 'DELPGM'
+  );
   
   let maxZindex = jsonMaxValue(gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex');
   let selJson = jsonRtn(gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState'), 'windowZindex', maxZindex);

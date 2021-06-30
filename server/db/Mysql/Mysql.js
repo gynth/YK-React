@@ -191,6 +191,7 @@ router.post('/Query', (req, res) => {
         }
 
         if(typeof(Common) !== 'function'){
+          connection.release();
           console.log('Wrong file location');
           res.send({
             result  : false,
@@ -261,6 +262,8 @@ router.post('/Query', (req, res) => {
       }
     }catch(err){
       console.log(err);
+      connection.release();
+
       res.send({
         result  : false,
         data    : null,

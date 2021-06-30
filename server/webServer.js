@@ -15,10 +15,10 @@ app.use(cors());
 app.use('/Mysql', Mysql);
 
 // YK스틸 웹요청
-const yk_req = async(request) => {
+const yk_req = (request, URL) => {
   let response;
   try{
-    response = await axios.get('http://tally.yksteel.co.kr/tally_mstr_wait.jsp', {
+    response = axios.get(URL, {
 
     })
   }catch{
@@ -27,6 +27,18 @@ const yk_req = async(request) => {
 
   return response;
 }
+// const yk_req = async(request, URL) => {
+//   let response;
+//   try{
+//     response = await axios.get(URL, {
+
+//     })
+//   }catch{
+
+//   }
+
+//   return response;
+// }
 
 // app.get('/YK', (req, res) => {
 //   console.log(req.body);
@@ -36,8 +48,9 @@ const yk_req = async(request) => {
 // });
 
 app.post('/YK', (req, res) => {
-  console.log(req.body);
-  yk_req(req).then((response) => {
+  let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
+  
+  yk_req(req, URL).then((response) => {
     res.json(response.data);
   })
 });
