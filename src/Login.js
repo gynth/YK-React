@@ -3,46 +3,15 @@ import { connect } from 'react-redux';
 
 import { gfs_injectAsyncReducer } from './Method/Store';
 
-import styles from './Main.module.css';
-import ExplainInput from './Component/Control/ExplainInput';
-import Button from './Component/Control/Button';
+import Input from './Component/Control/Input';
+import { gfo_getInput } from './Method/Component';
 
 import { getDynamicSql_Mysql } from './db/Mysql/Mysql';
 import { setSessionCookie, getSessionCookie} from './Cookies';
 
-import { gfs_getStoreValue } from './Method/Store';
+import { gfs_PGM_REDUCER, gfs_getStoreValue } from './Method/Store';
 
-import * as YK_REQ from './WebReq/WebReq';
-
-//#region 리듀서 생성
-const loginReducer = (nowState, action) => {
-  if(action.reducer !== 'LOGIN_REDUCER') {
-    return {
-      userIdFocus: nowState === undefined ? false : nowState.userIdFocus,
-      pwdFocus   : nowState === undefined ? false : nowState.pwdFocus,
-      userIdText : nowState === undefined ? '' : nowState.userIdText,
-      pwdText    : nowState === undefined ? '' : nowState.pwdText,
-    };
-  }
-
-  if(action.type === 'USERID_FOCUS'){
-    return Object.assign({}, nowState, {
-      userIdFocus  : action.userIdFocus
-    });
-  }else if(action.type === 'PWD_FOCUS'){
-    return Object.assign({}, nowState, {
-      pwdFocus  : action.pwdFocus
-    });
-  }else if(action.type === 'USERID_CHANGE'){
-    return Object.assign({}, nowState, {
-      userIdText   : action.userIdText
-    });
-  }else if(action.type === 'PWD_CHANGE'){
-    return Object.assign({}, nowState, {
-      pwdText   : action.pwdText
-    });
-  }
-};
+import './login.css';
 
 const userReducer = (nowState, action) => {
   if(action.reducer !== 'USER_REDUCER') {
@@ -80,7 +49,7 @@ const userReducer = (nowState, action) => {
 
 //#endregion
 
-gfs_injectAsyncReducer('LOGIN_REDUCER', loginReducer);
+gfs_PGM_REDUCER('login');
 gfs_injectAsyncReducer('USER_REDUCER', userReducer);
 
 const onClick = async(e, user_id, pass_cd) => {
@@ -96,10 +65,13 @@ const onClick = async(e, user_id, pass_cd) => {
     if(result.data.data.length === 0){
       alert('로그인 정보가 잘못되었습니다.');
     }else{
+      gfo_getInput('login', 'id').setValue('');
+      gfo_getInput('login', 'pwd').setValue('');
+
       const width = window.screen.availWidth;
       const height = window.screen.availHeight;
 
-      const winProperties = 'location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
+      const winProperties = 'fullscreen=yes, location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
 
       e.preventDefault(); 
       setSessionCookie('session', 'SUCCESS', 1/1440);   
@@ -113,83 +85,71 @@ const onClick = async(e, user_id, pass_cd) => {
 
 const Login = (props) => {
   
-  let userIdParentBorder = undefined;
-  let pwdParentBorder    = undefined;
-  if(gfs_getStoreValue('LOGIN_REDUCER' , 'userIdFocus')){
-    userIdParentBorder = 'black';
-  }
-
-  if(gfs_getStoreValue('LOGIN_REDUCER', 'pwdFocus')){
-    pwdParentBorder = 'black';
-  }
-
-  let userIdspanVisible = undefined;
-  let userIdinputTop    = undefined;
-  let pwdspanVisible    = undefined;
-  let pwdinputTop       = undefined;
-  const userIdText = gfs_getStoreValue('LOGIN_REDUCER', 'userIdText');
-  const pwdText = gfs_getStoreValue('LOGIN_REDUCER', 'pwdText');
-  if(userIdText !== ''){
-    userIdspanVisible = 'visible';
-    userIdinputTop    = '42%';
-  }
-
-  if(pwdText !== ''){
-    pwdspanVisible = 'visible';
-    pwdinputTop    = '42%';
-  }
-
-  let btnBackGround = '#b2dffc';
-  let btnDisabled   = true;
-  if(userIdText !== '' && pwdText !== ''){
-    btnBackGround = '#0095f6';
-    btnDisabled   = false;
-  }
-  
   return (
-    <div className={styles.Login_Main}>
-      <h1 className={styles.Login_Text}>Login</h1>
-      <div>
-        <form>
-            <ExplainInput placeholder='사용자ID' 
-                          width='240px'
-                          height='35px'
-                          marginBottom='5px'
-                          parentBorder={userIdParentBorder} 
-                          smallVisible={userIdspanVisible}
-                          location={userIdinputTop}
-                          onFocus={props.onUserIdFocus}
-                          onBlur={props.onUserIdBlur}
-                          onChange={props.onUserIdChange} />
-            
-            <ExplainInput placeholder='비밀번호' 
-                          width='240px'
-                          height='35px'
-                          marginBottom='20px'
-                          parentBorder={pwdParentBorder} 
-                          smallVisible={pwdspanVisible}
-                          location={pwdinputTop}
-                          onFocus={props.onPwdFocus}
-                          onBlur={props.onPwdBlur}  
-                          onChange={props.onPwdChange}
-                          type='password'/>
+    <div className='login_box'>
+		  <h2><img src={require('../src/Image/yk_07@2x.png').default} width='358' height='47' alt='와이케이스틸 로고' /></h2>
 
-          <div style={{textAlign:'center'}}>
-            
-          <Button value='로그인'
-                  color='white'
-                  disabled={btnDisabled}
-                  backgroundColor={btnBackGround}
-                  height='30px'
-                  width='240px'
-                  borderWidth='0px'
-                  borderRadius='3px'
-                  outline='0px' 
-                  onClick={e => onClick(e, userIdText, pwdText)}/>
-          </div>
-        </form>
-      </div>
+      
+      <div className='input_box'>
+        <div className='input_line'>
+          <label>ID</label>
+          <Input pgm='login' id='id' type='text' />
+        </div>
+        <div className='input_line'>
+          <label>PASSWORD</label>
+          <Input pgm='login' id='pwd' type='password' />
+        </div>
+        <button type='button' onClick={e => {
+          const id  = gfo_getInput('login', 'id').getValue();
+          const pwd = gfo_getInput('login', 'pwd').getValue();
+
+          onClick(e, id, pwd);
+        }}>로그인</button>
+		  </div>
     </div>
+    // <div>
+    //   <h1>Login</h1>
+    //   <div>
+    //     <form>
+    //         <ExplainInput placeholder='사용자ID' 
+    //                       width='240px'
+    //                       height='35px'
+    //                       marginBottom='5px'
+    //                       parentBorder={userIdParentBorder} 
+    //                       smallVisible={userIdspanVisible}
+    //                       location={userIdinputTop}
+    //                       onFocus={props.onUserIdFocus}
+    //                       onBlur={props.onUserIdBlur}
+    //                       onChange={props.onUserIdChange} />
+            
+    //         <ExplainInput placeholder='비밀번호' 
+    //                       width='240px'
+    //                       height='35px'
+    //                       marginBottom='20px'
+    //                       parentBorder={pwdParentBorder} 
+    //                       smallVisible={pwdspanVisible}
+    //                       location={pwdinputTop}
+    //                       onFocus={props.onPwdFocus}
+    //                       onBlur={props.onPwdBlur}  
+    //                       onChange={props.onPwdChange}
+    //                       type='password'/>
+
+    //       <div style={{textAlign:'center'}}>
+            
+    //       <Button value='로그인'
+    //               color='white'
+    //               disabled={btnDisabled}
+    //               backgroundColor={btnBackGround}
+    //               height='30px'
+    //               width='240px'
+    //               borderWidth='0px'
+    //               borderRadius='3px'
+    //               outline='0px' 
+    //               onClick={e => onClick(e, userIdText, pwdText)}/>
+    //       </div>
+    //     </form>
+    //   </div>
+    // </div>
   );
 };
 
@@ -287,4 +247,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 };
 //#endregion
 
-export default connect(mapStateToProps, mapDispatchToProps) (Login);
+export default Login;

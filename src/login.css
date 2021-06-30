@@ -1,0 +1,9 @@
+body {background:#F2F5FA;}
+.login_box {width:565px; height:675px; background:#ffffff; border-radius:5px; margin:0 auto; position:relative; top:50%; margin-top:-337px; box-shadow:30px 30px 20px rgba(68,97,126, 0.1);}
+.login_box h2 {padding-top:110px; padding-bottom:110px; text-align:center}
+.login_box .input_box {padding:0 35px;}
+.login_box .input_line {position:relative; margin-bottom:25px; padding-top:22px; border-bottom:1px solid #ADC2C8}
+.login_box .input_line label {position:absolute; left:0; top:0; font-size:17px; color:#C0C9D5;}
+.login_box .input_line input {height:61px; font-size:22px; letter-spacing:-1px; font-weight:bold;  width:100%; padding:0; border:none; box-sizing:border-box}
+.login_box button {cursor:pointer; height:75px; background:#144E64; border:none; width:100%; color:#ffffff; font-size:26px;}
+.login_box button:hover {background:#0063A9;}

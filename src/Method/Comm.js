@@ -125,3 +125,19 @@ export const gfc_rpad = (str, padLen, padStr) => {
   str = str.length >= padLen ? str.substring(0, padLen) : str;
   return str;
 }
+
+export const gfc_showMask = () => {
+  gfs_dispatch('MASK_REDUCER', 'MASK', 
+    ({
+      MASK: true
+    })
+  );
+}
+
+export const gfc_hideMask = () => {
+  gfs_dispatch('MASK_REDUCER', 'MASK', 
+    ({
+      MASK: false
+    })
+  );
+}

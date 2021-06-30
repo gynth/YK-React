@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Layout from '../../../Component/Layout/Layout';
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_getAtt, gfc_getMultiLang } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
 import { gfo_getInput, gfo_getCombo } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -126,13 +126,14 @@ class INSP_PROC extends Component {
     
     // console.log(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT'));
 
+    gfc_showMask();
+
     let req = await YK_WEB_REQ('tally_process_pop.jsp?division=P005', {});
     console.log(req);
 
     gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 1});
     gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 2});
     gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 3331333});
-
 
     const data = {'dataSend':[
                   {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
@@ -164,6 +165,8 @@ class INSP_PROC extends Component {
     gfg_setSelectRow(grid);
 
     gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
+
+    gfc_hideMask();
   }
 
 

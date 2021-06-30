@@ -11,162 +11,178 @@ router.post('/SP', (req, res) => {
   const gridInfo = req.body.gridInfo;
 
   dbPool.getConnection((err, connection) => {
-    if(!err){
+    console.log(dbPool._allConnections.length);
 
-      const queryList = [];
-      
-      if(gridInfo === undefined){
+    try{
+      if(!err){
+
+        const queryList = [];
         
-        for(let i = 0; i < param.length; i++){
-          const keys = Object.keys(param[0]);
+        if(gridInfo === undefined){
           
-          // let query = `
-          // SET @p_SUCCESS  = false;
-          // SET @p_MSG_CODE = '';
-          // SET @p_MSG_TEXT = '';
-          // SET @p_COL_NAM  = '';
-          // CALL ${param[i].SP} ('${param[i].ROWSTATUS}'`;
-
-          let query = `
-          CALL ${param[i].SP} ('${param[i].ROWSTATUS}'`;
-      
-          keys.forEach(e => {
-            if(e !== 'SP' && e !== 'ROWSTATUS'){
-              if(typeof(param[i][e]) === 'string')
-                query += `,'${param[i][e]}' `
-              else
-                query += `,${param[i][e]} `
-            }
-          }) 
-
-          query += ',@p_SUCCESS, @p_MSG_CODE, @p_MSG_TEXT, @p_COL_NAM); SELECT @p_SUCCESS, @p_MSG_CODE, @p_MSG_TEXT, @p_COL_NAM;';
-          queryList[i] = {query};
-        }
-      }else{
-          for(let i = 0; i < gridInfo.length; i++){
-            const Keys = Object.keys(gridInfo[i]);
+          for(let i = 0; i < param.length; i++){
+            const keys = Object.keys(param[0]);
             
+            // let query = `
+            // SET @p_SUCCESS  = false;
+            // SET @p_MSG_CODE = '';
+            // SET @p_MSG_TEXT = '';
+            // SET @p_COL_NAM  = '';
+            // CALL ${param[i].SP} ('${param[i].ROWSTATUS}'`;
+
             let query = `
-            SET @p_SUCCESS  = false;
-            SET @p_MSG_CODE = '';
-            SET @p_MSG_TEXT = '';
-            SET @p_COL_NAM  = '';
-            CALL ${gridInfo[i].SP} ('${gridInfo[i].rowStatus}'`;
-    
-            for(let k = 0; k < Keys.length; k++){
-              if(Keys[k] !== 'grid' && Keys[k] !== 'SP' && Keys[k] !== 'rowStatus' && Keys[k] !== 'rowKey'){
-                const key = Keys[k];
-                
-                let value = gridInfo[i][key];
-                query += `,${value} `;
+            CALL ${param[i].SP} ('${param[i].ROWSTATUS}'`;
+        
+            keys.forEach(e => {
+              if(e !== 'SP' && e !== 'ROWSTATUS'){
+                if(typeof(param[i][e]) === 'string')
+                  query += `,'${param[i][e]}' `
+                else
+                  query += `,${param[i][e]} `
               }
-            }
+            }) 
 
             query += ',@p_SUCCESS, @p_MSG_CODE, @p_MSG_TEXT, @p_COL_NAM); SELECT @p_SUCCESS, @p_MSG_CODE, @p_MSG_TEXT, @p_COL_NAM;';
-            queryList[i] = {query,
-                            ROW_KEY : gridInfo[i].rowKey
-                           };
+            queryList[i] = {query};
           }
-      
-          if(queryList.length === 0){
-            res.send({
-              result  : false,
-              data    : null,
-              applyRow: 0,    
-              MSG_CODE: 'NO MOD',
-              MSG_TEXT: '추가되거나 수정된건이 없습니다.',
-              ROW_KEY : 0
-            });
-          }
-      }
-      
-      connection.beginTransaction();
-
-      for(let i = 0; i < queryList.length; i++){
-          connection.query(queryList[i]['query'], (queryErr, data) => {
-            try{
-              const ROW_KEY = queryList[i]['ROW_KEY'];
+        }else{
+            for(let i = 0; i < gridInfo.length; i++){
+              const Keys = Object.keys(gridInfo[i]);
               
-              if(queryErr !== null){
-                console.log(queryErr);
-
-                res.send({
-                  result  : false,
-                  data    : null,
-                  applyRow: 0,    
-                  MSG_CODE: queryErr.sqlState,
-                  MSG_TEXT: queryErr.sqlMessage,
-                  ROW_KEY
-                });
-          
-                connection.rollback();
-
-                return;
-              }
-              
-              const SUCCESS = data[data.length - 1][0]['@p_SUCCESS'];
-              const MSG_CODE = data[data.length - 1][0]['@p_MSG_CODE'];
-              const MSG_TEXT = data[data.length - 1][0]['@p_MSG_TEXT'];
-              const COL_NAM = data[data.length - 1][0]['@p_COL_NAM'];
-              const RowDataPacket = data.filter(e => (Array.isArray(e)))
-
-              if(SUCCESS === 'Y'){
-                if(i === (queryList.length - 1)){
-                  res.send({
-                    result  : true,
-                    data    : RowDataPacket.length > 1 && data[0],
-                    applyRow: RowDataPacket.length > 1 && data[0].length,
-                    MSG_CODE,
-                    MSG_TEXT,  
-                    COL_NAM,
-                    ROW_KEY 
-                  });
-          
-                  connection.commit(); 
+              let query = `
+              SET @p_SUCCESS  = false;
+              SET @p_MSG_CODE = '';
+              SET @p_MSG_TEXT = '';
+              SET @p_COL_NAM  = '';
+              CALL ${gridInfo[i].SP} ('${gridInfo[i].rowStatus}'`;
+      
+              for(let k = 0; k < Keys.length; k++){
+                if(Keys[k] !== 'grid' && Keys[k] !== 'SP' && Keys[k] !== 'rowStatus' && Keys[k] !== 'rowKey'){
+                  const key = Keys[k];
+                  
+                  let value = gridInfo[i][key];
+                  query += `,${value} `;
                 }
-              }else{
-                console.log(queryList[i]['query']);
-                res.send({
-                  result  : false,
-                  data    : null,
-                  applyRow: 0,    
-                  MSG_CODE,
-                  MSG_TEXT: (RowDataPacket.length === 1 || RowDataPacket[0].length === 0) ? MSG_TEXT : RowDataPacket[0][0].Message,
-                  COL_NAM,
-                  ROW_KEY
-                });
-          
-                connection.rollback(); 
-                return;
-              } 
-            }catch(err){
-              console.log(err);
+              }
 
+              query += ',@p_SUCCESS, @p_MSG_CODE, @p_MSG_TEXT, @p_COL_NAM); SELECT @p_SUCCESS, @p_MSG_CODE, @p_MSG_TEXT, @p_COL_NAM;';
+              queryList[i] = {query,
+                              ROW_KEY : gridInfo[i].rowKey
+                            };
+            }
+        
+            if(queryList.length === 0){
               res.send({
                 result  : false,
                 data    : null,
                 applyRow: 0,    
-                MSG_CODE: err,
-                MSG_TEXT: err,
+                MSG_CODE: 'NO MOD',
+                MSG_TEXT: '추가되거나 수정된건이 없습니다.',
                 ROW_KEY : 0
               });
-        
-              connection.rollback();
             }
-          })
-      };
+        }
+        
+        connection.beginTransaction();
 
-      connection.release();
-    }else{
+        for(let i = 0; i < queryList.length; i++){
+            connection.query(queryList[i]['query'], (queryErr, data) => {
+              try{
+                const ROW_KEY = queryList[i]['ROW_KEY'];
+                
+                if(queryErr !== null){
+                  console.log(queryErr);
+
+                  res.send({
+                    result  : false,
+                    data    : null,
+                    applyRow: 0,    
+                    MSG_CODE: queryErr.sqlState,
+                    MSG_TEXT: queryErr.sqlMessage,
+                    ROW_KEY
+                  });
+            
+                  connection.rollback();
+
+                  return;
+                }
+                
+                const SUCCESS = data[data.length - 1][0]['@p_SUCCESS'];
+                const MSG_CODE = data[data.length - 1][0]['@p_MSG_CODE'];
+                const MSG_TEXT = data[data.length - 1][0]['@p_MSG_TEXT'];
+                const COL_NAM = data[data.length - 1][0]['@p_COL_NAM'];
+                const RowDataPacket = data.filter(e => (Array.isArray(e)))
+
+                if(SUCCESS === 'Y'){
+                  if(i === (queryList.length - 1)){
+                    res.send({
+                      result  : true,
+                      data    : RowDataPacket.length > 1 && data[0],
+                      applyRow: RowDataPacket.length > 1 && data[0].length,
+                      MSG_CODE,
+                      MSG_TEXT,  
+                      COL_NAM,
+                      ROW_KEY 
+                    });
+            
+                    connection.commit(); 
+                  }
+                }else{
+                  console.log(queryList[i]['query']);
+                  res.send({
+                    result  : false,
+                    data    : null,
+                    applyRow: 0,    
+                    MSG_CODE,
+                    MSG_TEXT: (RowDataPacket.length === 1 || RowDataPacket[0].length === 0) ? MSG_TEXT : RowDataPacket[0][0].Message,
+                    COL_NAM,
+                    ROW_KEY
+                  });
+            
+                  connection.rollback(); 
+                  return;
+                } 
+              }catch(err){
+                console.log(err);
+
+                res.send({
+                  result  : false,
+                  data    : null,
+                  applyRow: 0,    
+                  MSG_CODE: err,
+                  MSG_TEXT: err,
+                  ROW_KEY : 0
+                });
+          
+                connection.rollback();
+              }
+            })
+        };
+      }else{
+        res.send({
+          result  : false,
+          data    : null,
+          applyRow: 0,
+          MSG_CODE: err.syscall,
+          MSG_TEXT: err.code,
+          column  : '',
+          ROW_KEY : 0
+        });
+      }
+    }catch (err){
+      console.log(err);
+
       res.send({
         result  : false,
         data    : null,
         applyRow: 0,
-        MSG_CODE: err.syscall,
-        MSG_TEXT: err.code,
+        MSG_CODE: err.name,
+        MSG_TEXT: err.stack,
         column  : '',
         ROW_KEY : 0
       });
+    }finally{
+      connection.release();
     }
   });
 })
@@ -191,7 +207,6 @@ router.post('/Query', (req, res) => {
         }
 
         if(typeof(Common) !== 'function'){
-          connection.release();
           console.log('Wrong file location');
           res.send({
             result  : false,
@@ -249,7 +264,6 @@ router.post('/Query', (req, res) => {
           }
         })
         
-        connection.release();
       }else{
         console.log('connection fail');
         res.send({
@@ -262,7 +276,6 @@ router.post('/Query', (req, res) => {
       }
     }catch(err){
       console.log(err);
-      connection.release();
 
       res.send({
         result  : false,
@@ -271,6 +284,8 @@ router.post('/Query', (req, res) => {
         code    : err.name,
         message : err.stack
       });
+    }finally{
+      connection.release();
     }
   });
 })

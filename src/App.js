@@ -7,10 +7,11 @@ class App extends React.Component{
   render(){
     return (
       <Router>
-        <main>
+        {/* 김경현 이거 확인 main??? */}
+        {/* <main> */}
           <Route exact path="/" component={Login} />
           <Route path="/Home"  component={Home} />
-        </main>
+        {/* </main> */}
       </Router>
     )
   }
