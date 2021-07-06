@@ -94,12 +94,15 @@ class Combobox extends Component{
       gfc_getMultiLang('dup', '콤보 아이디 중복입니다. > ' + props.pgm + ', ' + props.id);
       return 
     } 
+  }
 
-    this.ComboCreate(props);
+  componentDidMount(){
 
-    gfs_dispatch(props.pgm, 'INITCOMBO', 
+    this.ComboCreate(this.props);
+
+    gfs_dispatch(this.props.pgm, 'INITCOMBO', 
       ({
-        Combo  : {id   : props.id,
+        Combo  : {id   : this.props.id,
                   Combo: this}
       })
     );
@@ -128,7 +131,7 @@ class Combobox extends Component{
     control: (base) => ({
       ...base,
       margin:0,
-      height: 34,
+      height: this.props.height,
       textAlign: this.align
     }),
 

@@ -537,7 +537,8 @@ const RtnGrid = (props) => {
 
   return (
     <> 
-      <div ref={ref} style={{width:'calc(100% - 10px)', height: 'calc(100% - 10px)', marginLeft: '5px', marginTop: '5px'}}>
+      <div ref={ref} style={{marginLeft: '8px', width:'calc(100% - 17px)', height: 'calc(100% - 10px)'}}>
+      {/* <div ref={ref} style={{width:'calc(100% - 10px)', height: 'calc(100% - 10px)', marginLeft: '5px', marginTop: '5px'}}> */}
         
         <Grid header        = {props.colHeader}
               selectionUnit = 'row'

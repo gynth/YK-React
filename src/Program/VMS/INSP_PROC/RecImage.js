@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import Modal from 'react-modal';
 import { gfs_dispatch } from '../../../Method/Store';
+import RecTimer from './RecTimer';
 
 function RecImage(props) {  
   const isOpen = useSelector((e) => {
@@ -22,6 +23,7 @@ function RecImage(props) {
 
     gfs_dispatch('INSP_PROC_MAIN', props.cam, obj);
   }
+
 
   const style={
     overlay: {
@@ -51,10 +53,10 @@ function RecImage(props) {
   const img = <button style={{height:'100%', width:'100%', color:'white', border:'none'}}
                       onFocus={e => {
                         if(!isOpen){
-                            let obj = {};
-                            obj[props.focus] = true;
-          
-                            gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
+                          let obj = {};
+                          obj[props.focus] = true;
+        
+                          gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
                         }
                       }}
                       onBlur={e => {
@@ -64,15 +66,20 @@ function RecImage(props) {
                           gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
                         }
                       }}>
-                   <img style={{height:'100%', width:'100%'}} src={require(`../../../Image/${props.image}`).default} alt='yk_image'
-                        onDoubleClick={e => {
-                          let obj = {};
-                          obj[props.focus] = false; 
-                          gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
-                          
-                          setModalIsOpen(true);
-                        }}
-                   /> 
+                    <div style={{width:'100%', height:'100%', border:'none'}}>
+                      <div style={{position:'absolute', height:'30', border:'none'}}>
+                        <RecTimer rec={props.rec}/>
+                      </div>
+                      <img style={{height:'100%', width:'100%'}} src={require(`../../../Image/${props.image}`).default} alt='yk_image'
+                            onDoubleClick={e => {
+                              let obj = {};
+                              obj[props.focus] = false; 
+                              gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
+                              
+                              setModalIsOpen(true);
+                            }}
+                      /> 
+                    </div>
               </button>;
 
   return (

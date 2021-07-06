@@ -16,6 +16,8 @@ import { gfc_sleep } from '../../../Method/Comm';
  * 
  * format(설정값) : 날짜포맷
  * 
+ * fontSize :  폰트크기
+ * 
  * align(center(기본) | left | right) : 좌우정렬
  * 
  * valign(top | middle(기본) | bottom) : 상하정렬
@@ -50,6 +52,7 @@ export const Combobox = (props) => {
   const header    = props.header;
   const width     = props.width !== undefined ? props.width : 100;
   const readOnly  = props.readOnly !== undefined ? props.readOnly : true;
+  const fontSize  = props.fontSize !== undefined ? props.fontSize : '13';
   const align     = props.align !== undefined ? props.align : 'center';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
   const resizable = props.resizable !== undefined ? props.resizable : false;
@@ -62,6 +65,7 @@ export const Combobox = (props) => {
                align, 
                valign, 
                resizable,
+               fontSize,
                data}
 
   const queryResult = new ComboInit({
@@ -72,6 +76,7 @@ export const Combobox = (props) => {
     field   : editor !== undefined ? editor.field : '',
     param   : editor !== undefined ? editor.param : '',
     emptyRow: editor !== undefined ? editor.emptyRow : '',
+    fontSize: editor !== undefined ? editor.fontSize : '13',
     data
   });
 
@@ -88,6 +93,7 @@ export const Combobox = (props) => {
       data,
       options: {
         align,
+        fontSize,
         queryResult,
         onFilter: editor !== undefined ? editor.onFilter : ''
       }
@@ -100,6 +106,7 @@ export const Combobox = (props) => {
     options: {
       align,
       valign,
+      fontSize,
       listItems: queryResult.optionList
     }
   }
@@ -357,6 +364,9 @@ class ComboboxRenderer {
 
   render(props) {
     const option = props.columnInfo.renderer.options;
+    const grid = props.grid;
+    const rowKey = props.rowKey;
+    const height = grid.store.rowCoords.heights[rowKey];
     let value = props.value;
     if(value === undefined || value === null) value = ''; else value = value.toString();
 
@@ -376,11 +386,12 @@ class ComboboxRenderer {
     
     this.el.type = 'text';
     // this.el.setAttribute('style', `height:33px; margin:0 5px 0 5px; text-align:${option['align']}; border: 0px; background-color:${backGround};display:table-cell; width:calc(100% - 10px);`)
-    this.el.setAttribute('style', `height:33px; 
+    this.el.setAttribute('style', `height: ${height - 1}px; 
                                    text-align:${option['align']}; 
                                    border: 0px; 
                                    background-color:${backGround};
                                    display:table-cell; 
+                                   font-size:${option['fontSize']}; 
                                    width:100%;`)
   }
 }

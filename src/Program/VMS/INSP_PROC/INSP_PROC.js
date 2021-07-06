@@ -13,6 +13,7 @@ import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
 import { DateTime as columnDateTime } from '../../../Component/Grid/Column/DateTime';
+import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 
 import Combobox from '../../../Component/Control/Combobox';
 
@@ -21,6 +22,7 @@ import Botspan from './Botspan';
 import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
+import { Timer } from 'timer-node';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 
@@ -51,7 +53,22 @@ class INSP_PROC extends Component {
           DUM_CAM_OPEN : nowState === undefined ? false : nowState.DUM_CAM_OPEN,
 
           STD_CAM_FOCUS: nowState === undefined ? false : nowState.STD_CAM_FOCUS,
-          DUM_CAM_FOCUS: nowState === undefined ? false : nowState.DUM_CAM_FOCUS
+          DUM_CAM_FOCUS: nowState === undefined ? false : nowState.DUM_CAM_FOCUS,
+
+          STD_CAM_REC  : nowState === undefined ? {
+                                                    rec     : false,
+                                                    car     : '',
+                                                    time    : '00:00',
+                                                    timer   : new Timer(),
+                                                    interval: undefined
+                                                  } : nowState.STD_CAM_REC,
+          DUM_CAM_REC  : nowState === undefined ? {
+                                                    rec     : false,
+                                                    car     : '',
+                                                    time    : '00:00',
+                                                    timer   : new Timer(),
+                                                    interval: undefined
+                                                  } : nowState.DUM_CAM_REC
         };
       }
 
@@ -115,6 +132,40 @@ class INSP_PROC extends Component {
         return Object.assign({}, nowState, {
           DUM_CAM_FOCUS : action.DUM_CAM_FOCUS
         })
+      }else if(action.type === 'STD_CAM_REC'){
+
+        return Object.assign({}, nowState, {
+          STD_CAM_REC : {rec  : action.rec,
+                         car  : action.car,
+                         time : nowState.STD_CAM_REC.time,
+                         timer: nowState.STD_CAM_REC.timer}
+        })
+      }else if(action.type === 'DUM_CAM_REC'){
+
+        return Object.assign({}, nowState, {
+          DUM_CAM_REC : {rec  : action.rec,
+                         car  : action.car,
+                         time : nowState.DUM_CAM_REC.time,
+                         timer: nowState.DUM_CAM_REC.timer}
+        })
+      }else if(action.type === 'STD_CAM_REC_TIME'){
+
+        return Object.assign({}, nowState, {
+          STD_CAM_REC : {rec     : nowState.STD_CAM_REC.rec,
+                         car     : action.car,
+                         time    : action.time,
+                         timer   : nowState.STD_CAM_REC.timer,
+                         interval: action.interval}
+        })
+      }else if(action.type === 'DUM_CAM_REC_TIME'){
+
+        return Object.assign({}, nowState, {
+          DUM_CAM_REC : {rec     : nowState.DUM_CAM_REC.rec,
+                         car     : action.car,
+                         time    : action.time,
+                         timer   : nowState.DUM_CAM_REC.timer,
+                         interval: action.interval}
+        })
       }
     }
 
@@ -128,12 +179,12 @@ class INSP_PROC extends Component {
 
     gfc_showMask();
 
-    let req = await YK_WEB_REQ('tally_process_pop.jsp?division=P005', {});
-    console.log(req);
+    let req = await YK_WEB_REQ('tally_process_pop.jsp?division=P005');
+    // console.log(req);
 
-    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 1});
-    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 2});
-    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 3331333});
+    // gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 1});
+    // gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 2});
+    // gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 3331333});
 
     const data = {'dataSend':[
                   {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
@@ -145,7 +196,17 @@ class INSP_PROC extends Component {
                   {'date':'2021-06-24 14:40:18','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'31800','scaleNumb':'202106240241','carNumb':'부산94아3089'},
                   {'date':'2021-06-24 15:15:05','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0002','totalWgt':'43100','scaleNumb':'202106240248','carNumb':'경북83아8533'},
                   {'date':'2021-06-24 15:42:51','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0001','totalWgt':'43320','scaleNumb':'202106240255','carNumb':'경북82아8342'},
-                  {'rec':'1','date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'}
+                  {'rec':'1','date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'
+
+                  ,
+                  _attributes: {
+                    checked: true, // A checkbox is already checked while rendering
+                    className: {
+                      // Add class name on a row
+                      row: ['red']
+                    }
+                  }
+                }
                 ]
               }['dataSend'];
 
@@ -162,9 +223,9 @@ class INSP_PROC extends Component {
     grid.resetData(
       sort
     );
-    gfg_setSelectRow(grid);
+    // gfg_setSelectRow(grid);
 
-    gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
+    // gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
 
     gfc_hideMask();
   }
@@ -181,337 +242,247 @@ class INSP_PROC extends Component {
 
   render() {
     return (
-      <Layout split='vertical'
-              defaultSize = {'780'}>
-        <div style={{width:'calc(100% - 2px)', height:'100%'}}>
-          <div style={{background:'#25262B', width:'100%', height:'145', overflow:'auto'}}>
-            <div style={{ display:'flex', background:'white', width:'768', height:'50', borderRadius:'7px', margin:'7px 0 0 5px'}}>
-              <Input pgm         = {this.props.pgm}
-                     id          = 'search_car_no'
-                     placeHolder = '                                차량번호 검색'
-                     borderWidth = '0'
-                     height      = '40'
-                     width       = '730'
-                     marginTop   = '4px' 
-                     outline     = 'none'
-                     fontSize    = {30}/>
+      <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
+        <div className='car_manager'>
+          <div className='car_list'>
+            <div className='search_line'>
+              <div className='wp'>
+                <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
+                  <Combobox pgm     = {this.props.pgm}
+                            id      = 'search_tp'
+                            value   = 'code'
+                            display = 'name'
+                            width   = {124}
+                            height  = {42}
+                            emptyRow
+                            data    = {[{
+                              code: '1',
+                              name: '배차번호'
+                            },{
+                              code: '2',
+                              name: '차량번호'
+                            },{
+                              code: '3',
+                              name: '등급'
+                            },{
+                              code: '4',
+                              name: '업체'
+                            }]}
+                  />
+                </div>
+                <Input pgm         = {this.props.pgm}
+                       id          = 'search_txt'
+                       height      = '42'
+                       placeHolder = '검색어를 입력하세요'
+                       paddingLeft = '14'
+                       width       = '100%'
+                       type        = 'textarea'
+                      //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
+                        />
+                <button>검색</button>
+              </div>
             </div>
-
-            <div style={{display:'flex', marginTop:'20px', width:'770'}}>
-              <div style={{background:'#25262B', width: '215', height:'46', borderRadius:'25px', marginLeft:'5px', border:'2px solid #68757D'}}>
-                <img style={{height:'24', marginLeft:'12px', marginTop:'10px'}} src={require('../../../Image/yk_car.jpg').default} alt='yk_car'/> 
-                <Mainspan flag={1} />
+            <div className='grid'>
+              <div className='wp'>
+                <div style={{width:'100%', height:'100%', overflow:'auto'}}>
+                  <Grid pgm={this.props.pgm}
+                        id ='main10'
+                        selectionChange={(e) => this.onSelectChange(e)}
+                        rowHeight={45}
+                        columns={[
+                          columnInput({
+                            name: 'scaleNumb',
+                            header: '배차번호',
+                            width : 140,
+                            readOnly: true,
+                            color : '#0063A9',
+                            align : 'center',
+                            fontSize: '18'
+                          }),
+                          columnInput({
+                            name: 'carNumb',
+                            header: '차량번호',
+                            width : 130,
+                            readOnly: true,
+                            align : 'center',
+                            fontSize: '18'
+                          }),   
+                          columnCombobox({
+                            name: 'itemFlag', 
+                            header: '구분',
+                            readOnly: true,
+                            width   : 75,
+                            data: [{
+                              'code': 'M1KDO0001',
+                              'name': '고철'
+                            },{
+                              'code': 'M1KDO0002',
+                              'name': '분철'
+                            }],
+                            editor: {
+                              value   : 'code',
+                              display : 'name'
+                            }
+                          }),
+                          columnTextArea({
+                            name  : 'date',
+                            header: '입차시간',
+                            width : 130,
+                            readOnly: true,
+                            valign:'middle',
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                            time  : 'HH:mm'
+                          }),
+                          columnInput({
+                            name: 'vendor',
+                            header: 'Vendor',
+                            width : 190,
+                            readOnly: true,
+                            align : 'left'
+                          }),
+                          columnImage({
+                            name: 'rec',
+                            header: '녹화중',
+                            width: 90,
+                            imgItem:[
+                              {'code':'0', 'value': ''},
+                              {'code':'1', 'value': <GifPlayer height='30' width='100' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
+                            ]
+                          })
+                        ]}
+                  />
+                </div>
               </div>
-              <div style={{background:'#25262B', width: '215', height:'46', borderRadius:'25px', marginLeft:'15px', border:'2px solid #68757D'}}>
-                <img style={{height:'24', marginLeft:'12px', marginTop:'10px'}} src={require('../../../Image/yk_car.jpg').default} alt='yk_car'/> 
-                <Mainspan flag={2} />
+              <div className='grid_info'>
+                <span className='title'>잔여차량</span><span className='value'>10</span>
               </div>
-              <div style={{background:'#25262B', width: '290', height:'46', borderRadius:'25px', marginLeft:'15px', border:'2px solid #68757D'}}>
-                <img style={{height:'24', marginLeft:'12px', marginTop:'10px'}} src={require('../../../Image/yk_weight.jpg').default} alt='yk_weight'/> 
-                <Mainspan flag={3} />
-              </div>
+            </div>
+            <div className='total_info'>
+              <ul>
+                <li><span className='title'>잔류 차량</span><span className='value'>10</span></li>
+                <li><span className='title'>전체 검수 차량</span><span className='value'>55</span></li>
+                <li><span className='title'>입고량(KG)</span><span className='value'>777,440</span></li>
+              </ul>
             </div>
           </div>
-
-          <div style={{width:'100%', height:'calc(100% - 190px)', overflow:'auto'}}>
-            <Grid pgm={this.props.pgm}
-                  id='main10'
-                  selectionChange={(e) => this.onSelectChange(e)}
-                  columns={[
-                    columnInput({
-                      name: 'scaleNumb',
-                      header: '배차번호',
-                      width : 105,
-                      readOnly: true,
-                      color : 'red',
-                      align : 'center'
-                    }),
-                    columnCombobox({
-                      name: 'itemFlag', 
-                      header: '구분',
-                      readOnly: true,
-                      width   : 75,
-                      data: [{
-                        'code': 'M1KDO0001',
-                        'name': '고철'
-                      },{
-                        'code': 'M1KDO0002',
-                        'name': '분철'
-                      }],
-                      editor: {
-                        value   : 'code',
-                        display : 'name'
-                      }
-                    }),
-                    columnInput({
-                      name: 'carNumb',
-                      header: '차량번호',
-                      width : 110,
-                      readOnly: true,
-                      align : 'center'
-                    }),   
-                    columnDateTime({
-                      name  : 'date',
-                      header: '입차시간',
-                      width : 130,
-                      readOnly: true,
-                      format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
-                      time  : 'HH:mm'
-                    }),
-                    columnInput({
-                      name: 'vendor',
-                      header: 'Vendor',
-                      width : 190,
-                      readOnly: true,
-                      align : 'left'
-                    }),
-                    columnImage({
-                      name: 'rec',
-                      header: '녹화중',
-                      width: 90,
-                      imgItem:[
-                        {'code':'0', 'value': ''},
-                        {'code':'1', 'value': <GifPlayer height='34' width='100' gif={require('../../../Image/yk_rec.gif').default} autoplay/>}
-                      ]
-                    })
-                  ]}
-            />
+          <div className='car_info'>
+            <div className='title'><span>배차번호</span>202106170007</div>
+            <div className='detail'>
+              <ul>
+                <li><span className='t'>차량번호</span>부산92아7287</li>
+                <li><span className='t'>총중량(KG)</span>44,800</li>
+                <li><span className='t'>입차시간</span>2021-06-17 06:08:21</li>
+              </ul>
+            </div>
+            <div className='detail2'>
+              <ul>
+                <li>
+                  <h5>등급책정</h5>
+                  <select>
+                    <option>고철등급 검색</option>
+                  </select>
+                  <input type='text' />
+                </li>
+                <li>
+                  <h5>감량중량</h5>
+                  <select>
+                    <option>감량중량 검색(KG)</option>
+                  </select>
+                </li>
+                <li>
+                  <h5>감가내역</h5>
+                  <select>
+                    <option>감가내역 검색</option>
+                  </select>
+                </li>
+                <li>
+                  <h5>하차구역</h5>
+                  <select>
+                    <option>하차구역 검색(SECTOR)</option>
+                  </select>
+                </li>
+                <li>
+                  <h5>차종구분</h5>
+                  <select>
+                    <option>차종 선택</option>
+                  </select>
+                </li>
+                <li>
+                  <h5>반품구분</h5>
+                  <select>
+                    <option>일부,전량 선택</option>
+                  </select>
+                </li>
+              </ul>
+            </div>
+            <div className='complete_btn'>
+              <button type='button'><span>등록완료</span></button>
+            </div>
           </div>
-          
-          {/* <div style={{background:'#D6DEE0', position:'absolute', float:'left', left:0, bottom:0, width:'calc(100% - 2px)', height:'45'}}> */}
-          
-          <div style={{background:'#D6DEE0',width:'100%', height:'45'}}>
-            <img style={{height:'35', float:'left', marginLeft:'12px', margin:'7px 0 0 10px'}} src={require('../../../Image/yk_exclamation.jpg').default} alt='yk_exclamation'/> 
-            <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 8px 5px'}}>잔여차량</div>
-            <Botspan />
+          <div className='cctv_viewer'>
+            <h4>실시간 CCTV</h4>
+            <div className='cctv_list'>
+              <div className='cctv'>
+                <div className='viewer'>
+                  {/* 뷰어 공간 */}
+                </div>
+                <div className='controller'>
+                  <button type='' className='left'>왼쪽</button>
+                  <button type='' className='top'>위쪽</button>
+                  <button type='' className='down'>아래</button>
+                  <button type='' className='right'>오른쪽</button>
+                  <span className='sep'>
+                    <button type='' className='plus'>확대</button>
+                    <button type='' className='minus'>축소</button>
+                  </span>
+                </div>
+              </div>
+              <div className='cctv'>
+                <div className='viewer'>
+                  {/* 뷰어 공간 */}
+                </div>
+                <div className='controller'>
+                  <button type='' className='left'>왼쪽</button>
+                  <button type='' className='top'>위쪽</button>
+                  <button type='' className='down'>아래</button>
+                  <button type='' className='right'>오른쪽</button>
+                  <span className='sep'>
+                    <button type='' className='plus'>확대</button>
+                    <button type='' className='minus'>축소</button>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div style={{width:'calc(100% - 2px)', height:'100%'}}>
-          <div style={{background:'#25262B', width:'100%', height:'145'}}>
-
-            <div style={{display:'flex', width:'770', padding:'20px 0 0 0'}}>
-              <div style={{width:'270', marginLeft: '30px'}}>
-                <Mainspan flag={5} fontSize={30}/>
-              </div>
-              <div style={{background:'#25262B', width: '155', height:'46', borderRadius:'25px', marginLeft:'5px', border:'2px solid #68757D'}}>
-                <img style={{float:'left', height:'24', marginLeft:'12px', marginTop:'10px'}} src={require('../../../Image/yk_car.jpg').default} alt='yk_car'/> 
-                <div style={{float:'left', color:'white', textAlign:'center', fontSize:'25', marginLeft:'10px', marginTop:'3px'}}>차량번호</div>
-
-                <div style={{height:'50', width:'155', marginLeft:'160px', padding:'5px 0 0 10px'}}>
-                  <Mainspan flag={6} fontSize={'25'} margin='0 0 0 0'/>
-                </div>
-              </div>
-            </div>
-
-            <div style={{display:'flex', marginTop:'5px', width:'770'}}>
-              <div style={{background:'#25262B', width: '155', height:'46', borderRadius:'25px', marginLeft:'15px', border:'2px solid #68757D'}}>
-                <img style={{float:'left', height:'24', marginLeft:'12px', marginTop:'10px'}} src={require('../../../Image/yk_04.png').default} alt='yk_04'/> 
-                <div style={{float:'left', color:'white', textAlign:'center', fontSize:'25', marginLeft:'10px', marginTop:'3px'}}>총중량</div>
-
-                <div style={{height:'50', width:'155', marginLeft:'160px', padding:'5px 0 0 10px'}}>
-                  <Mainspan flag={7} fontSize={'25'} margin='0 0 0 0'/>
-                </div>
-              </div>
-              <div style={{background:'#25262B', width: '155', height:'46', borderRadius:'25px', marginLeft:'130px', border:'2px solid #68757D'}}>
-                <img style={{float:'left', height:'24', marginLeft:'12px', marginTop:'10px'}} src={require('../../../Image/yk_05.png').default} alt='yk_05'/> 
-                <div style={{float:'left', color:'white', textAlign:'center', fontSize:'25', marginLeft:'10px', marginTop:'3px'}}>입차시간</div>
-
-                <div style={{height:'50', width:'300', marginLeft:'160px', padding:'5px 0 0 10px'}}>
-                  <Mainspan flag={8} fontSize={'25'} margin='0 0 0 0'/>
-                </div>
-              </div>
-            </div>
+        <div className='search_line'>
+          <div className='line first'>
+            <label>기준년도</label><input type='text' /><input type='text' />
+            <label>거래처</label><input type='text' />
+            <label>아이템</label><input type='text' />
           </div>
-
-          <div style={{width:'100%', height:'200'}}>
-            <div style={{width:'1000', height:'48'}}>
-              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>등급책정</div>
-              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_grade1'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '고철등급 검색'
-
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                />
-              </div>
-              <div style={{float:'left', height:'40', width:'297', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_grade2'
-                          value   = 'itemCode'
-                          display = 'item'
-
-                          onFocus = {ComboCreate => {
-                            const value = gfo_getCombo(this.props.pgm, 'detail_grade1').getValue();
-                            if(value === null) return;
-
-                            YK_WEB_REQ(`tally_process_pop.jsp?division=${value}`, {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                />
-              </div>
-            </div>
-            <div style={{width:'1000', height:'48'}}>
-              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>감량중량</div>
-              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_subt'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감량중량 검색(KG)'
-
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                />
-              </div>
-              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>감량사유</div>
-              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_subt_leg'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감량사유 검색'
-
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                />
-              </div>
-            </div>
-            <div style={{width:'1000', height:'48'}}>
-              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>감가내역</div>
-              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_depr'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감가내역 검색'
-
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                />
-              </div>
-              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>하차구역</div>
-              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_out'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '하차구역 검색(SECTOR)'
-
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',});
-                              })
-                          }}
-                />
-              </div>
-            </div>
-            <div style={{width:'1000', height:'48'}}>
-              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>차종구분</div>
-              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_car'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '차종선택'
-
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                />
-              </div>
-              <div style={{fontSize:'25', float:'left', height:'40', margin:'5px 0 0 5px'}}>반품구분</div>
-              <div style={{float:'left', height:'40', width:'200', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_rtn'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '일부,전량 선택'
-
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                />
-              </div>
-              <div style={{float:'left', height:'40', width:'297', margin:'5px 0 0 5px'}}>
-                <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_rtn_leg'
-                          value   = 'itemCode'
-                          display = 'item'
-
-                          onFocus = {ComboCreate => {
-
-                            YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                />
-              </div>
-            </div>
-
-            <div style={{width:'280px', height:'140px', position:'absolute', top: '150', left:'615'}}>
-              <button style={{width:'100%', height:'100%', background:'#F93C02', color:'white', fontSize:'40', borderRadius:'10px'}}>등록완료</button>
-            </div>
-          </div>
-
-          <div style={{width:'100%', height:'calc(100% - 360px)'}}>
-            <RecImage cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' image='yk_06.jpg'/>
-            <RecImage cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' image='yk_06.jpg'/>
+          <div className='line'>
+            <label>기준년도</label><input type='text' /><input type='text' />
+            <label>거래처</label><input type='text' />
+            <label>아이템</label><input type='text' />
           </div>
         </div>
-      </Layout>
+        <div className='detail_box'>
+          <h5><span className='bu'></span><span className='text'>상세정보</span></h5>
+          <table className='data_table'>
+            <tbody>
+              <tr>
+                <th>상세입력란</th>
+                <td><input type='text' /></td>
+              </tr>
+              <tr>
+                <th>상세입력란</th>
+                <td><textarea></textarea></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     );
   }
 }

@@ -88,21 +88,25 @@ class Input extends Component{
                  id          = {this.props.id}
                  className   = {this.props.className}
                    
-                 style={{fontSize    : this.props.fontSize,
-                         color       : this.props.color,
-                        //  background  : this.props.backgroundColor,
-                         background  : this.state.background,
-                         width       : this.props.width,
-                         height      : this.props.height,
-                         margin      : this.props.margin,
-                         marginTop   : this.props.marginTop,
-                         marginRight : this.props.marginRight,
-                         marginBottom: this.props.marginBottom,
-                         marginLeft  : this.props.marginLeft,
-                         borderWidth : this.props.borderWidth,
-                         borderColor : this.props.borderColor,
-                         borderRadius: this.props.borderRadius,
-                         outline     : this.props.outline}}
+                 style={{fontSize     : this.props.fontSize,
+                         color        : this.props.color,
+                         background   : this.state.background,
+                         width        : this.props.width,
+                         height       : this.props.height,
+                         padding      : this.props.padding,
+                         paddingTop   : this.props.paddingTop,
+                         paddingRight : this.props.paddingRight,
+                         paddingBottom: this.props.paddingBottom,
+                         paddingLeft  : this.props.paddingLeft,
+                         margin       : this.props.margin,
+                         marginTop    : this.props.marginTop,
+                         marginRight  : this.props.marginRight,
+                         marginBottom : this.props.marginBottom,
+                         marginLeft   : this.props.marginLeft,
+                         borderWidth  : this.props.borderWidth,
+                         borderColor  : this.props.borderColor,
+                         borderRadius : this.props.borderRadius,
+                         outline      : this.props.outline}}
  
                  onBlur       = {e => this.onBlurBase(e)}
                  onChange     = {e => this.onChangeBase(e)}

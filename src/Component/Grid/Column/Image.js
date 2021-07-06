@@ -19,6 +19,8 @@ export const Image = (props) => {
   const width     = props.width !== undefined ? props.width : 100;
   const resizable = props.resizable !== undefined ? props.resizable : true;
   const readOnly  = true;
+  const align     = props.align !== undefined ? props.align : 'center';
+  const valign    = props.valign !== undefined ? props.valign : 'middle';
   const imgItem   = props.imgItem;
 
   const rtn = {name,
@@ -31,8 +33,8 @@ export const Image = (props) => {
   rtn.renderer = {
     type   : ImageRenderer,
     options: {
-      align : props.align,
-      valign: props.valign,
+      align : align,
+      valign: valign,
       onRender: props.onRender,
       readOnly,
       imgItem
@@ -55,6 +57,10 @@ class ImageRenderer {
   }
 
   render(props) {
+    const grid = props.grid;
+    const rowKey = props.rowKey;
+    const height = grid.store.rowCoords.heights[rowKey];
+
     const option = props.columnInfo.renderer.options;
     const imgItem = option.imgItem;
 
@@ -63,10 +69,13 @@ class ImageRenderer {
 
     if(viewImg.length > 0) ReactDOM.render(viewImg[0].value, this.el);
 
-    this.el.setAttribute('style', `height: 32px; 
+    this.el.setAttribute('style', `height: ${height - 1}px; 
                                    width:100%; 
+                                   display:flex;justify-content:center;align-items:center;
                                    border: 0px; 
                                    background-color:white;
+                                   text-align:${option['align']}; 
+                                   vertical-align:${option['valign']}; 
                                    `)
 
 

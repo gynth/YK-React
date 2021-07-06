@@ -19,7 +19,7 @@ import { gfg_setValue } from '../../../Method/Grid';
  * 
  * resizable(true) : 컬럼넓이 조정여부
  * 
- * 
+ * fontSize : 폰트크기
  * 
  * editor: { 
  * 
@@ -46,6 +46,7 @@ export const DateTime = (props) => {
   const readOnly  = props.readOnly !== undefined ? props.readOnly : true;
   let   format    = props.format !== undefined ? props.format : gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT');
   let   time      = props.time;
+  const fontSize  = props.fontSize !== undefined ? props.fontSize : '13';
   const align     = props.align !== undefined ? props.align : 'center';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
   const resizable = props.resizable !== undefined ? props.resizable : true;
@@ -62,6 +63,7 @@ export const DateTime = (props) => {
                width, 
                align, 
                valign, 
+               fontSize,
                resizable}
 
   if(!readOnly){
@@ -71,7 +73,8 @@ export const DateTime = (props) => {
         timepicker: (editor !== undefined && editor['timepicker'] !== undefined) && editor['timepicker'],
         selectableRanges: (editor !== undefined && editor['selectableRanges'] !== undefined) && editor['selectableRanges'],
         format,
-        time
+        time,
+        fontSize
       }
     }
 
@@ -86,7 +89,8 @@ export const DateTime = (props) => {
       valign,
       readOnly,
       format,
-      time
+      time,
+      fontSize
     }
   }
 
@@ -109,6 +113,7 @@ class DateTimeRenderer {
     const grid = props.grid;
     const name = props.columnInfo.name;
     const rowKey = props.rowKey;
+    const height = grid.store.rowCoords.heights[rowKey];
 
     const option = props.columnInfo.renderer.options;
 
@@ -139,12 +144,13 @@ class DateTimeRenderer {
     this.el.type = 'text';
     // this.el.setAttribute('style', `height: 27px; display: table-cell; width:calc(100% - 5px); padding: 0px 0px 0px 5px; border: 0px; text-align:${option['align']}; vertical-align:${option['valign']}; background-color:${backGround};`)
 
-    this.el.setAttribute('style', `height: 33px; 
-                                   display: table-cell; 
+    this.el.setAttribute('style', `height: ${height - 1}px; 
                                    width:100%; 
+                                   display:table-cell; 
                                    border: 0px; 
                                    text-align:${option['align']}; 
                                    vertical-align:${option['valign']}; 
+                                   font-size:${option['fontSize']}; 
                                    background-color:${backGround};`)
 
     this.el.value = value;

@@ -19,16 +19,13 @@ import { gfg_getRow } from '../../../Method/Grid';
  * valign(top | middle(기본) | bottom) : 상하정렬
  * 
  * resizable(true) : 컬럼넓이 조정여부
- * 
- * password(false) : 비밀번호여부
  */
-export const Input = (props) => {
+export const TextArea = (props) => {
   const name      = props.name;
   const header    = props.header;
   const width     = props.width !== undefined ? props.width : '100%';
   const color     = props.color !== undefined ? props.color : 'black';
   const fontSize  = props.fontSize !== undefined ? props.fontSize : '13';
-  const password  = props.password !== undefined ? props.password : false;
   const align     = props.align !== undefined ? props.align : 'left';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
   const resizable = props.resizable !== undefined ? props.resizable : true;
@@ -69,7 +66,6 @@ export const Input = (props) => {
   rtn.editor = {
     type   : InputEditor,
     options: {
-      password,
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
@@ -82,7 +78,6 @@ export const Input = (props) => {
   rtn.renderer = {
     type   : InputRenderer,
     options: {
-      password,
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
@@ -98,7 +93,7 @@ export const Input = (props) => {
 class InputEditor {
   constructor(props) {
     const option = props.columnInfo.renderer.options;
-    const el = document.createElement('input');
+    const el = document.createElement('textarea');
     el.setAttribute('style', `height:100%; 
                               border: 0px; 
                               display:table-cell; 
@@ -109,15 +104,7 @@ class InputEditor {
                               text-align:${option['align']}; 
                               vertical-align:${option['valign']};
                               ` )
-
-    const password = option['password'];
-
-    el.type  = password ? 'password' : 'text';
     el.value = String(props.value === null ? '' : props.value);
-    if(password){
-      el.passwordValue = el.value !== '><DF^K)AD*' && '><DF^K)AD*';
-      el.value = el.passwordValue;
-    }
 
     if(option['readOnly']) el.readOnly = true;
 
@@ -147,7 +134,7 @@ class InputEditor {
 
 class InputRenderer {
   constructor(props) {
-    const el = document.createElement('input');
+    const el = document.createElement('textarea');
 
     this.el = el;
     this.render(props);
@@ -161,20 +148,19 @@ class InputRenderer {
     // store.subscribe((e1, e2) => console.log(store.getState()))
 
     const option = props.columnInfo.renderer.options;
-    // console.log(option)
+    const grid = props.grid;
+    const rowKey = props.rowKey;
+    const height = grid.store.rowCoords.heights[rowKey];
     const orgData = props.grid.dataManager.getOriginData();
     let org = orgData.length <= props.rowKey ? '' : props.grid.dataManager.getOriginData()[props.rowKey][props.columnInfo.name];
     if(org === null) org = '';
-    const password = option['password'];
 
     let backGround = 'white';
-    if(!password){
-      if(String(org) !== String(props.value === null ? '' : props.value)) backGround = 'greenYellow'
-    }
+    if(String(org) !== String(props.value === null ? '' : props.value)) backGround = 'greenYellow'
 
-    this.el.type  = password ? 'password' : 'text';
-    this.el.setAttribute('style', `height: 100%; 
+    this.el.setAttribute('style', `height: ${height - 1}px; 
                                    width:calc(100% - 5px); 
+                                   min-height:${height - 1}px; 
                                    padding: 0px 5px 0px 5px;
                                    border: 0px; 
                                    text-align:${option['align']}; 
@@ -185,11 +171,6 @@ class InputRenderer {
                                    `)
 
     let value = String((props.value === null || props.value === undefined) ? '' : props.value);
-    if(password){
-      value = '><DF^K)AD*';
-    }
-
-    // this.el.value = String((props.value === null || props.value === undefined) ? '' : props.value);
     this.el.value = value
   }
 }

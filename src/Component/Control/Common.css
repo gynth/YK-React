@@ -1,4 +1,4 @@
-.search_line {border-bottom:1px solid #C3CFDF; padding-bottom:5px; width:100%}
+/* .search_line {border-bottom:1px solid #C3CFDF; padding-bottom:5px; width:100%}
 .search_line .line {margin-top:-5px; line-height:51px; overflow:hidden}
 .search_line .line:first-child {margin:0;}
 .search_line .line .item {float:left; height:51px; line-height:51px;}
@@ -22,7 +22,5 @@
 .detail_box .data_table {margin-top:6px;border:1px solid #CCD3DC; width:100%; border-collapse: collapse;}
 .detail_box .data_table>tbody>tr>th {border-bottom:1px solid #CCD3DC; background:#EBEFF5; text-align: left; padding:10px 10px 11px 20px; width:90px; font-size:14px;}
 .detail_box .data_table>tbody>tr>td {border-bottom:1px solid #CCD3DC; padding: 6px; }
-/* .detail_box .data_table td input {width:calc(100% - 22px); }
-.detail_box .data_table td textarea {margin:0; width:calc(100% - 6px); border: 1px solid #b5b5b5;} */
 .detail_box .data_table>tbody>tr>td>input {width:calc(100%); }
-.detail_box .data_table>tbody>tr>td>textarea {margin:0; width:calc(100% - 6px); border: 1px solid #b5b5b5;}
+.detail_box .data_table>tbody>tr>td>textarea {margin:0; width:calc(100% - 6px); border: 1px solid #b5b5b5;} */
