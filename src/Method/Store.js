@@ -25,6 +25,10 @@ export const gfs_dispatch = (reducer, type, values) => {
   }) 
 }
 
+export const gfs_subscribe = (target) => {
+  store.subscribe(target);
+}
+
 export const gfs_WINDOWFRAME_REDUCER = () => {
   if(store.asyncReducers['WINDOWFRAME_REDUCER'] === undefined){
       

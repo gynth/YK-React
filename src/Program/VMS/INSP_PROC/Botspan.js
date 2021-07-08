@@ -7,7 +7,8 @@ function Botspan(props) {
   });
 
   return (
-    <div style={{fontSize:'25', float:'right', height:'40', margin:'5px 10px 8px 0'}}>{value}</div>
+    // <div style={{fontSize:'25', float:'right', height:'40', margin:'5px 10px 8px 0'}}>{value}</div>
+    <span className='value'>{value}</span>
   );
 }
 

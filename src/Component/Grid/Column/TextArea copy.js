@@ -16,7 +16,7 @@ import { gfg_getRow } from '../../../Method/Grid';
  * 
  * align(center | left(기본) | right) : 좌우정렬
  * 
- * height: 높이(자동조절이 안되고 되게 하려면 번거로운게 많아서 rowHeight와 이걸로 조절)
+ * valign(top | middle(기본) | bottom) : 상하정렬
  * 
  * resizable(true) : 컬럼넓이 조정여부
  */
@@ -34,10 +34,10 @@ export const TextArea = (props) => {
   const rtn = {name,
                header,
                width,
-               height,
                color,
                fontSize,
                align,
+               height,
                resizable,
               //  filter:{
               //    type: 'text',
@@ -157,15 +157,16 @@ class InputRenderer {
     let backGround = 'white';
     if(String(org) !== String(props.value === null ? '' : props.value)) backGround = 'greenYellow'
 
-    this.el.setAttribute('style', `height: ${height}px; 
-                                   min-height:${height}px; 
+    this.el.setAttribute('style', `height: ${height - 1}px; 
+                                   min-height:${height - 1}px; 
                                    width:calc(100% - 5px); 
+                                  
                                    border: 0px; 
                                    text-align:${option['align']}; 
+                                  
                                    background-color:${backGround};
                                    color:${option['color']};
                                    font-size:${option['fontSize']}; 
-                                   resize: none;
                                    `)
 
     let value = String((props.value === null || props.value === undefined) ? '' : props.value);

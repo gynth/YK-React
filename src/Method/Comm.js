@@ -141,3 +141,21 @@ export const gfc_hideMask = () => {
     })
   );
 }
+
+export const gfc_addClass = (element, className) => {
+	element.className += " " + className;
+	
+}
+
+export const gfc_removeClass = (element, className) => {
+	var check = new RegExp("(\\s|^)" + className + "(\\s|$)");
+	element.className = element.className.replace(check, " ").trim();
+}
+
+export const gfc_hasClass = (element, className) => {
+	if(element.className.indexOf(className) > -1){
+		return true;
+	}else{
+		return false;
+	}
+}

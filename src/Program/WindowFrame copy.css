@@ -32,9 +32,9 @@
 .car_list .grid table tbody tr td .type {}
 .car_list .grid table tbody tr td img {vertical-align:middle} */
 
-.car_list .grid .grid_info {position:absolute; bottom:0; width:100%; box-sizing:border-box; padding-left:26px; left:0; height:48px; line-height:48px; background:#EEF1F6;}
+/* .car_list .grid .grid_info {position:absolute; bottom:0; width:100%; box-sizing:border-box; padding-left:26px; left:0; height:48px; line-height:48px; background:#EEF1F6;}
 .car_list .grid .grid_info .title {display:block; float:left; font-size:16px; font-weight:bold; margin-right:15px; float:left;}
-.car_list .grid .grid_info .value {display:block; float:left; font-size:14px; font-weight:bold; padding:0px 10px; min-width:40px; text-align:center; height:25px; line-height:25px; margin-top:11px; border-radius:5px; background:#ffffff }
+.car_list .grid .grid_info .value {display:block; float:left; font-size:14px; font-weight:bold; padding:0px 10px; min-width:40px; text-align:center; height:25px; line-height:25px; margin-top:11px; border-radius:5px; background:#ffffff } */
 
 .car_list .total_info {position:absolute; left:0; bottom:0; padding:24px 0; height:161px; box-sizing:border-box; width:100%; border-top:1px solid #707070}
 .car_list .total_info ul {overflow:hidden; height:100%;}
@@ -65,12 +65,12 @@
 .car_info .tab_content {height:100%}
 .car_info .tab_content>div {display:none;}
 .car_info .tab_content>div.on {display:block;}
-.car_info .input_list {font-size: 16; padding:0 17px; height: 100%; overflow: auto;}
+.car_info .input_list {padding:0 17px; height: 100%; overflow: auto;}
 .car_info .input_list ul {}
 .car_info .input_list ul li {}
 .car_info .input_list ul li h5 {font-size:16px; font-weight:bold; background:url('../Image/detail_li_bu.png') no-repeat 0 50%; padding-left:15px; margin:15px 0;}
-/* .car_info .input_list ul li select {width:100%; height:42px; padding-left:7px; box-sizing:border-box; border-radius:5px;} */
-/* .car_info .input_list ul li input {width:100%; height:42px; box-sizing:border-box; border-radius:5px; margin-top:5px} */
+.car_info .input_list ul li select {width:100%; height:42px; padding-left:7px; box-sizing:border-box; border-radius:5px;}
+.car_info .input_list ul li input {width:100%; height:42px; box-sizing:border-box; border-radius:5px; margin-top:5px}
 
 .car_info .data_list {padding:0 17px; height: 100%; overflow: auto;}
 .car_info .data_list ul {}
@@ -89,28 +89,29 @@
 .car_manager .cctv_viewer {position:relative; padding-top:61px; padding-bottom:17px; float:left; width:calc(100% - 1105px); height:100%; background:#0C1D33; box-sizing:border-box;}
 .cctv_viewer h4 {position:absolute; left:0; top:0; color:#ffffff; height:61px; line-height:61px; font-size:18px; padding-left:58px; background:url('../Image/cctv_bu@2x.png') no-repeat 27px 50%; background-size:22px 27px;}
 .cctv_viewer .cctv_list {padding:0 17px; height:100%;}
-.cctv {position:relative; height:50%; box-sizing:border-box;}
-.cctv:first-child {padding-bottom:8px}
-.cctv:last-child {padding-top:8px}
-.cctv .viewer {background:#000000; width:100%; height:100%; cursor:pointer; box-sizing:border-box;}
-.cctv .viewer.on {border:2px solid #2D7ADE}
-.cctv .controller {position:absolute; right:10px; bottom:20px; border:1px solid rgba(0,0,0,0.3); padding:5px; height:30px; border-radius:30px; }
-.cctv .controller button {vertical-align:top; cursor:pointer; float:left; width:30px; height:30px; margin-right:4px; border-radius:15px; border:none; text-indent:-9999px; overflow:hidden;}
-.cctv .controller button.left {background:rgba(0,0,0,0.2) url('../Image/car_controll_left@2x.png') no-repeat 9px 50%; background-size:10px 13px;}
-.cctv .controller button.top {background:rgba(0,0,0,0.2) url('../Image/car_controll_top@2x.png') no-repeat 50% 50%; background-size:13px 11px;}
-.cctv .controller button.down {background:rgba(0,0,0,0.2) url('../Image/car_controll_down@2x.png') no-repeat 50% 10px; background-size:13px 11px;}
-.cctv .controller button.right {background:rgba(0,0,0,0.2) url('../Image/car_controll_right@2x.png') no-repeat 11px 50%; background-size:10px 13px;}
-.cctv .controller button.plus {background:rgba(0,0,0,0.2) url('../Image/car_controll_plus@2x.png') no-repeat 50% 50%; background-size:16px 16px;}
-.cctv .controller button.minus {margin:0;background:rgba(0,0,0,0.2) url('../Image/car_controll_minus@2x.png') no-repeat 50% 50%; background-size:16px 3px;}
-.cctv .controller .sep {display:inline-block; padding-left:5px; border-left:1px solid rgba(0,0,0,0.3)}
-.cctv .controller.on {padding:10px; height:60px; border-radius:60px;}
-.cctv .controller.on button {width:60px; height:60px; border-radius:30px}
-.cctv .controller.on button.left {background:rgba(0,0,0,0.2) url('../Image/car_controll_left@2x.png') no-repeat 45% 50%; background-size:auto;}
-.cctv .controller.on button.top {background:rgba(0,0,0,0.2) url('../Image/car_controll_top@2x.png') no-repeat 50% 45%; background-size:auto;}
-.cctv .controller.on button.down {background:rgba(0,0,0,0.2) url('../Image/car_controll_down@2x.png') no-repeat 50% 55%; background-size:auto;}
-.cctv .controller.on button.right {background:rgba(0,0,0,0.2) url('../Image/car_controll_right@2x.png') no-repeat 55% 50%; background-size:auto;}
-.cctv .controller.on button.plus {background:rgba(0,0,0,0.2) url('../Image/car_controll_plus@2x.png') no-repeat 50% 50%; background-size:auto;}
-.cctv .controller.on button.minus {margin:0;background:rgba(0,0,0,0.2) url('../Image/car_controll_minus@2x.png') no-repeat 50% 50%; background-size:auto;}
+.cctv_viewer .cctv_list .cctv {position:relative; height:50%; box-sizing:border-box;}
+.cctv_viewer .cctv_list .cctv:first-child {padding-bottom:8px}
+.cctv_viewer .cctv_list .cctv:last-child {padding-top:8px}
+.cctv_viewer .cctv_list .cctv .viewer {background:#000000; width:100%; height:100%; cursor:pointer; box-sizing:border-box;}
+.cctv_viewer .cctv_list .cctv .viewer.on {border:2px solid #2D7ADE}
+.cctv_viewer .cctv_list .cctv .controller {position:absolute; right:10px; bottom:20px; border:1px solid rgba(0,0,0,0.3); padding:5px; height:30px; border-radius:30px; }
+.cctv_viewer .cctv_list .cctv .controller button {vertical-align:top; cursor:pointer; float:left; width:30px; height:30px; margin-right:4px; border-radius:15px; border:none; text-indent:-9999px; overflow:hidden;}
+.cctv_viewer .cctv_list .cctv .controller button.left {background:rgba(0,0,0,0.2) url('../Image/car_controll_left@2x.png') no-repeat 9px 50%; background-size:10px 13px;}
+.cctv_viewer .cctv_list .cctv .controller button.top {background:rgba(0,0,0,0.2) url('../Image/car_controll_top@2x.png') no-repeat 50% 50%; background-size:13px 11px;}
+.cctv_viewer .cctv_list .cctv .controller button.down {background:rgba(0,0,0,0.2) url('../Image/car_controll_down@2x.png') no-repeat 50% 10px; background-size:13px 11px;}
+.cctv_viewer .cctv_list .cctv .controller button.right {background:rgba(0,0,0,0.2) url('../Image/car_controll_right@2x.png') no-repeat 11px 50%; background-size:10px 13px;}
+.cctv_viewer .cctv_list .cctv .controller button.plus {background:rgba(0,0,0,0.2) url('../Image/car_controll_plus@2x.png') no-repeat 50% 50%; background-size:16px 16px;}
+.cctv_viewer .cctv_list .cctv .controller button.minus {margin:0;background:rgba(0,0,0,0.2) url('../Image/car_controll_minus@2x.png') no-repeat 50% 50%; background-size:16px 3px;}
+.cctv_viewer .cctv_list .cctv .controller .sep {display:inline-block; padding-left:5px; border-left:1px solid rgba(0,0,0,0.3)}
+
+.cctv_viewer .cctv_list .cctv .controller.on {padding:10px; height:60px; border-radius:60px;}
+.cctv_viewer .cctv_list .cctv .controller.on button {width:60px; height:60px; border-radius:30px}
+.cctv_viewer .cctv_list .cctv .controller.on button.left {background:rgba(0,0,0,0.2) url('../Image/car_controll_left@2x.png') no-repeat 45% 50%; background-size:auto;}
+.cctv_viewer .cctv_list .cctv .controller.on button.top {background:rgba(0,0,0,0.2) url('../Image/car_controll_top@2x.png') no-repeat 50% 45%; background-size:auto;}
+.cctv_viewer .cctv_list .cctv .controller.on button.down {background:rgba(0,0,0,0.2) url('../Image/car_controll_down@2x.png') no-repeat 50% 55%; background-size:auto;}
+.cctv_viewer .cctv_list .cctv .controller.on button.right {background:rgba(0,0,0,0.2) url('../Image/car_controll_right@2x.png') no-repeat 55% 50%; background-size:auto;}
+.cctv_viewer .cctv_list .cctv .controller.on button.plus {background:rgba(0,0,0,0.2) url('../Image/car_controll_plus@2x.png') no-repeat 50% 50%; background-size:auto;}
+.cctv_viewer .cctv_list .cctv .controller.on button.minus {margin:0;background:rgba(0,0,0,0.2) url('../Image/car_controll_minus@2x.png') no-repeat 50% 50%; background-size:auto;}
 
 
 

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import Modal from 'react-modal';
 import { gfs_dispatch } from '../../../Method/Store';
 import RecTimer from './RecTimer';
+import '../../../Program/WindowFrame.css';
 
 function RecImage(props) {  
   const isOpen = useSelector((e) => {
@@ -52,23 +53,23 @@ function RecImage(props) {
   };
 
   // const img = <a href='#null' style={{pointerEvents:'none'}} 
-  const img = <a href='#!'
-                  onFocus={() => {
-                    if(!isOpen){
-                      let obj = {};
-                      obj[props.focus] = true;
-    
-                      gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
-                    }
-                  }}
-                  onBlur={() => {
-                    if(!isOpen){
-                      let obj = {};
-                      obj[props.focus] = false; 
-                      gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
-                    }
-                  }}>
-                <div style={{height: isOpen === true && '100%'}} className={isFocus === true ? 'cctv select' : 'cctv'}>
+  const img = <a href='#!' 
+                              onFocus={e => {
+                                if(!isOpen){
+                                  let obj = {};
+                                  obj[props.focus] = true;
+                
+                                  gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
+                                }
+                              }}
+                              onBlur={e => {
+                                if(!isOpen){
+                                  let obj = {};
+                                  obj[props.focus] = false; 
+                                  gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
+                                }
+                              }}>
+                <div className={isFocus === true ? 'cctv select' : 'cctv'}>
                   <div className={isFocus === true ? 'viewer on' : 'viewer'}>
 
                     <img style={{height:'100%', width:'100%'}} src={require(`../../../Image/${props.image}`).default} alt='yk_image'
@@ -80,7 +81,7 @@ function RecImage(props) {
                               setModalIsOpen(true);
                             }}
                       /> 
-                      <div className={isOpen === true ? 'controller on' : 'controller'}>
+                      <div className={isFocus === true ? 'controller on' : 'controller'}>
                         <button type='' className='left'>왼쪽</button>
                         <button type='' className='top'>위쪽</button>
                         <button type='' className='down'>아래</button>
@@ -96,16 +97,16 @@ function RecImage(props) {
 
   return (
     <>
-      {isOpen === false ? img : 
-        <Modal 
-              style={style}
-              className='cctv_viewer'
-              isOpen={isOpen} 
-              onRequestClose={() => setModalIsOpen(false)} 
-              ariaHideApp={false}>
-          {img}
-        </Modal>
-      }
+      { isOpen === false && img}
+
+      <Modal 
+             style={style}
+             className='cctv_viewer'
+             isOpen={isOpen} 
+             onRequestClose={() => setModalIsOpen(false)} 
+             ariaHideApp={false}>
+        { isOpen === true && img}
+      </Modal>
     </>
   );
 }

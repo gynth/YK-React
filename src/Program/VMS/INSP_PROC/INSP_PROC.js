@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 
-import Layout from '../../../Component/Layout/Layout';
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
-import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_addClass, gfc_removeClass, gfc_hasClass } from '../../../Method/Comm';
+import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getInput, gfo_getCombo } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
@@ -12,12 +11,12 @@ import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
-import { DateTime as columnDateTime } from '../../../Component/Grid/Column/DateTime';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 
 import Combobox from '../../../Component/Control/Combobox';
 
 import Mainspan from './Mainspan';
+import Detailspan from './Detailspan';
 import Botspan from './Botspan';
 import RecImage from './RecImage';
 
@@ -27,8 +26,32 @@ import { Timer } from 'timer-node';
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 
 class INSP_PROC extends Component {
+
+  onActiveWindow = () => {
+    const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
+    if(activeWindow.programId === 'INSP_PROC'){
+      if(window.onkeydown === null){
+        window.onkeydown = e => this.onKeyDown(e);
+        window.onmousewheel = e => this.onMouseWheel(e);
+      }
+    }else{
+      if(window.onkeydown !== null){
+        window.onkeydown = null;
+        window.onmousewheel = null;
+      }
+    }
+  }
+
   state = {
     wait_list: []
+  }
+
+  onKeyDown = (e) => {
+    console.log(e);
+  }
+
+  onMouseWheel = (e) => {
+    console.log(e);
   }
 
   constructor(props){
@@ -170,6 +193,18 @@ class INSP_PROC extends Component {
     }
 
     gfs_injectAsyncReducer('INSP_PROC_MAIN', INSP_PROC_MAIN);
+
+    
+    gfs_subscribe(this.onActiveWindow);
+  }
+
+  componentDidUpdate(){
+    console.log('componentDidUpdate');
+  }
+
+  componentWillUnmount() {
+    window.onkeydown = undefined;
+    window.onmousewheel = undefined;
   }
 
   Retrieve = async () => {
@@ -182,9 +217,9 @@ class INSP_PROC extends Component {
     let req = await YK_WEB_REQ('tally_process_pop.jsp?division=P005');
     // console.log(req);
 
-    // gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 1});
-    // gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 2});
-    // gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 3331333});
+    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 1});
+    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 2});
+    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 3331333});
 
     const data = {'dataSend':[
                   {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
@@ -196,17 +231,7 @@ class INSP_PROC extends Component {
                   {'date':'2021-06-24 14:40:18','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'31800','scaleNumb':'202106240241','carNumb':'부산94아3089'},
                   {'date':'2021-06-24 15:15:05','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0002','totalWgt':'43100','scaleNumb':'202106240248','carNumb':'경북83아8533'},
                   {'date':'2021-06-24 15:42:51','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0001','totalWgt':'43320','scaleNumb':'202106240255','carNumb':'경북82아8342'},
-                  {'rec':'1','date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'
-
-                  ,
-                  _attributes: {
-                    checked: true, // A checkbox is already checked while rendering
-                    className: {
-                      // Add class name on a row
-                      row: ['red']
-                    }
-                  }
-                }
+                  {'rec':'1','date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'}
                 ]
               }['dataSend'];
 
@@ -223,9 +248,9 @@ class INSP_PROC extends Component {
     grid.resetData(
       sort
     );
-    // gfg_setSelectRow(grid);
+    gfg_setSelectRow(grid);
 
-    // gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
+    gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
 
     gfc_hideMask();
   }
@@ -240,7 +265,26 @@ class INSP_PROC extends Component {
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
   }
 
+  tabButton(tabIndex){
+    let tabList = ['tab1','tab2']
+    let contentList = ['content1','content2']
+    let tabMaxIndex = 2;
+    for(let i = 0; i < tabMaxIndex; i++){
+      if(i === tabIndex){
+        if(gfc_hasClass(document.getElementById(tabList[i]),'on') === false){
+          gfc_addClass(document.getElementById(tabList[i]),'on');
+          gfc_addClass(document.getElementById(contentList[i]),'on');
+        }
+      }else{
+        gfc_removeClass(document.getElementById(tabList[i]),'on');
+        gfc_removeClass(document.getElementById(contentList[i]),'on');
+      }
+    }
+  }
+
   render() {
+    const aa = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'SELECTWINDOW');
+
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
         <div className='car_manager'>
@@ -288,12 +332,13 @@ class INSP_PROC extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
-                        rowHeight={45}
+                        rowHeight={46}
+                        rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
                           columnInput({
                             name: 'scaleNumb',
                             header: '배차번호',
-                            width : 140,
+                            width : 155,
                             readOnly: true,
                             color : '#0063A9',
                             align : 'center',
@@ -302,7 +347,7 @@ class INSP_PROC extends Component {
                           columnInput({
                             name: 'carNumb',
                             header: '차량번호',
-                            width : 130,
+                            width : 135,
                             readOnly: true,
                             align : 'center',
                             fontSize: '18'
@@ -327,26 +372,29 @@ class INSP_PROC extends Component {
                           columnTextArea({
                             name  : 'date',
                             header: '입차시간',
-                            width : 130,
+                            width : 80,
+                            height: 38,
+                            // paddingTop: ''
                             readOnly: true,
                             valign:'middle',
                             format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
                             time  : 'HH:mm'
                           }),
-                          columnInput({
+                          columnTextArea({
                             name: 'vendor',
                             header: 'Vendor',
-                            width : 190,
+                            width : 150,
+                            height: 38,
                             readOnly: true,
                             align : 'left'
                           }),
                           columnImage({
                             name: 'rec',
                             header: '녹화중',
-                            width: 90,
+                            width: 70,
                             imgItem:[
                               {'code':'0', 'value': ''},
-                              {'code':'1', 'value': <GifPlayer height='30' width='100' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
+                              {'code':'1', 'value': <GifPlayer height='30' width='65' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
                             ]
                           })
                         ]}
@@ -354,133 +402,253 @@ class INSP_PROC extends Component {
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>잔여차량</span><span className='value'>10</span>
+                <span className='title'>잔여차량</span><Botspan />
               </div>
             </div>
             <div className='total_info'>
               <ul>
-                <li><span className='title'>잔류 차량</span><span className='value'>10</span></li>
-                <li><span className='title'>전체 검수 차량</span><span className='value'>55</span></li>
-                <li><span className='title'>입고량(KG)</span><span className='value'>777,440</span></li>
+                <li><span className='title'>잔류 차량</span><Mainspan flag={1} /></li>
+                <li><span className='title'>전체 검수 차량</span><Mainspan flag={2} /></li>
+                <li><span className='title'>입고량(KG)</span><Mainspan flag={3} /></li>
               </ul>
             </div>
           </div>
           <div className='car_info'>
-            <div className='title'><span>배차번호</span>202106170007</div>
+            <div className='title'><span>배차번호</span><Detailspan flag={1} /></div>
             <div className='detail'>
               <ul>
-                <li><span className='t'>차량번호</span>부산92아7287</li>
-                <li><span className='t'>총중량(KG)</span>44,800</li>
-                <li><span className='t'>입차시간</span>2021-06-17 06:08:21</li>
+                <li><span className='t'>차량번호</span><Detailspan flag={2} /></li>
+                <li><span className='t'>총중량(KG)</span><Detailspan flag={3} /></li>
+                <li><span className='t'>입차시간</span><Detailspan flag={4} /></li>
               </ul>
             </div>
-            <div className='detail2'>
-              <ul>
-                <li>
-                  <h5>등급책정</h5>
-                  <select>
-                    <option>고철등급 검색</option>
-                  </select>
-                  <input type='text' />
-                </li>
-                <li>
-                  <h5>감량중량</h5>
-                  <select>
-                    <option>감량중량 검색(KG)</option>
-                  </select>
-                </li>
-                <li>
-                  <h5>감가내역</h5>
-                  <select>
-                    <option>감가내역 검색</option>
-                  </select>
-                </li>
-                <li>
-                  <h5>하차구역</h5>
-                  <select>
-                    <option>하차구역 검색(SECTOR)</option>
-                  </select>
-                </li>
-                <li>
-                  <h5>차종구분</h5>
-                  <select>
-                    <option>차종 선택</option>
-                  </select>
-                </li>
-                <li>
-                  <h5>반품구분</h5>
-                  <select>
-                    <option>일부,전량 선택</option>
-                  </select>
-                </li>
-              </ul>
+            <div className='tab_list'>
+              <button type='button' id='tab1' className='tab on' onClick={() => this.tabButton(0)}>검수입력</button>
+              <button type='button' id='tab2' className='tab' onClick={() => this.tabButton(1)}><span className='doc'>메모있음</span>계량증명서</button>
+            </div>
+            <div className='tab_content'>
+              <div className='input_list on' id='content1'>
+                <ul>
+                  <li>
+                    <h5>등급책정</h5>
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                                id      = 'detail_grade1'
+                                value   = 'itemCode'
+                                display = 'item'
+                                placeholder = '고철등급 검색'
+                                height  = {42}
+
+                                onFocus = {ComboCreate => {
+                                  YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
+                                    .then(res => {
+                                      ComboCreate({data   : res.data.dataSend,
+                                                  value  : 'itemCode',
+                                                  display: 'item'});
+                                    })
+                                }}
+                      />
+                    </div>
+                    <Combobox pgm     = {this.props.pgm}
+                              id      = 'detail_grade2'
+                              value   = 'itemCode'
+                              display = 'item'
+
+                              onFocus = {ComboCreate => {
+                                const value = gfo_getCombo(this.props.pgm, 'detail_grade1').getValue();
+                                if(value === null) return;
+
+                                YK_WEB_REQ(`tally_process_pop.jsp?division=${value}`, {})
+                                  .then(res => {
+                                    ComboCreate({data   : res.data.dataSend,
+                                                value  : 'itemCode',
+                                                display: 'item'});
+                                  })
+                              }}
+                    />
+                  </li>
+                  <li>
+                    <h5>감량중량</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_subt'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '감량중량 검색(KG)'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                  />
+                  </li>
+                  <li>
+                    <h5>감량사유</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_subt_leg'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '감량사유 검색'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                  />
+                  </li>
+                  <li>
+                    <h5>감가내역</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_depr'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '감가내역 검색'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                  />
+                  </li>
+                  <li>
+                    <h5>하차구역</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_out'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '하차구역 검색(SECTOR)'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',});
+                              })
+                          }}
+                  />
+                  </li>
+                  <li>
+                    <h5>차종구분</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_car'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '차종선택'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item'});
+                              })
+                          }}
+                  />
+                  </li>
+                  <li>
+                    <h5>반품구분</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_rtn'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '일부,전량 선택'
+
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item',
+                                            emptyRow: true});
+                              })
+                          }}
+                  />
+                  </li>
+                  <li>
+                    <h5>경고</h5>
+                    <Combobox pgm = {this.props.pgm}
+                          id      = 'detail_warning'
+                          value   = 'code'
+                          display = 'name'
+                          placeholder = '경고'
+                          data    = {[{
+                            'code': 'Y',
+                            'name': '경고'
+                          }]}
+                          emptyRow
+                  />
+                  </li>
+                </ul>
+              </div>
+              <div className='data_list' id='content2'>
+                <ul>
+                  <li>
+                    <span className='t'>일시</span>
+                    <span className='v'>2021-06-17 06:02:02</span>
+                  </li>
+                  <li>
+                    <span className='t'>계량번호</span>
+                    <span className='v'>202106170001</span>
+                  </li>
+                  <li>
+                    <span className='t'>차량번호</span>
+                    <span className='v'>경남 81사7885</span>
+                  </li>
+                  <li>
+                    <span className='t'>업체</span>
+                    <span className='v'>(주)거산</span>
+                  </li>
+                  <li>
+                    <span className='t'>제품</span>
+                    <span className='v'>원재료.철강.국내분철</span>
+                  </li>
+                  <li>
+                    <span className='t'>입차중량</span>
+                    <span className='v'>44,420</span>
+                  </li>
+                  <li>
+                    <span className='t'>지역</span>
+                    <span className='v'>부산</span>
+                  </li>
+                  <li>
+                    <span className='t'>검수자</span>
+                    <span className='v'>유명훈</span>
+                  </li>
+                </ul>
+                <div className='memo'>
+                  <h5>MEMO</h5>
+                  <textarea style={{resize: 'none'}}></textarea>
+                </div>
+              </div>
             </div>
             <div className='complete_btn'>
               <button type='button'><span>등록완료</span></button>
             </div>
           </div>
-          <div className='cctv_viewer'>
-            <h4>실시간 CCTV</h4>
-            <div className='cctv_list'>
-              <div className='cctv'>
-                <div className='viewer'>
-                  {/* 뷰어 공간 */}
-                </div>
-                <div className='controller'>
-                  <button type='' className='left'>왼쪽</button>
-                  <button type='' className='top'>위쪽</button>
-                  <button type='' className='down'>아래</button>
-                  <button type='' className='right'>오른쪽</button>
-                  <span className='sep'>
-                    <button type='' className='plus'>확대</button>
-                    <button type='' className='minus'>축소</button>
-                  </span>
-                </div>
-              </div>
-              <div className='cctv'>
-                <div className='viewer'>
-                  {/* 뷰어 공간 */}
-                </div>
-                <div className='controller'>
-                  <button type='' className='left'>왼쪽</button>
-                  <button type='' className='top'>위쪽</button>
-                  <button type='' className='down'>아래</button>
-                  <button type='' className='right'>오른쪽</button>
-                  <span className='sep'>
-                    <button type='' className='plus'>확대</button>
-                    <button type='' className='minus'>축소</button>
-                  </span>
-                </div>
+            <div className='cctv_viewer'>
+              <h4>실시간 CCTV</h4>
+              <div className='cctv_list'>
+          {/* <div style={{width:'100%', height:'calc(100% - 360px)'}}> */}
+            <RecImage cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='yk_06.jpg'/>
+            <RecImage cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' rec='DUM_CAM_REC' image='yk_06.jpg'/>
+          {/* </div> */}
               </div>
             </div>
-          </div>
-        </div>
-        <div className='search_line'>
-          <div className='line first'>
-            <label>기준년도</label><input type='text' /><input type='text' />
-            <label>거래처</label><input type='text' />
-            <label>아이템</label><input type='text' />
-          </div>
-          <div className='line'>
-            <label>기준년도</label><input type='text' /><input type='text' />
-            <label>거래처</label><input type='text' />
-            <label>아이템</label><input type='text' />
-          </div>
-        </div>
-        <div className='detail_box'>
-          <h5><span className='bu'></span><span className='text'>상세정보</span></h5>
-          <table className='data_table'>
-            <tbody>
-              <tr>
-                <th>상세입력란</th>
-                <td><input type='text' /></td>
-              </tr>
-              <tr>
-                <th>상세입력란</th>
-                <td><textarea></textarea></td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     );

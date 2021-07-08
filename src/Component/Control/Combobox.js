@@ -157,7 +157,7 @@ class Combobox extends Component{
       marginTop: 1,
       // width: this.width,
       width: '100%',
-      // zIndex: 100
+      zIndex: 1000
       // width: 400
     }),
 
