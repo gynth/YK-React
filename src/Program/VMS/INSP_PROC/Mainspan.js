@@ -28,9 +28,4 @@ function Mainspan(props) {
   );
 }
 
-Mainspan.defaultProps = {
-  fontSize: '30',
-  margin: '0 0 8px 15px'
-}
-
 export default Mainspan;

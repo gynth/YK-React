@@ -1,5 +1,7 @@
 import numeral from 'numeral';
 import { gfs_dispatch } from '../Method/Store';
+import html2canvas from 'html2canvas';
+import axios from 'axios';
 
 export const gfc_getMultiLang = (code, text) => {
   // alert(code + '[' + text + ']');
@@ -158,4 +160,75 @@ export const gfc_hasClass = (element, className) => {
 	}else{
 		return false;
 	}
+}
+
+export const gfc_screenshot = (element, filename) => {
+  html2canvas(element).then(canvas => {
+    const img = canvas.toDataURL('image/png');
+
+    var link = document.createElement('a');
+    if (typeof link.download === 'string') {
+      link.href = img;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      window.open(img);
+    }
+  });
+}
+
+export const gfc_screenshot_srv = (element, filename, root) => {
+  return html2canvas(element).then(canvas => {
+    let img = canvas.toDataURL('image/png');
+
+    const host = 'http://localhost:3001/ScreenShot';
+    const option = {
+      url   : host,
+      method: 'POST',
+      // headers: {
+      //   'Access-Control-Allow-Origin': '*'
+      // },
+      data: {
+        img,
+        filename,
+        root
+      } 
+    };
+
+    return axios(option)
+      .then(res => {
+        // console.log(res);
+        return res;
+      })
+      .catch(err => {
+        console.log(err)
+        return err;
+      })
+  });
+}
+
+export const gfc_test = (element, filename, root) => {    
+  const host = 'http://localhost:3001/ScreenShot/TEST';
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
 }

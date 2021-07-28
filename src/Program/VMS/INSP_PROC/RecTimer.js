@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { gfc_lpad } from '../../../Method/Comm';
+import { gfc_getMultiLang, gfc_lpad, gfc_screenshot, gfc_screenshot_srv } from '../../../Method/Comm';
 import { gfs_dispatch } from '../../../Method/Store';
 import GifPlayer from 'react-gif-player';
 
@@ -50,10 +50,23 @@ function RecTimer(props) {
             <GifPlayer height='30' width='30' gif={require('../../../Image/yk_rec02.gif').default} autoplay/>
           </div>
           <div style={{float:'left', width:'70', height:'30', marginTop:'5'}}>
-            <h2>{time.time}</h2>
+            <h2 style={{color:'white'}}>{time.time}</h2>
           </div>
         </>
       }
+      {/* <button onClick={() => {
+                const img = document.getElementById(props.rec);
+                gfc_screenshot(img, 'capture.jpg');
+                
+              }}>client</button>
+      <button onClick={async () => {
+                const img = document.getElementById(props.rec);
+                // const result = await gfc_screenshot_srv(img, 'capture-test.png', 'C:\\Image');
+                const result = await gfc_screenshot_srv(img);
+
+                if(result.data !== null) gfc_getMultiLang('영상캡처에 실패했습니다.');
+                
+              }}>server</button> */}
     </React.Fragment>
   );
 }

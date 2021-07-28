@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 export function YK_WEB_REQ(addr){
-  // const host = 'http://tally.yksteel.co.kr/tally_mstr_wait.jsp';
   const host = 'http://localhost:3001/YK';
+  // const host = 'http://211.231.136.150:3001/YK';
   const option = {
     url   : host,
     method: 'POST',
@@ -24,17 +24,74 @@ export function YK_WEB_REQ(addr){
     })
 };
 
-export function YK_MILESTONE(addr){
-  // const host = 'http://tally.yksteel.co.kr/tally_mstr_wait.jsp';
-  const host = 'http://localhost:3001/MILESTONE';
+export function MILESTONE_LIVE(data) {
+  // const host = `http://localhost:3001/MILESTONE/LIVE?device=${data['device']}`;
+  const host = `http://211.231.136.150:3002/MILESTONE/LIVE?device=${data['device']}`;
+  // const host = `http://211.231.136.150:3001/MILESTONE/LIVE`;
   const option = {
     url   : host,
     method: 'GET',
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    },
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
     data: {
-      addr
+      // device: data['device']
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
+export function MILESTONE(data){
+  // const host = `http://localhost:3001/MILESTONE/${data['reqAddr']}`;
+  const host = `http://211.231.136.150:3002/MILESTONE/${data['reqAddr']}`;
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+      reqAddr    : data['reqAddr'],
+      MilestoneIP: data['MilestoneIP'],
+      token      : data['token'],
+      device     : data['device'],
+      ip         : data['ip'],
+      maxWidth   : data['maxWidth'], 
+      maxHeight  : data['maxHeight'],
+      ptz        : data['ptz'],
+      rec_yn     : data['rec_yn']
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+};
+
+export function TOKEN(data){
+  // const host = `http://localhost:3001/Token`;
+  const host = `http://211.231.136.150:3002/Token`;
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+
     } 
   };
 

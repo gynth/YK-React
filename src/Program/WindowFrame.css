@@ -73,16 +73,20 @@
 /* .car_info .input_list ul li input {width:100%; height:42px; box-sizing:border-box; border-radius:5px; margin-top:5px} */
 
 .car_info .data_list {padding:0 17px; height: 100%; overflow: auto;}
+.car_info .data_list .doc {border:1px solid #000; margin-top:15px}
+.car_info .data_list .doc>h5 { font-size:16px; font-weight:bold; text-align:center; height:43px; line-height:43px; border-bottom:1px solid #000}
 .car_info .data_list ul {}
-.car_info .data_list ul li {height:50px; line-height:50px; font-size:16px; border-bottom:1px dashed #ACACAC}
-.car_info .data_list ul li .t {display:inline-block; width:84px; font-weight:bold; background:url('../Image/li_bu2.png') no-repeat 0 50%; padding-left:17px;} 
-.car_info .data_list ul li .v {color:#0063A9; font-weight:bold;} 
+.car_info .data_list ul li {height:43px; line-height:43px; font-size:16px; border-bottom:1px solid #ACACAC}
+.car_info .data_list ul li:last-child {border-bottom:none;}
+.car_info .data_list ul li .t {display:block; float:left; width:84px; font-weight:bold; text-align:center; border-right:1px solid #000; box-sizing:border-box;} 
+.car_info .data_list ul li .v {display:block; float:left; width:calc(100% - 84px); text-align:center; font-weight:bold;} 
 .car_info .data_list .memo {}
 .car_info .data_list .memo h5 {font-size:16px; font-weight:bold; padding:10px 0}
 .car_info .data_list .memo textarea {padding:5px; width: calc(100% - 15px); border:1px solid #C8C8C8; border-radius:5px; height:170px;}
 
 .car_info .complete_btn {position:absolute; bottom:0; left:0; height:90px; width:100%; padding:0 17px; box-sizing:border-box; }
-.car_info .complete_btn button { cursor:pointer; width:100%; height:62px; border-radius:5px; border:none; margin-top:10px; background:#0C1D33; color:#ffffff; font-size:22px;}
+.car_info .complete_btn button {display:none; cursor:pointer; width:100%; height:62px; border-radius:5px; border:none; margin-top:10px; background:#0C1D33; color:#ffffff; font-size:22px;}
+.car_info .complete_btn button.on {display:block}
 .car_info .complete_btn button span {padding-left:30px; background:url('../Image/carcomplete_bu@2x.png') no-repeat 0 5px; background-size:24px;}
 .car_info .complete_btn button:hover {background-color:#0063A9}
 
@@ -111,6 +115,19 @@
 .cctv .controller.on button.right {background:rgba(0,0,0,0.2) url('../Image/car_controll_right@2x.png') no-repeat 55% 50%; background-size:auto;}
 .cctv .controller.on button.plus {background:rgba(0,0,0,0.2) url('../Image/car_controll_plus@2x.png') no-repeat 50% 50%; background-size:auto;}
 .cctv .controller.on button.minus {margin:0;background:rgba(0,0,0,0.2) url('../Image/car_controll_minus@2x.png') no-repeat 50% 50%; background-size:auto;}
+
+
+.picture_save {position: absolute; left: 10px; bottom: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:20px; background:rgba(0,0,0,0.3) url('../Image/camera_bu.png') no-repeat 21px 10px;}
+.picture_save a {font-size:14px; color:#ffffff; text-decoration: none;}
+.picture_save .server {padding-left:3px; }
+.picture_save .mycomputer {padding-left:10px}
+
+
+.picture_save.on {position: absolute; left: 20px; bottom: 20px; height: 82px; border-radius:41px; line-height:82px; padding-left:67px; padding-right:30px; background:rgba(0,0,0,0.3) url('../Image/camera_bu.png') no-repeat 31px 29px;}
+.picture_save.on a {font-size:18px; color:#ffffff;}
+.picture_save.on .server {padding-left:3px; }
+.picture_save.on .mycomputer {padding-left:10px}
+
 
 
 

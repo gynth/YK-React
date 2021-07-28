@@ -6,13 +6,52 @@ import TabList from './Component/Menu/tabMenu/TabList';
 import WindowFrame from './Program/WindowFrame';
 
 import './Home.css';
-import {getSessionCookie} from "./Cookies";
-import { gfs_injectAsyncReducer } from './Method/Store';
+import { getSessionCookie } from "./Cookies";
+import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch } from './Method/Store';
 
 import GifPlayer from 'react-gif-player';
 import LoadingOverlay from 'react-loading-overlay';
+import {YK_TOKEN} from './WebReq/WebReq';
 
 let isSession = false;
+
+const defaultData = async() => {
+  const userReducer = (nowState, action) => {
+    if(action.reducer !== 'USER_REDUCER') {
+      return {
+        COP_CD    : nowState === undefined ? ''           : nowState.COP_CD,
+        USER_ID   : nowState === undefined ? 'KKH'        : nowState.USER_ID,
+        USER_NAM  : nowState === undefined ? '김경현'      : nowState.USER_NAM,
+        LANGUAGE  : nowState === undefined ? 'KOR'        : nowState.LANGUAGE,
+        YMD_FORMAT: nowState === undefined ? 'yyyy-MM-DD' : nowState.YMD_FORMAT,
+        // YMD_FORMAT: nowState === undefined ? 'MM-DD-yyyy' : nowState.YMD_FORMAT,
+        YM_FORMAT : nowState === undefined ? 'yyyy-MM'    : nowState.YM_FORMAT,
+        NUM_FORMAT: nowState === undefined ? '0,0'        : nowState.NUM_FORMAT,
+        NUM_ROUND : nowState === undefined ? '2R'         : nowState.NUM_ROUND
+      };
+    }
+
+    if(action.type === 'USERID_FOCUS'){
+      return Object.assign({}, nowState, {
+        userIdFocus  : action.userIdFocus
+      });
+    }else if(action.type === 'PWD_FOCUS'){
+      return Object.assign({}, nowState, {
+        pwdFocus  : action.pwdFocus
+      });
+    }else if(action.type === 'USERID_CHANGE'){
+      return Object.assign({}, nowState, {
+        userIdText   : action.userIdText
+      });
+    }else if(action.type === 'PWD_CHANGE'){
+      return Object.assign({}, nowState, {
+        pwdText   : action.pwdText
+      });
+    }
+  };
+
+  gfs_injectAsyncReducer('USER_REDUCER', userReducer);
+}
 
 const Home = (props) => {  
   useEffect(e => {
@@ -32,6 +71,9 @@ const Home = (props) => {
     }
 
     gfs_injectAsyncReducer('MASK_REDUCER', MASK_REDUCER);
+
+    defaultData();
+    // refreshToken();
   }, [])
 
   const session = getSessionCookie("session");
@@ -75,7 +117,7 @@ const Home = (props) => {
     
     <LoadingOverlay
       active={MASK}
-      spinner={<GifPlayer height='100' width='100' gif={require('../src/Image/waitImage.gif').default} autoplay/>}
+      spinner={<GifPlayer height='100' width='100' gif={require('../src/Image/waitImage.gif').default} autoplay={MASK ? true : false}/>}
       styles={{
         overlay: (base) => ({
           ...base,

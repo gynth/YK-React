@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_addClass, gfc_removeClass, gfc_hasClass } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_addClass, gfc_removeClass, gfc_hasClass, gfc_test } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getInput, gfo_getCombo } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -24,8 +24,28 @@ import GifPlayer from 'react-gif-player';
 import { Timer } from 'timer-node';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
+import { TOKEN } from '../../../WebReq/WebReq';
+import { throttle } from 'lodash';
 
 class INSP_PROC extends Component {
+
+  milestoneInfo = async() => {
+
+    // 선택된 공정의 카메라를 찾아서 스트리밍 받는다
+    // 지금은 하드코딩 되어있지만 나중엔 로컬스토리지와 콤보박스를 써서 선택된 공정의 아이피를 가지고 카메라를 가져온다.
+    // 1. 선택된 공정의 카메라 정보를 가지고온다.
+    // const milestone = TOKEN({reqAddr: 'LOGIN', MilestoneIP: gfs_getStoreValue('CAMERA_REDUCER', 'MilestoneIP')});
+    const milestone = await TOKEN({});
+    this.token  = milestone.data.TOKEN;
+    this.device = milestone.data.DEVICE;
+    if(this.token === ''){
+      alert('마일스톤 서버에 접속할 수 없습니다.'); 
+    }else if(this.device === ''){
+      alert('마일스톤 서버에 접속할 수 없습니다.');
+    }else{ 
+      
+    }
+  }
 
   onActiveWindow = () => {
     const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
@@ -46,8 +66,17 @@ class INSP_PROC extends Component {
     wait_list: []
   }
 
+  debounceSomethingFunc = throttle((e, device) => {
+    console.log(e, device);
+  }, 1000);
+
   onKeyDown = (e) => {
-    console.log(e);
+    const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
+    const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
+    
+    if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
+      this.debounceSomethingFunc(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
+    }
   }
 
   onMouseWheel = (e) => {
@@ -57,7 +86,9 @@ class INSP_PROC extends Component {
   constructor(props){
     super(props)
     gfc_initPgm(props.pgm, props.nam, this)
+    this.milestoneInfo();
 
+    //#region 리듀서
     const INSP_PROC_MAIN = (nowState, action) => {
 
       if(action.reducer !== 'INSP_PROC_MAIN') {
@@ -71,6 +102,9 @@ class INSP_PROC extends Component {
           DETAIL_CARNO : nowState === undefined ? '' : nowState.DETAIL_CARNO,
           DETAIL_WEIGHT: nowState === undefined ? '' : nowState.DETAIL_WEIGHT,
           DETAIL_DATE  : nowState === undefined ? '' : nowState.DETAIL_DATE,
+
+          STD_CAM_IMG  : nowState === undefined ? null : nowState.STD_CAM_IMG,
+          DUM_CAM_IMG  : nowState === undefined ? null : nowState.DUM_CAM_IMG,
 
           STD_CAM_OPEN : nowState === undefined ? false : nowState.STD_CAM_OPEN,
           DUM_CAM_OPEN : nowState === undefined ? false : nowState.DUM_CAM_OPEN,
@@ -135,6 +169,16 @@ class INSP_PROC extends Component {
         return Object.assign({}, nowState, {
           DETAIL_DATE : action.DETAIL_DATE
         })
+      }else if(action.type === 'STD_CAM_IMG'){
+
+        return Object.assign({}, nowState, {
+          STD_CAM_IMG : action.STD_CAM_IMG
+        })
+      }else if(action.type === 'DUM_CAM_IMG'){
+
+        return Object.assign({}, nowState, {
+          DUM_CAM_IMG : action.DUM_CAM_IMG
+        })
       }else if(action.type === 'STD_CAM_OPEN'){
 
         return Object.assign({}, nowState, {
@@ -193,18 +237,9 @@ class INSP_PROC extends Component {
     }
 
     gfs_injectAsyncReducer('INSP_PROC_MAIN', INSP_PROC_MAIN);
-
-    
     gfs_subscribe(this.onActiveWindow);
-  }
+    //#endregion
 
-  componentDidUpdate(){
-    console.log('componentDidUpdate');
-  }
-
-  componentWillUnmount() {
-    window.onkeydown = undefined;
-    window.onmousewheel = undefined;
   }
 
   Retrieve = async () => {
@@ -214,12 +249,26 @@ class INSP_PROC extends Component {
 
     gfc_showMask();
 
-    let req = await YK_WEB_REQ('tally_process_pop.jsp?division=P005');
-    // console.log(req);
+    const headData = await YK_WEB_REQ('tally_mstr_header.jsp');
+    const header = headData.data.dataSend;
+    if(header){
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
+    }else{
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
+    }
 
-    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 1});
-    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 2});
-    gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 3331333});
+    const mainData = await YK_WEB_REQ('tally_mstr_wait.jsp');
+    const main = mainData.data.dataSend;
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+    if(main){
+
+    }else{
+
+    }
 
     const data = {'dataSend':[
                   {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
@@ -244,14 +293,12 @@ class INSP_PROC extends Component {
       }
     })
 
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.resetData(
       sort
     );
+
     gfg_setSelectRow(grid);
-
     gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
-
     gfc_hideMask();
   }
 
@@ -268,22 +315,24 @@ class INSP_PROC extends Component {
   tabButton(tabIndex){
     let tabList = ['tab1','tab2']
     let contentList = ['content1','content2']
+    let btnList = ['btn1','btn2']
     let tabMaxIndex = 2;
     for(let i = 0; i < tabMaxIndex; i++){
       if(i === tabIndex){
         if(gfc_hasClass(document.getElementById(tabList[i]),'on') === false){
           gfc_addClass(document.getElementById(tabList[i]),'on');
           gfc_addClass(document.getElementById(contentList[i]),'on');
+          gfc_addClass(document.getElementById(btnList[i]),'on');
         }
       }else{
         gfc_removeClass(document.getElementById(tabList[i]),'on');
         gfc_removeClass(document.getElementById(contentList[i]),'on');
+        gfc_removeClass(document.getElementById(btnList[i]),'on');
       }
     }
   }
 
   render() {
-    const aa = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'SELECTWINDOW');
 
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
@@ -420,6 +469,16 @@ class INSP_PROC extends Component {
                 <li><span className='t'>차량번호</span><Detailspan flag={2} /></li>
                 <li><span className='t'>총중량(KG)</span><Detailspan flag={3} /></li>
                 <li><span className='t'>입차시간</span><Detailspan flag={4} /></li>
+                <li><button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'STD_CAM_REC', {rec: true, car: '1234'})}>on1</button>
+                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'STD_CAM_REC', {rec: false, car: '1234'})}>off1</button>
+                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
+                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
+                    <button onClick={async () => {
+                      
+                      console.log(await gfc_test());
+
+                    }}>loop</button>
+                </li>
               </ul>
             </div>
             <div className='tab_list'>
@@ -595,57 +654,61 @@ class INSP_PROC extends Component {
                   </li>
                 </ul>
               </div>
-              <div className='data_list' id='content2'>
-                <ul>
-                  <li>
-                    <span className='t'>일시</span>
-                    <span className='v'>2021-06-17 06:02:02</span>
-                  </li>
-                  <li>
-                    <span className='t'>계량번호</span>
-                    <span className='v'>202106170001</span>
-                  </li>
-                  <li>
-                    <span className='t'>차량번호</span>
-                    <span className='v'>경남 81사7885</span>
-                  </li>
-                  <li>
-                    <span className='t'>업체</span>
-                    <span className='v'>(주)거산</span>
-                  </li>
-                  <li>
-                    <span className='t'>제품</span>
-                    <span className='v'>원재료.철강.국내분철</span>
-                  </li>
-                  <li>
-                    <span className='t'>입차중량</span>
-                    <span className='v'>44,420</span>
-                  </li>
-                  <li>
-                    <span className='t'>지역</span>
-                    <span className='v'>부산</span>
-                  </li>
-                  <li>
-                    <span className='t'>검수자</span>
-                    <span className='v'>유명훈</span>
-                  </li>
-                </ul>
-                <div className='memo'>
+              <div className="data_list" id="content2">
+                <div className="doc">
+                  <h5>계 량 증 명 서</h5>
+                  <ul>
+                    <li>
+                      <span className="t">일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;시</span>
+                      <span className="v">2021-06-17 06:02:02</span>
+                    </li>
+                    <li>
+                      <span className="t">계량번호</span>
+                      <span className="v">202106170001</span>
+                    </li>
+                    <li>
+                      <span className="t">차량번호</span>
+                      <span className="v">경남 81사7885</span>
+                    </li>
+                    <li>
+                      <span className="t">업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;체</span>
+                      <span className="v">(주)거산</span>
+                    </li>
+                    <li>
+                      <span className="t">제&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;품</span>
+                      <span className="v">원재료.철강.국내분철</span>
+                    </li>
+                    <li>
+                      <span className="t">입차중량</span>
+                      <span className="v">44,420</span>
+                    </li>
+                    <li>
+                      <span className="t">지&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;역</span>
+                      <span className="v">부산</span>
+                    </li>
+                    <li>
+                      <span className="t">검&nbsp;&nbsp;수&nbsp;&nbsp;자</span>
+                      <span className="v">유명훈</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="memo">
                   <h5>MEMO</h5>
-                  <textarea style={{resize: 'none'}}></textarea>
+                  <textarea></textarea>
                 </div>
               </div>
             </div>
             <div className='complete_btn'>
-              <button type='button'><span>등록완료</span></button>
+              <button type='button' id="btn1" className='on'><span>등록완료</span></button>
+              <button type='button' id="btn2"><span>계량증명서저장</span></button>
             </div>
           </div>
             <div className='cctv_viewer'>
               <h4>실시간 CCTV</h4>
               <div className='cctv_list'>
           {/* <div style={{width:'100%', height:'calc(100% - 360px)'}}> */}
-            <RecImage cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='yk_06.jpg'/>
-            <RecImage cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' rec='DUM_CAM_REC' image='yk_06.jpg'/>
+              <RecImage ip='10.10.136.112' cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='STD_CAM_IMG'/>
+              <RecImage ip='10.10.136.128' cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' rec='DUM_CAM_REC' image='DUM_CAM_IMG'/>
           {/* </div> */}
               </div>
             </div>

@@ -1,9 +1,11 @@
+
 import React, { Component } from 'react';
 import { gfc_initPgm, gfc_getAtt, gfc_getMultiLang } from '../../../Method/Comm';
-import { YK_MILESTONE } from '../../../WebReq/WebReq';
+import axios from 'axios';
+import { YK_TOKEN } from '../../../WebReq/WebReq';
+
 
 class INSP_HIST extends Component {
-  key = 'f689d57a2ae72d2cdd97dff4dd0fbe09';
   
   constructor(props){
     super(props)
@@ -11,10 +13,51 @@ class INSP_HIST extends Component {
   }
 
   Retrieve = () => {
-    const aa = YK_MILESTONE('tally_process_pop.jsp?division=P005', {});
-    aa.then(e => {
-      console.log(e);
-    })
+    const host = 'http://localhost:3001/Token';
+    const option = {
+      url   : host,
+      method: 'POST',
+      // headers: {
+      //   'Access-Control-Allow-Origin': '*'
+      // },
+      data: {
+  
+      } 
+    };
+
+    axios(option)
+      .then(res => {
+        console.log(res);
+        return res;
+      })
+      .catch(err => {
+        console.log(err)
+        return err;
+      })
+  }
+
+  Delete = () => {
+    const host = 'http://localhost:3001/TestSet';
+    const option = {
+      url   : host,
+      method: 'POST',
+      // headers: {
+      //   'Access-Control-Allow-Origin': '*'
+      // },
+      data: {
+  
+      } 
+    };
+
+    axios(option)
+      .then(res => {
+        console.log(res);
+        return res;
+      })
+      .catch(err => {
+        console.log(err)
+        return err;
+      })
   }
 
   render() {
