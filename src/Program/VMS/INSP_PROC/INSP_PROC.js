@@ -24,7 +24,7 @@ import GifPlayer from 'react-gif-player';
 import { Timer } from 'timer-node';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
-import { TOKEN } from '../../../WebReq/WebReq';
+import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import { throttle } from 'lodash';
 
 class INSP_PROC extends Component {
@@ -42,8 +42,6 @@ class INSP_PROC extends Component {
       alert('마일스톤 서버에 접속할 수 없습니다.'); 
     }else if(this.device === ''){
       alert('마일스톤 서버에 접속할 수 없습니다.');
-    }else{ 
-      
     }
   }
 
@@ -66,21 +64,57 @@ class INSP_PROC extends Component {
     wait_list: []
   }
 
-  debounceSomethingFunc = throttle((e, device) => {
-    console.log(e, device);
+  debounceKeyDown = throttle((e, device) => {
+    let ptz = '';
+    if(e.keyCode === 37) ptz = 'left';
+    else if(e.keyCode === 38) ptz = 'up';
+    else if(e.keyCode === 39) ptz = 'right';
+    else if(e.keyCode === 40) ptz = 'down';
+
+    if(ptz !== ''){
+      MILESTONE({reqAddr: 'PTZ',
+      device: device.Guid,
+      ptz})
+    }
+  }, 1000);
+
+  debounceMouseWheel = throttle((e, device) => {
+    let ptz = '';
+    if(e.deltaX === -0){
+      if (e.wheelDelta > 0){
+        ptz = 'zoomin';
+      }else{
+        ptz = 'zoomout';
+      }
+    }
+
+    if(ptz !== ''){
+      MILESTONE({reqAddr: 'PTZ',
+      device: device.Guid,
+      ptz})
+    }
   }, 1000);
 
   onKeyDown = (e) => {
+    e.stopPropagation();
+
     const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
     const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
     
     if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
-      this.debounceSomethingFunc(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
+      this.debounceKeyDown(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
     }
   }
 
   onMouseWheel = (e) => {
-    console.log(e);
+    e.stopPropagation();
+
+    const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
+    const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
+    
+    if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
+      this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
+    }
   }
 
   constructor(props){

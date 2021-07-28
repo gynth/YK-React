@@ -30,9 +30,6 @@ router.post('/JPEGGetLive', (req, res) => {
 })
 //#endregion
 
-
-
-
 router.post('/CONNECT', (req, res) => {
   const device = req.body.device;
 
@@ -43,12 +40,12 @@ router.post('/CONNECT', (req, res) => {
       methodName: 'Connect'
     });
 
-    Connect([global.MILESTONE_TOKEN, device, 'Start', 'PTZ', 'REC_YN'], (error, result) => { 
+    Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
       if(result[1] === 'Y') {
         global.MILESTONE_DATA[device] = {
           method : Connect,
           nodeLoop: setInterval(() => {
-                      global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', 'PTZ', 'REC_YN'], (error, result) => { 
+                      global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
                         if(result[1] === 'Y') {
                           global.MILESTONE_DATA[device].liveImg = result[2];
                         }
@@ -57,46 +54,25 @@ router.post('/CONNECT', (req, res) => {
         }
       }
     })    
-
-    // global.MILESTONE_DATA[device] = {
-    //   liveImg: '1',
-    //   rec    : null
-    // }
-
-    // global.MILESTONE_DATA[device].rec = setInterval((e) => {
-    //   getLive([global.MILESTONE_TOKEN, device, Object.keys(global.MILESTONE_DATA).length], (error, result) => { 
-    //     if(result[0] === 'Y') {
-    //      global.MILESTONE_DATA[device].liveImg = result;
-    //     }
-    //   })   
-    // }, 1)
   }
- 
-  // if(index < 0){ 
-  //   let getLive = edge.func({
-  //     assemblyFile:'./server/Milestone/Milestone.dll',
-  //     methodName: 'Connect'
-  //   });
-  //   liveImg.push({device, ip, liveImg: ''}); 
-  //   // console.log(liveImg.find(e => e.device === device))
-  //   setInterval((e) => {
-  //     // console.log(device);
-  //     getLive([global.MILESTONE_TOKEN, device, liveImg.length], (error, result) => { 
-  //       if(result[0] === 'Y') {
-  //         liveImg.find(e => e.device === device)['liveImg'] = result;
-  //       }
-  //     })  
-  //   }, 1);    
-  // }
   
   res.json({result:'OK'}) 
-})  
- 
-// let getLive = edge.func({
-//   assemblyFile:'./server/Milestone/Milestone.dll',
-//   methodName: 'Live' 
-// });  
+});  
+
+router.post('/PTZ', (req, res) => {
+  const device = req.body.device;
+  const ptz = req.body.ptz; 
+
+  // 1-1. 설정된 데이터가 없을때만 진행한다.
+  if(global.MILESTONE_DATA[device] !== undefined){
+    global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'PTZ', ptz, ''], (error, result) => { 
+      if(error === undefined) res.json('OK');
+      else res.json(error)
+    })   
+  }
+});
   
+//#region 마일스톤 라이브 이미지 가져오기
 router.get('/LIVE', (req, res) => {
   const device = req.query.device;
 
@@ -119,45 +95,9 @@ router.post('/LIVE', (req, res) => {
   else 
     res.json('')   
 })  
+//#endregion
 
-// router.get('/TEST', async function(req, res) {
-//   const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-//   const ffmpeg = require('fluent-ffmpeg');
-//   ffmpeg.setFfmpegPath(ffmpegPath);
-//   var flag_args = ['omit_endlist', 'append_list'];
-//   new ffmpeg('D:/Project/01. YK/react/server/Milestone/test.avi').addOptions([
-//       '-vcodec libx264',
-//       '-crf 23',
-//       '-r 10',
-//       '-fflags nobuffer',
-//       '-c:v copy',
-//       '-c:a copy',
-//       '-b:v 60k',
-//       '-maxrate 60k',
-//       '-minrate 60k',
-//       '-bufsize 60k',
-//       '-pix_fmt yuv420p',
-//       '-flags low_delay',
-//       '-flags',
-//       '-global_header',
-//       '-probesize 5000',
-//       '-hls_flags ' + flag_args.join('+'),
-//       '-hls_playlist_type event',
-//       '-hls_time 3', //분단된 ts파일들의 길이 지정(초 단위)
-//       '-hls_list_size 6', //m3u8파일에 기록될 최대 ts파일 수
-//       '-hls_wrap 10', //저장될 파일 갯수의 최대 갯수 해당 갯수를 넘으면 덮어 씌웁니다
-//   ]).on('start', function(commandLine) {
-//       console.log('Spawned FFmpeg with command: ' + commandLine);
-//   }).on('codecData', function(data) {
-//     console.log('11');
-//       res.send({id:'test', url : 'D:/Project/01. YK/react/server/Milestone/test22.m3u8',});//url에 대해선 다음 코드에 설명하겠습니다
-//   }).on('error', function(err) {
-//       // deleteFolderRecursive('./videos/'+id)
-//       console.log(err);
-//   }).saveToFile('D:/Project/01. YK/react/server/Milestone/test22.m3u8'); //저장
-// })
-
-
+//#region 마일스톤 로그인
 router.post('/LOGIN', (req, res) => {
   
   try{
@@ -198,5 +138,6 @@ router.post('/LOGIN', (req, res) => {
     res.json({token:'', deviceId: '', err})
   }
 });
+//#endregion
 
 module.exports = router; 

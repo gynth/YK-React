@@ -1,12 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { TOKEN, MILESTONE_LIVE } from '../../../WebReq/WebReq';
+import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
 import { gfs_dispatch } from '../../../Method/Store';
 import RecTimer from './RecTimer';
+import { throttle } from 'lodash';
 
 function RecImageDtl(props) {
   const imageRef = useRef();
+  let token = '';
   let device = '';
 
   const isOpen = useSelector((e) => {
@@ -23,14 +25,26 @@ function RecImageDtl(props) {
   }
 
   const start = async(ip) => {
+
     const milestone = await TOKEN({});
+    token  = milestone.data.TOKEN;
     device = milestone.data.DEVICE.find(e => e.Name.indexOf(ip) >= 0);
+    
     if(device === undefined){
       console.log('IP가 잘못되었거나 마일스톤 설정이 잘못되었습니다. ' + ip);
   
       return;
     }else{
       device = device['Guid'];
+    }
+
+    if(token !== ''){
+      MILESTONE({reqAddr: 'CONNECT',
+                 token,
+                 device,
+                 ip})
+
+      console.log(token, device);
     }
   }
 
@@ -94,6 +108,33 @@ function RecImageDtl(props) {
     }, 50);
   }
 
+  const debounceOnClick = throttle((e, ptz) => {
+    TOKEN({}).then(e => {
+      const device = e.data.DEVICE.find(e => e.Name.indexOf(props.ip) >= 0);
+
+      MILESTONE({reqAddr: 'PTZ',
+      device: device.Guid,
+      ptz})
+    })
+
+  }, 1000);
+
+  const onClick = (e, ptz) => {
+    e.stopPropagation();
+    debounceOnClick(e, ptz);
+  }
+
+  // const onMouseWheel = (e) => {
+  //   e.stopPropagation();
+
+  //   const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
+  //   const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
+    
+  //   if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
+  //     this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
+  //   }
+  // }
+
   const img = <>
                 <div style={{position:'absolute'}}>
                   <RecTimer rec={props.rec} car={props.car} />
@@ -101,9 +142,9 @@ function RecImageDtl(props) {
                 <img style={{height:'100%', width:'100%'}} alt='yk_image' 
                     ref={imageRef}
                     onDoubleClick={e => {
-                      let obj = {};
-                      obj[props.focus] = false; 
-                      gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
+                      // let obj = {};
+                      // obj[props.focus] = false; 
+                      // gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
 
                       setModalIsOpen(true);
                     }}>
@@ -112,13 +153,25 @@ function RecImageDtl(props) {
                   {/* <a href='#!' className='server'></a> */}
                 </div>
                 <div className={isOpen === true ? 'controller on' : 'controller'}>
-                  <button type='' className='left'>왼쪽</button>
-                  <button type='' className='top'>위쪽</button>
-                  <button type='' className='down'>아래</button>
-                  <button type='' className='right'>오른쪽</button>
+                  <button type='' className='left' onClick={e => {
+                    e.stopPropagation();
+                    onClick(e, 'left')}}>왼쪽</button>
+                  <button type='' className='top' onClick={e => {
+                    e.stopPropagation();
+                    onClick(e, 'up')}}>위쪽</button>
+                  <button type='' className='down' onClick={e => {
+                    e.stopPropagation();
+                    onClick(e, 'down')}}>아래</button>
+                  <button type='' className='right' onClick={e => {
+                    e.stopPropagation();
+                    onClick(e, 'right')}}>오른쪽</button>
                   <span className='sep'>
-                    <button type='' className='plus'>확대</button>
-                    <button type='' className='minus'>축소</button>
+                    <button type='' className='plus' onClick={e => {
+                    e.stopPropagation();
+                    onClick(e, 'zoomin')}}>확대</button>
+                    <button type='' className='minus' onClick={e => {
+                    e.stopPropagation();
+                    onClick(e, 'zoomout')}}>축소</button>
                   </span>
                 </div>
               </>;

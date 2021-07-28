@@ -1,13 +1,9 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { gfs_dispatch } from '../../../Method/Store';
-import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import ReactImageDtl from './RecImageDtl';
 
 function RecImage(props) {  
-  let token  = '';
-  let device = '';
-  const ip     = props.ip;
 
   const isOpen = useSelector((e) => {
     return e.INSP_PROC_MAIN[props.cam];
@@ -21,32 +17,9 @@ function RecImage(props) {
     return p === n;
   });
 
-  const startLive = async() => {
-
-    const milestone = await TOKEN({});
-    token  = milestone.data.TOKEN;
-    device = milestone.data.DEVICE.find(e => e.Name.indexOf(ip) >= 0);
-    
-    if(device === undefined){
-      console.log('IP가 잘못되었거나 마일스톤 설정이 잘못되었습니다. ' + ip);
-  
-      return;
-    }else{
-      device = device['Guid'];
-    }
-
-    if(token !== ''){
-      MILESTONE({reqAddr: 'CONNECT',
-                    token,
-                    device,
-                    ip})
-
-      console.log(token, device);
-    }
-  }
 
   useEffect(() => { 
-    startLive();
+    // startLive();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
  
@@ -73,7 +46,7 @@ function RecImage(props) {
                                      cam={props.cam}
                                      focus={props.focus}
                                      rec={props.rec} 
-                                     car={props.car} />
+                                     car={props.car}/>
                     </div>
                   </div>
                 </div>
