@@ -2,14 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
-import { gfs_dispatch } from '../../../Method/Store';
+import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import RecTimer from './RecTimer';
 import { throttle } from 'lodash';
 
 function RecImageDtl(props) {
   const imageRef = useRef();
-  let token = '';
-  let device = '';
 
   const isOpen = useSelector((e) => {
     return e.INSP_PROC_MAIN[props.cam];
@@ -26,26 +24,8 @@ function RecImageDtl(props) {
 
   const start = async(ip) => {
 
-    const milestone = await TOKEN({});
-    token  = milestone.data.TOKEN;
-    device = milestone.data.DEVICE.find(e => e.Name.indexOf(ip) >= 0);
-    
-    if(device === undefined){
-      console.log('IP가 잘못되었거나 마일스톤 설정이 잘못되었습니다. ' + ip);
-  
-      return;
-    }else{
-      device = device['Guid'];
-    }
-
-    if(token !== ''){
       MILESTONE({reqAddr: 'CONNECT',
-                 token,
-                 device,
-                 ip})
-
-      console.log(token, device);
-    }
+                 device : props.device})
   }
 
   const style={
@@ -85,7 +65,7 @@ function RecImageDtl(props) {
   const onStreaming = () => {
     setInterval((e) => {
       MILESTONE_LIVE({
-        device
+        device: props.device
       }).then(e => {
         // console.log('1');
         // const JPEG = e.data.liveImg.data;
@@ -110,10 +90,9 @@ function RecImageDtl(props) {
 
   const debounceOnClick = throttle((e, ptz) => {
     TOKEN({}).then(e => {
-      const device = e.data.DEVICE.find(e => e.Name.indexOf(props.ip) >= 0);
 
       MILESTONE({reqAddr: 'PTZ',
-      device: device.Guid,
+      device: props.device,
       ptz})
     })
 
@@ -123,17 +102,6 @@ function RecImageDtl(props) {
     e.stopPropagation();
     debounceOnClick(e, ptz);
   }
-
-  // const onMouseWheel = (e) => {
-  //   e.stopPropagation();
-
-  //   const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
-  //   const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
-    
-  //   if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
-  //     this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
-  //   }
-  // }
 
   const img = <>
                 <div style={{position:'absolute'}}>

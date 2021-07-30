@@ -29,6 +29,11 @@ import { throttle } from 'lodash';
 
 class INSP_PROC extends Component {
 
+  state = {
+    wait_list: [],
+    device: []
+  }
+
   milestoneInfo = async() => {
 
     // 선택된 공정의 카메라를 찾아서 스트리밍 받는다
@@ -42,9 +47,22 @@ class INSP_PROC extends Component {
       alert('마일스톤 서버에 접속할 수 없습니다.'); 
     }else if(this.device === ''){
       alert('마일스톤 서버에 접속할 수 없습니다.');
+    }else{
+      let ipArr = ['10.10.136.112', '10.10.136.128'];
+      let cameraArr = [];
+
+      ipArr.forEach(e => {
+        const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
+        if(camera) cameraArr.push(camera);
+      })
+
+      if(cameraArr.length > 0){
+        this.setState(this.state.device = cameraArr);
+      }
     }
   }
 
+  //#region onActiveWindow 스토어 subscribe로 실행됨.
   onActiveWindow = () => {
     const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
     if(activeWindow.programId === 'INSP_PROC'){
@@ -59,11 +77,9 @@ class INSP_PROC extends Component {
       }
     }
   }
+  //#endregion
 
-  state = {
-    wait_list: []
-  }
-
+  //#region PTZ
   debounceKeyDown = throttle((e, device) => {
     let ptz = '';
     if(e.keyCode === 37) ptz = 'left';
@@ -116,11 +132,44 @@ class INSP_PROC extends Component {
       this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
     }
   }
+  //#endregion
+
+  //#region 녹화제어
+  startRec = (device, scaleNo, recOwner) => {
+    MILESTONE({reqAddr : 'StartManualRecording',
+               device  : device.Guid,
+               scaleNo,
+               recOwner})
+
+  }
+
+  // startRecResult = (device, scaleNo, result) => {
+
+  //   let recYn = result.data.recYn;
+  //   let recDt = result.data.recDt;
+
+  //   //녹화실패
+  //   if(recYn === '3'){
+  //     alert('녹화시작에 실패했습니다.');
+  //     return;
+  //   }else if(recYn === '2'){
+  //     const cf = window.confirm('녹화가 진행중입니다. 녹화를 재시작 하시겠습니까?');
+  //     if(cf){
+
+  //     }else{
+  //       return;
+  //     }
+  //   }
+    
+  //   gfs_dispatch('INSP_PROC_MAIN', 'STD_CAM_REC', {rec: true})
+  // }
+
+  //#endregion
 
   constructor(props){
     super(props)
+    
     gfc_initPgm(props.pgm, props.nam, this)
-    this.milestoneInfo();
 
     //#region 리듀서
     const INSP_PROC_MAIN = (nowState, action) => {
@@ -148,14 +197,12 @@ class INSP_PROC extends Component {
 
           STD_CAM_REC  : nowState === undefined ? {
                                                     rec     : false,
-                                                    car     : '',
                                                     time    : '00:00',
                                                     timer   : new Timer(),
                                                     interval: undefined
                                                   } : nowState.STD_CAM_REC,
           DUM_CAM_REC  : nowState === undefined ? {
                                                     rec     : false,
-                                                    car     : '',
                                                     time    : '00:00',
                                                     timer   : new Timer(),
                                                     interval: undefined
@@ -273,7 +320,10 @@ class INSP_PROC extends Component {
     gfs_injectAsyncReducer('INSP_PROC_MAIN', INSP_PROC_MAIN);
     gfs_subscribe(this.onActiveWindow);
     //#endregion
+  }
 
+  componentDidMount(){
+    this.milestoneInfo();
   }
 
   Retrieve = async () => {
@@ -308,13 +358,13 @@ class INSP_PROC extends Component {
                   {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
                   {'date':'2021-06-24 13:43:39','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'36960','scaleNumb':'202106240218','carNumb':'경남80사5946'},
                   {'date':'2021-06-24 13:45:05','vendor':'(주)거산\/ (주)거산 동부산 지점','itemFlag':'M1KDO0001','totalWgt':'35020','scaleNumb':'202106240219','carNumb':'81버7666'},
-                  {'rec':'1', 'date':'2021-06-24 14:21:42','vendor':'(주)우신\/ 주식회사 우신','itemFlag':'M1KDO0001','totalWgt':'43620','scaleNumb':'202106240230','carNumb':'경북86아4725'},
+                  {'date':'2021-06-24 14:21:42','vendor':'(주)우신\/ 주식회사 우신','itemFlag':'M1KDO0001','totalWgt':'43620','scaleNumb':'202106240230','carNumb':'경북86아4725'},
                   {'date':'2021-06-24 14:26:24','vendor':'(주)진광스틸\/ 금와산업','itemFlag':'M1KDO0002','totalWgt':'43800','scaleNumb':'202106240233','carNumb':'경남82사5143'},
                   {'date':'2021-06-24 14:34:09','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'36240','scaleNumb':'202106240236','carNumb':'경남82사3319'},
                   {'date':'2021-06-24 14:40:18','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'31800','scaleNumb':'202106240241','carNumb':'부산94아3089'},
                   {'date':'2021-06-24 15:15:05','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0002','totalWgt':'43100','scaleNumb':'202106240248','carNumb':'경북83아8533'},
                   {'date':'2021-06-24 15:42:51','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0001','totalWgt':'43320','scaleNumb':'202106240255','carNumb':'경북82아8342'},
-                  {'rec':'1','date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'}
+                  {'date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'}
                 ]
               }['dataSend'];
 
@@ -503,15 +553,16 @@ class INSP_PROC extends Component {
                 <li><span className='t'>차량번호</span><Detailspan flag={2} /></li>
                 <li><span className='t'>총중량(KG)</span><Detailspan flag={3} /></li>
                 <li><span className='t'>입차시간</span><Detailspan flag={4} /></li>
-                <li><button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'STD_CAM_REC', {rec: true, car: '1234'})}>on1</button>
+                <li>
+                    <button onClick={() => 
+                      {
+                        const device = this.device[0];
+                        this.startRec(device, 'testScale', '0');
+                      }}>on1
+                    </button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'STD_CAM_REC', {rec: false, car: '1234'})}>off1</button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
-                    <button onClick={async () => {
-                      
-                      console.log(await gfc_test());
-
-                    }}>loop</button>
                 </li>
               </ul>
             </div>
@@ -740,10 +791,8 @@ class INSP_PROC extends Component {
             <div className='cctv_viewer'>
               <h4>실시간 CCTV</h4>
               <div className='cctv_list'>
-          {/* <div style={{width:'100%', height:'calc(100% - 360px)'}}> */}
-              <RecImage ip='10.10.136.112' cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='STD_CAM_IMG'/>
-              <RecImage ip='10.10.136.128' cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' rec='DUM_CAM_REC' image='DUM_CAM_IMG'/>
-          {/* </div> */}
+                {this.state.device[0] !== undefined && <RecImage device={this.state.device[0].Guid} cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='STD_CAM_IMG'/> }
+                {this.state.device[1] !== undefined && <RecImage device={this.state.device[1].Guid} cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' rec='DUM_CAM_REC' image='DUM_CAM_IMG'/> }
               </div>
             </div>
         </div>

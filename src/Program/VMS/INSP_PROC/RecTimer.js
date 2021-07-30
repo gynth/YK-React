@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { gfc_getMultiLang, gfc_lpad, gfc_screenshot, gfc_screenshot_srv } from '../../../Method/Comm';
+import { gfc_lpad, gfc_screenshot, gfc_screenshot_srv } from '../../../Method/Comm';
 import { gfs_dispatch } from '../../../Method/Store';
 import GifPlayer from 'react-gif-player';
+import { MILESTONE } from '../../../WebReq/WebReq';
 
 // let interval;
 
@@ -25,8 +26,17 @@ function RecTimer(props) {
       isRec.timer.start();
 
       isRec.interval = setInterval((e) => {
+        if(isRec.timer.time().m === 10){
+          clearInterval(isRec.interval);
+          isRec.timer.stop();
+          gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
+            time    : '00:00',
+            interval: undefined
+          })
+          gfs_dispatch('INSP_PROC_MAIN', `${props.rec}`, {rec: false})
+        }
+
         gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
-          car     : props.car,
           time    : `${gfc_lpad(isRec.timer.time().m, 2, '0')}:${gfc_lpad(isRec.timer.time().s, 2, '0')}`,
           interval: isRec.interval
         })
@@ -36,11 +46,28 @@ function RecTimer(props) {
     clearInterval(isRec.interval);
     isRec.timer.stop();
     gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
-      car     : '',
       time    : '00:00',
       interval: undefined
     })
   }
+
+  useEffect(e => {
+
+    // setInterval(() => {
+    //   MILESTONE({
+    //     reqAddr: 'Status',
+    //     device
+    //   }).then(
+    //     e => {
+    //       const recYn = e.data.recYn;
+    //       const recDt = e.data.recDt;
+
+    //       const isRec = gfs_getStoreValue('INSP_PROC_MAIN', props.rec);
+    //     }
+    //   )
+
+    // }, 1000);
+  }, [])
 
   return (
     <React.Fragment>   

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { gfs_dispatch } from '../../../Method/Store';
 import ReactImageDtl from './RecImageDtl';
@@ -16,12 +16,6 @@ function RecImage(props) {
   }, (p, n) => {
     return p === n;
   });
-
-
-  useEffect(() => { 
-    // startLive();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
  
   const img = <a href='#!'
                   onFocus={() => {
@@ -42,7 +36,7 @@ function RecImage(props) {
                 <div id={props.rec} style={{height: isOpen === true && '100%'}} className={isFocus === true ? 'cctv select' : 'cctv'}>
                   <div className={isFocus === true ? 'viewer on' : 'viewer'}>
                     <div style={{width:'100%', height:'100%'}}>
-                      <ReactImageDtl ip={props.ip} 
+                      <ReactImageDtl device={props.device} 
                                      cam={props.cam}
                                      focus={props.focus}
                                      rec={props.rec} 

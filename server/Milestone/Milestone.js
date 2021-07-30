@@ -4,6 +4,14 @@ const soap = require('soap');
 var edge = require('edge-js');
 
 
+//object[] info
+//0: token
+//1: device
+//2: call
+//3: PTZ flag(up, down.....)
+//4: Scale No. 배차번호
+//5: Rec Owner - '0':자동녹화, '1':수동녹화
+
 //#region JPEGGetLive
 router.post('/JPEGGetLive', (req, res) => {
   try{
@@ -40,6 +48,7 @@ router.post('/CONNECT', (req, res) => {
       methodName: 'Connect'
     });
 
+
     Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
       if(result[1] === 'Y') {
         global.MILESTONE_DATA[device] = {
@@ -63,7 +72,7 @@ router.post('/PTZ', (req, res) => {
   const device = req.body.device;
   const ptz = req.body.ptz; 
 
-  // 1-1. 설정된 데이터가 없을때만 진행한다.
+  //설정된 메서드가 있을때만 진행한다.
   if(global.MILESTONE_DATA[device] !== undefined){
     global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'PTZ', ptz, ''], (error, result) => { 
       if(error === undefined) res.json('OK');
@@ -71,6 +80,36 @@ router.post('/PTZ', (req, res) => {
     })   
   }
 });
+
+router.post('/StartManualRecording', (req, res) => {
+  const device = req.body.device;
+  const scaleNo = req.body.scaleNo; 
+  const recOwner = req.body.recOwner;
+
+  //설정된 메서드가 있을때만 진행한다.
+  if(global.MILESTONE_DATA[device] !== undefined){
+    global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'StartManualRecording', '', scaleNo, recOwner], (error, result) => { 
+      if(error === undefined) res.json('OK');
+      else res.json(error);
+    })   
+  }
+});
+
+//#region 마일스톤 카메라 상태 가져오기
+router.post('/Status', (req, res) => {
+  const device = req.body.device;
+  
+  if(global.MILESTONE_DATA[device] !== undefined){
+    global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Status', '', '', ''], (error, result) => { 
+      const scaleNo = result[3];
+      const recYn = result[4];
+      const recDt = result[5];
+
+      res.json({scaleNo, recYn, recDt});
+    })   
+  }
+})
+//#endregion
   
 //#region 마일스톤 라이브 이미지 가져오기
 router.get('/LIVE', (req, res) => {
@@ -78,7 +117,10 @@ router.get('/LIVE', (req, res) => {
 
   if(global.MILESTONE_DATA[device] !== undefined){
     res.json(global.MILESTONE_DATA[device].liveImg); 
-    // res.send()
+    
+    // res.json({liveImg: global.MILESTONE_DATA[device].liveImg,
+    //   recYn  : global.MILESTONE_DATA[device].recYn,
+    //   recDt  : global.MILESTONE_DATA[device].recDt}); 
   } 
   else 
     res.json('')   

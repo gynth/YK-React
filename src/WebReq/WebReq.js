@@ -67,7 +67,8 @@ export function MILESTONE(data){
       maxWidth   : data['maxWidth'], 
       maxHeight  : data['maxHeight'],
       ptz        : data['ptz'],
-      rec_yn     : data['rec_yn']
+      scaleNo    : data['scaleNo'],
+      recOwner   : data['recOwner']
     } 
   };
 
