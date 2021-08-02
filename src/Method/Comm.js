@@ -179,6 +179,33 @@ export const gfc_screenshot = (element, filename) => {
   });
 }
 
+export const gfc_screenshot_srv_from_milestone = (device, scaleNo) => {
+
+  // const host = 'http://localhost:3001/ScreenShot/Milestone';
+  const host = `http://211.231.136.150:3001/ScreenShot/Milestone`;
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+      device,
+      scaleNo
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
 export const gfc_screenshot_srv = (element, filename, root) => {
   return html2canvas(element).then(canvas => {
     let img = canvas.toDataURL('image/png');

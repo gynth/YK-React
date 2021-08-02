@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
+const soap = require('soap'); 
 
 router.post('/TEST', (req, res) => {
   res.json();
@@ -31,6 +32,53 @@ router.post('/TEST', (req, res) => {
   //   res.json(err);
   // });
 });
+
+router.post('/Milestone', (req, res) => {
+  let device = req.body.device;
+  let scaleNo = req.body.scaleNo;
+
+  // if(!fs.existsSync(`${__dirname}/Screenshot`)){
+  //   fs.mkdirSync(`${__dirname}/Screenshot`);
+  // }
+  if(!fs.existsSync(`E:\\IMS`)){
+    fs.mkdirSync(`E:\\IMS`);
+  }
+  if(!fs.existsSync(`E:\\IMS\\Screenshot`)){
+    fs.mkdirSync(`E:\\IMS\\Screenshot`);
+  }
+
+  const root = `E:\\IMS\\Screenshot/${scaleNo}`;
+  // const root = `C:\\IMS\\Screenshot\\${scaleNo}`;
+
+  if(!fs.existsSync(root)){
+    fs.mkdirSync(root);
+  }
+
+  const MilestoneIP = global.MILESTONE_IP;
+  const token       = global.MILESTONE_TOKEN;
+  const deviceId    = device;
+
+  var url = `http://${MilestoneIP}:7563/RecorderCommandService/RecorderCommandService.asmx?wsdl`;
+  soap.createClient(url, (err, client) => {
+
+    client.JPEGGetLive({token, deviceId, maxWidth:1280, maxHeight:1024}, (e, r) => {
+      // const img = `data:image/JPEG;base64,${r.JPEGGetLiveResult.Data}`;
+      const img = `${r.JPEGGetLiveResult.Data}`;
+      if(e === null){
+        const filename = `${getCurrentDate()}.png`;
+        fs.writeFile(`${root}\\${filename}`, img, 'base64', function(err) {
+          if(err === null){
+            res.json({Result: 'OK'})
+          }else{
+            res.json({Result: err});
+          }
+        });
+      }else {
+        res.json({Result: e});
+      }
+    }) 
+  })
+})
 
 router.post('/', (req, res) => {
 

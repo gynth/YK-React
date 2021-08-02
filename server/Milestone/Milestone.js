@@ -101,9 +101,9 @@ router.post('/Status', (req, res) => {
   
   if(global.MILESTONE_DATA[device] !== undefined){
     global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Status', '', '', ''], (error, result) => { 
-      const scaleNo = result[3];
-      const recYn = result[4];
-      const recDt = result[5];
+      const scaleNo = result[0];
+      const recYn = result[1];
+      const recDt = result[2];
 
       res.json({scaleNo, recYn, recDt});
     })   

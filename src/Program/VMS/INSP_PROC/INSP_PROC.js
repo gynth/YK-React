@@ -21,7 +21,7 @@ import Botspan from './Botspan';
 import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
-import { Timer } from 'timer-node';
+// import { Timer } from 'timer-node';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
@@ -142,28 +142,6 @@ class INSP_PROC extends Component {
                recOwner})
 
   }
-
-  // startRecResult = (device, scaleNo, result) => {
-
-  //   let recYn = result.data.recYn;
-  //   let recDt = result.data.recDt;
-
-  //   //녹화실패
-  //   if(recYn === '3'){
-  //     alert('녹화시작에 실패했습니다.');
-  //     return;
-  //   }else if(recYn === '2'){
-  //     const cf = window.confirm('녹화가 진행중입니다. 녹화를 재시작 하시겠습니까?');
-  //     if(cf){
-
-  //     }else{
-  //       return;
-  //     }
-  //   }
-    
-  //   gfs_dispatch('INSP_PROC_MAIN', 'STD_CAM_REC', {rec: true})
-  // }
-
   //#endregion
 
   constructor(props){
@@ -197,15 +175,11 @@ class INSP_PROC extends Component {
 
           STD_CAM_REC  : nowState === undefined ? {
                                                     rec     : false,
-                                                    time    : '00:00',
-                                                    timer   : new Timer(),
-                                                    interval: undefined
+                                                    time    : '00:00'
                                                   } : nowState.STD_CAM_REC,
           DUM_CAM_REC  : nowState === undefined ? {
                                                     rec     : false,
-                                                    time    : '00:00',
-                                                    timer   : new Timer(),
-                                                    interval: undefined
+                                                    time    : '00:00'
                                                   } : nowState.DUM_CAM_REC
         };
       }
@@ -284,35 +258,29 @@ class INSP_PROC extends Component {
 
         return Object.assign({}, nowState, {
           STD_CAM_REC : {rec  : action.rec,
-                         car  : action.car,
-                         time : nowState.STD_CAM_REC.time,
-                         timer: nowState.STD_CAM_REC.timer}
+                        //  car  : action.car,
+                         time : nowState.STD_CAM_REC.time}
         })
       }else if(action.type === 'DUM_CAM_REC'){
 
         return Object.assign({}, nowState, {
           DUM_CAM_REC : {rec  : action.rec,
-                         car  : action.car,
-                         time : nowState.DUM_CAM_REC.time,
-                         timer: nowState.DUM_CAM_REC.timer}
+                        //  car  : action.car,
+                         time : nowState.DUM_CAM_REC.time}
         })
       }else if(action.type === 'STD_CAM_REC_TIME'){
 
         return Object.assign({}, nowState, {
           STD_CAM_REC : {rec     : nowState.STD_CAM_REC.rec,
-                         car     : action.car,
-                         time    : action.time,
-                         timer   : nowState.STD_CAM_REC.timer,
-                         interval: action.interval}
+                        //  car     : action.car,
+                         time    : action.time}
         })
       }else if(action.type === 'DUM_CAM_REC_TIME'){
 
         return Object.assign({}, nowState, {
           DUM_CAM_REC : {rec     : nowState.DUM_CAM_REC.rec,
-                         car     : action.car,
-                         time    : action.time,
-                         timer   : nowState.DUM_CAM_REC.timer,
-                         interval: action.interval}
+                        //  car     : action.car,
+                         time    : action.time}
         })
       }
     }

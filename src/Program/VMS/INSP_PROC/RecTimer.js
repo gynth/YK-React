@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { gfc_lpad, gfc_screenshot, gfc_screenshot_srv } from '../../../Method/Comm';
-import { gfs_dispatch } from '../../../Method/Store';
+import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import GifPlayer from 'react-gif-player';
 import { MILESTONE } from '../../../WebReq/WebReq';
 
@@ -21,52 +21,63 @@ function RecTimer(props) {
     return p.time === n.time;
   });
 
-  if(isRec.rec){
-    if(isRec.interval === undefined){
-      isRec.timer.start();
+  // if(isRec.rec){
+  //   if(isRec.interval === undefined){
+  //     isRec.timer.start();
 
-      isRec.interval = setInterval((e) => {
-        if(isRec.timer.time().m === 10){
-          clearInterval(isRec.interval);
-          isRec.timer.stop();
-          gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
-            time    : '00:00',
-            interval: undefined
-          })
-          gfs_dispatch('INSP_PROC_MAIN', `${props.rec}`, {rec: false})
-        }
+  //     isRec.interval = setInterval((e) => {
+  //       if(isRec.timer.time().m === 10){
+  //         clearInterval(isRec.interval);
+  //         isRec.timer.stop();
+  //         gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
+  //           time    : '00:00',
+  //           interval: undefined
+  //         })
+  //         gfs_dispatch('INSP_PROC_MAIN', `${props.rec}`, {rec: false})
+  //       }
 
-        gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
-          time    : `${gfc_lpad(isRec.timer.time().m, 2, '0')}:${gfc_lpad(isRec.timer.time().s, 2, '0')}`,
-          interval: isRec.interval
-        })
-      }, 1000);
-    }
-  }else{
-    clearInterval(isRec.interval);
-    isRec.timer.stop();
-    gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
-      time    : '00:00',
-      interval: undefined
-    })
-  }
+  //       gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
+  //         time    : `${gfc_lpad(isRec.timer.time().m, 2, '0')}:${gfc_lpad(isRec.timer.time().s, 2, '0')}`,
+  //         interval: isRec.interval
+  //       })
+  //     }, 1000);
+  //   }
+  // }else{
+  //   clearInterval(isRec.interval);
+  //   isRec.timer.stop();
+  //   gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {
+  //     time    : '00:00',
+  //     interval: undefined
+  //   })
+  // }
 
   useEffect(e => {
 
-    // setInterval(() => {
-    //   MILESTONE({
-    //     reqAddr: 'Status',
-    //     device
-    //   }).then(
-    //     e => {
-    //       const recYn = e.data.recYn;
-    //       const recDt = e.data.recDt;
+    setInterval(() => {
+      MILESTONE({
+        reqAddr: 'Status',
+        device: props.device
+      }).then(
+        e => {
+          const recYn = e.data.recYn;
+          const recDt = e.data.recDt;
+          const isRec = gfs_getStoreValue('INSP_PROC_MAIN', props.rec);
 
-    //       const isRec = gfs_getStoreValue('INSP_PROC_MAIN', props.rec);
-    //     }
-    //   )
+          if(recYn === '0' || recYn === '2'){
+            if(isRec.rec === false){
+              gfs_dispatch('INSP_PROC_MAIN', `${props.rec}`, {rec: true, time: recDt});
+            }
+            
+            gfs_dispatch('INSP_PROC_MAIN', `${props.rec}_TIME`, {rec: true, time: recDt});
+          }else{
+            if(isRec === true){
+              gfs_dispatch('INSP_PROC_MAIN', `${props.rec}`, {rec: false, time: '00:00'});
+            }
+          }
+        }
+      )
 
-    // }, 1000);
+    }, 1000);
   }, [])
 
   return (

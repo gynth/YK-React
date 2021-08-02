@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import RecTimer from './RecTimer';
 import { throttle } from 'lodash';
+import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
 
 function RecImageDtl(props) {
   const imageRef = useRef();
@@ -105,7 +106,7 @@ function RecImageDtl(props) {
 
   const img = <>
                 <div style={{position:'absolute'}}>
-                  <RecTimer rec={props.rec} car={props.car} />
+                  <RecTimer device={props.device} rec={props.rec} car={props.car} />
                 </div>
                 <img style={{height:'100%', width:'100%'}} alt='yk_image' 
                     ref={imageRef}
@@ -117,7 +118,18 @@ function RecImageDtl(props) {
                       setModalIsOpen(true);
                     }}>
                 </img>
-                <div className='picture_save'>
+                <div className='picture_save' onClick={e => {
+                  
+                  gfc_showMask();
+                  gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
+                    e => {
+                      gfc_hideMask();
+                      if(e.data.Result !== 'OK'){
+                        alert('파일저장에 실패 했습니다.');
+                      }
+                    }
+                  )
+                }}>
                   {/* <a href='#!' className='server'></a> */}
                 </div>
                 <div className={isOpen === true ? 'controller on' : 'controller'}>
