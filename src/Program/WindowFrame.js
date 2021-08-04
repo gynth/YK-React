@@ -1,15 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Rnd } from 'react-rnd';
 import { useSelector } from 'react-redux';
 import { gfs_getStoreValue, gfs_dispatch } from '../Method/Store';
 import PropTypes from 'prop-types';
 import './WindowFrame.css';
 import { jsonMaxValue, jsonRtn } from '../JSON/jsonControl';
-import PgmTest from './MES/PgmTest';
-import Menu from './MES/Menu';
-import PgmTest2 from './MES/Chart/PgmTest2';
-import e from 'cors';
- 
 //#region 이벤트 정의
 const onWindowClick = (programId, programNam) => {
   

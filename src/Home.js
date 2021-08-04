@@ -7,11 +7,10 @@ import WindowFrame from './Program/WindowFrame';
 
 import './Home.css';
 import { getSessionCookie } from "./Cookies";
-import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch } from './Method/Store';
+import { gfs_injectAsyncReducer } from './Method/Store';
 
 import GifPlayer from 'react-gif-player';
 import LoadingOverlay from 'react-loading-overlay';
-import {YK_TOKEN} from './WebReq/WebReq';
 
 let isSession = false;
 

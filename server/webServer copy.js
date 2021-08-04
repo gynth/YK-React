@@ -73,27 +73,32 @@ app3002.listen(port3002, () => {
 
 
 const Stream = require('node-rtsp-stream');
-const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
-// const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
+// const streamUrl = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov";
+const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1';
 
 const streams = new Stream({
-  name: 'foscam_stream', 
+  name: 'primary', 
   streamUrl: streamUrl,
   wsPort: 3100,
-  width: 1920,
-  height: 1080,
+  width: 1024,
+  height: 768,
+  analyzeduration: 2147483647,
+  probesize: 2147483647
   // ffmpegOptions: { // options ffmpeg flags
-  //   scale: '1920x1080'
-  // }  
-});    
-    
- 
-         
-                  
-        
-         
- 
+  //   '-stats': '', // an option with no neccessary value uses a blank string
+  //   '-r': 30, // options with required values specify the value after the key
+  //   'video': 'h264'
+  // }
+});  
+
   
+ 
+
+
+
+
+
+
 //#region  마일스톤 토큰 처리
 const getToken = () => {
   try{

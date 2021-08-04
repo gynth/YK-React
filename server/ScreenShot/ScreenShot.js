@@ -40,14 +40,14 @@ router.post('/Milestone', (req, res) => {
   // if(!fs.existsSync(`${__dirname}/Screenshot`)){
   //   fs.mkdirSync(`${__dirname}/Screenshot`);
   // }
-  if(!fs.existsSync(`E:\\IMS`)){
-    fs.mkdirSync(`E:\\IMS`);
+  if(!fs.existsSync(`D:\\IMS`)){
+    fs.mkdirSync(`D:\\IMS`);
   }
-  if(!fs.existsSync(`E:\\IMS\\Screenshot`)){
-    fs.mkdirSync(`E:\\IMS\\Screenshot`);
+  if(!fs.existsSync(`D:\\IMS\\Screenshot`)){
+    fs.mkdirSync(`D:\\IMS\\Screenshot`);
   }
 
-  const root = `E:\\IMS\\Screenshot/${scaleNo}`;
+  const root = `D:\\IMS\\Screenshot/${scaleNo}`;
   // const root = `C:\\IMS\\Screenshot\\${scaleNo}`;
 
   if(!fs.existsSync(root)){
@@ -72,7 +72,7 @@ router.post('/Milestone', (req, res) => {
           }else{
             res.json({Result: err});
           }
-        });
+        }); 
       }else {
         res.json({Result: e});
       }

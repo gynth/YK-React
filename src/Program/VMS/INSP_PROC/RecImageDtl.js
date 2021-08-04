@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
-import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import { gfs_dispatch } from '../../../Method/Store';
 import RecTimer from './RecTimer';
 import { throttle } from 'lodash';
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
@@ -57,10 +57,17 @@ function RecImageDtl(props) {
   };
 
   useEffect(() => { 
-    start(props.ip);
-    onStreaming();
+    var jsmpeg = require('jsmpeg');
+    var client = new WebSocket('ws://localhost:3100');
+    var canvas = document.querySelector('canvas');
+    var player = new jsmpeg(client, {
+      canvas: canvas 
+    });
+
+
+    // start(props.ip);
+    // onStreaming();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-    // imageRef.current.subscribeToStateChange(this.handleStateChange.bind(this));
   }, [])
 
   const onStreaming = () => {
@@ -71,22 +78,26 @@ function RecImageDtl(props) {
         // console.log('1');
         // const JPEG = e.data.liveImg.data;
         // const JPEG = 'data:image/JPEG;base64,' + _arrayBufferToBase64(e.data.liveImg.data);
-        const JPEG = e.data;
-        // setImage(JPEG);
-        // imageRef.current.src = JPEG;
-
-        if(JPEG !== undefined && JPEG !== ''){
-          if(imageRef.current !== undefined){
-            // setImage(JPEG);
-            imageRef.current.src = JPEG;
-            // let obj = {};
-            // obj[props.image] = JPEG;
+        try{
+          const JPEG = e.data;
+          // setImage(JPEG);
+          // imageRef.current.src = JPEG;
   
-            // gfs_dispatch('INSP_PROC_MAIN', props.image, obj);
+          if(JPEG !== undefined && JPEG !== ''){
+            if(imageRef.current !== undefined){
+              // setImage(JPEG);
+              imageRef.current.src = JPEG;
+              // let obj = {};
+              // obj[props.image] = JPEG;
+    
+              // gfs_dispatch('INSP_PROC_MAIN', props.image, obj);
+            }
           }
+        }catch (e){
+          
         }
       })
-    }, 50);
+    }, 80);
   }
 
   const debounceOnClick = throttle((e, ptz) => {
@@ -108,16 +119,16 @@ function RecImageDtl(props) {
                 <div style={{position:'absolute'}}>
                   <RecTimer device={props.device} rec={props.rec} car={props.car} />
                 </div>
-                <img style={{height:'100%', width:'100%'}} alt='yk_image' 
+                {/* rtsp://admin:admin13579@10.10.136.112:554/video1+audio1  */}
+
+                <canvas id='canvas' style={{width:'100%', height:'100%'}}/>
+
+                {/* <img style={{height:'100%', width:'100%'}} alt='yk_image' 
                     ref={imageRef}
                     onDoubleClick={e => {
-                      // let obj = {};
-                      // obj[props.focus] = false; 
-                      // gfs_dispatch('INSP_PROC_MAIN', props.focus, obj);
-
                       setModalIsOpen(true);
                     }}>
-                </img>
+                </img> */}
                 <div className='picture_save' onClick={e => {
                   
                   gfc_showMask();

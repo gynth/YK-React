@@ -181,8 +181,8 @@ export const gfc_screenshot = (element, filename) => {
 
 export const gfc_screenshot_srv_from_milestone = (device, scaleNo) => {
 
-  // const host = 'http://localhost:3001/ScreenShot/Milestone';
-  const host = `http://211.231.136.150:3001/ScreenShot/Milestone`;
+  const host = 'http://localhost:3001/ScreenShot/Milestone';
+  // const host = `http://211.231.136.150:3001/ScreenShot/Milestone`;
   const option = {
     url   : host,
     method: 'POST',

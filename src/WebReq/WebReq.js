@@ -25,9 +25,8 @@ export function YK_WEB_REQ(addr){
 };
 
 export function MILESTONE_LIVE(data) {
-  // const host = `http://localhost:3001/MILESTONE/LIVE?device=${data['device']}`;
-  const host = `http://211.231.136.150:3002/MILESTONE/LIVE?device=${data['device']}`;
-  // const host = `http://211.231.136.150:3001/MILESTONE/LIVE`;
+  const host = `http://localhost:3002/MILESTONE/LIVE?device=${data['device']}`;
+  // const host = `http://211.231.136.150:3002/MILESTONE/LIVE?device=${data['device']}`;
   const option = {
     url   : host,
     method: 'GET',
@@ -50,8 +49,8 @@ export function MILESTONE_LIVE(data) {
 }
 
 export function MILESTONE(data){
-  // const host = `http://localhost:3001/MILESTONE/${data['reqAddr']}`;
-  const host = `http://211.231.136.150:3002/MILESTONE/${data['reqAddr']}`;
+  const host = `http://localhost:3002/MILESTONE/${data['reqAddr']}`;
+  // const host = `http://211.231.136.150:3002/MILESTONE/${data['reqAddr']}`;
   const option = {
     url   : host,
     method: 'POST',
@@ -83,8 +82,8 @@ export function MILESTONE(data){
 };
 
 export function TOKEN(data){
-  // const host = `http://localhost:3001/Token`;
-  const host = `http://211.231.136.150:3002/Token`;
+  const host = `http://localhost:3002/Token`;
+  // const host = `http://211.231.136.150:3002/Token`;
   const option = {
     url   : host,
     method: 'POST',

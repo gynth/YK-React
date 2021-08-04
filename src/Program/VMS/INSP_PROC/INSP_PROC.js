@@ -140,10 +140,21 @@ class INSP_PROC extends Component {
                device  : device.Guid,
                scaleNo,
                recOwner})
+  }
 
+  stopRec = (device, scaleNo) => {
+    MILESTONE({reqAddr : 'StopManualRecording',
+               device  : device.Guid,
+               scaleNo})
   }
   //#endregion
 
+  //#region 검수등록
+  onProcess = () => {
+    const detail_grade1 = gfo_getCombo(this.props.pgm, 'detail_grade1'); //고철등급
+
+  }
+  //#endregion
   constructor(props){
     super(props)
     
@@ -528,7 +539,12 @@ class INSP_PROC extends Component {
                         this.startRec(device, 'testScale', '0');
                       }}>on1
                     </button>
-                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'STD_CAM_REC', {rec: false, car: '1234'})}>off1</button>
+                    <button onClick={() => 
+                      {
+                        const device = this.device[0];
+                        this.stopRec(device, 'testScale');
+                      }}>off1
+                    </button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
                 </li>
@@ -550,7 +566,7 @@ class INSP_PROC extends Component {
                                 display = 'item'
                                 placeholder = '고철등급 검색'
                                 height  = {42}
-
+                                data    = ''
                                 onFocus = {ComboCreate => {
                                   YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
                                     .then(res => {
@@ -565,7 +581,7 @@ class INSP_PROC extends Component {
                               id      = 'detail_grade2'
                               value   = 'itemCode'
                               display = 'item'
-
+                              data    = ''
                               onFocus = {ComboCreate => {
                                 const value = gfo_getCombo(this.props.pgm, 'detail_grade1').getValue();
                                 if(value === null) return;
@@ -586,7 +602,7 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량중량 검색(KG)'
-
+                          data    = ''
                           onFocus = {ComboCreate => {
                             YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
                               .then(res => {
@@ -605,7 +621,7 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량사유 검색'
-
+                          data    = ''
                           onFocus = {ComboCreate => {
                             YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
                               .then(res => {
@@ -624,7 +640,7 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감가내역 검색'
-
+                          data    = ''
                           onFocus = {ComboCreate => {
                             YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
                               .then(res => {
@@ -643,13 +659,13 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '하차구역 검색(SECTOR)'
-
+                          data    = ''
                           onFocus = {ComboCreate => {
                             YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
                               .then(res => {
                                 ComboCreate({data   : res.data.dataSend,
                                             value  : 'itemCode',
-                                            display: 'item',});
+                                            display: 'item'});
                               })
                           }}
                   />
@@ -661,7 +677,7 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '차종선택'
-
+                          data    = ''
                           onFocus = {ComboCreate => {
                             YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
                               .then(res => {
@@ -679,7 +695,7 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '일부,전량 선택'
-
+                          data    = ''
                           onFocus = {ComboCreate => {
                             YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
                               .then(res => {
@@ -707,59 +723,59 @@ class INSP_PROC extends Component {
                   </li>
                 </ul>
               </div>
-              <div className="data_list" id="content2">
-                <div className="doc">
+              <div className='data_list' id='content2'>
+                <div className='doc'>
                   <h5>계 량 증 명 서</h5>
                   <ul>
                     <li>
-                      <span className="t">일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;시</span>
-                      <span className="v">2021-06-17 06:02:02</span>
+                      <span className='t'>일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;시</span>
+                      <span className='v'>2021-06-17 06:02:02</span>
                     </li>
                     <li>
-                      <span className="t">계량번호</span>
-                      <span className="v">202106170001</span>
+                      <span className='t'>계량번호</span>
+                      <span className='v'>202106170001</span>
                     </li>
                     <li>
-                      <span className="t">차량번호</span>
-                      <span className="v">경남 81사7885</span>
+                      <span className='t'>차량번호</span>
+                      <span className='v'>경남 81사7885</span>
                     </li>
                     <li>
-                      <span className="t">업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;체</span>
-                      <span className="v">(주)거산</span>
+                      <span className='t'>업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;체</span>
+                      <span className='v'>(주)거산</span>
                     </li>
                     <li>
-                      <span className="t">제&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;품</span>
-                      <span className="v">원재료.철강.국내분철</span>
+                      <span className='t'>제&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;품</span>
+                      <span className='v'>원재료.철강.국내분철</span>
                     </li>
                     <li>
-                      <span className="t">입차중량</span>
-                      <span className="v">44,420</span>
+                      <span className='t'>입차중량</span>
+                      <span className='v'>44,420</span>
                     </li>
                     <li>
-                      <span className="t">지&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;역</span>
-                      <span className="v">부산</span>
+                      <span className='t'>지&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;역</span>
+                      <span className='v'>부산</span>
                     </li>
                     <li>
-                      <span className="t">검&nbsp;&nbsp;수&nbsp;&nbsp;자</span>
-                      <span className="v">유명훈</span>
+                      <span className='t'>검&nbsp;&nbsp;수&nbsp;&nbsp;자</span>
+                      <span className='v'>유명훈</span>
                     </li>
                   </ul>
                 </div>
-                <div className="memo">
+                <div className='memo'>
                   <h5>MEMO</h5>
                   <textarea></textarea>
                 </div>
               </div>
             </div>
             <div className='complete_btn'>
-              <button type='button' id="btn1" className='on'><span>등록완료</span></button>
-              <button type='button' id="btn2"><span>계량증명서저장</span></button>
+              <button type='button' id='btn1' className='on'><span>등록완료</span></button>
+              <button type='button' id='btn2'><span>계량증명서저장</span></button>
             </div>
           </div>
             <div className='cctv_viewer'>
               <h4>실시간 CCTV</h4>
               <div className='cctv_list'>
-                {this.state.device[0] !== undefined && <RecImage device={this.state.device[0].Guid} cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='STD_CAM_IMG'/> }
+                {/* {this.state.device[0] !== undefined && <RecImage device={this.state.device[0].Guid} cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='STD_CAM_IMG'/> } */}
                 {this.state.device[1] !== undefined && <RecImage device={this.state.device[1].Guid} cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' rec='DUM_CAM_REC' image='DUM_CAM_IMG'/> }
               </div>
             </div>

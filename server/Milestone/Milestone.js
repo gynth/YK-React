@@ -62,7 +62,7 @@ router.post('/CONNECT', (req, res) => {
                     }, 1)
         }
       }
-    })    
+    })     
   }
   
   res.json({result:'OK'}) 
@@ -89,6 +89,19 @@ router.post('/StartManualRecording', (req, res) => {
   //설정된 메서드가 있을때만 진행한다.
   if(global.MILESTONE_DATA[device] !== undefined){
     global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'StartManualRecording', '', scaleNo, recOwner], (error, result) => { 
+      if(error === undefined) res.json('OK');
+      else res.json(error);
+    })   
+  }
+});
+
+router.post('/StopManualRecording', (req, res) => {
+  const device = req.body.device;
+  const scaleNo = req.body.scaleNo; 
+
+  //설정된 메서드가 있을때만 진행한다.
+  if(global.MILESTONE_DATA[device] !== undefined){
+    global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'StopManualRecording', '', scaleNo, ''], (error, result) => { 
       if(error === undefined) res.json('OK');
       else res.json(error);
     })   
