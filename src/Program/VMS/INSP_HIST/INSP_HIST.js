@@ -13,7 +13,7 @@ class INSP_HIST extends Component {
   }
 
   Retrieve = () => {
-    const host = 'http://localhost:3001/Token';
+    const host = 'http://211.231.136.182:3001/Token';
     const option = {
       url   : host,
       method: 'POST',
@@ -37,7 +37,7 @@ class INSP_HIST extends Component {
   }
 
   Delete = () => {
-    const host = 'http://localhost:3001/TestSet';
+    const host = 'http://211.231.136.182:3001/TestSet';
     const option = {
       url   : host,
       method: 'POST',

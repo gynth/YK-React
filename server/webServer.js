@@ -14,6 +14,7 @@ global.MILESTONE_TOKEN = '';
 global.MILESTONE_DEVICE = {};
 global.MILESTONE_TOKEN_TIME = '';
 global.MILESTONE_DATA = {};
+global.MILESTONE_RTSP = {};
 
 // var httpAttach = require('http-attach') // useful module for attaching middlewares
 // const fs = require('fs');
@@ -70,22 +71,17 @@ app3002.listen(port3002, () => {
 //#endregion
 
 
+// const Stream = require('node-rtsp-stream');
+// const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
+// // const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
 
-
-const Stream = require('node-rtsp-stream');
-const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
-// const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
-
-const streams = new Stream({
-  name: 'foscam_stream', 
-  streamUrl: streamUrl,
-  wsPort: 3100,
-  width: 1920,
-  height: 1080,
-  // ffmpegOptions: { // options ffmpeg flags
-  //   scale: '1920x1080'
-  // }  
-});    
+// const streams = new Stream({
+//   name: 'foscam_stream', 
+//   streamUrl: streamUrl,
+//   wsPort: 3100,
+//   width: 1920,
+//   height: 1080
+// });    
     
  
          

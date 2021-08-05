@@ -128,6 +128,10 @@
 .picture_save.on .server {padding-left:3px; }
 .picture_save.on .mycomputer {padding-left:10px}
 
+.rain_info {position:absolute; right:13px; top:10px;}
+.rain_info .title {color:#fff; font-size:16px; padding-left:33px; background:url('../Image/rain_bu.png') no-repeat 0 50%; }
+.rain_info .value {margin-left:10px; display:inline-block; background:#000; text-align:center; height:37px; line-height:37px; padding:0 10px; color:#fff; font-size:16px; }
+
 
 
 

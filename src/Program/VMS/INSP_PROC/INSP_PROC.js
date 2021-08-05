@@ -19,6 +19,7 @@ import Mainspan from './Mainspan';
 import Detailspan from './Detailspan';
 import Botspan from './Botspan';
 import RecImage from './RecImage';
+import Chit from './Chit';
 
 import GifPlayer from 'react-gif-player';
 // import { Timer } from 'timer-node';
@@ -49,15 +50,19 @@ class INSP_PROC extends Component {
       alert('마일스톤 서버에 접속할 수 없습니다.');
     }else{
       let ipArr = ['10.10.136.112', '10.10.136.128'];
-      let cameraArr = [];
+      let rtspUrl = ['rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp', 'rtsp://admin:pass@10.10.136.128:554/video1'];
+      let rtspPort = [3100, 3101];
+      let infoArr = [];
 
       ipArr.forEach(e => {
         const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
-        if(camera) cameraArr.push(camera);
+        if(camera){
+          infoArr.push({camera, rtspUrl, rtspPort}); 
+        }
       })
 
-      if(cameraArr.length > 0){
-        this.setState(this.state.device = cameraArr);
+      if(infoArr.length > 0){
+        this.setState(this.state.device = infoArr);
       }
     }
   }
@@ -723,49 +728,10 @@ class INSP_PROC extends Component {
                   </li>
                 </ul>
               </div>
-              <div className='data_list' id='content2'>
-                <div className='doc'>
-                  <h5>계 량 증 명 서</h5>
-                  <ul>
-                    <li>
-                      <span className='t'>일&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;시</span>
-                      <span className='v'>2021-06-17 06:02:02</span>
-                    </li>
-                    <li>
-                      <span className='t'>계량번호</span>
-                      <span className='v'>202106170001</span>
-                    </li>
-                    <li>
-                      <span className='t'>차량번호</span>
-                      <span className='v'>경남 81사7885</span>
-                    </li>
-                    <li>
-                      <span className='t'>업&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;체</span>
-                      <span className='v'>(주)거산</span>
-                    </li>
-                    <li>
-                      <span className='t'>제&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;품</span>
-                      <span className='v'>원재료.철강.국내분철</span>
-                    </li>
-                    <li>
-                      <span className='t'>입차중량</span>
-                      <span className='v'>44,420</span>
-                    </li>
-                    <li>
-                      <span className='t'>지&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;역</span>
-                      <span className='v'>부산</span>
-                    </li>
-                    <li>
-                      <span className='t'>검&nbsp;&nbsp;수&nbsp;&nbsp;자</span>
-                      <span className='v'>유명훈</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className='memo'>
-                  <h5>MEMO</h5>
-                  <textarea></textarea>
-                </div>
-              </div>
+              
+              <Chit />
+
+
             </div>
             <div className='complete_btn'>
               <button type='button' id='btn1' className='on'><span>등록완료</span></button>
@@ -774,9 +740,28 @@ class INSP_PROC extends Component {
           </div>
             <div className='cctv_viewer'>
               <h4>실시간 CCTV</h4>
+              <div className="rain_info">
+		            <span className="title">강수량</span><span className="value">100mm</span>
+	            </div>
               <div className='cctv_list'>
-                {/* {this.state.device[0] !== undefined && <RecImage device={this.state.device[0].Guid} cam='STD_CAM_OPEN' focus='STD_CAM_FOCUS' rec='STD_CAM_REC' image='STD_CAM_IMG'/> } */}
-                {this.state.device[1] !== undefined && <RecImage device={this.state.device[1].Guid} cam='DUM_CAM_OPEN' focus='DUM_CAM_FOCUS' rec='DUM_CAM_REC' image='DUM_CAM_IMG'/> }
+                {this.state.device[0] !== undefined && 
+                  <RecImage device={this.state.device[0].camera.Guid} 
+                            rtspUrl={this.state.device[0].rtspUrl[0]}
+                            rtspPort={this.state.device[0].rtspPort[0]}
+                            cam='STD_CAM_OPEN' 
+                            focus='STD_CAM_FOCUS' 
+                            rec='STD_CAM_REC' 
+                            image='STD_CAM_IMG'/> 
+                }
+                {this.state.device[1] !== undefined && 
+                  <RecImage device={this.state.device[1].camera.Guid} 
+                            rtspUrl={this.state.device[1].rtspUrl[1]}
+                            rtspPort={this.state.device[1].rtspPort[1]}
+                            cam='DUM_CAM_OPEN' 
+                            focus='DUM_CAM_FOCUS' 
+                            rec='DUM_CAM_REC' 
+                            image='DUM_CAM_IMG'/> 
+                }
               </div>
             </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
-import { gfs_dispatch } from '../../../Method/Store';
+import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import RecTimer from './RecTimer';
 import { throttle } from 'lodash';
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
@@ -17,6 +17,7 @@ function RecImageDtl(props) {
   });
 
   const setModalIsOpen = (open) => {
+    
     let obj = {};
     obj[props.cam] = open;
 
@@ -24,7 +25,6 @@ function RecImageDtl(props) {
   }
 
   const start = async(ip) => {
-
       MILESTONE({reqAddr: 'CONNECT',
                  device : props.device})
   }
@@ -56,19 +56,49 @@ function RecImageDtl(props) {
     }
   };
 
-  useEffect(() => { 
-    var jsmpeg = require('jsmpeg');
-    var client = new WebSocket('ws://localhost:3100');
-    var canvas = document.querySelector('canvas');
+  var jsmpeg = null;
+  var client = null;
+  var canvas = null;
+  const setRtsp = () => {
+
+    jsmpeg = require('jsmpeg');
+    client = new WebSocket(`ws://211.231.136.182:${props.rtspPort}`);
+    canvas = imageRef.current;
     new jsmpeg(client, {
       canvas 
     });
+  }
 
-
-    // start(props.ip);
+  useEffect(() => { 
+    start(props.ip);
     // onStreaming();
+
+    // var jsmpeg = require('jsmpeg');
+    // var client = new WebSocket('ws://211.231.136.182:3100');
+    // var canvas = document.querySelector('canvas');
+    // new jsmpeg(client, {
+    //   canvas 
+    // });
+
+    MILESTONE({reqAddr: 'RTSPStart',
+               device: props.device,
+               streamUrl: props.rtspUrl,
+               port: props.rtspPort
+              }).then(e => {
+                if(e.data === 'OK'){
+                  setRtsp();
+                }
+              })
+    
+    return() => {
+      // const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
+      // if(activeWindow.programId !== 'INSP_PROC'){
+        client.close();
+      // }
+    }
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isOpen])
 
   const onStreaming = () => {
     setInterval((e) => {
@@ -121,7 +151,10 @@ function RecImageDtl(props) {
                 </div>
                 {/* rtsp://admin:admin13579@10.10.136.112:554/video1+audio1  */}
 
-                <canvas id='canvas' style={{width:'100%', height:'100%'}}/>
+                <canvas ref={imageRef} style={{width:'100%', height:'100%'}}
+                        onDoubleClick={e => {
+                          setModalIsOpen(true);
+                        }}/>
 
                 {/* <img style={{height:'100%', width:'100%'}} alt='yk_image' 
                     ref={imageRef}

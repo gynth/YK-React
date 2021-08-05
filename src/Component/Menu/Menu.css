@@ -19,7 +19,7 @@ html,body {height:100%;}
 .sidebarmenu .left_menu {overflow:hidden; padding-left:74px;}
 .sidebarmenu .left_menu .fixed_menu {z-index:1; position:fixed; left:0; top:0; height:100vh; width:74px; background:#ffffff}
 .sidebarmenu .left_menu .fixed_menu h1 {position:absolute; left:17px; top:14px;}
-.sidebarmenu .left_menu .fixed_menu h1 img {width:40px; height:46px}
+.sidebarmenu .left_menu .fixed_menu h1 img {width:45px; height:37px}
 .sidebarmenu .left_menu .fixed_menu .hmenu {position:absolute; left:25px; top:108px; width:24px; height:20px; background:url('../../Image/openmenu@2x.png') no-repeat 0 0; background-size:24px 20px; cursor:pointer; overflow:hidden; border:none; text-indent:-9999px}
 .sidebarmenu .left_menu .fixed_menu ul {position:absolute; top:50%; margin-top:-200px; padding:0 16px;}
 .sidebarmenu .left_menu .fixed_menu ul li {width:42px; height:42px; overflow:hidden; border-radius:21px; margin-bottom:46px; background:#ffffff;

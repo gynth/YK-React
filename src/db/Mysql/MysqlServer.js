@@ -2,7 +2,7 @@ import axios from "axios";
 
 export function MysqlServerQuery(file, fn, param){
   const host = 'http://211.231.136.150:3001/Mysql/Query';
-  // const host = 'http://localhost:3001/Mysql/Query';
+  // const host = 'http://211.231.136.182:3001/Mysql/Query';
   const option = {
     url   : host,
     method: 'POST',
@@ -29,7 +29,7 @@ export function MysqlServerQuery(file, fn, param){
 
 export function MysqlServerSP(param, gridInfo, mustValue){
   const host = 'http://211.231.136.150:3001/Mysql/SP';
-  // const host = 'http://localhost:3001/Mysql/SP';
+  // const host = 'http://211.231.136.182:3001/Mysql/SP';
   const option = {
     url   : host,
     method: 'POST',
@@ -54,7 +54,7 @@ export function MysqlServerSP(param, gridInfo, mustValue){
 
 // export function MysqlServerTemp(call, file, fn, param, query){
 //   const host = 'http://211.231.136.150:8080/mysql/select/';
-//   // const host = 'http://localhost:8080/mysql/select/';
+//   // const host = 'http://211.231.136.182:8080/mysql/select/';
 //   const option = {
 //     url   : host,
 //     method: 'POST',

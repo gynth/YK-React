@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export function YK_WEB_REQ(addr){
-  const host = 'http://localhost:3001/YK';
+  const host = 'http://211.231.136.182:3001/YK';
   // const host = 'http://211.231.136.150:3001/YK';
   const option = {
     url   : host,
@@ -25,7 +25,7 @@ export function YK_WEB_REQ(addr){
 };
 
 export function MILESTONE_LIVE(data) {
-  const host = `http://localhost:3002/MILESTONE/LIVE?device=${data['device']}`;
+  const host = `http://211.231.136.182:3002/MILESTONE/LIVE?device=${data['device']}`;
   // const host = `http://211.231.136.150:3002/MILESTONE/LIVE?device=${data['device']}`;
   const option = {
     url   : host,
@@ -49,7 +49,7 @@ export function MILESTONE_LIVE(data) {
 }
 
 export function MILESTONE(data){
-  const host = `http://localhost:3002/MILESTONE/${data['reqAddr']}`;
+  const host = `http://211.231.136.182:3002/MILESTONE/${data['reqAddr']}`;
   // const host = `http://211.231.136.150:3002/MILESTONE/${data['reqAddr']}`;
   const option = {
     url   : host,
@@ -67,7 +67,9 @@ export function MILESTONE(data){
       maxHeight  : data['maxHeight'],
       ptz        : data['ptz'],
       scaleNo    : data['scaleNo'],
-      recOwner   : data['recOwner']
+      recOwner   : data['recOwner'],
+      streamUrl  : data['streamUrl'],
+      port       : data['port']
     } 
   };
 
@@ -82,7 +84,7 @@ export function MILESTONE(data){
 };
 
 export function TOKEN(data){
-  const host = `http://localhost:3002/Token`;
+  const host = `http://211.231.136.182:3002/Token`;
   // const host = `http://211.231.136.150:3002/Token`;
   const option = {
     url   : host,

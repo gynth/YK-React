@@ -181,7 +181,7 @@ export const gfc_screenshot = (element, filename) => {
 
 export const gfc_screenshot_srv_from_milestone = (device, scaleNo) => {
 
-  const host = 'http://localhost:3001/ScreenShot/Milestone';
+  const host = 'http://211.231.136.182:3001/ScreenShot/Milestone';
   // const host = `http://211.231.136.150:3001/ScreenShot/Milestone`;
   const option = {
     url   : host,
@@ -210,7 +210,7 @@ export const gfc_screenshot_srv = (element, filename, root) => {
   return html2canvas(element).then(canvas => {
     let img = canvas.toDataURL('image/png');
 
-    const host = 'http://localhost:3001/ScreenShot';
+    const host = 'http://211.231.136.182:3001/ScreenShot';
     const option = {
       url   : host,
       method: 'POST',
@@ -237,7 +237,7 @@ export const gfc_screenshot_srv = (element, filename, root) => {
 }
 
 export const gfc_test = (element, filename, root) => {    
-  const host = 'http://localhost:3001/ScreenShot/TEST';
+  const host = 'http://211.231.136.182:3001/ScreenShot/TEST';
   const option = {
     url   : host,
     method: 'POST',

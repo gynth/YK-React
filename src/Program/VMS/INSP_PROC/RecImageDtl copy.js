@@ -58,7 +58,7 @@ function RecImageDtl(props) {
 
   useEffect(() => { 
     var jsmpeg = require('jsmpeg');
-    var client = new WebSocket('ws://localhost:3100');
+    var client = new WebSocket('ws://211.231.136.182:3100');
     var canvas = document.querySelector('canvas');
     new jsmpeg(client, {
       canvas 

@@ -3,7 +3,6 @@ const router = express.Router();
 const soap = require('soap'); 
 var edge = require('edge-js');
 
-
 //object[] info
 //0: token
 //1: device
@@ -38,6 +37,38 @@ router.post('/JPEGGetLive', (req, res) => {
 })
 //#endregion
 
+router.post('/RTSPStart', (req, res) => {
+  const device = req.body.device;
+ 
+  if(global.MILESTONE_RTSP[device] === undefined){
+    const streamUrl = req.body.streamUrl;
+    const port = req.body.port;
+    
+    // const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
+    // const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
+  
+    const Stream = require('node-rtsp-stream');
+    const streams = new Stream({
+      name: device, 
+      streamUrl: streamUrl,
+      wsPort: port, //3100, 
+      width: 1920,  
+      height: 1080 
+    });            
+    
+    global.MILESTONE_RTSP[device] = streams;
+  }   
+   
+  res.json('OK') ;    
+});   
+
+router.post('/RTSPStop', (req, res) => {
+  const device = req.body.device;
+  global.MILESTONE_RTSP[device] = undefined;
+   
+  res.json('OK') ;   
+});  
+  
 router.post('/CONNECT', (req, res) => {
   const device = req.body.device;
 
@@ -47,24 +78,24 @@ router.post('/CONNECT', (req, res) => {
       assemblyFile:`${__dirname}/Milestone.dll`,
       methodName: 'Connect'
     });
-
+ 
 
     Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
       if(result[1] === 'Y') {
         global.MILESTONE_DATA[device] = {
           method : Connect,
-          nodeLoop: setInterval(() => {
-                      global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
-                        if(result[1] === 'Y') {
-                          global.MILESTONE_DATA[device].liveImg = result[2];
-                        }
-                      })   
-                    }, 1)
+          // nodeLoop: setInterval(() => {
+          //             global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
+          //               if(result[1] === 'Y') {
+          //                 global.MILESTONE_DATA[device].liveImg = result[2];
+          //               }
+          //             })   
+          //           }, 1)
         }
       }
-    })     
-  }
-  
+    })      
+  }   
+    
   res.json({result:'OK'}) 
 });  
 
