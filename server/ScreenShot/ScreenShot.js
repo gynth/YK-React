@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
+const fsPromises = fs.promises;
 const soap = require('soap'); 
+const sharp = require('sharp');
 
 router.post('/TEST', (req, res) => {
   res.json();
@@ -99,13 +101,116 @@ router.post('/', (req, res) => {
   }
 
   if(filename === undefined){
-    filename = `${getCurrentDate()}.png`;
+    filename = `${getCurrentDate()}.jpg`;
   }
 
   fs.writeFile(`${root}\\${filename}`, img, 'base64', function(err) {
     res.json(err);
   });
 });
+
+//#region 계량표 불러오기
+router.post('/YK_Chit_YN', (req, res) => {
+  const scaleNo = req.body.scaleNo;
+  const folder = scaleNo.substring(0, 8);
+
+  if(fs.existsSync(`D:\\IMS\\Chit\\${folder}\\${scaleNo}.jpg`)){
+    const readFile = fs.readFileSync(`D:\\IMS\\Chit\\${folder}\\${scaleNo}.jpg`);
+    const encode = Buffer.from(readFile).toString('base64');
+    res.end(encode);
+  }else{
+    res.json('N');
+  }
+});  
+//#endregion
+
+//#region 계량표 저장
+router.post('/YK_Chit', (req, res) => {
+
+  const img = req.body.img.replace('data:image/png;base64,', '');
+  const filename = req.body.filename;
+  const folder = filename.substring(0, 8);
+  
+  if(!fs.existsSync(`D:\\IMS`)){
+    fs.mkdirSync(`D:\\IMS`);
+  }
+  if(!fs.existsSync(`D:\\IMS\\Chit`)){
+    fs.mkdirSync(`D:\\IMS\\Chit`);
+  }
+  if(!fs.existsSync(`D:\\IMS\\Chit\\${folder}`)){
+    fs.mkdirSync(`D:\\IMS\\Chit\\${folder}`);
+  }
+
+  // const root4 = `D:\\Project\\01.YK\\Screenshot\\20210805\\test.png`;
+  // const root5 = `D:\\Project\\01.YK\\Screenshot\\20210805\\test2.png`;
+  makeImg(img, folder, filename).then(e => {
+    res.json(e);
+  });
+}); 
+
+const makeImg = async(img, folder, filename) => {
+
+  const root = `D:\\IMS\\Chit\\${folder}\\${filename}_temp1.png`;
+  const root1 = `D:\\IMS\\Chit\\${folder}\\${filename}_temp2.png`;
+  const root2 = `D:\\IMS\\Chit\\${folder}\\${filename}_temp3.png`;
+  const root3 = `D:\\IMS\\Chit\\${folder}\\${filename}.jpg`;
+
+  try{
+    await fsPromises.writeFile(root, img, 'base64');
+  
+    await sleep(300);
+  
+    await sharp(root).extract({left:16, top:0, width:336, height:690})    
+    .toFile(root1);
+   
+    await sleep(300);
+
+    // //원본 비율을 무시하고 리사이즈 한다.
+    // await sharp(root1).resize({fit:'fill', width:540, height:942})
+    // .toFile(root2);
+  
+    // await sleep(300);
+
+    await fsPromises.rename(root1, root3);
+  
+    await sleep(300);
+
+    await fsPromises.unlink(root);
+
+    // await sleep(300);
+
+    // await fsPromises.unlink(root1);
+  
+
+
+
+    // //원본 비율을 무시하고 리사이즈 한다.
+    // await sharp(root1).resize({fit:'fill', width:540, height:942})
+    // .toFile(root2);
+  
+    // await sleep(300);
+
+    // await fsPromises.rename(root2, root3);
+  
+    // await sleep(300);
+
+    // await fsPromises.unlink(root);
+
+    // await sleep(300);
+
+    // await fsPromises.unlink(root1);
+    
+    return 'Y';
+  }catch(e) {
+    return e;
+  }
+}
+
+const sleep = (ms) => {
+  return new Promise(resolve=>setTimeout(resolve, ms));
+}
+
+//#endregion
 
 const getToday = () => {
   var date = new Date();

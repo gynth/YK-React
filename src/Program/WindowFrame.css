@@ -36,14 +36,16 @@
 .car_list .grid .grid_info .title {display:block; float:left; font-size:16px; font-weight:bold; margin-right:15px; float:left;}
 .car_list .grid .grid_info .value {display:block; float:left; font-size:14px; font-weight:bold; padding:0px 10px; min-width:40px; text-align:center; height:25px; line-height:25px; margin-top:11px; border-radius:5px; background:#ffffff }
 
-.car_list .total_info {position:absolute; left:0; bottom:0; padding:24px 0; height:161px; box-sizing:border-box; width:100%; border-top:1px solid #707070}
-.car_list .total_info ul {overflow:hidden; height:100%;}
-.car_list .total_info ul li {float:left; width:34%; height:100%; box-sizing:border-box; text-align:center;}
+.car_list .total_info {position:absolute; left:0; bottom:0; padding:12px 0; height:161px; box-sizing:border-box; width:100%; border-top:1px solid #707070}
+.car_list .total_info ul {overflow:hidden; height:50%;}
+.car_list .total_info ul li {position:relative; float:left; width:34%; height:100%; box-sizing:border-box; text-align:center;}
+.car_list .total_info ul:first-child {border-bottom:1px solid #C8C8C8}
 .car_list .total_info ul li:first-child {width:33%; border-right:1px solid #C8C8C8}
 .car_list .total_info ul li:last-child {width:33%; border-left:1px solid #C8C8C8}
-.car_list .total_info ul li .title {display:block; font-size:16px; font-weight:bold; color:#2C73BB; margin-top:15px;}
-.car_list .total_info ul li .value {display:block; font-family: 'Rajdhani', sans-serif; font-size:50px; margin-top:5px; line-height:50px; color:#000000;}
-
+.car_list .total_info ul li .title {float:left; vertical-align:middle; font-size:16px; font-weight:bold; color:#2C73BB; padding-left:10px;}
+.car_list .total_info ul:last-child li .title {padding-top:5px}
+.car_list .total_info ul li .value {position:absolute; right:0; bottom:0; font-family: 'Rajdhani', sans-serif; font-size:40px; padding-right:10px; line-height:40px; color:#000000;}
+.car_list .total_info ul:last-child li .value {bottom:-5px;}
 .car_manager .car_info {float:left; width:365px; height:100%;}
 
 .car_info {position:relative; padding-top:251px; padding-bottom:90px; box-sizing:border-box;}
@@ -80,10 +82,10 @@
 .car_info .data_list ul li:last-child {border-bottom:none;}
 .car_info .data_list ul li .t {display:block; float:left; width:84px; font-weight:bold; text-align:center; border-right:1px solid #000; box-sizing:border-box;} 
 .car_info .data_list ul li .v {display:block; float:left; width:calc(100% - 84px); text-align:center; font-weight:bold;} 
-.car_info .data_list .memo {}
-.car_info .data_list .memo h5 {font-size:16px; font-weight:bold; padding:10px 0}
-.car_info .data_list .memo textarea {padding:5px; width: calc(100% - 15px); border:1px solid #C8C8C8; border-radius:5px; height:170px;}
-
+.car_info .data_list .memo {border:1px solid #000; border-top:none;}
+.car_info .data_list .memo h5 {font-size:16px; font-weight:bold; padding:10px 0; text-align:center;}
+/* .car_info .data_list .memo textarea {padding:5px; width: calc(100% - 10px); border:none; border-radius:5px; height:170px;} */
+.car_info .data_list .memo textarea {resize: none; padding:5px; border:none; border-radius:5px; height:210px; width: calc(100% - 10px); }
 .car_info .complete_btn {position:absolute; bottom:0; left:0; height:90px; width:100%; padding:0 17px; box-sizing:border-box; }
 .car_info .complete_btn button {display:none; cursor:pointer; width:100%; height:62px; border-radius:5px; border:none; margin-top:10px; background:#0C1D33; color:#ffffff; font-size:22px;}
 .car_info .complete_btn button.on {display:block}
@@ -98,6 +100,8 @@
 .cctv:last-child {padding-top:8px}
 .cctv .viewer {background:#000000; width:100%; height:100%; cursor:pointer; box-sizing:border-box;}
 .cctv .viewer.on {border:2px solid #2D7ADE}
+
+/*
 .cctv .controller {position:absolute; right:10px; bottom:20px; border:1px solid rgba(0,0,0,0.3); padding:5px; height:30px; border-radius:30px; }
 .cctv .controller button {vertical-align:top; cursor:pointer; float:left; width:30px; height:30px; margin-right:4px; border-radius:15px; border:none; text-indent:-9999px; overflow:hidden;}
 .cctv .controller button.left {background:rgba(0,0,0,0.2) url('../Image/car_controll_left@2x.png') no-repeat 9px 50%; background-size:10px 13px;}
@@ -115,8 +119,28 @@
 .cctv .controller.on button.right {background:rgba(0,0,0,0.2) url('../Image/car_controll_right@2x.png') no-repeat 55% 50%; background-size:auto;}
 .cctv .controller.on button.plus {background:rgba(0,0,0,0.2) url('../Image/car_controll_plus@2x.png') no-repeat 50% 50%; background-size:auto;}
 .cctv .controller.on button.minus {margin:0;background:rgba(0,0,0,0.2) url('../Image/car_controll_minus@2x.png') no-repeat 50% 50%; background-size:auto;}
+*/
+
+.cctv:last-child .direction .top {top:20px;}
+.cctv .viewer {background:#000000; width:100%; height:100%; cursor:pointer; box-sizing:border-box;}
+.cctv .viewer.on {border:2px solid #2D7ADE}
 
 
+.cctv .controller {position:absolute; right:10px; bottom:20px;}
+.cctv .controller button {cursor:pointer; opacity:0.7; width:42px; height:42px; border-radius:30px; text-indent:-9999px; overflow:hidden; border:none; float:left; margin-right:5px}
+.cctv .controller button:hover {opacity:1}
+.cctv .controller button.plus {background:rgba(0,0,0,0.5) url('../Image/car_controll_plus@2x.png') no-repeat 50% 50%; background-size:22px;}
+.cctv .controller button.minus {margin:0;background:rgba(0,0,0,0.5) url('../Image/car_controll_minus@2x.png') no-repeat 50% 50%; background-size:22px;}
+.cctv .direction button {opacity:0.7; cursor:pointer; width:40px; height:40px; text-indent:-9999px; overflow:hidden; border:none; border-radius:5px}
+.cctv .direction button:hover {opacity:1}
+.cctv .direction .left {position:absolute; left:10px; top:50%; margin-top:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_left@2x.png') no-repeat 50% 50%; background-size:15px auto; }
+.cctv .direction .right {position:absolute; right:10px; top:50%; margin-top:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_right@2x.png') no-repeat 50% 50%; background-size:15px auto; }
+.cctv .direction .top {position:absolute; left:50%; top:10px; margin-left:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_top@2x.png') no-repeat 50% 50%; background-size:20px auto; }
+.cctv .direction .down {position:absolute; left:50%; bottom:20px; margin-left:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_down@2x.png') no-repeat 50% 50%; background-size:20px auto; }
+
+.picture_save {opacity:0.7; position: absolute; left: 10px; bottom: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:10px; background:rgba(0,0,0,0.5) url('../Image/camera_bu.png') no-repeat 21px 10px;}
+.picture_save:hover {opacity:1}
+/*
 .picture_save {position: absolute; left: 10px; bottom: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:20px; background:rgba(0,0,0,0.3) url('../Image/camera_bu.png') no-repeat 21px 10px;}
 .picture_save a {font-size:14px; color:#ffffff; text-decoration: none;}
 .picture_save .server {padding-left:3px; }
@@ -127,7 +151,7 @@
 .picture_save.on a {font-size:18px; color:#ffffff;}
 .picture_save.on .server {padding-left:3px; }
 .picture_save.on .mycomputer {padding-left:10px}
-
+*/
 .rain_info {position:absolute; right:13px; top:10px;}
 .rain_info .title {color:#fff; font-size:16px; padding-left:33px; background:url('../Image/rain_bu.png') no-repeat 0 50%; }
 .rain_info .value {margin-left:10px; display:inline-block; background:#000; text-align:center; height:37px; line-height:37px; padding:0 10px; color:#fff; font-size:16px; }

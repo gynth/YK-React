@@ -37,7 +37,7 @@ app3002.use(express.urlencoded({
   limit: '100mb',
   extended: false
 }));
-app3001.use(cors());
+app3001.use(cors()); 
 app3002.use(cors());
 
 //#region Mysql요청

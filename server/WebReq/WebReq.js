@@ -17,8 +17,8 @@ const yk_req = (request, URL) => {
 }
 
 router.post('/', (req, res) => {
-  let URL = `http://tally.yksteel.co.kr/ykdev/${req.body.addr}`;
-  // let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
+  // let URL = `http://tally.yksteel.co.kr/ykdev/${req.body.addr}`;
+  let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
   
   
   yk_req(req, URL).then((response) => {

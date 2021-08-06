@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_addClass, gfc_removeClass, gfc_hasClass, gfc_test } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getInput, gfo_getCombo } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -18,11 +18,11 @@ import Combobox from '../../../Component/Control/Combobox';
 import Mainspan from './Mainspan';
 import Detailspan from './Detailspan';
 import Botspan from './Botspan';
-import RecImage from './RecImage';
 import Chit from './Chit';
+import CompleteBtn from './CompleteBtn';
+import TabList from './TabList';
 
 import GifPlayer from 'react-gif-player';
-// import { Timer } from 'timer-node';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
@@ -154,12 +154,6 @@ class INSP_PROC extends Component {
   }
   //#endregion
 
-  //#region 검수등록
-  onProcess = () => {
-    const detail_grade1 = gfo_getCombo(this.props.pgm, 'detail_grade1'); //고철등급
-
-  }
-  //#endregion
   constructor(props){
     super(props)
     
@@ -196,7 +190,21 @@ class INSP_PROC extends Component {
           DUM_CAM_REC  : nowState === undefined ? {
                                                     rec     : false,
                                                     time    : '00:00'
-                                                  } : nowState.DUM_CAM_REC
+                                                  } : nowState.DUM_CAM_REC,
+
+          CHIT_MEMO    : nowState === undefined ? '' : nowState.CHIT_MEMO,
+          
+          CHIT_INFO    : nowState === undefined ? {
+                                                    date     : '',
+                                                    scaleNumb: '',
+                                                    carNumb  : '',
+                                                    vender   : '',
+                                                    itemFlag : '',
+                                                    Wgt      : '',
+                                                    loc      : '',
+                                                    user     : '',
+                                                    chit     : {}
+                                                  } : nowState.CHIT_INFO
         };
       }
 
@@ -273,30 +281,57 @@ class INSP_PROC extends Component {
       }else if(action.type === 'STD_CAM_REC'){
 
         return Object.assign({}, nowState, {
-          STD_CAM_REC : {rec  : action.rec,
-                        //  car  : action.car,
-                         time : nowState.STD_CAM_REC.time}
+          STD_CAM_REC : {
+            rec  : action.rec,
+            //  car  : action.car,
+            time : nowState.STD_CAM_REC.time
+          }
         })
       }else if(action.type === 'DUM_CAM_REC'){
 
         return Object.assign({}, nowState, {
-          DUM_CAM_REC : {rec  : action.rec,
-                        //  car  : action.car,
-                         time : nowState.DUM_CAM_REC.time}
+          DUM_CAM_REC : {
+            rec  : action.rec,
+            //  car  : action.car,
+            time : nowState.DUM_CAM_REC.time
+          }
         })
       }else if(action.type === 'STD_CAM_REC_TIME'){
 
         return Object.assign({}, nowState, {
-          STD_CAM_REC : {rec     : nowState.STD_CAM_REC.rec,
-                        //  car     : action.car,
-                         time    : action.time}
+          STD_CAM_REC : {
+            rec     : nowState.STD_CAM_REC.rec,
+            //  car     : action.car,
+            time    : action.time
+          }
         })
       }else if(action.type === 'DUM_CAM_REC_TIME'){
 
         return Object.assign({}, nowState, {
-          DUM_CAM_REC : {rec     : nowState.DUM_CAM_REC.rec,
-                        //  car     : action.car,
-                         time    : action.time}
+          DUM_CAM_REC : {
+            rec     : nowState.DUM_CAM_REC.rec,
+            //  car     : action.car,
+            time    : action.time
+          }
+        })
+      }else if(action.type === 'CHIT_INFO'){
+
+        return Object.assign({}, nowState, {
+          CHIT_INFO : {
+            date     : action.date,
+            scaleNumb: action.scaleNumb,
+            carNumb  : action.carNumb,
+            vender   : action.vender,
+            itemFlag : action.itemFlag,
+            Wgt      : action.Wgt,
+            loc      : action.loc,
+            user     : action.user,
+            chit     : action.chit
+          }
+        })
+      }else if(action.type === 'CHIT_MEMO'){
+        return Object.assign({}, nowState, {
+          CHIT_MEMO : action.CHIT_MEMO
         })
       }
     }
@@ -333,71 +368,83 @@ class INSP_PROC extends Component {
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     if(main){
-
+      grid.resetData(main);
     }else{
 
     }
 
-    const data = {'dataSend':[
-                  {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
-                  {'date':'2021-06-24 13:43:39','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'36960','scaleNumb':'202106240218','carNumb':'경남80사5946'},
-                  {'date':'2021-06-24 13:45:05','vendor':'(주)거산\/ (주)거산 동부산 지점','itemFlag':'M1KDO0001','totalWgt':'35020','scaleNumb':'202106240219','carNumb':'81버7666'},
-                  {'date':'2021-06-24 14:21:42','vendor':'(주)우신\/ 주식회사 우신','itemFlag':'M1KDO0001','totalWgt':'43620','scaleNumb':'202106240230','carNumb':'경북86아4725'},
-                  {'date':'2021-06-24 14:26:24','vendor':'(주)진광스틸\/ 금와산업','itemFlag':'M1KDO0002','totalWgt':'43800','scaleNumb':'202106240233','carNumb':'경남82사5143'},
-                  {'date':'2021-06-24 14:34:09','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'36240','scaleNumb':'202106240236','carNumb':'경남82사3319'},
-                  {'date':'2021-06-24 14:40:18','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'31800','scaleNumb':'202106240241','carNumb':'부산94아3089'},
-                  {'date':'2021-06-24 15:15:05','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0002','totalWgt':'43100','scaleNumb':'202106240248','carNumb':'경북83아8533'},
-                  {'date':'2021-06-24 15:42:51','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0001','totalWgt':'43320','scaleNumb':'202106240255','carNumb':'경북82아8342'},
-                  {'date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'}
-                ]
-              }['dataSend'];
+    // const data = {'dataSend':[
+    //               {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
+    //               {'date':'2021-06-24 13:43:39','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'36960','scaleNumb':'202106240218','carNumb':'경남80사5946'},
+    //               {'date':'2021-06-24 13:45:05','vendor':'(주)거산\/ (주)거산 동부산 지점','itemFlag':'M1KDO0001','totalWgt':'35020','scaleNumb':'202106240219','carNumb':'81버7666'},
+    //               {'date':'2021-06-24 14:21:42','vendor':'(주)우신\/ 주식회사 우신','itemFlag':'M1KDO0001','totalWgt':'43620','scaleNumb':'202106240230','carNumb':'경북86아4725'},
+    //               {'date':'2021-06-24 14:26:24','vendor':'(주)진광스틸\/ 금와산업','itemFlag':'M1KDO0002','totalWgt':'43800','scaleNumb':'202106240233','carNumb':'경남82사5143'},
+    //               {'date':'2021-06-24 14:34:09','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'36240','scaleNumb':'202106240236','carNumb':'경남82사3319'},
+    //               {'date':'2021-06-24 14:40:18','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'31800','scaleNumb':'202106240241','carNumb':'부산94아3089'},
+    //               {'date':'2021-06-24 15:15:05','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0002','totalWgt':'43100','scaleNumb':'202106240248','carNumb':'경북83아8533'},
+    //               {'date':'2021-06-24 15:42:51','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0001','totalWgt':'43320','scaleNumb':'202106240255','carNumb':'경북82아8342'},
+    //               {'date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'}
+    //             ]
+    //           }['dataSend'];
 
-    const sort = [];
-    data.forEach(e => {
-      if(e.rec === '1'){
-        sort.unshift(e);
-      }else{
-        sort.push(e);
-      }
-    })
+    // const sort = [];
+    // main.forEach(e => {
+    //   if(e.rec === '1'){
+    //     sort.unshift(e);
+    //   }else{
+    //     sort.push(e);
+    //   }
+    // })
 
-    grid.resetData(
-      sort
-    );
+    // grid.resetData(
+    //   sort
+    // );
 
     gfg_setSelectRow(grid);
-    gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: sort.length});
+    gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
     gfc_hideMask();
   }
 
 
-  onSelectChange = (e) => {
+  onSelectChange = async (e) => {
     if(e === null) return;
 
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
-  }
 
-  tabButton(tabIndex){
-    let tabList = ['tab1','tab2']
-    let contentList = ['content1','content2']
-    let btnList = ['btn1','btn2']
-    let tabMaxIndex = 2;
-    for(let i = 0; i < tabMaxIndex; i++){
-      if(i === tabIndex){
-        if(gfc_hasClass(document.getElementById(tabList[i]),'on') === false){
-          gfc_addClass(document.getElementById(tabList[i]),'on');
-          gfc_addClass(document.getElementById(contentList[i]),'on');
-          gfc_addClass(document.getElementById(btnList[i]),'on');
-        }
-      }else{
-        gfc_removeClass(document.getElementById(tabList[i]),'on');
-        gfc_removeClass(document.getElementById(contentList[i]),'on');
-        gfc_removeClass(document.getElementById(btnList[i]),'on');
-      }
+    //계량표 정보여부
+    const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
+    if(!chitInfoYn.data.dataSend){
+      alert('계량표 정보가 없습니다.');
+      return;
     }
+
+    //계량표 여부 확인.
+    const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
+    if(chitYn.data === 'N'){
+      gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+        date     : chitInfoYn.data.dataSend[0].date,
+        scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
+        carNumb  : chitInfoYn.data.dataSend[0].carNumb,
+        vender   : chitInfoYn.data.dataSend[0].vendor,
+        itemFlag : chitInfoYn.data.dataSend[0].item,
+        Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
+        loc      : '부산',
+        user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+        chit     : {}
+      });
+    }else{
+      gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+        chit     : chitYn.data
+      });
+    }
+
+    //계량표 정보 확인.
+    // const headData = YK_WEB_REQ(`tally_chit.jsp?scaleNumb=202107140001`);
+    // const headData = YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
+
   }
 
   render() {
@@ -528,6 +575,11 @@ class INSP_PROC extends Component {
                 <li><span className='title'>전체 검수 차량</span><Mainspan flag={2} /></li>
                 <li><span className='title'>입고량(KG)</span><Mainspan flag={3} /></li>
               </ul>
+              <ul>
+                <li><span className='title'>검수대기</span><Mainspan flag={4} /></li>
+                <li><span className='title'>출차대기</span><Mainspan flag={5} /></li>
+                <li><span className='title'>입차대기</span><Mainspan flag={6} /></li>
+              </ul>
             </div>
           </div>
           <div className='car_info'>
@@ -555,11 +607,10 @@ class INSP_PROC extends Component {
                 </li>
               </ul>
             </div>
-            <div className='tab_list'>
-              <button type='button' id='tab1' className='tab on' onClick={() => this.tabButton(0)}>검수입력</button>
-              <button type='button' id='tab2' className='tab' onClick={() => this.tabButton(1)}><span className='doc'>메모있음</span>계량증명서</button>
-            </div>
-            <div className='tab_content'>
+
+            <TabList />
+
+            <div className='tab_content' id='tabMain'>
               <div className='input_list on' id='content1'>
                 <ul>
                   <li>
@@ -733,18 +784,16 @@ class INSP_PROC extends Component {
 
 
             </div>
-            <div className='complete_btn'>
-              <button type='button' id='btn1' className='on'><span>등록완료</span></button>
-              <button type='button' id='btn2'><span>계량증명서저장</span></button>
-            </div>
+            
+            <CompleteBtn pgm={this.props.pgm}/>
           </div>
             <div className='cctv_viewer'>
               <h4>실시간 CCTV</h4>
-              <div className="rain_info">
-		            <span className="title">강수량</span><span className="value">100mm</span>
+              <div className='rain_info'>
+		            <span className='title'>강수량</span><span className='value'>100mm</span>
 	            </div>
               <div className='cctv_list'>
-                {this.state.device[0] !== undefined && 
+                {/* {this.state.device[0] !== undefined && 
                   <RecImage device={this.state.device[0].camera.Guid} 
                             rtspUrl={this.state.device[0].rtspUrl[0]}
                             rtspPort={this.state.device[0].rtspPort[0]}
@@ -761,7 +810,7 @@ class INSP_PROC extends Component {
                             focus='DUM_CAM_FOCUS' 
                             rec='DUM_CAM_REC' 
                             image='DUM_CAM_IMG'/> 
-                }
+                } */}
               </div>
             </div>
         </div>

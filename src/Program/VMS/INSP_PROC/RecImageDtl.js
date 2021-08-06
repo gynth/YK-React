@@ -176,8 +176,8 @@ function RecImageDtl(props) {
                 }}>
                   {/* <a href='#!' className='server'></a> */}
                 </div>
-                <div className={isOpen === true ? 'controller on' : 'controller'}>
-                  <button type='' className='left' onClick={e => {
+                <div className="direction">
+                <button type='' className='left' onClick={e => {
                     e.stopPropagation();
                     onClick(e, 'left')}}>왼쪽</button>
                   <button type='' className='top' onClick={e => {
@@ -189,14 +189,14 @@ function RecImageDtl(props) {
                   <button type='' className='right' onClick={e => {
                     e.stopPropagation();
                     onClick(e, 'right')}}>오른쪽</button>
-                  <span className='sep'>
+                </div>
+                <div className={isOpen === true ? 'controller on' : 'controller'}>
                     <button type='' className='plus' onClick={e => {
                     e.stopPropagation();
                     onClick(e, 'zoomin')}}>확대</button>
                     <button type='' className='minus' onClick={e => {
                     e.stopPropagation();
                     onClick(e, 'zoomout')}}>축소</button>
-                  </span>
                 </div>
               </>;
 

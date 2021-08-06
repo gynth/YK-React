@@ -1,6 +1,7 @@
 import numeral from 'numeral';
 import { gfs_dispatch } from '../Method/Store';
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas'
+import html2canvas from 'html2canvas-render-offscreen'
 import axios from 'axios';
 
 export const gfc_getMultiLang = (code, text) => {
@@ -163,7 +164,10 @@ export const gfc_hasClass = (element, className) => {
 }
 
 export const gfc_screenshot = (element, filename) => {
-  html2canvas(element).then(canvas => {
+  html2canvas(element, {
+    height: 1000,
+    scale: 3
+  }).then(canvas => {
     const img = canvas.toDataURL('image/png');
 
     var link = document.createElement('a');
@@ -173,7 +177,7 @@ export const gfc_screenshot = (element, filename) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } else {
+    } else { 
       window.open(img);
     }
   });
@@ -206,8 +210,12 @@ export const gfc_screenshot_srv_from_milestone = (device, scaleNo) => {
     })
 }
 
-export const gfc_screenshot_srv = (element, filename, root) => {
-  return html2canvas(element).then(canvas => {
+export const gfc_screenshot_srv = (element, filename, height, root) => {
+
+  return html2canvas(element, {
+    // width : 1000,
+    height: 1500
+  }).then(canvas => {
     let img = canvas.toDataURL('image/png');
 
     const host = 'http://211.231.136.182:3001/ScreenShot';
@@ -220,7 +228,65 @@ export const gfc_screenshot_srv = (element, filename, root) => {
       data: {
         img,
         filename,
-        root
+        root,
+        height
+      } 
+    };
+
+    return axios(option)
+      .then(res => {
+        // console.log(res);
+        return res;
+      })
+      .catch(err => {
+        console.log(err)
+        return err;
+      })
+  });
+}
+
+export const gfc_chit_yn_YK = (scaleNo) => {
+  const host = 'http://211.231.136.182:3001/ScreenShot/YK_Chit_YN';
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+      scaleNo
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
+export const gfc_screenshot_srv_YK = (element, filename) => {
+
+  return html2canvas(element, {
+    // width : 1000,
+    height: 1500
+  }).then(canvas => {
+    let img = canvas.toDataURL('image/png');
+
+    const host = 'http://211.231.136.182:3001/ScreenShot/YK_Chit';
+    const option = {
+      url   : host,
+      method: 'POST',
+      // headers: {
+      //   'Access-Control-Allow-Origin': '*'
+      // },
+      data: {
+        img,
+        filename
       } 
     };
 

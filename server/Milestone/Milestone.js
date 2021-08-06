@@ -59,8 +59,8 @@ router.post('/RTSPStart', (req, res) => {
     global.MILESTONE_RTSP[device] = streams;
   }   
    
-  res.json('OK') ;    
-});   
+  res.json('OK') ;     
+});    
 
 router.post('/RTSPStop', (req, res) => {
   const device = req.body.device;
