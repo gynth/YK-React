@@ -31,6 +31,14 @@ class Input extends Component{
     );
   }
 
+  componentWillUnmount(){
+    gfs_dispatch(this.props.pgm, 'CLEARINPUT', 
+      ({
+        id: this.props.id
+      })
+    );
+  }
+
   onChangeBase = (e) => {
     this.setState({
       defaultValue: e.target.value

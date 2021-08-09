@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { gfc_setNumberFormat } from '../../../Method/Comm';
 import { gfs_dispatch } from '../../../Method/Store';
+import { gfo_getTextarea } from '../../../Method/Component';
+import TextArea from '../../../Component/Control/TextArea';
 
 function Chit(props) {
   const value = useSelector((e) => {
-    return e.INSP_PROC_MAIN.CHIT_INFO;
+    return e[props.reducer].CHIT_INFO;
   }, (p, n) => {
-    return p.scaleNumb === n.scaleNumb;
+    return p === n;
   });
 
   const changeMemo = (e) => {
-    gfs_dispatch('INSP_PROC_MAIN', 'CHIT_MEMO', {CHIT_MEMO: e.target.value});
+    gfs_dispatch(props.reducer, 'CHIT_MEMO', {CHIT_MEMO: e.target.value});
   }
 
   const limitLine = (e) => {
@@ -23,6 +25,11 @@ function Chit(props) {
 
     }
   }
+
+  useEffect(e => {
+    if(value.chit.length === undefined)
+      gfo_getTextarea(props.pgm, 'chit_memo').setValue('');
+  })
 
   // date     : action.date,
   // scaleNumb: action.scaleNumb,
@@ -78,7 +85,7 @@ function Chit(props) {
           </div>
           <div className='memo'>
             <h5>MEMO</h5>
-            <textarea rows={10} wrap='soft' defaultValue='' onChange={e => changeMemo(e)} onKeyDown={e => limitLine(e)}></textarea>
+            <TextArea pgm={props.pgm} id={props.id} rows={10} wrap='soft' defaultValue='' onChange={e => changeMemo(e)} onKeyDown={e => limitLine(e)}></TextArea>
           </div>
         </div>
       :

@@ -18,6 +18,24 @@ export const gfo_getInput = (parent, inputId) => {
   }
 }
 
+export const gfo_getTextarea = (parent, inputId) => {
+  const type = typeof(parent);
+  let storeValue;
+
+  if(type === 'string'){
+    storeValue = gfs_getStoreValue(parent, 'Textarea');
+  }else{
+    storeValue = parent['Textarea'];
+  }
+
+  if(storeValue !== undefined && storeValue.length > 0) {
+    const findValue = storeValue.find(e => e.id === inputId);
+
+    if(findValue !== undefined)
+      return findValue.Textarea;
+  }
+}
+
 export const gfo_getCombo = (parent, comboId) => {
   const type = typeof(parent);
   let storeValue;

@@ -96,6 +96,14 @@ class Combobox extends Component{
     } 
   }
 
+  componentWillUnmount(){
+    gfs_dispatch(this.props.pgm, 'CLEARCOMBO', 
+      ({
+        id: this.props.id
+      })
+    );
+  }
+
   componentDidMount(){
 
     this.ComboCreate(this.props);
@@ -197,12 +205,26 @@ class Combobox extends Component{
       this.originalValue = curValue;
   }
 
+  onChangeBase = (e) => {
+    if(this.props.onChange !== undefined){
+      this.props.onChange(e);
+    }
+  }
+
   getValue = () => {
     const value = this.ref.current.state.value;
     if(value === null) return null;
     if(value === undefined) return null;
 
     return value.value;
+  }
+
+  getLabel = () => {
+    const label = this.ref.current.state.value;
+    if(label === null) return null;
+    if(label === undefined) return null;
+
+    return label.label;
   }
 
   setValue = (value) => {
@@ -228,14 +250,14 @@ class Combobox extends Component{
                 ref          = {this.ref}
                 onBlur       = {e => this.onBlurBase(e)}
 
-                onFocus = {e => this.onFocusBase(e)}
+                onFocus      = {e => this.onFocusBase(e)}
+                onChange     = {e => this.onChangeBase(e)}
                 
                 // menuIsOpen
                   
                   // inputId={this.props.id}
                   // filterOption={null}
   
-                  // onChange={(e) => onChangeBase(e)}
                 
                   // // defaultValue={option[1]} //이건 이방법뿐인듯 따로 기능구현
                   // onFocus={(e) => onFocusBase(e)}

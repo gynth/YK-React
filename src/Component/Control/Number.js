@@ -32,6 +32,14 @@ class Number extends Component{
     );
   }
 
+  componentWillUnmount(){
+    gfs_dispatch(this.props.pgm, 'CLEARNUMBER', 
+      ({
+        id: this.props.id
+      })
+    );
+  }
+
   onChangeBase = (e) => {  
     // if(e.nativeEvent.data !== null){
 

@@ -1,10 +1,11 @@
+//#region import
 import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
-import { gfo_getInput, gfo_getCombo } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getTextarea } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
@@ -15,10 +16,10 @@ import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextA
 
 import Combobox from '../../../Component/Control/Combobox';
 
-import Mainspan from './Mainspan';
-import Detailspan from './Detailspan';
-import Botspan from './Botspan';
-import Chit from './Chit';
+import Mainspan from '../Common/Mainspan';
+import Detailspan from '../Common/Detailspan';
+import Botspan from '../Common/Botspan';
+import Chit from '../Common/Chit';
 import CompleteBtn from './CompleteBtn';
 import TabList from './TabList';
 import RecImage from './RecImage';
@@ -28,6 +29,7 @@ import GifPlayer from 'react-gif-player';
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import { throttle } from 'lodash';
+//#endregion
 
 class INSP_PROC extends Component {
 
@@ -333,6 +335,21 @@ class INSP_PROC extends Component {
             time    : action.time
           }
         })
+      }else if(action.type === 'CHIT_INFO_ITEM_FLAG'){
+
+        return Object.assign({}, nowState, {
+          CHIT_INFO : {
+            date     :  nowState.CHIT_INFO.date,
+            scaleNumb:  nowState.CHIT_INFO.scaleNumb,
+            carNumb  :  nowState.CHIT_INFO.carNumb,
+            vender   :  nowState.CHIT_INFO.vender,
+            itemFlag :  action.itemFlag,
+            Wgt      :  nowState.CHIT_INFO.Wgt,
+            loc      :  nowState.CHIT_INFO.loc,
+            user     :  nowState.CHIT_INFO.user,
+            chit     :  nowState.CHIT_INFO.chit
+          }
+        })
       }else if(action.type === 'CHIT_INFO'){
 
         return Object.assign({}, nowState, {
@@ -449,6 +466,17 @@ class INSP_PROC extends Component {
   onSelectChange = async (e) => {
     if(e === null) return;
 
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(''); //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue(''); //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(''); //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(''); //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(''); //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue(''); //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(''); //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(''); //반품구분사유
+    gfo_getCombo(this.props.pgm, 'detail_warning').setValue(''); //경고
+
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
@@ -469,7 +497,7 @@ class INSP_PROC extends Component {
         scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
         carNumb  : chitInfoYn.data.dataSend[0].carNumb,
         vender   : chitInfoYn.data.dataSend[0].vendor,
-        itemFlag : chitInfoYn.data.dataSend[0].item,
+        itemFlag : '',
         Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
         loc      : '부산',
         user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
@@ -606,29 +634,29 @@ class INSP_PROC extends Component {
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>잔여차량</span><Botspan />
+                <span className='title'>잔여차량</span><Botspan reducer='INSP_PROC_MAIN' />
               </div>
             </div>
             <div className='total_info'>
               <ul>
-                <li><span className='title'>잔류 차량</span><Mainspan flag={1} /></li>
-                <li><span className='title'>전체 검수 차량</span><Mainspan flag={2} /></li>
-                <li><span className='title'>입고량(KG)</span><Mainspan flag={3} /></li>
+                <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
+                <li><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
+                <li><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
               </ul>
               <ul>
-                <li><span className='title'>검수대기</span><Mainspan flag={4} /></li>
-                <li><span className='title'>출차대기</span><Mainspan flag={5} /></li>
-                <li><span className='title'>입차대기</span><Mainspan flag={6} /></li>
+                <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
+                <li><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
+                <li><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
               </ul>
             </div>
           </div>
           <div className='car_info'>
-            <div className='title'><span>배차번호</span><Detailspan flag={1} /></div>
+            <div className='title'><span>배차번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
             <div className='detail'>
               <ul>
-                <li><span className='t'>차량번호</span><Detailspan flag={2} /></li>
-                <li><span className='t'>총중량(KG)</span><Detailspan flag={3} /></li>
-                <li><span className='t'>입차시간</span><Detailspan flag={4} /></li>
+                <li><span className='t'>차량번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={2} /></li>
+                <li><span className='t'>총중량(KG)</span><Detailspan reducer='INSP_PROC_MAIN' flag={3} /></li>
+                <li><span className='t'>입차시간</span><Detailspan reducer='INSP_PROC_MAIN' flag={4} /></li>
                 <li>
                     <button onClick={() => 
                       {
@@ -648,7 +676,7 @@ class INSP_PROC extends Component {
               </ul>
             </div>
 
-            <TabList />
+            <TabList pgm={this.props.pgm} id={this.props.id}/>
 
             <div className='tab_content' id='tabMain'>
               <div className='input_list on' id='content1'>
@@ -731,22 +759,62 @@ class INSP_PROC extends Component {
                   </li>
                   <li>
                     <h5>감가내역</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_depr'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감가내역 검색'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                  />
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_depr'
+                            value   = 'itemCode'
+                            display = 'item'
+                            placeholder = '감가내역 검색'
+                            data    = ''
+                            onFocus = {ComboCreate => {
+                              YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
+                                .then(res => {
+                                  ComboCreate({data   : res.data.dataSend,
+                                              value  : 'itemCode',
+                                              display: 'item',
+                                              emptyRow: true});
+                                })
+                            }}
+                      />
+                    </div>
+                    <Combobox pgm = {this.props.pgm}
+                          id      = 'detail_depr2'
+                          value   = 'code'
+                          display = 'name'
+                          placeholder = '감가비율'
+                          data    = {[{
+                            'code': '10',
+                            'name': '10%'
+                          },{
+                            'code': '20',
+                            'name': '20%'
+                          },{
+                            'code': '30',
+                            'name': '30%'
+                          },{
+                            'code': '40',
+                            'name': '40%'
+                          },{
+                            'code': '50',
+                            'name': '50%'
+                          },{
+                            'code': '60',
+                            'name': '60%'
+                          },{
+                            'code': '70',
+                            'name': '70%'
+                          },{
+                            'code': '80',
+                            'name': '80%'
+                          },{
+                            'code': '90',
+                            'name': '90%'
+                          },{
+                            'code': '100',
+                            'name': '100%'
+                          }]}
+                          emptyRow
+                    />
                   </li>
                   {/* <li>
                     <h5>하차구역</h5>
@@ -834,12 +902,12 @@ class INSP_PROC extends Component {
                             'name': '경고'
                           }]}
                           emptyRow
-                  />
+                    />
                   </li>
                 </ul>
               </div>
               
-              <Chit />
+              <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_PROC_MAIN'/>
 
 
             </div>

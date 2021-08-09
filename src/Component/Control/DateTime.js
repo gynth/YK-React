@@ -66,6 +66,14 @@ class DateTime extends Component{
     }
   }
 
+  componentWillUnmount(){
+    gfs_dispatch(this.props.pgm, 'CLEARDATETIME', 
+      ({
+        id: this.props.id
+      })
+    );
+  }
+
   onChangeBase = (e) => {
     let thisFormat = this.format;
     if(this.time !== undefined){ 

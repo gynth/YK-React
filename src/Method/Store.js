@@ -319,6 +319,7 @@ export const gfs_PGM_REDUCER = (pgm) => {
         return {
           Grid    : nowState === undefined ? [] : nowState.Grid,
           Input   : nowState === undefined ? [] : nowState.Input,
+          Textarea: nowState === undefined ? [] : nowState.Textarea,
           Combo   : nowState === undefined ? [] : nowState.Combo,
           DateTime: nowState === undefined ? [] : nowState.DateTime,
           Number  : nowState === undefined ? [] : nowState.Number
@@ -330,25 +331,72 @@ export const gfs_PGM_REDUCER = (pgm) => {
         return Object.assign({}, nowState, {
           Grid : [...nowState.Grid, action.Grid]
         })
+      }else if(action.type === 'CLEARGRID'){
+
+        return Object.assign({}, nowState, {
+          Grid: [...nowState.Grid.filter(e => {
+            return e.id !== action.id
+          })]
+        })
       }else if(action.type === 'INITINPUT'){
 
         return Object.assign({}, nowState, {
           Input: [...nowState.Input, action.Input]
+        })
+      }else if(action.type === 'CLEARINPUT'){
+
+        return Object.assign({}, nowState, {
+          Input: [...nowState.Input.filter(e => {
+            return e.id !== action.id
+          })]
+        })
+      }else if(action.type === 'INITTEXTAREA'){
+
+        return Object.assign({}, nowState, {
+          Textarea: [...nowState.Textarea, action.Textarea]
+        })
+      }else if(action.type === 'CLEARTEXTAREA'){
+
+        return Object.assign({}, nowState, {
+          Textarea: [...nowState.Textarea.filter(e => {
+            return e.id !== action.id
+          })]
         })
       }else if(action.type === 'INITCOMBO'){
 
         return Object.assign({}, nowState, {
           Combo: [...nowState.Combo, action.Combo]
         })
+      }else if(action.type === 'CLEARCOMBO'){
+
+        return Object.assign({}, nowState, {
+          Combo: [...nowState.Combo.filter(e => {
+            return e.id !== action.id
+          })]
+        })
       }else if(action.type === 'INITDATETIME'){
 
         return Object.assign({}, nowState, {
           DateTime: [...nowState.DateTime, action.DateTime]
         })
+      }else if(action.type === 'CLEARDATETIME'){
+
+        return Object.assign({}, nowState, {
+          DateTime: [...nowState.DateTime.filter(e => {
+            return e.id !== action.id
+          })]
+        })
       }else if(action.type === 'INITNUMBER'){
 
         return Object.assign({}, nowState, {
           Number: [...nowState.Number, action.Number]
+        })
+      }else if(action.type === 'CLEARNUMBER'){
+
+        return Object.assign({}, nowState, {
+          Number: [...nowState.Number.filter(e => {
+            return e.id !== action.id
+          })]
         })
       }else if(action.type === 'DELPGM'){
 
@@ -357,7 +405,8 @@ export const gfs_PGM_REDUCER = (pgm) => {
           Input   : [],
           Combo   : [],
           DateTime: [],
-          Number  : []
+          Number  : [],
+          Textarea: []
         })
       }
     }

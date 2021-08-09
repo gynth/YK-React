@@ -402,6 +402,14 @@ const RtnGrid = (props) => {
       })
     );
 
+    return() => {
+      gfs_dispatch(props.pgm, 'CLEARGRID', 
+        ({
+          id: props.id
+        })
+      );
+    }
+
     // const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
     // const PGM_ID    = props.pgm;
     // const GRID_ID   = props.id;
