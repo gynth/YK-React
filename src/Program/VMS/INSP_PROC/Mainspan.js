@@ -10,6 +10,12 @@ function Mainspan(props) {
       return e.INSP_PROC_MAIN.MAIN_TOTAL;
     }else if(props.flag === 3){
       return e.INSP_PROC_MAIN.MAIN_WEIGHT;
+    }else if(props.flag === 4){
+      return e.INSP_PROC_MAIN.PROC_WAIT;
+    }else if(props.flag === 5){
+      return e.INSP_PROC_MAIN.DEPT_WAIT;
+    }else if(props.flag === 6){
+      return e.INSP_PROC_MAIN.ENTR_WAIT;
     }
   }, (p, n) => {
     return p === n;

@@ -21,6 +21,7 @@ import Botspan from './Botspan';
 import Chit from './Chit';
 import CompleteBtn from './CompleteBtn';
 import TabList from './TabList';
+import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
 
@@ -168,6 +169,9 @@ class INSP_PROC extends Component {
           MAIN_TOTAL   : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
           MAIN_WEIGHT  : nowState === undefined ? 0 : nowState.MAIN_WEIGHT,
           BOT_TOTAL    : nowState === undefined ? 0 : nowState.BOT_TOTAL,
+          PROC_WAIT    : nowState === undefined ? 0 : nowState.PROC_WAIT,
+          DEPT_WAIT    : nowState === undefined ? 0 : nowState.DEPT_WAIT,
+          ENTR_WAIT    : nowState === undefined ? 0 : nowState.ENTR_WAIT,
  
           DETAIL_SCALE : nowState === undefined ? '' : nowState.DETAIL_SCALE,
           DETAIL_CARNO : nowState === undefined ? '' : nowState.DETAIL_CARNO,
@@ -227,6 +231,21 @@ class INSP_PROC extends Component {
 
         return Object.assign({}, nowState, {
           BOT_TOTAL : action.BOT_TOTAL
+        })
+      }else if(action.type === 'PROC_WAIT'){
+
+        return Object.assign({}, nowState, {
+          PROC_WAIT : action.PROC_WAIT
+        })
+      }else if(action.type === 'DEPT_WAIT'){
+
+        return Object.assign({}, nowState, {
+          DEPT_WAIT : action.DEPT_WAIT
+        })
+      }else if(action.type === 'ENTR_WAIT'){
+
+        return Object.assign({}, nowState, {
+          ENTR_WAIT : action.ENTR_WAIT
         })
       }else if(action.type === 'DETAIL_SCALE'){
 
@@ -369,8 +388,12 @@ class INSP_PROC extends Component {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     if(main){
       grid.resetData(main);
-    }else{
 
+      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
+      gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+    }else{
+      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
 
     // const data = {'dataSend':[
@@ -401,7 +424,24 @@ class INSP_PROC extends Component {
     // );
 
     gfg_setSelectRow(grid);
-    gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+    //출차대기
+    const headData2 = await YK_WEB_REQ('tally_mstr_pass.jsp');
+    const header2 = headData2.data.dataSend;
+    if(header2){
+      gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
+    }else{
+      gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
+    }
+
+    //입차대기
+    const headData3 = await YK_WEB_REQ('tally_mstr_drive.jsp');
+    const header3 = headData3.data.dataSend;
+    if(header3){
+      gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
+    }else{
+      gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
+    }
+
     gfc_hideMask();
   }
 
@@ -708,7 +748,7 @@ class INSP_PROC extends Component {
                           }}
                   />
                   </li>
-                  <li>
+                  {/* <li>
                     <h5>하차구역</h5>
                     <Combobox pgm     = {this.props.pgm}
                           id      = 'detail_out'
@@ -725,7 +765,7 @@ class INSP_PROC extends Component {
                               })
                           }}
                   />
-                  </li>
+                  </li> */}
                   <li>
                     <h5>차종구분</h5>
                     <Combobox pgm     = {this.props.pgm}
@@ -746,22 +786,41 @@ class INSP_PROC extends Component {
                   </li>
                   <li>
                     <h5>반품구분</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_rtn'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '일부,전량 선택'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                  />
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_rtn'
+                            value   = 'itemCode'
+                            display = 'item'
+                            placeholder = '일부,전량 선택'
+                            data    = ''
+                            onFocus = {ComboCreate => {
+                              YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
+                                .then(res => {
+                                  ComboCreate({data   : res.data.dataSend,
+                                              value  : 'itemCode',
+                                              display: 'item',
+                                              emptyRow: true});
+                                })
+                            }}
+                    />
+                  </div>
+                  <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_rtn2'
+                            value   = 'itemCode'
+                            display = 'item'
+                            data    = ''
+                            onFocus = {ComboCreate => {
+                              const value = gfo_getCombo(this.props.pgm, 'detail_rtn').getValue();
+                              if(value === null) return;
+
+                              YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
+                                .then(res => {
+                                  ComboCreate({data   : res.data.dataSend,
+                                              value  : 'itemCode',
+                                              display: 'item'});
+                                })
+                            }}
+                    />
                   </li>
                   <li>
                     <h5>경고</h5>

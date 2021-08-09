@@ -38,7 +38,7 @@ app3002.use(express.urlencoded({
   extended: false
 }));
 app3001.use(cors()); 
-app3002.use(cors());
+app3002.use(cors()); 
 
 //#region Mysql요청
 app3001.use('/Mysql', Mysql);
@@ -54,7 +54,7 @@ app3001.use('/ScreenShot', ScreenShot);
 
 //#region MileStone
 app3002.use('/Milestone', Milestone);
-//#endregion
+//#endregion 
 
 //#region 서버시작
 const port3001 = 3001;

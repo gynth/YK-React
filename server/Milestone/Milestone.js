@@ -79,21 +79,25 @@ router.post('/CONNECT', (req, res) => {
       methodName: 'Connect'
     });
  
+    global.MILESTONE_DATA[device] = {
+      method : Connect
+    }
 
-    Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
-      if(result[1] === 'Y') {
-        global.MILESTONE_DATA[device] = {
-          method : Connect,
-          // nodeLoop: setInterval(() => {
-          //             global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
-          //               if(result[1] === 'Y') {
-          //                 global.MILESTONE_DATA[device].liveImg = result[2];
-          //               }
-          //             })   
-          //           }, 1)
-        }
-      }
-    })      
+
+    // Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
+    //   if(result[1] === 'Y') {
+    //     global.MILESTONE_DATA[device] = {
+    //       method : Connect,
+    //       nodeLoop: setInterval(() => {
+    //                   global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
+    //                     if(result[1] === 'Y') {
+    //                       global.MILESTONE_DATA[device].liveImg = result[2];
+    //                     }
+    //                   })   
+    //                 }, 1)
+    //     }
+    //   }
+    // })      
   }   
     
   res.json({result:'OK'}) 
@@ -211,6 +215,7 @@ router.post('/LOGIN', (req, res) => {
       }) 
       const token = loginResult;
       const deviceId = deviceResult;
+      console.log(token, deviceId);
       
       if(deviceResult !== undefined){
         res.json({token, deviceId});
