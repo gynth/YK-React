@@ -93,12 +93,16 @@ export const TextArea = (props) => {
 class InputEditor {
   constructor(props) {
     const option = props.columnInfo.renderer.options;
+    const height = option.height;
     const el = document.createElement('textarea');
-    el.setAttribute('style', `height:100%; 
-                              border: 0px; 
+    el.setAttribute('style', `height: ${height}px; 
+                              min-height:${height}px; 
+                              border: none; 
+                              outline: none;
                               display:table-cell; 
                               width:100%; 
                               padding:0px;
+                              resize:none;
                               color:${option['color']};
                               font-size:${option['fontSize']}; 
                               text-align:${option['align']}; 
@@ -160,7 +164,8 @@ class InputRenderer {
     this.el.setAttribute('style', `height: ${height}px; 
                                    min-height:${height}px; 
                                    width:calc(100% - 5px); 
-                                   border: 0px; 
+                                   border: none; 
+                                   outline: none;
                                    text-align:${option['align']}; 
                                    background-color:${backGround};
                                    color:${option['color']};

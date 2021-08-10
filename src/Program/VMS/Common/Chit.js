@@ -27,7 +27,9 @@ function Chit(props) {
   }
 
   useEffect(e => {
-    if(value.chit.length === undefined)
+    if(props.reducer !== 'INSP_PROC_MAIN') return;
+
+    if(value.chit === 'N')
       gfo_getTextarea(props.pgm, 'chit_memo').setValue('');
   })
 
@@ -44,8 +46,8 @@ function Chit(props) {
   return (
     <>
       {
-        value.chit.length === undefined ?
-        <div className='data_list' id='content2'>
+        value.chit === 'N' && props.reducer === 'INSP_PROC_MAIN' ?
+        <div className='data_list' id={`content2_${props.pgm}`}>
           <div className='doc'>
             <h5>계 량 증 명 서</h5>
             <ul>
@@ -90,9 +92,8 @@ function Chit(props) {
         </div>
       :
       
-      <div className='data_list' id='content2'>
-        <img src={'data:image/jpeg;base64,' + value.chit} style={{width:'100%', height:690}} alt='chit'>
-        </img>
+      <div className='data_list' id={`content2_${props.pgm}`}>
+        {value.chit !== 'N' && <img src={'data:image/jpeg;base64,' + value.chit} style={{width:'100%', height:690}} alt='chit' />}
       </div>
       }
     </>

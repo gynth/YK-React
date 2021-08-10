@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
-import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
+import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
+import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getTextarea } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
@@ -21,7 +21,7 @@ import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
 import Chit from '../Common/Chit';
 import CompleteBtn from './CompleteBtn';
-import TabList from './TabList';
+import TabList from '../Common/TabList';
 import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
@@ -198,7 +198,7 @@ class INSP_PROC extends Component {
                                                     time    : '00:00'
                                                   } : nowState.DUM_CAM_REC,
 
-          CHIT_MEMO    : nowState === undefined ? '' : nowState.CHIT_MEMO,
+          CHIT_MEMO    : nowState === undefined ? 'N' : nowState.CHIT_MEMO,
           
           CHIT_INFO    : nowState === undefined ? {
                                                     date     : '',
@@ -209,7 +209,7 @@ class INSP_PROC extends Component {
                                                     Wgt      : '',
                                                     loc      : '',
                                                     user     : '',
-                                                    chit     : {}
+                                                    chit     : 'N'
                                                   } : nowState.CHIT_INFO
         };
       }
@@ -377,8 +377,34 @@ class INSP_PROC extends Component {
     //#endregion
   }
 
-  componentDidMount(){
+  Init = async() => {
     this.milestoneInfo();
+
+    //#region 검수이력 Open
+    gfs_PGM_REDUCER('INSP_HIST');
+
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 0,
+      activeWindow: {programId: 'INSP_HIST',
+                      programNam: '검수이력'
+                    }
+    }));
+    //#endregion
+
+    await gfc_sleep(50);
+
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 1,
+      activeWindow: {programId: 'INSP_PROC',
+                      programNam: '검수진행'
+                    }
+    }));
+  }
+
+  componentDidMount(){
+    this.Init();
   }
 
   Retrieve = async () => {
@@ -405,6 +431,7 @@ class INSP_PROC extends Component {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     if(main){
       grid.resetData(main);
+      gfg_setSelectRow(grid);
 
       gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
       gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
@@ -440,7 +467,6 @@ class INSP_PROC extends Component {
     //   sort
     // );
 
-    gfg_setSelectRow(grid);
     //출차대기
     const headData2 = await YK_WEB_REQ('tally_mstr_pass.jsp');
     const header2 = headData2.data.dataSend;
@@ -461,7 +487,6 @@ class INSP_PROC extends Component {
 
     gfc_hideMask();
   }
-
 
   onSelectChange = async (e) => {
     if(e === null) return;
@@ -501,7 +526,7 @@ class INSP_PROC extends Component {
         Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
         loc      : '부산',
         user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-        chit     : {}
+        chit     : 'N'
       });
     }else{
       gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
@@ -676,10 +701,10 @@ class INSP_PROC extends Component {
               </ul>
             </div>
 
-            <TabList pgm={this.props.pgm} id={this.props.id}/>
+            <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_PROC_MAIN'/>
 
             <div className='tab_content' id='tabMain'>
-              <div className='input_list on' id='content1'>
+              <div className='input_list on' id={`content1_${this.props.pgm}`}>
                 <ul>
                   <li>
                     <h5>등급책정</h5>

@@ -6,16 +6,17 @@ import { gfs_dispatch } from '../../../Method/Store';
 
 const TabList = (props) => {
   const value = useSelector((e) => {
-    return e.INSP_PROC_MAIN.CHIT_INFO;
+    return e[props.reducer].CHIT_INFO;
   }, (p, n) => {
     return p.scaleNumb === n.scaleNumb;
   });
 
 
-  const tabButton = (tabIndex) => {
-    let tabList = ['tab1','tab2']
-    let contentList = ['content1','content2']
-    let btnList = ['btn1','btn2']
+  const tabButton = (tabIndex,type) => {
+
+    let tabList = [`tab1_${type}`,`tab2_${type}`]
+    let contentList = [`content1_${type}`,`content2_${type}`]
+    let btnList = [`btn1_${type}`,`btn2_${type}`]
     let tabMaxIndex = 2;
     for(let i = 0; i < tabMaxIndex; i++){
       if(i === tabIndex){
@@ -30,22 +31,25 @@ const TabList = (props) => {
         gfc_removeClass(document.getElementById(contentList[i]),'on');
         gfc_removeClass(document.getElementById(btnList[i]),'on');
 
-        const detail_grade1 = gfo_getCombo(props.pgm, 'detail_grade1').getLabel(); //고철등급
-        gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO_ITEM_FLAG', {
-          itemFlag : detail_grade1
-        });
+        if(props.pgm === 'INSP_PROC'){
+          const detail_grade1 = gfo_getCombo(props.pgm, 'detail_grade1').getLabel(); //고철등급
+          gfs_dispatch(props.reducer, 'CHIT_INFO_ITEM_FLAG', {
+            itemFlag : detail_grade1
+          });
+        }
       }
     }
   }
 
   return (
-    <div className='tab_list'>
-      <button type='button' id='tab1' className='tab on' onClick={() => tabButton(0)}>검수입력</button>
-      <button type='button' id='tab2' className='tab' onClick={() => tabButton(1)}>
-        {value.chit.length !== undefined && <span className='doc'>메모있음</span> } 
-        {/* 계량증명서 */}
-        검수입력
-      </button>
+    <div id={props.pgm}>
+      <div className='tab_list'>
+        <button type='button' id={`tab1_${props.pgm}`} className='tab on' onClick={() => tabButton(0, props.pgm)}>검수입력</button>
+        <button type='button' id={`tab2_${props.pgm}`} className='tab' onClick={() => tabButton(1, props.pgm)}>
+          {value.chit !== 'N' && <span className='doc'>메모있음</span> } 
+          계량증명서
+        </button>
+      </div>
     </div>
   );
 }

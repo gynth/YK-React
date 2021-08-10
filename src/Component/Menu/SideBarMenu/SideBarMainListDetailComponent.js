@@ -1,16 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { gfs_dispatch, gfs_WINDOWFRAME_REDUCER, gfs_PGM_REDUCER } from '../../../Method/Store';
+import { gfs_dispatch, gfs_PGM_REDUCER } from '../../../Method/Store';
 
 const SideBarMainListDetailComponent = (props) => {
 
 
   const pgmClick = (e) => {
     const select = e.currentTarget.dataset;
-
-    //#region 윈도우 리듀서 생성
-    gfs_WINDOWFRAME_REDUCER();
-    //#endregion
 
     //#region 프로그램 리듀서 생성
     gfs_PGM_REDUCER(select.pgm);

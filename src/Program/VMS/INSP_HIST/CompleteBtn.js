@@ -9,14 +9,14 @@ import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 
 const CompleteBtn = (props) => {
   const value = useSelector((e) => {
-    return e.INSP_PROC_MAIN.CHIT_INFO;
+    return e.INSP_HIST_MAIN.CHIT_INFO;
   }, (p, n) => {
     return p.scaleNumb === n.scaleNumb;
   });
 
   //#region 검수등록
   const onProcess = async() => {
-    const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+    const scaleNumb = gfs_getStoreValue('INSP_HIST_MAIN', 'DETAIL_SCALE');
 
     if(scaleNumb === ''){
       alert('선택된 배차정보가 없습니다.');
@@ -99,7 +99,7 @@ const CompleteBtn = (props) => {
 
       await gfc_sleep(300);
 
-      const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
+      const memo = gfs_getStoreValue('INSP_HIST_MAIN', 'CHIT_MEMO').trim();
       if(memo.length === 0){
         if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
           gfc_hideMask();
@@ -112,7 +112,7 @@ const CompleteBtn = (props) => {
       
       if(result.data === 'Y'){
         const chitYn = await gfc_chit_yn_YK(scaleNumb);
-        gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+        gfs_dispatch('INSP_HIST_MAIN', 'CHIT_INFO', {
           chit     : chitYn.data
         });
       }else{
@@ -157,7 +157,7 @@ const CompleteBtn = (props) => {
   //#region 계량표저장
   // const onScaleChit = async() => {
   //   const img = document.getElementById('content2');
-  //   const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_INFO');
+  //   const scaleNumb = gfs_getStoreValue('INSP_HIST_MAIN', 'CHIT_INFO');
 
   //   if(scaleNumb.scaleNumb === ''){
   //     alert('선택된 배차정보가 없습니다.');
@@ -166,7 +166,7 @@ const CompleteBtn = (props) => {
 
   //   gfc_showMask();
 
-  //   const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
+  //   const memo = gfs_getStoreValue('INSP_HIST_MAIN', 'CHIT_MEMO').trim();
   //   if(memo.length === 0){
   //     if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
   //       gfc_hideMask();
@@ -186,7 +186,7 @@ const CompleteBtn = (props) => {
     
   //   if(result.data === 'Y'){
   //     const chitYn = await gfc_chit_yn_YK(scaleNumb.scaleNumb);
-  //     gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+  //     gfs_dispatch('INSP_HIST_MAIN', 'CHIT_INFO', {
   //       chit     : chitYn.data
   //     });
   //   }else{
@@ -199,9 +199,9 @@ const CompleteBtn = (props) => {
 
   return (
     <div className='complete_btn'>
-      <button type='button' id='btn1' onClick={e => onProcess()} className='on'><span>등록완료</span></button>
+      <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>등록완료</span></button>
       {/* <button style={{display: value.chit.length !== undefined && 'none' }} type='button' id='btn2' onClick={e => onScaleChit()}><span>계량증명서저장</span></button> */}
-      <button style={{display: value.chit.length !== undefined && 'none' }} type='button' id='btn2' onClick={e => onProcess()}><span>등록완료</span></button>
+      <button style={{display: value.chit.length !== undefined && 'none' }} type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button>
     </div>
   );
 }

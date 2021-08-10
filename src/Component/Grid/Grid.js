@@ -394,6 +394,14 @@ const RtnGrid = (props) => {
       if(props.afterChange !== undefined)
         props.afterChange(e.changes[0]);
     })
+
+    gridRef.current.getInstance().on('dblclick', (e) => {
+      if(props.dblclick !== undefined){
+        if(e.targetType !== 'etc'){
+          props.dblclick(e.columnName);
+        }
+      }
+    })
         
     gfs_dispatch(props.pgm, 'INITGRID', 
       ({

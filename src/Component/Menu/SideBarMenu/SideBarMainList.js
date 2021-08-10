@@ -35,21 +35,22 @@ const SideBarMainList = (props) => {
           MENU_NAM: '검수'
         }]
       )
-    }else if(MENU_ID === 'DISP'){
-      setList(
-        [{
-          MENU_ID,
-          MENU_NAM: '배차'
-        }]
-      )
-    }else if(MENU_ID === 'ENTR'){
-      setList(
-        [{
-          MENU_ID,
-          MENU_NAM: '입차'
-        }]
-      )
     }
+    // else if(MENU_ID === 'DISP'){
+    //   setList(
+    //     [{
+    //       MENU_ID,
+    //       MENU_NAM: '배차'
+    //     }]
+    //   )
+    // }else if(MENU_ID === 'ENTR'){
+    //   setList(
+    //     [{
+    //       MENU_ID,
+    //       MENU_NAM: '입차'
+    //     }]
+    //   )
+    // }
   }, [MENU_ID])
 
   return (

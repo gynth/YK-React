@@ -17,7 +17,7 @@ const yk_req = (request, URL) => {
 }
 
 router.post('/', (req, res) => {
-  let URL = `http://tally.yksteel.co.kr/ykdev/${req.body.addr}`;
+  let URL = encodeURI(`http://tally.yksteel.co.kr/ykdev/${req.body.addr}`);
   // let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
   
   
@@ -26,4 +26,4 @@ router.post('/', (req, res) => {
   })
 });
 
-module.exports = router;
+module.exports = router;   

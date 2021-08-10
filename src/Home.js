@@ -7,7 +7,7 @@ import WindowFrame from './Program/WindowFrame';
 
 import './Home.css';
 import { getSessionCookie } from "./Cookies";
-import { gfs_injectAsyncReducer } from './Method/Store';
+import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER } from './Method/Store';
 
 import GifPlayer from 'react-gif-player';
 import LoadingOverlay from 'react-loading-overlay';
@@ -71,8 +71,11 @@ const Home = (props) => {
 
     gfs_injectAsyncReducer('MASK_REDUCER', MASK_REDUCER);
 
+    //#region 윈도우 리듀서 생성
+    gfs_WINDOWFRAME_REDUCER();
+    //#endregion
+
     defaultData();
-    // refreshToken();
   }, [])
 
   const session = getSessionCookie("session");

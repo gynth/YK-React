@@ -33,21 +33,22 @@ const SideBarMainListDetail = (props) => {
           MENU_NAM: '배차정보'
         }]
       )
-    }else if(MENU_ID === 'DISP'){
-      setList(
-        [{
-          MENU_ID : 'DISP_WAIT',
-          MENU_NAM: '출차대기'
-        }]
-      )
-    }else if(MENU_ID === 'ENTR'){
-      setList(
-        [{
-          MENU_ID : 'ENTR_WAIT',
-          MENU_NAM: '입차대기'
-        }]
-      )
     }
+    // else if(MENU_ID === 'DISP'){
+    //   setList(
+    //     [{
+    //       MENU_ID : 'DISP_WAIT',
+    //       MENU_NAM: '출차대기'
+    //     }]
+    //   )
+    // }else if(MENU_ID === 'ENTR'){
+    //   setList(
+    //     [{
+    //       MENU_ID : 'ENTR_WAIT',
+    //       MENU_NAM: '입차대기'
+    //     }]
+    //   )
+    // }
   }, [MENU_ID])
 
   return (

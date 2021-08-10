@@ -248,8 +248,8 @@ class Combobox extends Component{
                 placeholder  = {this.props.placeholder}
                 menuPlacement= 'auto'
                 ref          = {this.ref}
+                isDisabled   = {this.props.isDisabled}
                 onBlur       = {e => this.onBlurBase(e)}
-
                 onFocus      = {e => this.onFocusBase(e)}
                 onChange     = {e => this.onChangeBase(e)}
                 
@@ -284,6 +284,7 @@ Combobox.propTypes = {
   fontSize    : PropTypes.number,
   label       : PropTypes.string,
   menuIsOpen  : PropTypes.bool,
+  isDisabled  : PropTypes.bool,
   isRtl       : PropTypes.bool,
   isSearchable: PropTypes.bool,
   isMulti     : PropTypes.bool,
@@ -304,6 +305,7 @@ Combobox.defaultProps = {
   fontSize    : 12,
   label       : '',
   menuIsOpen  : false,
+  isDisabled  : false,
   isRtl       : false,
   isSearchable: true,
   isMulti     : false,
