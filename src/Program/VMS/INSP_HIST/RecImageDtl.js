@@ -8,6 +8,7 @@ import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '.
 import ReactPlayer from 'react-player'
 
 function RecImageDtl(props) {
+  
   const movieRef = useRef();
   const prgRef = useRef();
 
@@ -83,19 +84,49 @@ function RecImageDtl(props) {
   };
 
   useEffect(() => { 
-    return() => {
+    var req = new XMLHttpRequest();
+    req.open('GET', 'http://211.231.136.182:3003/1.mp4', true);
+    req.responseType = 'blob';
 
+    req.onload = function() {
+      // Onload is triggered even on 404
+      // so we need to check the status code
+      if (this.status === 200) {
+          var videoBlob = this.response;
+          var vid = URL.createObjectURL(videoBlob); // IE10+
+          // Video is now downloaded
+          // and we can set it as source on the video element
+          movieRef.current.src = vid;
+      }
+    }
+    req.onerror = function() {
+      // Error
     }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen])
+    req.send();
+  })
 
   const img = <>
                 <div style={{width:'100%', height:'100%'}}>
-                  <video ref={movieRef} controls autoPlay width='100%' height='100%' 
+                  {/* <ReactPlayer
+                     controls
+                     playing
+                     className='react-player'
+                     url='http://211.231.136.182:3003/1.mp4'
+                     width='100%'
+                     height='100%' /> */}
+                  <video 
+                    ref={movieRef} 
+                    width='100%' 
+                    height='100%' 
+                    controls 
+                    autoPlay 
+                    style={{objectFit:'fill'}}
+                    
                     onCanPlay={e => console.log(e)}
                   >
-                    <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' />
+                    {/* <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' /> */}
+                    <source type='video/mp4' />
                   </video>
                   {/* <input ref={prgRef} data-seeking={false} style={{width:'100%'}} defaultValue={0}
                     type='range' min={0} step='any'
