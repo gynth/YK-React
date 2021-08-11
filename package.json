@@ -84,6 +84,7 @@
     "react-hls-player": "^3.0.7",
     "react-loading-overlay": "^1.0.1",
     "react-modal": "^3.14.3",
+    "react-player": "^2.9.0",
     "react-redux": "^7.2.2",
     "react-refresh": "^0.8.3",
     "react-resize-detector": "^6.6.4",

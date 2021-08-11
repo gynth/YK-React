@@ -15,31 +15,28 @@ function RecImageDtl(props) {
     prgRef.current.max = duration;
   }
   const handleSeekMouseDown = e => {
-    // prgRef.current.dataset.seeking = 'true';
+    prgRef.current.dataset.seeking = 'true';
   }
   const handleSeekMouseUp = e => {
-    // const value = prgRef.current.value;
-    
-    // movieRef.current.seekTo(5);
-    // prgRef.current.dataset.seeking = 'false';
+    const value = prgRef.current.value;
+    // movieRef.current.pau
+    movieRef.current.seekTo(5);
+    prgRef.current.dataset.seeking = 'false';
 
-    const aa = movieRef.current.currentTime;
-    movieRef.current.currentTime += 0.5;
-    console.log(movieRef.current.currentTime);
+    console.log(movieRef.current);
   }
   const handleSeekChange = e => {
     // this.setState({ played: parseFloat(e.target.value) })
-    // movieRef.current.currentTime += 0.5;
   }
   const  handleProgress = state => {
     // // We only want to update time slider if we are not currently seeking
     // if (!state.seeking) {
     //   setState(e)
     // }
-    // console.log(state);
+    console.log(state);
     
-    // if(prgRef.current.dataset.seeking === 'false')
-    //   prgRef.current.value = state.playedSeconds;
+    if(prgRef.current.dataset.seeking === 'false')
+      prgRef.current.value = state.playedSeconds;
   }
 
   const isOpen = useSelector((e) => {
@@ -92,18 +89,28 @@ function RecImageDtl(props) {
 
   const img = <>
                 <div style={{width:'100%', height:'100%'}}>
-                  <video ref={movieRef} controls autoPlay width='100%' height='100%' 
-                    onCanPlay={e => console.log(e)}
-                  >
+                  {/* <video controls autoPlay width='100%' height='100%'>
                     <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' />
-                  </video>
-                  {/* <input ref={prgRef} data-seeking={false} style={{width:'100%'}} defaultValue={0}
+                  </video> */}
+                  <ReactPlayer ref={movieRef} 
+                    width='100%' 
+                    height='100%' 
+                    url='http://211.231.136.182:3003/1.mp4'
+                    
+                    controls
+                    playing 
+                    muted
+                    
+                    onDuration={e => handleDuration(e)}
+                    onProgress={e => handleProgress(e)}
+                  />
+                  <input ref={prgRef} data-seeking={false} style={{width:'100%'}} defaultValue={0}
                     type='range' min={0} step='any'
                     // value={played}
                     onMouseDown={e => handleSeekMouseDown(e)}
                     onChange={e => handleSeekChange(e)}
                     onMouseUp={e => handleSeekMouseUp(e)}
-                  /> */}
+                  />
                 </div>
                 <div className='picture_save' onClick={e => {
                   

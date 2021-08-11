@@ -138,8 +138,11 @@
 .cctv .direction .top {position:absolute; left:50%; top:10px; margin-left:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_top@2x.png') no-repeat 50% 50%; background-size:20px auto; }
 .cctv .direction .down {position:absolute; left:50%; bottom:20px; margin-left:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_down@2x.png') no-repeat 50% 50%; background-size:20px auto; }
 
-.picture_save {opacity:0.7; position: absolute; left: 10px; bottom: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:10px; background:rgba(0,0,0,0.5) url('../Image/camera_bu.png') no-repeat 21px 10px;}
+.picture_save {opacity:0.7; position: absolute; right: 10px; top: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:10px; background:rgba(0,0,0,0.5) url('../Image/camera_bu.png') no-repeat 21px 10px;}
 .picture_save:hover {opacity:1}
+
+/* .picture_save2 {opacity:0.7; position: absolute; right:10px; top: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:10px; background:rgba(0,0,0,0.5) url('../Image/camera_bu.png') no-repeat 21px 10px;}
+.picture_save2:hover {opacity:1} */
 /*
 .picture_save {position: absolute; left: 10px; bottom: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:20px; background:rgba(0,0,0,0.3) url('../Image/camera_bu.png') no-repeat 21px 10px;}
 .picture_save a {font-size:14px; color:#ffffff; text-decoration: none;}

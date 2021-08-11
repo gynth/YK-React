@@ -382,8 +382,8 @@ class INSP_HIST extends Component {
 
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
-        <div style={{height:'calc(100vh + 95px'}} className='car_manager' >
-          <div className='car_list'>
+        <div className='car_manager' >
+          <div style={{paddingBottom:'0'}} className='car_list'>
             <div className='search_line'>
               <div className='wp' >
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
@@ -519,7 +519,7 @@ class INSP_HIST extends Component {
               </ul>
             </div> */}
           </div>
-          <div style={{paddingTop:'200px'}} className='car_info'>
+          <div style={{paddingBottom:'10px', paddingTop:'200px'}} className='car_info'>
             <div className='title'><span>배차번호</span><Detailspan flag={1}  reducer='INSP_HIST_MAIN'/></div>
             <div style={{height:'130px'}} className='detail'>
               <ul>
@@ -529,20 +529,15 @@ class INSP_HIST extends Component {
               </ul>
             </div>
 
-            {/* <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_HIST_MAIN'/> */}
-
-            <div className='tab_content' id='tabMain'>
-              <div className='input_list on' id={`content2_${this.props.pgm} on`}>
-                <Chit pgm={this.props.pgm} id={'chit_memo'}  reducer='INSP_HIST_MAIN'/>
-              </div>
-            </div>
-            
-            <CompleteBtn pgm={this.props.pgm}  reducer='INSP_HIST_MAIN'/>
+            <Chit pgm={this.props.pgm} id={'chit_memo'}  reducer='INSP_HIST_MAIN'/>
           </div>
             <div className='cctv_viewer'>
               <h4>녹화영상</h4>
+              {/* <div className='rain_info'>
+		            <span className='title'>강수량</span><span className='value'>100mm</span>
+	            </div> */}
               <div className='cctv_list'>
-                {/* {this.state.device[0] !== undefined && 
+                {this.state.device[0] !== undefined && 
                   <RecImage device={this.state.device[0].camera.Guid} 
                             rtspUrl={this.state.device[0].rtspUrl[0]}
                             rtspPort={this.state.device[0].rtspPort[0]}
@@ -551,7 +546,7 @@ class INSP_HIST extends Component {
                             rec='STD_CAM_REC' 
                             image='STD_CAM_IMG'/> 
                 }
-                {this.state.device[1] !== undefined && 
+                {/* {this.state.device[1] !== undefined && 
                   <RecImage device={this.state.device[1].camera.Guid} 
                             rtspUrl={this.state.device[1].rtspUrl[1]}
                             rtspPort={this.state.device[1].rtspPort[1]}
