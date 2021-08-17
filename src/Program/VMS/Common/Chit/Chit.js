@@ -1,40 +1,21 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { gfc_setNumberFormat } from '../../../Method/Comm';
-import { gfs_dispatch } from '../../../Method/Store';
-import { gfo_getTextarea } from '../../../Method/Component';
-import TextArea from '../../../Component/Control/TextArea';
+import { gfc_setNumberFormat } from '../../../../Method/Comm';
+import ChitMemo from './ChitMemo';
 
 function Chit(props) {
   const value = useSelector((e) => {
     return e[props.reducer].CHIT_INFO;
   }, (p, n) => {
-    if(props.reducer !== 'INSP_PROC_MAIN')
-      return p.itemFlag === n.itemFlag;
-    else
-      return p === n;
+    return p === n;
   });
 
-  const changeMemo = (e) => {
-    gfs_dispatch(props.reducer, 'CHIT_MEMO', {CHIT_MEMO: e.target.value});
-  }
-
-  const limitLine = (e) => {
-    // let numberOfLines = (e.target.value.match("\n/g") || []).length + 1;
-    let numberOfLines = e.target.value.substr(0, e.target.value.length).split("\n").length;
-    let maxRows = e.target.rows;
-    // if(e.which === 13 && numberOfLines === maxRows){
-    if(numberOfLines >= maxRows){
-
-    }
-  }
-
   useEffect(e => {
-    if(props.reducer !== 'INSP_PROC_MAIN') return;
+    // if(props.reducer !== 'INSP_PROC_MAIN') return;
 
-    if(value.chit === 'N'){
-      gfo_getTextarea(props.pgm, 'chit_memo').setValue('');
-    }
+    // if(value.chit === 'N'){
+    //   gfo_getTextarea(props.pgm, 'chit_memo').setValue('');
+    // }
   })
 
   // date     : action.date,
@@ -91,7 +72,7 @@ function Chit(props) {
           </div>
           <div className='memo'>
             <h5>MEMO</h5>
-            <TextArea pgm={props.pgm} id={props.id} rows={10} wrap='soft' defaultValue='' onChange={e => changeMemo(e)} onKeyDown={e => limitLine(e)}></TextArea>
+            <ChitMemo pgm={props.pgm} id={props.id} reducer={props.reducer}/>
           </div>
         </div>
       :

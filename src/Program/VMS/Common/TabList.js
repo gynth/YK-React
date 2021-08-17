@@ -14,10 +14,10 @@ const TabList = (props) => {
 
   const tabButton = (tabIndex,type) => {
 
-    let tabList = [`tab1_${type}`,`tab2_${type}`]
-    let contentList = [`content1_${type}`,`content2_${type}`]
-    let btnList = [`btn1_${type}`,`btn2_${type}`]
-    let tabMaxIndex = 2;
+    let tabList = [`tab1_${type}`,`tab2_${type}`,`tab3_${type}`]
+    let contentList = [`content1_${type}`,`content2_${type}`,`content3_${type}`]
+    let btnList = [`btn1_${type}`,`btn2_${type}`,`btn3_${type}`]
+    let tabMaxIndex = 3;
     for(let i = 0; i < tabMaxIndex; i++){
       if(i === tabIndex){
         if(gfc_hasClass(document.getElementById(tabList[i]),'on') === false){
@@ -47,8 +47,9 @@ const TabList = (props) => {
         <button type='button' id={`tab1_${props.pgm}`} className='tab on' onClick={() => tabButton(0, props.pgm)}>검수입력</button>
         <button type='button' id={`tab2_${props.pgm}`} className='tab' onClick={() => tabButton(1, props.pgm)}>
           {value.chit !== 'N' && <span className='doc'>메모있음</span> } 
-          계량증명서
+          계량표
         </button>
+        <button type='button' id={`tab3_${props.pgm}`} className='tab' onClick={() => tabButton(2, props.pgm)}>배차정보</button>
       </div>
     </div>
   );

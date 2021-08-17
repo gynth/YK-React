@@ -123,24 +123,21 @@ router.post('/Replay', (req, res) => {
       assemblyFile:`${__dirname}/Milestone.dll`,
       methodName: 'Connect'
     });
-     
+      
     Connect([global.MILESTONE_TOKEN, device, 'Start', '', scaleNo, '', cameraName], (error, result) => { 
       if(result[1] === 'Y') {
         global.MILESTONE_REPLAY = Connect;
       }
     })  
-  } 
+  }  
  
   global.MILESTONE_REPLAY([global.MILESTONE_TOKEN, device, 'Replay', '', scaleNo, '', cameraName], (error, result) => { 
-    
-    console.log(result); 
-
-    if(error === undefined) res.json('OK');
+    if(error === undefined) res.json(result);
     else res.json(error)
   })   
 }); 
   
-
+ 
 router.post('/PTZ', (req, res) => {
   const device = req.body.device;
   const ptz = req.body.ptz; 

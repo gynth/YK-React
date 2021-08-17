@@ -58,11 +58,11 @@
 .car_info .detail ul li .t {display:inline-block; width:105px; color:#2C73BB; font-weight:bold}
 
 .car_info .tab_list {position:absolute; left:0; top:192px; width:100%; padding:0 17px; overflow:hidden; box-sizing:border-box; margin-top:17px;}
-.car_info .tab_list .tab {cursor:pointer; width:50%; height:42px; border:1px solid #9FA8C9; background:#F6F8FC; color:#9BA9BE; float:left; text-align:center; font-size:16px; font-weight:bold;}
+.car_info .tab_list .tab {cursor:pointer; width:33%; height:42px; border:1px solid #9FA8C9; background:#F6F8FC; color:#9BA9BE; float:left; text-align:center; font-size:16px; font-weight:bold;}
 .car_info .tab_list .tab .doc {position:relative; top:-2px; margin-right:5px; display:inline-block; vertical-align:middle; width:21px; height:21px; background:url('../Image/doc_bu.png') no-repeat 50% 50%; overflow:hidden; text-indent:-9999px; background-size:21px}
 .car_info .tab_list .tab.on {background:#ffffff; color:#000000}
 .car_info .tab_list .tab:first-child {border-radius:3px 0 0 3px; border-right:0px none;}
-.car_info .tab_list .tab:last-child {border-radius:0 3px 3px 0}
+.car_info .tab_list .tab:last-child {border-radius:0 3px 3px 0; width:34%;  border-left:0px none;}
 
 .car_info .tab_content {height:100%}
 .car_info .tab_content>div {display:none;}

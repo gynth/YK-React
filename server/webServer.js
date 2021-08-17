@@ -212,31 +212,41 @@ app3002.post('/Token', (req, res) => {
 
 
 var server = http.createServer(function(request,response){
-
+ 
   try{
-    var resourcePath = 'D:/' + request.url;
+    var scaleNumb = url.parse(request.url, true).query['scaleNumb'];
+    var Name = url.parse(request.url, true).query['cameraName'];
+    var requestPath = request.url.substring(0, request.url.indexOf('?'));
+
+    var resourcePath = `D:/IMS/Replay/${scaleNumb}/${Name}/${requestPath}`;
+    
+    // fs.readFile(resourcePath, function(error, data) {
+    //   // request.end(data);
+    //   response.write(data);
+    // });
+
     var stream = fs.createReadStream(resourcePath);
   
     stream.on('data', (movie) => {
       // 3.1. data 이벤트가 발생되면 해당 data를 클라이언트로 전송
       response.write(movie);
-    });
+    });  
   
     stream.on('end', function () {
       console.log('end streaming');
       response.end();
     });
-  
+     
     stream.on('error', function(err) {
       console.log(err);
       response.end('500 Internal Server '+err);
     });
   }catch (e){
     console.log(e);
-    response.end(e);
+    response.statusMessage = e; 
   }
-});
-
+}); 
+ 
 const port3003 = 3003;
 server.listen(port3003, function(){
   console.log(`Replay on port: ${port3003}..`)

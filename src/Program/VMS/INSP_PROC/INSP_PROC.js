@@ -5,7 +5,7 @@ import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
-import { gfo_getCombo, gfo_getTextarea } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getInput, gfo_getTextarea } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
@@ -19,7 +19,7 @@ import Combobox from '../../../Component/Control/Combobox';
 import Mainspan from '../Common/Mainspan';
 import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
-import Chit from '../Common/Chit';
+import Chit from '../Common/Chit/Chit';
 import CompleteBtn from './CompleteBtn';
 import TabList from '../Common/TabList';
 import RecImage from './RecImage';
@@ -488,9 +488,21 @@ class INSP_PROC extends Component {
     gfc_hideMask();
   }
 
+  dblclick = async(e) => {
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+      ({
+        windowZindex: 0,
+        activeWindow: {programId:  'INSP_HIST',
+                       programNam: '검수이력'
+                      }
+      })
+    );
+  }
+
   onSelectChange = async (e) => {
     if(e === null) return;
 
+    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.itemGrade); //사전등급
     gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(''); //고철등급
     gfo_getCombo(this.props.pgm, 'detail_grade2').setValue(''); //상세고철등급
     gfo_getCombo(this.props.pgm, 'detail_subt').setValue(''); //감량중량
@@ -524,7 +536,8 @@ class INSP_PROC extends Component {
         vender   : chitInfoYn.data.dataSend[0].vendor,
         itemFlag : '',
         Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
-        loc      : chitInfoYn.data.dataSend[0].area,
+        // loc      : chitInfoYn.data.dataSend[0].area,
+        loc      : '부산',
         user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
         chit     : 'N'
       });
@@ -558,7 +571,7 @@ class INSP_PROC extends Component {
                             emptyRow
                             data    = {[{
                               code: '1',
-                              name: '배차번호'
+                              name: '계근번호'
                             },{
                               code: '2',
                               name: '차량번호'
@@ -589,12 +602,13 @@ class INSP_PROC extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
+                        dblclick={(e) => this.dblclick(e)}
                         rowHeight={46}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
                           columnInput({
                             name: 'scaleNumb',
-                            header: '배차번호',
+                            header: '계근번호',
                             width : 155,
                             readOnly: true,
                             color : '#0063A9',
@@ -676,7 +690,7 @@ class INSP_PROC extends Component {
             </div>
           </div>
           <div className='car_info'>
-            <div className='title'><span>배차번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
+            <div className='title'><span>계근번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
             <div className='detail'>
               <ul>
                 <li><span className='t'>차량번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={2} /></li>
@@ -740,6 +754,14 @@ class INSP_PROC extends Component {
               <div className='input_list on' id={`content1_${this.props.pgm}`}>
                 <ul>
                   <li>
+                    <h5>사전등급</h5>
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'detail_pre_grade'
+                             width   = '100%'
+                             disabled
+                      />
+                  </li>
+                  <li>
                     <h5>등급책정</h5>
                     <div style={{marginBottom:'5px'}}>
                       <Combobox pgm     = {this.props.pgm}
@@ -779,25 +801,24 @@ class INSP_PROC extends Component {
                   </li>
                   <li>
                     <h5>감량중량</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_subt'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감량중량 검색(KG)'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                  />
-                  </li>
-                  <li>
-                    <h5>감량사유</h5>
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_subt'
+                            value   = 'itemCode'
+                            display = 'item'
+                            placeholder = '감량중량 검색(KG)'
+                            data    = ''
+                            onFocus = {ComboCreate => {
+                              YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
+                                .then(res => {
+                                  ComboCreate({data   : res.data.dataSend,
+                                              value  : 'itemCode',
+                                              display: 'item',
+                                              emptyRow: true});
+                                })
+                            }}
+                      />
+                    </div>
                     <Combobox pgm     = {this.props.pgm}
                           id      = 'detail_subt_leg'
                           value   = 'itemCode'
@@ -813,7 +834,7 @@ class INSP_PROC extends Component {
                                             emptyRow: true});
                               })
                           }}
-                  />
+                    /> 
                   </li>
                   <li>
                     <h5>감가내역</h5>
@@ -967,7 +988,81 @@ class INSP_PROC extends Component {
               
               <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_PROC_MAIN'/>
 
+              <div className='input_list' id={`content3_${this.props.pgm}`}>
+                {/* <ul>
+                  <li>
+                    <h5>차종구분</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_car'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '차종선택'
+                          data    = ''
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item'});
+                              })
+                          }}
+                  />
+                  </li>
+                  <li>
+                    <h5>반품구분</h5>
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_rtn'
+                            value   = 'itemCode'
+                            display = 'item'
+                            placeholder = '일부,전량 선택'
+                            data    = ''
+                            onFocus = {ComboCreate => {
+                              YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
+                                .then(res => {
+                                  ComboCreate({data   : res.data.dataSend,
+                                              value  : 'itemCode',
+                                              display: 'item',
+                                              emptyRow: true});
+                                })
+                            }}
+                    />
+                  </div>
+                  <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_rtn2'
+                            value   = 'itemCode'
+                            display = 'item'
+                            data    = ''
+                            onFocus = {ComboCreate => {
+                              const value = gfo_getCombo(this.props.pgm, 'detail_rtn').getValue();
+                              if(value === null) return;
 
+                              YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
+                                .then(res => {
+                                  ComboCreate({data   : res.data.dataSend,
+                                              value  : 'itemCode',
+                                              display: 'item'});
+                                })
+                            }}
+                    />
+                  </li>
+                  <li>
+                    <h5>경고</h5>
+                    <Combobox pgm = {this.props.pgm}
+                          id      = 'detail_warning'
+                          value   = 'code'
+                          display = 'name'
+                          placeholder = '경고'
+                          data    = {[{
+                            'code': 'Y',
+                            'name': '경고'
+                          }]}
+                          emptyRow
+                    />
+                  </li>
+                </ul> */}
+              </div>
+              
             </div>
             
             <CompleteBtn pgm={this.props.pgm}/>

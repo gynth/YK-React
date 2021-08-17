@@ -49,6 +49,13 @@ function RecImageDtl(props) {
     return p === n;
   });
 
+  const value = useSelector((e) => {
+    return e.INSP_HIST_MAIN.GRID_SCALE;
+  }, (p, n) => {
+    return p === n;
+  });
+  
+
   const setModalIsOpen = (open) => {
     
     let obj = {};
@@ -84,27 +91,45 @@ function RecImageDtl(props) {
   };
 
   useEffect(() => { 
-    var req = new XMLHttpRequest();
-    req.open('GET', 'http://211.231.136.182:3003/1.mkv', true);
-    req.responseType = 'blob';
+    if(value !== ''){
+      gfc_showMask();
 
-    req.onload = function() {
-      // Onload is triggered even on 404
-      // so we need to check the status code
-      if (this.status === 200) {
-          var videoBlob = this.response;
-          var vid = URL.createObjectURL(videoBlob); // IE10+
-          // Video is now downloaded
-          // and we can set it as source on the video element
-          movieRef.current.src = vid;
-      }
-    }
-    req.onerror = function() {
-      // Error
-    }
+      // movieRef.current.get(0).stop();
+      // movieRef.current.get(0).stop();
+      movieRef.current.src = '';
 
-    req.send();
-  })
+      MILESTONE({
+        reqAddr : 'Replay',
+        device  : props.device,
+        scaleNo : value,
+        cameraName: props.Name}).then(e => {
+          if(e.data === '0'){
+            var req = new XMLHttpRequest();
+            req.open('GET', `http://211.231.136.182:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}`, true);
+            req.responseType = 'blob';
+        
+            req.onload = function() {
+              // Onload is triggered even on 404
+              // so we need to check the status code
+              if (this.status === 200) {
+                  var videoBlob = this.response;
+                  var vid = URL.createObjectURL(videoBlob); // IE10+
+                  // Video is now downloaded
+                  // and we can set it as source on the video element
+                  movieRef.current.src = vid;
+              }
+            }
+            req.onerror = function() {
+              gfc_hideMask();
+            }
+        
+            req.send();
+          }else{
+            gfc_hideMask();
+          }
+        })
+    }
+  }, [props.device, props.Name, value])
 
   const img = <>
                 <div style={{width:'100%', height:'100%'}}>
@@ -112,7 +137,7 @@ function RecImageDtl(props) {
                      controls
                      playing
                      className='react-player'
-                     url='http://211.231.136.182:3003/1.mp4'
+                     url={`http://211.231.136.182:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}`}
                      width='100%'
                      height='100%' /> */}
                   <video 
@@ -121,9 +146,15 @@ function RecImageDtl(props) {
                     height='100%' 
                     controls 
                     autoPlay 
+                     
+                    // preload='auto'
                     style={{objectFit:'fill'}}
+
+                    onPlaying={e => {
+                      gfc_hideMask();
+                    }}
                   >
-                    {/* <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' /> */}
+                    {/* <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' />  */}
                     <source type='video/mp4' />
                   </video>
                   {/* <input ref={prgRef} data-seeking={false} style={{width:'100%'}} defaultValue={0}

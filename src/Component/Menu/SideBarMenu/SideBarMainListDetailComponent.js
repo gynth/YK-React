@@ -38,7 +38,7 @@ const SideBarMainListDetailComponent = (props) => {
   });
 
   return (
-    
+     
     <li className={(selectWindow !== null) && selectWindow.programId === props.MENU_ID ? 'on' : ''}
     
         data-pgm={props.MENU_ID} 

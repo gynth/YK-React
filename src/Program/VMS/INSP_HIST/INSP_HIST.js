@@ -19,7 +19,7 @@ import Combobox from '../../../Component/Control/Combobox';
 // import Mainspan from './Mainspan';
 import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
-import Chit from '../Common/Chit';
+import Chit from '../Common/Chit/Chit';
 import CompleteBtn from './CompleteBtn';
 import TabList from '../Common/TabList';
 import RecImage from './RecImage';
@@ -68,15 +68,24 @@ class INSP_HIST extends Component {
   }
 
   onTabChg = async() => {
+
+    await gfc_sleep(200);
+
+    const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
+    if(activeWindow.programId !== 'INSP_HIST'){
+      return;
+    }
+
     const carNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_CARNO');
     if(carNumb !== undefined && carNumb !== ''){
+
       const befCarNumb = gfo_getInput(this.props.pgm, 'search_txt').getValue();
 
       if(befCarNumb !== carNumb){
         gfo_getInput(this.props.pgm, 'search_txt').setValue(carNumb);
-        
         await gfc_sleep(100);
-        this.Retrieve(carNumb);
+        
+        this.Retrieve();
 
         //차량번호, 총중량, 입차시간 세팅
         const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
@@ -124,6 +133,8 @@ class INSP_HIST extends Component {
           DETAIL_CARNO : nowState === undefined ? '' : nowState.DETAIL_CARNO,
           DETAIL_WEIGHT: nowState === undefined ? '' : nowState.DETAIL_WEIGHT,
           DETAIL_DATE  : nowState === undefined ? '' : nowState.DETAIL_DATE,
+
+          GRID_SCALE   : nowState === undefined ? '' : nowState.GRID_SCALE,
 
           STD_CAM_IMG  : nowState === undefined ? null : nowState.STD_CAM_IMG,
           DUM_CAM_IMG  : nowState === undefined ? null : nowState.DUM_CAM_IMG,
@@ -198,6 +209,11 @@ class INSP_HIST extends Component {
 
         return Object.assign({}, nowState, {
           DETAIL_SCALE : action.DETAIL_SCALE
+        })
+      }else if(action.type === 'GRID_SCALE'){
+
+        return Object.assign({}, nowState, {
+          GRID_SCALE : action.GRID_SCALE
         })
       }else if(action.type === 'DETAIL_CARNO'){
 
@@ -327,7 +343,8 @@ class INSP_HIST extends Component {
     gfo_getCombo(this.props.pgm, 'search_tp').setValue('2');
   }
 
-  Retrieve = async (carNumb) => {
+  Retrieve = async () => {
+    const carNumb = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     if(carNumb === undefined || carNumb === ''){
       alert('선택된 차량번호가 없습니다.');
       return;
@@ -357,9 +374,11 @@ class INSP_HIST extends Component {
       })
 
       grid.resetData(dataMod);
-      gfg_setSelectRow(grid);
-
       gfs_dispatch('INSP_HIST_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+      
+      await gfc_sleep(100);
+
+      gfg_setSelectRow(grid);
     }else{
       gfs_dispatch('INSP_HIST_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
@@ -370,6 +389,8 @@ class INSP_HIST extends Component {
 
   onSelectChange = async (e) => {
     if(e === null) return;
+
+    gfs_dispatch('INSP_HIST_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
 
     //계량표 여부 확인.
     const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
@@ -397,7 +418,7 @@ class INSP_HIST extends Component {
                             isDisabled
                             data    = {[{
                               code: '1',
-                              name: '배차번호'
+                              name: '계근번호'
                             },{
                               code: '2',
                               name: '차량번호'
@@ -520,7 +541,7 @@ class INSP_HIST extends Component {
             </div> */}
           </div>
           <div style={{paddingBottom:'10px', paddingTop:'200px'}} className='car_info'>
-            <div className='title'><span>배차번호</span><Detailspan flag={1}  reducer='INSP_HIST_MAIN'/></div>
+            <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='INSP_HIST_MAIN'/></div>
             <div style={{height:'130px'}} className='detail'>
               <ul>
                 <li><span className='t'>차량번호</span><Detailspan flag={2}  reducer='INSP_HIST_MAIN'/></li>
@@ -547,7 +568,7 @@ class INSP_HIST extends Component {
                             rec='STD_CAM_REC' 
                             image='STD_CAM_IMG'/> 
                 }
-                {/* {this.state.device[1] !== undefined && 
+                {this.state.device[1] !== undefined && 
                   <RecImage device={this.state.device[1].camera.Guid} 
                             Name={this.state.device[1].camera.Name}
                             rtspUrl={this.state.device[1].rtspUrl[1]}
@@ -556,7 +577,7 @@ class INSP_HIST extends Component {
                             focus='DUM_CAM_FOCUS' 
                             rec='DUM_CAM_REC' 
                             image='DUM_CAM_IMG'/> 
-                } */}
+                }
               </div>
             </div>
         </div>

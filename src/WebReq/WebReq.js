@@ -71,7 +71,8 @@ export function MILESTONE(data){
       streamUrl  : data['streamUrl'],
       port       : data['port'],
       cameraName : data['cameraName']
-    } 
+    },
+    timeout: 30000
   };
 
   return axios(option)
