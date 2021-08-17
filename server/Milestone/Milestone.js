@@ -79,29 +79,67 @@ router.post('/CONNECT', (req, res) => {
       methodName: 'Connect'
     });
  
-    global.MILESTONE_DATA[device] = {
-      method : Connect
-    }
+    // global.MILESTONE_DATA[device] = {
+    //   method : Connect
+    // }
 
 
-    // Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
-    //   if(result[1] === 'Y') {
-    //     global.MILESTONE_DATA[device] = {
-    //       method : Connect,
-    //       nodeLoop: setInterval(() => {
-    //                   global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
-    //                     if(result[1] === 'Y') {
-    //                       global.MILESTONE_DATA[device].liveImg = result[2];
-    //                     }
-    //                   })   
-    //                 }, 1)
-    //     }
-    //   }
-    // })      
+    Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
+      console.log(result[1]);
+      if(result[1] === 'Y') {
+        global.MILESTONE_DATA[device] = {
+          method : Connect
+        }
+      }
+    })
+
+    Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
+      if(result[1] === 'Y') {
+        global.MILESTONE_DATA[device] = {
+          method : Connect,
+          nodeLoop: setInterval(() => {
+                      global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
+                        if(result[1] === 'Y') {
+                          global.MILESTONE_DATA[device].liveImg = result[2];
+                        }
+                      })   
+                    }, 1)
+        }
+      }
+    })
   }   
     
   res.json({result:'OK'}) 
 });  
+
+router.post('/Replay', (req, res) => { 
+  const device = req.body.device;
+  const scaleNo = req.body.scaleNo;
+  const cameraName = req.body.cameraName; 
+
+  //설정된 메서드가 없으면 생성.
+  if(global.MILESTONE_REPLAY === undefined){
+    let Connect = edge.func({
+      assemblyFile:`${__dirname}/Milestone.dll`,
+      methodName: 'Connect'
+    });
+     
+    Connect([global.MILESTONE_TOKEN, device, 'Start', '', scaleNo, '', cameraName], (error, result) => { 
+      if(result[1] === 'Y') {
+        global.MILESTONE_REPLAY = Connect;
+      }
+    })  
+  } 
+ 
+  global.MILESTONE_REPLAY([global.MILESTONE_TOKEN, device, 'Replay', '', scaleNo, '', cameraName], (error, result) => { 
+    
+    console.log(result); 
+
+    if(error === undefined) res.json('OK');
+    else res.json(error)
+  })   
+}); 
+  
 
 router.post('/PTZ', (req, res) => {
   const device = req.body.device;
@@ -215,7 +253,7 @@ router.post('/LOGIN', (req, res) => {
       }) 
       const token = loginResult;
       const deviceId = deviceResult;
-      console.log(token, deviceId);
+      console.log(token, deviceId); 
       
       if(deviceResult !== undefined){
         res.json({token, deviceId});

@@ -85,7 +85,7 @@ function RecImageDtl(props) {
 
   useEffect(() => { 
     var req = new XMLHttpRequest();
-    req.open('GET', 'http://211.231.136.182:3003/1.mp4', true);
+    req.open('GET', 'http://211.231.136.182:3003/1.mkv', true);
     req.responseType = 'blob';
 
     req.onload = function() {
@@ -122,8 +122,6 @@ function RecImageDtl(props) {
                     controls 
                     autoPlay 
                     style={{objectFit:'fill'}}
-                    
-                    onCanPlay={e => console.log(e)}
                   >
                     {/* <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' /> */}
                     <source type='video/mp4' />

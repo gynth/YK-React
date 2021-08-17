@@ -23,3 +23,4 @@ yarn-debug.log*
 yarn-error.log*
 server/Milestone/ffmpeg.exe
 server/ffmpeg/*
+server/Milestone/*.dll

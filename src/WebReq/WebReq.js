@@ -69,7 +69,8 @@ export function MILESTONE(data){
       scaleNo    : data['scaleNo'],
       recOwner   : data['recOwner'],
       streamUrl  : data['streamUrl'],
-      port       : data['port']
+      port       : data['port'],
+      cameraName : data['cameraName']
     } 
   };
 

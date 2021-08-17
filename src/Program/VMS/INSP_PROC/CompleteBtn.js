@@ -29,7 +29,7 @@ const CompleteBtn = (props) => {
     const detail_grade1 = gfo_getCombo(props.pgm, 'detail_grade1'); //고철등급
     if(detail_grade1.getValue() === null){
       alert('필수입력값이 없습니다. > 고철등급');
-      const chitBtn = document.getElementById('tab1');
+      const chitBtn = document.getElementById(`tab1_${props.pgm}`);
       chitBtn.click(0);
 
       gfc_hideMask();
@@ -38,7 +38,7 @@ const CompleteBtn = (props) => {
     const detail_grade2 = gfo_getCombo(props.pgm, 'detail_grade2'); //상세고철등급
     if(detail_grade2.getValue() === null){
       alert('필수입력값이 없습니다. > 등급세부코드');
-      const chitBtn = document.getElementById('tab1');
+      const chitBtn = document.getElementById(`tab1_${props.pgm}`);
       chitBtn.click(0);
 
       gfc_hideMask();
@@ -51,7 +51,7 @@ const CompleteBtn = (props) => {
     if(detail_depr.getValue() !== null){
       if(detail_depr2.getValue() === null){
         alert('필수입력값이 없습니다. > 감가비율');
-        const chitBtn = document.getElementById('tab1');
+        const chitBtn = document.getElementById(`tab1_${props.pgm}`);
         chitBtn.click(0);
   
         gfc_hideMask();
@@ -68,7 +68,7 @@ const CompleteBtn = (props) => {
     const detail_car = gfo_getCombo(props.pgm, 'detail_car'); //차종구분
     if(detail_car.getValue() === null){
       alert('필수입력값이 없습니다. > 차종구분');
-      const chitBtn = document.getElementById('tab1');
+      const chitBtn = document.getElementById(`tab1_${props.pgm}`);
       chitBtn.click(0);
 
       gfc_hideMask();
@@ -79,7 +79,7 @@ const CompleteBtn = (props) => {
     if(detail_rtn !== null){
       if(detail_rtn2.getValue() === null){
         alert('필수입력값이 없습니다. > 반품구분사유');
-        const chitBtn = document.getElementById('tab1');
+        const chitBtn = document.getElementById(`tab1_${props.pgm}`);
         chitBtn.click(0);
   
         gfc_hideMask();
@@ -94,10 +94,9 @@ const CompleteBtn = (props) => {
     //#region 계량표저장
     const chitYn = await gfc_chit_yn_YK(scaleNumb);
     if(chitYn.data === 'N'){
-      const chitBtn = document.getElementById('tab2');
-      chitBtn.click(1);
+      document.getElementById(`tab2_${props.pgm}`).click(2);
 
-      await gfc_sleep(300);
+      await gfc_sleep(200);
 
       const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
       if(memo.length === 0){
@@ -107,7 +106,7 @@ const CompleteBtn = (props) => {
         }
       }
 
-      const img = document.getElementById('content2');
+      const img = document.getElementById(`content2_${props.pgm}`);
       const result = await gfc_screenshot_srv_YK(img, scaleNumb);
       
       if(result.data === 'Y'){
@@ -122,9 +121,9 @@ const CompleteBtn = (props) => {
       }
     }
 
-    const msg = `tally_process_erp_procedure.jsp?` +
-                `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
-                `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
+    const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
+                // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
+                `dWorker=1989&` + //검수자(ERP ID)
                 `dWorkerName=${gfs_getStoreValue('USER_REDUCER', 'USER_NAM')}&` + //검수자 이름
                 `dOutageReasonCode=${detail_subt_leg.getValue() === null ? '' : detail_subt_leg.getValue()}&` + //감량사유
                 `dOutageWeightCode=${detail_subt.getValue() === null ? '' : detail_subt.getValue()}&` + //감량중량
@@ -132,14 +131,14 @@ const CompleteBtn = (props) => {
                 `dScrapGradeItemCode=${detail_grade2.getValue()}&` + //등급아이템
                 `dTallyHistoryCode=${detail_depr.getValue() === null ? '' : detail_depr.getValue()}&` + //감가내역
                 
-                `dTallyRatio=10&` + //감가비율???
+                `dTallyRatio=${detail_depr2.getValue()}&` + //감가비율???
                 
                 // `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
                 `dScrapAreaCode=E001&` + //하차구역(섹터), 옥내는E001고정
                 `dReturnDivisionCode=${detail_rtn.getValue() === null ? '' : detail_rtn.getValue()}&` + //반품구분
                 `dReturnHistoryCode=${detail_rtn2.getValue() === null ? '' : detail_rtn2.getValue()}&` + //반품구분사유
                 
-                `dOutageReasonEtcEdit=?` + //기타의견???
+                `dOutageReasonEtcEdit=&` + //기타의견???
 
                 `dCarTypeCode=${detail_car.getValue()}&` +
                 `dWarning=${detail_warning.getValue() === null ? '' : detail_warning.getValue()}&` +
@@ -156,7 +155,7 @@ const CompleteBtn = (props) => {
 
   //#region 계량표저장
   // const onScaleChit = async() => {
-  //   const img = document.getElementById('content2');
+  //   const img = document.getElementById(`content2_${props.pgm}`);
   //   const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_INFO');
 
   //   if(scaleNumb.scaleNumb === ''){

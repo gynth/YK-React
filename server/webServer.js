@@ -2,6 +2,7 @@ const express = require('express');
 const app3001 = express();
 const app3002 = express();
 const Mysql = require('./db/Mysql/Mysql');
+const Oracle = require('./db/Oracle/Oracle');
 const Milestone = require('./Milestone/Milestone');
 const WebReq = require('./WebReq/WebReq');
 const ScreenShot = require('./ScreenShot/ScreenShot');
@@ -15,6 +16,7 @@ global.MILESTONE_DEVICE = {};
 global.MILESTONE_TOKEN_TIME = '';
 global.MILESTONE_DATA = {};
 global.MILESTONE_RTSP = {};
+global.MILESTONE_REPLAY = undefined;
 
 var httpAttach = require('http-attach') // useful module for attaching middlewares
 const fs = require('fs');
@@ -47,6 +49,10 @@ app3001.use('/Mysql', Mysql);
 //#region YK스틸 웹요청
 app3001.use('/YK', WebReq);
 //#endregion 
+
+//#region 오라클
+// app3001.use('/Oracle', Oracle);
+//#endregion
 
 //#region 화면캡쳐
 app3001.use('/ScreenShot', ScreenShot);

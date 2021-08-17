@@ -107,7 +107,7 @@ const CompleteBtn = (props) => {
         }
       }
 
-      const img = document.getElementById('content2');
+      const img = document.getElementById(`content2_${props.pgm}`);
       const result = await gfc_screenshot_srv_YK(img, scaleNumb);
       
       if(result.data === 'Y'){
@@ -156,7 +156,7 @@ const CompleteBtn = (props) => {
 
   //#region 계량표저장
   // const onScaleChit = async() => {
-  //   const img = document.getElementById('content2');
+  //   const img = document.getElementById(`content2_${props.pgm}`);
   //   const scaleNumb = gfs_getStoreValue('INSP_HIST_MAIN', 'CHIT_INFO');
 
   //   if(scaleNumb.scaleNumb === ''){

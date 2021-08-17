@@ -434,7 +434,7 @@ class INSP_HIST extends Component {
                           columnInput({
                             name: 'scaleNumb',
                             header: '계근번호',
-                            width : 90,
+                            width : 100,
                             readOnly: true,
                             color : '#0063A9',
                             align : 'center',
@@ -485,7 +485,7 @@ class INSP_HIST extends Component {
                           columnInput({
                             name: 'totalWgt',
                             header: '감량',
-                            width : 40,
+                            width : 35,
                             readOnly: true,
                             align : 'right',
                             fontSize: '12'
@@ -539,6 +539,7 @@ class INSP_HIST extends Component {
               <div className='cctv_list'>
                 {this.state.device[0] !== undefined && 
                   <RecImage device={this.state.device[0].camera.Guid} 
+                            Name={this.state.device[0].camera.Name}
                             rtspUrl={this.state.device[0].rtspUrl[0]}
                             rtspPort={this.state.device[0].rtspPort[0]}
                             cam='STD_CAM_OPEN' 
@@ -548,6 +549,7 @@ class INSP_HIST extends Component {
                 }
                 {/* {this.state.device[1] !== undefined && 
                   <RecImage device={this.state.device[1].camera.Guid} 
+                            Name={this.state.device[1].camera.Name}
                             rtspUrl={this.state.device[1].rtspUrl[1]}
                             rtspPort={this.state.device[1].rtspPort[1]}
                             cam='DUM_CAM_OPEN' 

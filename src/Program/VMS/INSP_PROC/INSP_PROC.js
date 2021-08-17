@@ -1,6 +1,6 @@
 //#region import
 import React, { Component } from 'react';
-
+import axios from 'axios';
 import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
@@ -198,7 +198,7 @@ class INSP_PROC extends Component {
                                                     time    : '00:00'
                                                   } : nowState.DUM_CAM_REC,
 
-          CHIT_MEMO    : nowState === undefined ? 'N' : nowState.CHIT_MEMO,
+          CHIT_MEMO    : nowState === undefined ? '' : nowState.CHIT_MEMO,
           
           CHIT_INFO    : nowState === undefined ? {
                                                     date     : '',
@@ -524,7 +524,7 @@ class INSP_PROC extends Component {
         vender   : chitInfoYn.data.dataSend[0].vendor,
         itemFlag : '',
         Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
-        loc      : '부산',
+        loc      : chitInfoYn.data.dataSend[0].area,
         user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
         chit     : 'N'
       });
@@ -683,7 +683,16 @@ class INSP_PROC extends Component {
                 <li><span className='t'>총중량(KG)</span><Detailspan reducer='INSP_PROC_MAIN' flag={3} /></li>
                 <li><span className='t'>입차시간</span><Detailspan reducer='INSP_PROC_MAIN' flag={4} /></li>
                 <li>
-                    <button onClick={() => 
+                  <button onClick={e => {
+                        MILESTONE({
+                          reqAddr : 'Replay',
+                          device  : this.device[0].Guid,
+                          scaleNo: 'test11',
+                          cameraName: this.device[0].Name})
+                  }}>Replay
+
+                  </button>
+                    {/* <button onClick={() => 
                       {
                         const device = this.device[0];
                         this.startRec(device, 'testScale', '0');
@@ -697,6 +706,30 @@ class INSP_PROC extends Component {
                     </button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
+                    <button onClick={() =>{
+                        const host = 'http://211.231.136.182:3001/Oracle/Query';
+                        // const host = 'http://211.231.136.182:3001/Mysql/Query';
+                        const option = {
+                          url   : host,
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                          },
+                          data: {
+
+                          } 
+                        };
+                      
+                        return axios(option)
+                          .then(res => {
+                            return res
+                          })
+                          .catch(err => {
+                            console.log(err)
+                            return err;
+                          })
+                    }}>oracle</button> */}
                 </li>
               </ul>
             </div>
@@ -947,6 +980,7 @@ class INSP_PROC extends Component {
               <div className='cctv_list'>
                 {/* {this.state.device[0] !== undefined && 
                   <RecImage device={this.state.device[0].camera.Guid} 
+                            Name={this.state.device[0].camera.Name}
                             rtspUrl={this.state.device[0].rtspUrl[0]}
                             rtspPort={this.state.device[0].rtspPort[0]}
                             cam='STD_CAM_OPEN' 
@@ -956,6 +990,7 @@ class INSP_PROC extends Component {
                 }
                 {this.state.device[1] !== undefined && 
                   <RecImage device={this.state.device[1].camera.Guid} 
+                            Name={this.state.device[1].camera.Name}
                             rtspUrl={this.state.device[1].rtspUrl[1]}
                             rtspPort={this.state.device[1].rtspPort[1]}
                             cam='DUM_CAM_OPEN' 

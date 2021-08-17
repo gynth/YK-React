@@ -37,6 +37,7 @@ function RecImage(props) {
                   <div className={isFocus === true ? 'viewer on' : 'viewer'}>
                     <div style={{width:'100%', height:'100%'}}>
                       <ReactImageDtl device={props.device} 
+                                     Name={props.Name}
                                      rtspUrl={props.rtspUrl}
                                      rtspPort={props.rtspPort}
                                      cam={props.cam}
