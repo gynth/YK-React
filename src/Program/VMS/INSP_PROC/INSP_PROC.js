@@ -22,11 +22,13 @@ import Botspan from '../Common/Botspan';
 import Chit from '../Common/Chit/Chit';
 import CompleteBtn from './CompleteBtn';
 import TabList from '../Common/TabList';
+import DispInfo from './DispInfo';
+import DispImg from './DispImg';
 import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
 
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
+import { YK_WEB_REQ, YK_WEB_REQ_TEMP } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import { throttle } from 'lodash';
 //#endregion
@@ -190,27 +192,37 @@ class INSP_PROC extends Component {
           DUM_CAM_FOCUS: nowState === undefined ? false : nowState.DUM_CAM_FOCUS,
 
           STD_CAM_REC  : nowState === undefined ? {
-                                                    rec     : false,
-                                                    time    : '00:00'
-                                                  } : nowState.STD_CAM_REC,
+            rec     : false,
+            time    : '00:00'
+          } : nowState.STD_CAM_REC,
+
           DUM_CAM_REC  : nowState === undefined ? {
-                                                    rec     : false,
-                                                    time    : '00:00'
-                                                  } : nowState.DUM_CAM_REC,
+            rec     : false,
+            time    : '00:00'
+          } : nowState.DUM_CAM_REC,
 
           CHIT_MEMO    : nowState === undefined ? '' : nowState.CHIT_MEMO,
           
           CHIT_INFO    : nowState === undefined ? {
-                                                    date     : '',
-                                                    scaleNumb: '',
-                                                    carNumb  : '',
-                                                    vender   : '',
-                                                    itemFlag : '',
-                                                    Wgt      : '',
-                                                    loc      : '',
-                                                    user     : '',
-                                                    chit     : 'N'
-                                                  } : nowState.CHIT_INFO
+            date     : '',
+            scaleNumb: '',
+            carNumb  : '',
+            vender   : '',
+            itemFlag : '',
+            Wgt      : '',
+            loc      : '',
+            user     : '',
+            chit     : 'N'
+          } : nowState.CHIT_INFO,
+          
+          DISP_INFO    : nowState === undefined ? {
+            scaleNumb       : '',
+            scrp_ord_no     : '',
+            scrp_grd_nm     : '',
+            real_vender_name: '',
+            load_area_nm    : '',
+            load_area_addr  : ''
+          } : nowState.DISP_INFO
         };
       }
 
@@ -365,6 +377,18 @@ class INSP_PROC extends Component {
             chit     : action.chit
           }
         })
+      }else if(action.type === 'DISP_INFO'){
+
+        return Object.assign({}, nowState, {
+          DISP_INFO : {
+            scaleNumb       : action.scaleNumb,
+            scrp_ord_no     : action.scrp_ord_no,
+            scrp_grd_nm     : action.scrp_grd_nm,
+            real_vender_name: action.real_vender_name,
+            load_area_nm    : action.load_area_nm,
+            load_area_addr  : action.load_area_addr  
+          }
+        })
       }else if(action.type === 'CHIT_MEMO'){
         return Object.assign({}, nowState, {
           CHIT_MEMO : action.CHIT_MEMO
@@ -502,31 +526,40 @@ class INSP_PROC extends Component {
   onSelectChange = async (e) => {
     if(e === null) return;
 
+    document.getElementById('tab1_INSP_PROC').click(0);
+    await gfc_sleep(100);
+
     gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.itemGrade); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(''); //고철등급
-    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue(''); //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(''); //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
     gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(''); //감가내역
-    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(''); //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue(''); //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(''); //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(''); //반품구분사유
-    gfo_getCombo(this.props.pgm, 'detail_warning').setValue(''); //경고
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    gfo_getCombo(this.props.pgm, 'detail_warning').setValue('');  //경고
+
+    gfo_getInput(this.props.pgm, 'disp_scrp_ord_no').setValue('');      //배차번호
+    gfo_getInput(this.props.pgm, 'disp_scrp_grd_nm').setValue('');      //배차등급
+    gfo_getInput(this.props.pgm, 'disp_real_vender_name').setValue(''); //실공급자
+    gfo_getInput(this.props.pgm, 'disp_load_area_nm').setValue('');     //실상차지
+    gfo_getInput(this.props.pgm, 'disp_load_area_addr').setValue('');   //주소
 
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
 
-    //계량표 정보여부
+    //계량증명서 정보여부
     const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
     if(!chitInfoYn.data.dataSend){
-      alert('계량표 정보가 없습니다.');
+      alert('계량증명서 정보가 없습니다.');
       return;
     }
 
-    //계량표 여부 확인.
+    //계량증명서 여부 확인.
     const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
     if(chitYn.data === 'N'){
       gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
@@ -547,10 +580,19 @@ class INSP_PROC extends Component {
       });
     }
 
-    //계량표 정보 확인.
-    // const headData = YK_WEB_REQ(`tally_chit.jsp?scaleNumb=202107140001`);
-    // const headData = YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
-
+    //배차정보
+    // const chitInfoYn = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 나중에 이형식으로 바꿔야함
+    const dispInfo = await YK_WEB_REQ_TEMP('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108180042');
+    if(dispInfo.data.dataSend){
+      gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
+        scaleNumb       : chitInfoYn.data.dataSend[0].scaleNumb,
+        scrp_ord_no     : dispInfo.data.dataSend[0].SCRP_ORD_NO,
+        scrp_grd_nm     : dispInfo.data.dataSend[0].SCRP_GRD_NM,
+        real_vender_name: dispInfo.data.dataSend[0].REAL_VENDER_NAME,
+        load_area_nm    : dispInfo.data.dataSend[0].LOAD_AREA_NM,
+        load_area_addr  : dispInfo.data.dataSend[0].LOAD_AREA_ADDR
+      });
+    }
   }
 
   render() {
@@ -689,7 +731,7 @@ class INSP_PROC extends Component {
               </ul>
             </div>
           </div>
-          <div className='car_info'>
+          <div className='car_info' id='car_info'>
             <div className='title'><span>계근번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
             <div className='detail'>
               <ul>
@@ -706,7 +748,7 @@ class INSP_PROC extends Component {
                   }}>Replay
 
                   </button>
-                    {/* <button onClick={() => 
+                    <button onClick={() => 
                       {
                         const device = this.device[0];
                         this.startRec(device, 'testScale', '0');
@@ -743,9 +785,9 @@ class INSP_PROC extends Component {
                             console.log(err)
                             return err;
                           })
-                    }}>oracle</button> */}
+                    }}>oracle</button>
                 </li>
-              </ul>
+              </ul> 
             </div>
 
             <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_PROC_MAIN'/>
@@ -987,81 +1029,16 @@ class INSP_PROC extends Component {
               </div>
               
               <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_PROC_MAIN'/>
-
+              
               <div className='input_list' id={`content3_${this.props.pgm}`}>
-                {/* <ul>
-                  <li>
-                    <h5>차종구분</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_car'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '차종선택'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                  />
-                  </li>
-                  <li>
-                    <h5>반품구분</h5>
-                    <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '일부,전량 선택'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
-                            }}
-                    />
-                  </div>
-                  <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn2'
-                            value   = 'itemCode'
-                            display = 'item'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              const value = gfo_getCombo(this.props.pgm, 'detail_rtn').getValue();
-                              if(value === null) return;
-
-                              YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item'});
-                                })
-                            }}
-                    />
-                  </li>
-                  <li>
-                    <h5>경고</h5>
-                    <Combobox pgm = {this.props.pgm}
-                          id      = 'detail_warning'
-                          value   = 'code'
-                          display = 'name'
-                          placeholder = '경고'
-                          data    = {[{
-                            'code': 'Y',
-                            'name': '경고'
-                          }]}
-                          emptyRow
-                    />
-                  </li>
-                </ul> */}
+                <DispInfo pgm={this.props.pgm} />
               </div>
+
+              <div className='input_list' id={`content4_${this.props.pgm}`}>
+                <DispImg pgm={this.props.pgm} />
+              </div>
+
+
               
             </div>
             

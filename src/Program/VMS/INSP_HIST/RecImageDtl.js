@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
 import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import { gfc_addClass, gfc_removeClass, gfc_hasClass } from '../../../Method/Comm';
 import { throttle } from 'lodash';
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
 import ReactPlayer from 'react-player'
@@ -55,6 +56,14 @@ function RecImageDtl(props) {
     return p === n;
   });
   
+  const playToggle = (_play) => {
+    var menu = document.getElementById(_play);
+    if(gfc_hasClass(menu,'play')){
+      gfc_removeClass(menu,'play')
+    }else{
+      gfc_addClass(menu,'play')
+    }
+  }
 
   const setModalIsOpen = (open) => {
     
@@ -144,7 +153,7 @@ function RecImageDtl(props) {
                     ref={movieRef} 
                     width='100%' 
                     height='100%' 
-                    controls 
+                    // controls 
                     autoPlay 
                      
                     // preload='auto'
@@ -164,6 +173,14 @@ function RecImageDtl(props) {
                     onChange={e => handleSeekChange(e)}
                     onMouseUp={e => handleSeekMouseUp(e)}
                   /> */}
+                </div>
+                <div className='viewer_range'>
+                  <div className='wp'>
+                    <button type='button' id='play1' className='play' onClick={() => playToggle('play1')}></button>
+                    <span className='time'>0:00 / 3:00 </span>
+                    <button type='button' className='download'></button>
+                  </div>
+                  <input  type='range' defaultValue={0} className='cctv_gauge'/> 
                 </div>
                 <div className='picture_save' onClick={e => {
                   

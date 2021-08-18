@@ -26,4 +26,14 @@ router.post('/', (req, res) => {
   })
 });
 
+router.post('/TEMP', (req, res) => {
+  let URL = encodeURI(req.body.addr);
+  // let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
+  
+  
+  yk_req(req, URL).then((response) => {
+    res.json(response.data);
+  })
+});
+
 module.exports = router;   

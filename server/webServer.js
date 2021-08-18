@@ -2,7 +2,7 @@ const express = require('express');
 const app3001 = express();
 const app3002 = express();
 const Mysql = require('./db/Mysql/Mysql');
-const Oracle = require('./db/Oracle/Oracle');
+// const Oracle = require('./db/Oracle/Oracle');
 const Milestone = require('./Milestone/Milestone');
 const WebReq = require('./WebReq/WebReq');
 const ScreenShot = require('./ScreenShot/ScreenShot');
@@ -49,11 +49,11 @@ app3001.use('/Mysql', Mysql);
 //#region YK스틸 웹요청
 app3001.use('/YK', WebReq);
 //#endregion 
-
+ 
 //#region 오라클
 // app3001.use('/Oracle', Oracle);
 //#endregion
-
+ 
 //#region 화면캡쳐
 app3001.use('/ScreenShot', ScreenShot);
 //#endregion 

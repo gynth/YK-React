@@ -392,7 +392,7 @@ class INSP_HIST extends Component {
 
     gfs_dispatch('INSP_HIST_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
 
-    //계량표 여부 확인.
+    //계량증명서 여부 확인.
     const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
     gfs_dispatch('INSP_HIST_MAIN', 'CHIT_INFO', {
       chit     : chitYn.data

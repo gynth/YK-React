@@ -93,12 +93,12 @@ const CompleteBtn = (props) => {
     
     //#region 계량표저장
     const chitYn = await gfc_chit_yn_YK(scaleNumb);
+    const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
     if(chitYn.data === 'N'){
       document.getElementById(`tab2_${props.pgm}`).click(2);
 
       await gfc_sleep(200);
 
-      const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
       if(memo.length === 0){
         if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
           gfc_hideMask();
@@ -116,6 +116,12 @@ const CompleteBtn = (props) => {
         });
       }else{
         alert('계량표 저장에 실패 했습니다.');
+        gfc_hideMask();
+        return;
+      }
+    }else{
+      if(memo.length > 0){
+        alert('저장된 계량표가있습니다. 다시 조회 후 확인바랍니다.');
         gfc_hideMask();
         return;
       }
@@ -199,9 +205,10 @@ const CompleteBtn = (props) => {
   return (
     <div className='complete_btn'>
       <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>등록완료</span></button>
-      {/* <button style={{display: value.chit.length !== undefined && 'none' }} type='button' id='btn2' onClick={e => onScaleChit()}><span>계량증명서저장</span></button> */}
-      <button style={{display: value.chit.length !== undefined && 'none' }} type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button>
-      <button style={{display:'none !important'}} id={`btn3_${props.pgm}`}></button>
+      {/* <button type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button> */}
+      <button style={{display: value.chit !== 'N' && 'none' }} type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button>
+      <button style={{display:'none'}} id={`btn3_${props.pgm}`}></button>
+      <button style={{display:'none'}} id={`btn4_${props.pgm}`}></button>
     </div>
   );
 }

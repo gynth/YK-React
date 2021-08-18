@@ -48,7 +48,7 @@
 .car_list .total_info ul:last-child li .value {bottom:-5px;}
 .car_manager .car_info {float:left; width:365px; height:100%;}
 
-.car_info {position:relative; padding-top:251px; padding-bottom:90px; box-sizing:border-box;}
+.car_info {position:relative; padding-top:293px; padding-bottom:90px; box-sizing:border-box;}
 .car_info .title {position:absolute; left:0; top:0; width:100%; height:60px; box-sizing:border-box; line-height:60px; background:#2C73BB; padding:0 17px; color:#ffffff; font-family: 'Rajdhani', sans-serif; font-size:36px;}
 .car_info .title span {position:relative; top:-3px; margin-right:22px; padding-left:27px; background:url('../Image/carinfo_bu@2x.png') no-repeat 0 50%; background-size:18px 16px; font-size:16px;}
 
@@ -58,19 +58,21 @@
 .car_info .detail ul li .t {display:inline-block; width:105px; color:#2C73BB; font-weight:bold}
 
 .car_info .tab_list {position:absolute; left:0; top:192px; width:100%; padding:0 17px; overflow:hidden; box-sizing:border-box; margin-top:17px;}
-.car_info .tab_list .tab {cursor:pointer; width:33%; height:42px; border:1px solid #9FA8C9; background:#F6F8FC; color:#9BA9BE; float:left; text-align:center; font-size:16px; font-weight:bold;}
+.car_info .tab_list .tab {cursor:pointer; width:50%; height:42px; border:1px solid #9FA8C9; background:#F6F8FC; color:#9BA9BE; float:left; text-align:center; font-size:16px; font-weight:bold;}
 .car_info .tab_list .tab .doc {position:relative; top:-2px; margin-right:5px; display:inline-block; vertical-align:middle; width:21px; height:21px; background:url('../Image/doc_bu.png') no-repeat 50% 50%; overflow:hidden; text-indent:-9999px; background-size:21px}
 .car_info .tab_list .tab.on {background:#ffffff; color:#000000}
-.car_info .tab_list .tab:first-child {border-radius:3px 0 0 3px; border-right:0px none;}
-.car_info .tab_list .tab:last-child {border-radius:0 3px 3px 0; width:34%;  border-left:0px none;}
+.car_info .tab_list .tab:first-child {border-radius:3px 0 0 0; border-right:0px none; border-bottom:0px none;}
+.car_info .tab_list .tab:nth-child(2) {border-radius:0 3px 0 0; border-bottom:0px none;}
+.car_info .tab_list .tab:nth-child(3) {border-radius:0 0 0 3px; border-right:0px none; }
+.car_info .tab_list .tab:last-child {border-radius:0 0 3px 0; }
 
 .car_info .tab_content {height:100%}
 .car_info .tab_content>div {display:none;}
 .car_info .tab_content>div.on {display:block;}
 .car_info .input_list {font-size: 16; padding:0 17px; height: 100%; overflow: auto;}
 .car_info .input_list ul {}
-.car_info .input_list ul li {}
-.car_info .input_list ul li h5 {font-size:16px; font-weight:bold; background:url('../Image/detail_li_bu.png') no-repeat 0 50%; padding-left:15px; margin:15px 0;}
+.car_info .input_list ul li {margin:0px 0px 10px 0px}
+.car_info .input_list ul li h5 {font-size:16px; font-weight:bold; background:url('../Image/detail_li_bu.png') no-repeat 0 50%; padding-left:15px; margin:10px 0;}
 /* .car_info .input_list ul li select {width:100%; height:42px; padding-left:7px; box-sizing:border-box; border-radius:5px;} */
 /* .car_info .input_list ul li input {width:100%; height:42px; box-sizing:border-box; border-radius:5px; margin-top:5px} */
 
@@ -159,6 +161,22 @@
 .rain_info .title {color:#fff; font-size:16px; padding-left:33px; background:url('../Image/rain_bu.png') no-repeat 0 50%; }
 .rain_info .value {margin-left:10px; display:inline-block; background:#000; text-align:center; height:37px; line-height:37px; padding:0 10px; color:#fff; font-size:16px; }
 
+
+
+
+.cctv_gauge {padding:10px;}
+
+.viewer_range {position:absolute; bottom:0; left:0; width:100%; padding:20px 25px; box-sizing: border-box;}
+.viewer_range .wp {overflow:hidden;}
+.viewer_range button {cursor:pointer; border:none; float:left; width:33px; height:38px; background:url('../Image/pause_bu.png') no-repeat 45% 50%;}
+.viewer_range button.play {background:url('../Image/play_bu.png') no-repeat 50% 50%;}
+.viewer_range button.download {float:right; background:url('../Image/download_bu.png') no-repeat 50% 50%;}
+.viewer_range button:hover {opacity:0.8}
+.viewer_range span.time {float:left; line-height:38px; font-size:14px; color:#fff}
+
+input[type=range].cctv_gauge {position:relative; top:-5px; padding:0; -webkit-appearance: none; overflow: hidden; width: 100%; height: 5px; background: transparent; cursor: pointer; background: #404040; border-radius:2px; /* iOS */ } 
+input[type=range].cctv_gauge:focus { outline: none; } 
+input[type=range].cctv_gauge::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 5px; background: #fff; box-shadow: -100vw 0 0 100vw #ffffff; border: 0.1px solid #fff; border-radius:2px; cursor: pointer; }
 
 
 

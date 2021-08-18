@@ -31,6 +31,13 @@ class Input extends Component{
     );
   }
 
+  componentDidUpdate(){
+    if(this.props.value !== ''){
+
+      this.inputRef.current.value = this.props.value;
+    }
+  }
+
   componentWillUnmount(){
     gfs_dispatch(this.props.pgm, 'CLEARINPUT', 
       ({
@@ -189,6 +196,7 @@ Input.defaultProps = {
   id          : undefined,
   label       : undefined,
   type        : 'text',
+  value       : '',
   defaultValue: undefined,
   placeHolder : undefined,
   fontSize    : undefined,
