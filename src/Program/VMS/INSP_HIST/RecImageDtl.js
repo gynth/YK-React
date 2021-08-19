@@ -2,47 +2,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
-import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
-import { gfc_addClass, gfc_removeClass, gfc_hasClass } from '../../../Method/Comm';
-import { throttle } from 'lodash';
+import { gfs_dispatch, gfs_subscribe, gfs_getStoreValue } from '../../../Method/Store';
+import { gfc_addClass, gfc_removeClass, gfc_hasClass, gfc_lpad } from '../../../Method/Comm';
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
 import ReactPlayer from 'react-player'
+import { throttle } from 'lodash';
 
 function RecImageDtl(props) {
   
   const movieRef = useRef();
   const prgRef = useRef();
+  const timeRef = useRef();
 
-  const handleDuration = (duration) => {
-    prgRef.current.max = duration;
-  }
-  const handleSeekMouseDown = e => {
-    // prgRef.current.dataset.seeking = 'true';
-  }
-  const handleSeekMouseUp = e => {
-    // const value = prgRef.current.value;
-    
-    // movieRef.current.seekTo(5);
-    // prgRef.current.dataset.seeking = 'false';
-
-    const aa = movieRef.current.currentTime;
-    movieRef.current.currentTime += 0.5;
-    console.log(movieRef.current.currentTime);
-  }
-  const handleSeekChange = e => {
-    // this.setState({ played: parseFloat(e.target.value) })
-    // movieRef.current.currentTime += 0.5;
-  }
-  const  handleProgress = state => {
-    // // We only want to update time slider if we are not currently seeking
-    // if (!state.seeking) {
-    //   setState(e)
-    // }
-    // console.log(state);
-    
-    // if(prgRef.current.dataset.seeking === 'false')
-    //   prgRef.current.value = state.playedSeconds;
-  }
+  let isSeek = false;
 
   const isOpen = useSelector((e) => {
     return e.INSP_HIST_MAIN[props.cam];
@@ -55,15 +27,76 @@ function RecImageDtl(props) {
   }, (p, n) => {
     return p === n;
   });
+
+  const activeWindow = useSelector((e) => {
+    return e.WINDOWFRAME_REDUCER.activeWindow;
+  }, (p, n) => {
+    return p.programId === n.programId;
+  });
+
+  const movieDown = () => {
+    console.log('1');
+  }
   
   const playToggle = (_play) => {
     var menu = document.getElementById(_play);
     if(gfc_hasClass(menu,'play')){
       gfc_removeClass(menu,'play')
+      movieRef.current.player.player.play();
     }else{
-      gfc_addClass(menu,'play')
+      gfc_addClass(menu,'play');
+      movieRef.current.player.player.pause();
     }
   }
+
+  if(activeWindow.programId === 'INSP_HIST'){
+    window.onkeydown = e => onKeyDown(e);
+  //   if(window.onkeydown === null){
+  //     window.onkeydown = e => onKeyDown(e);
+  //   }
+  // }else{
+  //   if(window.onkeydown !== null){
+  //     window.onkeydown = null;
+  //   }
+  }
+
+  const onKeyDown = (e) => {
+    e.stopPropagation();
+
+    const STD_CAM_FOCUS = gfs_getStoreValue('INSP_HIST_MAIN', 'STD_CAM_FOCUS');
+    const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_HIST_MAIN', 'DUM_CAM_FOCUS');
+    
+    if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
+      debounceKeyDown(e, STD_CAM_FOCUS ? 'STD_CAM_FOCUS' : 'DUM_CAM_FOCUS');
+    }
+  }
+  
+  const debounceKeyDown = throttle((e, owner) => {
+    let move = '';
+    if(e.keyCode === 37) move = 'left';
+    else if(e.keyCode === 39) move = 'right';
+
+    if(move !== ''){
+      if(owner === props.focus){
+        let curTime;
+        if(move === 'left'){
+          curTime = movieRef.current.getCurrentTime() - 5;
+        }else{
+          curTime = movieRef.current.getCurrentTime() + 5;
+        }
+
+        const totalMin = gfc_lpad(parseInt((curTime%3600)/60), 2, '0');
+        const totalSec = gfc_lpad(parseInt(curTime%60), 2, '0');
+
+        const curMin = gfc_lpad(parseInt((curTime%3600)/60), 2, '0');
+        const curSec = gfc_lpad(parseInt(curTime%60), 2, '0');
+
+        timeRef.current.textContent = `${curMin}:${curSec} / ${totalMin}:${totalSec}`;
+
+        movieRef.current.seekTo(curTime);
+      }
+    }
+  }, 300);
 
   const setModalIsOpen = (open) => {
     
@@ -99,6 +132,8 @@ function RecImageDtl(props) {
     }
   };
 
+  const [playUrl, setPlayUrl] = useState('');
+
   useEffect(() => { 
     if(value !== ''){
       gfc_showMask();
@@ -125,7 +160,9 @@ function RecImageDtl(props) {
                   var vid = URL.createObjectURL(videoBlob); // IE10+
                   // Video is now downloaded
                   // and we can set it as source on the video element
-                  movieRef.current.src = vid;
+                   
+                  // movieRef.current.src = vid;
+                  setPlayUrl(vid);
               }
             }
             req.onerror = function() {
@@ -135,64 +172,78 @@ function RecImageDtl(props) {
             req.send();
           }else{
             gfc_hideMask();
-          }
+          } 
         })
     }
   }, [props.device, props.Name, value])
-
+ 
   const img = <>
-                <div style={{width:'100%', height:'100%'}}>
-                  {/* <ReactPlayer
-                     controls
-                     playing
-                     className='react-player'
-                     url={`http://211.231.136.182:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}`}
-                     width='100%'
-                     height='100%' /> */}
-                  <video 
+                <div 
+                  style={{width:'100%', height:'100%'}} 
+                  className='player-wrapper'>
+                  <ReactPlayer 
                     ref={movieRef} 
+                    className='react-player'
                     width='100%' 
                     height='100%' 
-                    // controls 
-                    autoPlay 
-                     
-                    // preload='auto'
-                    style={{objectFit:'fill'}}
+                    onKeyPress={e => console.log(e)}
+                    
+                    // controls
+                    playing 
+                    muted 
+                    
+                    url={playUrl} 
 
-                    onPlaying={e => {
+                    onDuration={e => {
                       gfc_hideMask();
+                      prgRef.current.max = e;
                     }}
-                  >
-                    {/* <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' />  */}
-                    <source type='video/mp4' />
-                  </video>
-                  {/* <input ref={prgRef} data-seeking={false} style={{width:'100%'}} defaultValue={0}
-                    type='range' min={0} step='any'
-                    // value={played}
-                    onMouseDown={e => handleSeekMouseDown(e)}
-                    onChange={e => handleSeekChange(e)}
-                    onMouseUp={e => handleSeekMouseUp(e)}
-                  /> */}
+
+                    onProgress={e => {
+                      if(isSeek) return;
+
+                      const totalMin = gfc_lpad(parseInt((e.loadedSeconds%3600)/60), 2, '0');
+                      const totalSec = gfc_lpad(parseInt(e.loadedSeconds%60), 2, '0');
+
+                      const curMin = gfc_lpad(parseInt((e.playedSeconds%3600)/60), 2, '0');
+                      const curSec = gfc_lpad(parseInt(e.playedSeconds%60), 2, '0');
+
+                      prgRef.current.value = e.playedSeconds;
+                      timeRef.current.textContent = `${curMin}:${curSec} / ${totalMin}:${totalSec}`;
+                    }}
+                  /> 
                 </div>
+
                 <div className='viewer_range'>
                   <div className='wp'>
-                    <button type='button' id='play1' className='play' onClick={() => playToggle('play1')}></button>
-                    <span className='time'>0:00 / 3:00 </span>
-                    <button type='button' className='download'></button>
+                    <button type='button' id='play1' onClick={() => playToggle('play1')}></button>
+                    <span className='time' ref={timeRef}>00:00 / 00:00 </span>
+                    <button type='button' className='download' onClick={() => movieDown()}></button>
                   </div>
-                  <input  type='range' defaultValue={0} className='cctv_gauge'/> 
+                  <input 
+                    onMouseDown={e => isSeek = true}
+                    onMouseUp={e => {
+                      movieRef.current.seekTo(e.target.value);
+                      isSeek = false;
+                    }}
+                    ref={prgRef} 
+                    type='range' 
+                    min={0} 
+                    defaultValue={0} 
+                    className='cctv_gauge'/> 
                 </div>
+
                 <div className='picture_save' onClick={e => {
                   
-                  gfc_showMask();
-                  gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
-                    e => {
-                      gfc_hideMask();
-                      if(e.data.Result !== 'OK'){
-                        alert('파일저장에 실패 했습니다.');
-                      }
-                    }
-                  )
+                  // gfc_showMask();
+                  // gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
+                  //   e => {
+                  //     gfc_hideMask();
+                  //     if(e.data.Result !== 'OK'){
+                  //       alert('파일저장에 실패 했습니다.');
+                  //     } 
+                  //   }
+                  // )
                 }}>
                 </div>
               </>;

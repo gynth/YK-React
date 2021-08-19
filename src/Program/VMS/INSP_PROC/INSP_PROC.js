@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_disp_yn_YK } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getTextarea } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -76,15 +76,17 @@ class INSP_PROC extends Component {
   onActiveWindow = () => {
     const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
     if(activeWindow.programId === 'INSP_PROC'){
-      if(window.onkeydown === null){
-        window.onkeydown = e => this.onKeyDown(e);
-        window.onmousewheel = e => this.onMouseWheel(e);
-      }
-    }else{
-      if(window.onkeydown !== null){
-        window.onkeydown = null;
-        window.onmousewheel = null;
-      }
+      window.onkeydown = e => this.onKeyDown(e);
+      window.onmousewheel = e => this.onMouseWheel(e);
+    //   if(window.onkeydown === null){
+    //     window.onkeydown = e => this.onKeyDown(e);
+    //     window.onmousewheel = e => this.onMouseWheel(e);
+    //   }
+    // }else{
+    //   if(window.onkeydown !== null){
+    //     window.onkeydown = null;
+    //     window.onmousewheel = null;
+    //   }
     }
   }
   //#endregion
@@ -222,7 +224,24 @@ class INSP_PROC extends Component {
             real_vender_name: '',
             load_area_nm    : '',
             load_area_addr  : ''
-          } : nowState.DISP_INFO
+          } : nowState.DISP_INFO,
+
+          DISP_PIC    : nowState === undefined ? {
+            scaleNumb           : '',
+            scrp_ord_no         : '',
+            empty_front_date    : '',
+            empty_front         : '',
+            empty_front_gps_addr: '',
+            empty_rear_date     : '',
+            empty_rear          : '',
+            empty_rear_gps_addr : '',
+            cargo_front_date    : '',
+            cargo_front         : '',
+            cargo_front_gps_addr: '',
+            cargo_rear_date     : '',
+            cargo_rear          : '',
+            cargo_rear_gps_addr : ''
+          } : nowState.DISP_PIC
         };
       }
 
@@ -377,6 +396,10 @@ class INSP_PROC extends Component {
             chit     : action.chit
           }
         })
+      }else if(action.type === 'CHIT_MEMO'){
+        return Object.assign({}, nowState, {
+          CHIT_MEMO : action.CHIT_MEMO
+        })
       }else if(action.type === 'DISP_INFO'){
 
         return Object.assign({}, nowState, {
@@ -389,9 +412,25 @@ class INSP_PROC extends Component {
             load_area_addr  : action.load_area_addr  
           }
         })
-      }else if(action.type === 'CHIT_MEMO'){
+      }else if(action.type === 'DISP_PIC'){
+
         return Object.assign({}, nowState, {
-          CHIT_MEMO : action.CHIT_MEMO
+          DISP_PIC : {
+            scaleNumb           : action.scaleNumb,
+            scrp_ord_no         : action.scrp_ord_no,
+            empty_front_date    : action.empty_front_date,
+            empty_front         : action.empty_front,
+            empty_front_gps_addr: action.empty_front_gps_addr,
+            empty_rear_date     : action.empty_rear_date,
+            empty_rear          : action.empty_rear,
+            empty_rear_gps_addr : action.empty_rear_gps_addr,
+            cargo_front_date    : action.cargo_front_date,
+            cargo_front         : action.cargo_front,
+            cargo_front_gps_addr: action.cargo_front_gps_addr,
+            cargo_rear_date     : action.cargo_rear_date,
+            cargo_rear          : action.cargo_rear,
+            cargo_rear_gps_addr : action.cargo_rear_gps_addr 
+          }
         })
       }
     }
@@ -582,7 +621,7 @@ class INSP_PROC extends Component {
 
     //배차정보
     // const chitInfoYn = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 나중에 이형식으로 바꿔야함
-    const dispInfo = await YK_WEB_REQ_TEMP('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108180042');
+    const dispInfo = await YK_WEB_REQ_TEMP('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108190001');
     if(dispInfo.data.dataSend){
       gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
         scaleNumb       : chitInfoYn.data.dataSend[0].scaleNumb,
@@ -591,6 +630,29 @@ class INSP_PROC extends Component {
         real_vender_name: dispInfo.data.dataSend[0].REAL_VENDER_NAME,
         load_area_nm    : dispInfo.data.dataSend[0].LOAD_AREA_NM,
         load_area_addr  : dispInfo.data.dataSend[0].LOAD_AREA_ADDR
+      });
+
+      const img1  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].EMPTY_FRONT, chitInfoYn.data.dataSend[0].scaleNumb);
+      const img2  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].EMPTY_REAR, chitInfoYn.data.dataSend[0].scaleNumb);
+      const img3  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].CARGO_FRONT, chitInfoYn.data.dataSend[0].scaleNumb);
+      const img4  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].CARGO_REAR, chitInfoYn.data.dataSend[0].scaleNumb);
+
+      gfs_dispatch('INSP_PROC_MAIN', 'DISP_PIC', {
+        scaleNumb           : chitInfoYn.data.dataSend[0].scaleNumb,
+        scrp_ord_no         : dispInfo.data.dataSend[0].SCRP_ORD_NO,
+    
+        empty_front_date    : dispInfo.data.PIC[0].EMPTY_FRONT_DATE,
+        empty_front         : img1.data === 'N' ? '' : img1.data,
+        empty_front_gps_addr: dispInfo.data.PIC[0].EMPTY_FRONT_GPS_ADDR,
+        empty_rear_date     : dispInfo.data.PIC[0].EMPTY_REAR_DATE,
+        empty_rear          : img2.data === 'N' ? '' : img2.data,
+        empty_rear_gps_addr : dispInfo.data.PIC[0].EMPTY_REAR_GPS_ADDR,
+        cargo_front_date    : dispInfo.data.PIC[0].CARGO_FRONT_DATE,
+        cargo_front         : img3.data === 'N' ? '' : img3.data,
+        cargo_front_gps_addr: dispInfo.data.PIC[0].CARGO_FRONT_GPS_ADDR,
+        cargo_rear_date     : dispInfo.data.PIC[0].CARGO_REAR_DATE,
+        cargo_rear          : img4.data === 'N' ? '' : img4.data,
+        cargo_rear_gps_addr : dispInfo.data.PIC[0].CARGO_REAR_GPS_ADDR
       });
     }
   }

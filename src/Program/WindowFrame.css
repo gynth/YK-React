@@ -173,6 +173,9 @@
 .viewer_range button.download {float:right; background:url('../Image/download_bu.png') no-repeat 50% 50%;}
 .viewer_range button:hover {opacity:0.8}
 .viewer_range span.time {float:left; line-height:38px; font-size:14px; color:#fff}
+.viewer_range.hover{
+  opacity: 0;
+}
 
 input[type=range].cctv_gauge {position:relative; top:-5px; padding:0; -webkit-appearance: none; overflow: hidden; width: 100%; height: 5px; background: transparent; cursor: pointer; background: #404040; border-radius:2px; /* iOS */ } 
 input[type=range].cctv_gauge:focus { outline: none; } 
@@ -181,6 +184,16 @@ input[type=range].cctv_gauge::-webkit-slider-thumb { -webkit-appearance: none; w
 
 
 
+/* 
+.player-wrapper {
+  width: auto; 
+  height: auto;
+}
+.react-player {
+  padding-top: 56.25%;
+  position: relative; 
+}
 
-
-
+.react-player > div {
+  position: absolute; 
+} */

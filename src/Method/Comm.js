@@ -269,6 +269,31 @@ export const gfc_chit_yn_YK = (scaleNo) => {
     })
 }
 
+export const gfc_disp_yn_YK = (fileName, scaleNo) => {
+  const host = 'http://211.231.136.182:3001/ScreenShot/YK_Disp_YN';
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+      fileName,
+      scaleNo 
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
 export const gfc_screenshot_srv_YK = (element, filename) => {
 
   return html2canvas(element, {

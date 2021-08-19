@@ -71,14 +71,6 @@ function RecImageDtl(props) {
 
   useEffect(() => { 
     start(props.ip);
-    // onStreaming();
-
-    // var jsmpeg = require('jsmpeg');
-    // var client = new WebSocket('ws://211.231.136.182:3100');
-    // var canvas = document.querySelector('canvas');
-    // new jsmpeg(client, {
-    //   canvas 
-    // });
 
     MILESTONE({reqAddr: 'RTSPStart',
                device: props.device,
@@ -91,44 +83,31 @@ function RecImageDtl(props) {
               })
     
     return() => {
-      // const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
-      // if(activeWindow.programId !== 'INSP_PROC'){
-        client.close();
-      // }
+      client.close();
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
-  const onStreaming = () => {
-    setInterval((e) => {
-      MILESTONE_LIVE({
-        device: props.device
-      }).then(e => {
-        // console.log('1');
-        // const JPEG = e.data.liveImg.data;
-        // const JPEG = 'data:image/JPEG;base64,' + _arrayBufferToBase64(e.data.liveImg.data);
-        try{
-          const JPEG = e.data;
-          // setImage(JPEG);
-          // imageRef.current.src = JPEG;
+  // const onStreaming = () => {
+  //   setInterval((e) => {
+  //     MILESTONE_LIVE({
+  //       device: props.device
+  //     }).then(e => {
+  //       try{
+  //         const JPEG = e.data;
   
-          if(JPEG !== undefined && JPEG !== ''){
-            if(imageRef.current !== undefined){
-              // setImage(JPEG);
-              imageRef.current.src = JPEG;
-              // let obj = {};
-              // obj[props.image] = JPEG;
-    
-              // gfs_dispatch('INSP_PROC_MAIN', props.image, obj);
-            }
-          }
-        }catch (e){
+  //         if(JPEG !== undefined && JPEG !== ''){
+  //           if(imageRef.current !== undefined){
+  //             imageRef.current.src = JPEG;
+  //           }
+  //         }
+  //       }catch (e){
           
-        }
-      })
-    }, 80);
-  }
+  //       }
+  //     })
+  //   }, 80);
+  // }
 
   const debounceOnClick = throttle((e, ptz) => {
     TOKEN({}).then(e => {
