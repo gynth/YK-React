@@ -7,12 +7,14 @@ import { gfc_addClass, gfc_removeClass, gfc_hasClass, gfc_lpad } from '../../../
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
 import ReactPlayer from 'react-player'
 import { throttle } from 'lodash';
+import axios from 'axios';
 
 function RecImageDtl(props) {
   
   const movieRef = useRef();
   const prgRef = useRef();
   const timeRef = useRef();
+  const btnRef = useRef();
 
   let isSeek = false;
 
@@ -35,7 +37,32 @@ function RecImageDtl(props) {
   });
 
   const movieDown = () => {
-    console.log('1');
+    MILESTONE({
+      reqAddr : 'Download',
+      device  : props.device,
+      scaleNo : value,
+      cameraName: props.Name}).then(e => {
+        if(e.data === '0'){
+          axios({
+            url: `http://211.231.136.182:3003/${value}.mp4?scaleNumb=${value}&cameraName=${props.Name}&stream=N`,
+            method: 'GET',
+            responseType: 'blob'
+          })
+            .then((response) => {
+                  const url = window.URL
+                        .createObjectURL(new Blob([response.data]));
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', 'image.avi');
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+            }).catch(e => console.log(e))
+        }else{
+          alert('파일저장에 실패 했습니다.')
+        }
+      })
+
   }
   
   const playToggle = (_play) => {
@@ -137,19 +164,19 @@ function RecImageDtl(props) {
   useEffect(() => { 
     if(value !== ''){
       gfc_showMask();
+      setPlayUrl('');
 
       // movieRef.current.get(0).stop();
       // movieRef.current.get(0).stop();
-      movieRef.current.src = '';
 
       MILESTONE({
         reqAddr : 'Replay',
         device  : props.device,
         scaleNo : value,
         cameraName: props.Name}).then(e => {
-          if(e.data === '0'){
+          if(e.data === '0' || e.data === ''){
             var req = new XMLHttpRequest();
-            req.open('GET', `http://211.231.136.182:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}`, true);
+            req.open('GET', `http://211.231.136.182:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}&stream=Y`, true);
             req.responseType = 'blob';
         
             req.onload = function() {
@@ -194,7 +221,14 @@ function RecImageDtl(props) {
                     
                     url={playUrl} 
 
+                    
+                    onError={e => {
+                      btnRef.current.style = 'display:none;';
+                      gfc_hideMask();
+                    }}
+
                     onDuration={e => {
+                      btnRef.current.style = 'display:block;';
                       gfc_hideMask();
                       prgRef.current.max = e;
                     }}
@@ -218,7 +252,11 @@ function RecImageDtl(props) {
                   <div className='wp'>
                     <button type='button' id='play1' onClick={() => playToggle('play1')}></button>
                     <span className='time' ref={timeRef}>00:00 / 00:00 </span>
-                    <button type='button' className='download' onClick={() => movieDown()}></button>
+                    <button 
+                      ref={btnRef}
+                      type='button' 
+                      className='download' 
+                      onClick={() => movieDown()}></button>
                   </div>
                   <input 
                     onMouseDown={e => isSeek = true}

@@ -128,10 +128,35 @@ router.post('/Replay', (req, res) => {
       if(result[1] === 'Y') {
         global.MILESTONE_REPLAY = Connect;
       }
-    })  
+    })   
   }  
  
   global.MILESTONE_REPLAY([global.MILESTONE_TOKEN, device, 'Replay', '', scaleNo, '', cameraName], (error, result) => { 
+    if(error === undefined) res.json(result);
+    else res.json(error)
+  })   
+});  
+
+router.post('/Download', (req, res) => { 
+  const device = req.body.device;
+  const scaleNo = req.body.scaleNo;
+  const cameraName = req.body.cameraName; 
+
+  //설정된 메서드가 없으면 생성.
+  if(global.MILESTONE_REPLAY === undefined){
+    let Connect = edge.func({
+      assemblyFile:`${__dirname}/Milestone.dll`,
+      methodName: 'Connect'
+    });  
+        
+    Connect([global.MILESTONE_TOKEN, device, 'Start', '', scaleNo, '', cameraName], (error, result) => { 
+      if(result[1] === 'Y') {
+        global.MILESTONE_REPLAY = Connect;
+      }
+    })        
+  }         
+
+  global.MILESTONE_REPLAY([global.MILESTONE_TOKEN, device, 'Download', '', scaleNo, '', cameraName], (error, result) => { 
     if(error === undefined) res.json(result);
     else res.json(error)
   })   

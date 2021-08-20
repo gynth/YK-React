@@ -24,8 +24,32 @@ export function YK_WEB_REQ(addr){
     })
 };
 
-export function YK_WEB_REQ_TEMP(addr){
-  const host = 'http://211.231.136.182:3001/YK/TEMP';
+export function YK_WEB_REQ_DIRECT(addr){
+  const host = 'http://211.231.136.182:3001/YK/DIRECT';
+  // const host = 'http://211.231.136.150:3001/YK';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+    data: {
+      addr
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+};
+
+export function YK_WEB_REQ_DISP(addr){
+  const host = 'http://211.231.136.182:3001/YK/DISP';
   // const host = 'http://211.231.136.150:3001/YK';
   const option = {
     url   : host,

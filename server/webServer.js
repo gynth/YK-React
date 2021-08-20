@@ -1,8 +1,7 @@
 const express = require('express');
 const app3001 = express();
 const app3002 = express();
-const Mysql = require('./db/Mysql/Mysql');
-// const Oracle = require('./db/Oracle/Oracle');
+const Oracle = require('./db/Oracle/Oracle');
 const Milestone = require('./Milestone/Milestone');
 const WebReq = require('./WebReq/WebReq');
 const ScreenShot = require('./ScreenShot/ScreenShot');
@@ -32,7 +31,7 @@ app3001.use(express.urlencoded({
   limit: '100mb',
   extended: false 
 })); 
-app3002.use(express.json({
+app3002.use(express.json({ 
   limit: '100mb'
 }));
 app3002.use(express.urlencoded({
@@ -42,16 +41,12 @@ app3002.use(express.urlencoded({
 app3001.use(cors());  
 app3002.use(cors());
 
-//#region Mysql요청
-app3001.use('/Mysql', Mysql);
-//#endregion
-
 //#region YK스틸 웹요청
 app3001.use('/YK', WebReq);
 //#endregion 
  
 //#region 오라클
-// app3001.use('/Oracle', Oracle);
+app3001.use('/Oracle', Oracle);
 //#endregion
  
 //#region 화면캡쳐
@@ -75,7 +70,7 @@ app3002.listen(port3002, () => {
   refreshToken();
 });  
 //#endregion
-
+ 
 
 // const Stream = require('node-rtsp-stream');
 // const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
@@ -211,42 +206,52 @@ app3002.post('/Token', (req, res) => {
 
 
 
-var server = http.createServer(function(request,response){
+let server = http.createServer(function(request,response){
  
   try{
-    var scaleNumb = url.parse(request.url, true).query['scaleNumb'];
-    var Name = url.parse(request.url, true).query['cameraName'];
-    var requestPath = request.url.substring(0, request.url.indexOf('?'));
+    let scaleNumb = url.parse(request.url, true).query['scaleNumb'];
+    let Name = url.parse(request.url, true).query['cameraName'];
+    let streamYn = url.parse(request.url, true).query['stream'];
+    let requestPath = request.url.substring(0, request.url.indexOf('?'));
 
-    var resourcePath = `D:/IMS/Replay/${scaleNumb}/${Name}/${requestPath}`;
+    let resourcePath = `D:/IMS/Replay/${scaleNumb}/${Name}/${requestPath}`;
     
     // fs.readFile(resourcePath, function(error, data) {
     //   // request.end(data);
     //   response.write(data);
     // });
 
-    var stream = fs.createReadStream(resourcePath);
-  
-    stream.on('data', (movie) => {
-      // 3.1. data 이벤트가 발생되면 해당 data를 클라이언트로 전송
-      response.write(movie);
-    });  
-  
-    stream.on('end', function () {
-      console.log('end streaming');
-      response.end();
-    });
-     
-    stream.on('error', function(err) {
-      console.log(err);
-      response.end('500 Internal Server '+err);
-    });
-  }catch (e){
-    console.log(e);
+    if(streamYn === 'Y'){
+      let stream = fs.createReadStream(resourcePath);
+    
+      stream.on('data', (movie) => {
+        // 3.1. data 이벤트가 발생되면 해당 data를 클라이언트로 전송
+        response.write(movie);
+      });  
+    
+      stream.on('end', function () {
+        // console.log('end streaming');
+        response.end();
+      });
+       
+      stream.on('error', function(err) {
+        response.end('500 Internal Server '+err);
+      });
+    }else{
+      
+      let stream = fs.createReadStream(resourcePath);
+      stream.pipe(response);
+      // fs.readFile(resourcePath, function(error, data) {
+      //   // request.end(data);
+      //   response.write(data);
+      // });
+    }
+  }catch (e){ 
     response.statusMessage = e; 
+    response.end(e);
   }
 }); 
- 
+  
 const port3003 = 3003;
 server.listen(port3003, function(){
   console.log(`Replay on port: ${port3003}..`)

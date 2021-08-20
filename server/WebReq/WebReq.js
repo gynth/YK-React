@@ -9,7 +9,7 @@ const yk_req = (request, URL) => {
     response = axios.get(URL, { 
 
     })
-  }catch{
+  }catch(e){
 
   }
 
@@ -21,19 +21,27 @@ router.post('/', (req, res) => {
   // let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
   
   
-  yk_req(req, URL).then((response) => {
-    res.json(response.data);
-  })
+  yk_req(req, URL)
+    .then((response) => {
+      res.json(response.data);
+    })
+    .catch(err => {
+      // console.log(err);
+      res.json(err);
+    })
 });
 
-router.post('/TEMP', (req, res) => {
+router.post('/DIRECT', (req, res) => {
   let URL = encodeURI(req.body.addr);
-  // let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
   
-  
-  yk_req(req, URL).then((response) => {
-    res.json(response.data);
-  })
+  yk_req(req, URL)
+    .then((response, err) => {
+      res.json(response.data);
+    })
+    .catch(err => {
+      // console.log(err);
+      res.json(err);
+    })
 });
 
-module.exports = router;   
+module.exports = router;       

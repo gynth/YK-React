@@ -124,21 +124,21 @@ router.post('/YK_Chit_YN', (req, res) => {
 });   
 //#endregion
 
-//#region 출발보고 불러오기
-router.post('/YK_Disp_YN', (req, res) => {
-  const fileName = req.body.fileName; 
-  const scaleNo = req.body.scaleNo;
-  const folder = scaleNo.substring(0, 8);
+// //#region 출발보고 불러오기
+// router.post('/YK_Disp_YN', (req, res) => {
+//   const fileName = req.body.fileName; 
+//   const scrp_ord_no = req.body.scrp_ord_no;
+//   const folder = scaleNo.substring(0, 8);
 
-  if(fs.existsSync(`D:\\IMS\\Disp\\${folder}\\${fileName}`)){
-    const readFile = fs.readFileSync(`D:\\IMS\\Disp\\${folder}\\${fileName}`);
-    const encode = Buffer.from(readFile).toString('base64');
-    res.end(encode);
-  }else{
-    res.json('N');
-  }
-});  
-//#endregion
+//   if(fs.existsSync(`D:\\IMS\\Disp\\${folder}\\${fileName}`)){
+//     const readFile = fs.readFileSync(`D:\\IMS\\Disp\\${folder}\\${fileName}`);
+//     const encode = Buffer.from(readFile).toString('base64');
+//     res.end(encode);
+//   }else{
+//     res.json('N');
+//   }
+// });  
+// //#endregion
 
 //#region 계량표 저장
 router.post('/YK_Chit', (req, res) => {

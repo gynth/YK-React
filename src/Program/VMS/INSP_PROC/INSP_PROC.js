@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_disp_yn_YK } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getTextarea } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -28,7 +28,7 @@ import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
 
-import { YK_WEB_REQ, YK_WEB_REQ_TEMP } from '../../../WebReq/WebReq';
+import { YK_WEB_REQ, YK_WEB_REQ_DIRECT, YK_WEB_REQ_DISP } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import { throttle } from 'lodash';
 //#endregion
@@ -565,6 +565,8 @@ class INSP_PROC extends Component {
   onSelectChange = async (e) => {
     if(e === null) return;
 
+    gfc_showMask();
+
     document.getElementById('tab1_INSP_PROC').click(0);
     await gfc_sleep(100);
 
@@ -621,7 +623,7 @@ class INSP_PROC extends Component {
 
     //배차정보
     // const chitInfoYn = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 나중에 이형식으로 바꿔야함
-    const dispInfo = await YK_WEB_REQ_TEMP('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108190001');
+    const dispInfo = await YK_WEB_REQ_DIRECT('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108200002');
     if(dispInfo.data.dataSend){
       gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
         scaleNumb       : chitInfoYn.data.dataSend[0].scaleNumb,
@@ -632,28 +634,30 @@ class INSP_PROC extends Component {
         load_area_addr  : dispInfo.data.dataSend[0].LOAD_AREA_ADDR
       });
 
-      const img1  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].EMPTY_FRONT, chitInfoYn.data.dataSend[0].scaleNumb);
-      const img2  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].EMPTY_REAR, chitInfoYn.data.dataSend[0].scaleNumb);
-      const img3  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].CARGO_FRONT, chitInfoYn.data.dataSend[0].scaleNumb);
-      const img4  = await gfc_disp_yn_YK(dispInfo.data.PIC[0].CARGO_REAR, chitInfoYn.data.dataSend[0].scaleNumb);
+      const scrp_ord_no = dispInfo.data.dataSend[0].SCRP_ORD_NO;
+      const yyyy = scrp_ord_no.substr(2, 4);
+      const mm = scrp_ord_no.substr(6, 2);
+      const dd = scrp_ord_no.substr(8, 2);
 
       gfs_dispatch('INSP_PROC_MAIN', 'DISP_PIC', {
         scaleNumb           : chitInfoYn.data.dataSend[0].scaleNumb,
         scrp_ord_no         : dispInfo.data.dataSend[0].SCRP_ORD_NO,
     
         empty_front_date    : dispInfo.data.PIC[0].EMPTY_FRONT_DATE,
-        empty_front         : img1.data === 'N' ? '' : img1.data,
+        empty_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_FRONT}`,
         empty_front_gps_addr: dispInfo.data.PIC[0].EMPTY_FRONT_GPS_ADDR,
         empty_rear_date     : dispInfo.data.PIC[0].EMPTY_REAR_DATE,
-        empty_rear          : img2.data === 'N' ? '' : img2.data,
+        empty_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_REAR}`,
         empty_rear_gps_addr : dispInfo.data.PIC[0].EMPTY_REAR_GPS_ADDR,
         cargo_front_date    : dispInfo.data.PIC[0].CARGO_FRONT_DATE,
-        cargo_front         : img3.data === 'N' ? '' : img3.data,
+        cargo_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_FRONT}`,
         cargo_front_gps_addr: dispInfo.data.PIC[0].CARGO_FRONT_GPS_ADDR,
         cargo_rear_date     : dispInfo.data.PIC[0].CARGO_REAR_DATE,
-        cargo_rear          : img4.data === 'N' ? '' : img4.data,
+        cargo_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_REAR}`,
         cargo_rear_gps_addr : dispInfo.data.PIC[0].CARGO_REAR_GPS_ADDR
       });
+
+      gfc_hideMask();
     }
   }
 
