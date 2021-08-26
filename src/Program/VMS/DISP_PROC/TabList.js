@@ -14,10 +14,10 @@ const TabList = (props) => {
 
   const tabButton = (tabIndex,type) => {
 
-    let tabList = [`tab1_${type}`,`tab2_${type}`,`tab3_${type}`,`tab4_${type}`]
-    let contentList = [`content1_${type}`,`content2_${type}`,`content3_${type}`,`content4_${type}`]
-    let btnList = [`btn1_${type}`,`btn2_${type}`,`btn3_${type}`,`btn4_${type}`]
-    let tabMaxIndex = 4;
+    let tabList = [`tab1_${type}`,`tab2_${type}`]
+    let contentList = [`content1_${type}`,`content2_${type}`]
+    let btnList = [`btn1_${type}`,`btn2_${type}`]
+    let tabMaxIndex = 2;
     for(let i = 0; i < tabMaxIndex; i++){
       if(i === tabIndex){
         if(gfc_hasClass(document.getElementById(tabList[i]),'on') === false){
@@ -31,7 +31,7 @@ const TabList = (props) => {
           if(i === 0){
             car_info.style.paddingBottom = '90px';
           }else if(i === 1){
-            if(gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_INFO').chit !== 'N'){
+            if(gfs_getStoreValue('DISP_PROC_MAIN', 'CHIT_INFO').chit !== 'N'){
               car_info.style.paddingBottom = '10px';
             }else{
               car_info.style.paddingBottom = '90px';
@@ -46,14 +46,14 @@ const TabList = (props) => {
         gfc_removeClass(document.getElementById(contentList[i]),'on');
         
         const btnElement = document.getElementById(btnList[i]);
-        if(btnElement !== null) gfc_removeClass(btnElement,'on');
+          if(btnElement !== null) gfc_removeClass(btnElement,'on');
 
-        // if(props.pgm === 'INSP_PROC'){
-        //   const detail_grade1 = gfo_getCombo(props.pgm, 'detail_grade1').getLabel(); //고철등급
-        //   gfs_dispatch(props.reducer, 'CHIT_INFO_ITEM_FLAG', {
-        //     itemFlag : detail_grade1
-        //   });
-        // }
+        if(props.pgm === 'DISP_PROC'){
+          const detail_grade1 = gfo_getCombo(props.pgm, 'detail_grade1').getLabel(); //고철등급
+          gfs_dispatch(props.reducer, 'CHIT_INFO_ITEM_FLAG', {
+            itemFlag : detail_grade1
+          });
+        }
       }
     }
   }
@@ -61,13 +61,11 @@ const TabList = (props) => {
   return (
     <div id={props.pgm}>
       <div className='tab_list'>
-        <button type='button' id={`tab1_${props.pgm}`} className='tab on' onClick={() => tabButton(0, props.pgm)}>검수입력</button>
-        <button type='button' id={`tab2_${props.pgm}`} className='tab' onClick={() => tabButton(1, props.pgm)}>
+        <button type='button' id={`tab1_${props.pgm}`} className='tab on' style={{borderBottom:'1px solid #9FA8C9'}} onClick={() => tabButton(0, props.pgm)}>검수입력</button>
+        <button type='button' id={`tab2_${props.pgm}`} className='tab' style={{borderBottom:'1px solid #9FA8C9'}} onClick={() => tabButton(1, props.pgm)}>
           {value.chit !== 'N' && <span className='doc'>메모있음</span> } 
           계량증명서
         </button>
-        <button type='button' id={`tab3_${props.pgm}`} className='tab' onClick={() => tabButton(2, props.pgm)}>배차정보</button>
-        <button type='button' id={`tab4_${props.pgm}`} className='tab' onClick={() => tabButton(3, props.pgm)}>출발보고</button>
       </div>
     </div>
   );

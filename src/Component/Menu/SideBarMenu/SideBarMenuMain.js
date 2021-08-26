@@ -71,15 +71,14 @@ const SideBarMenu = (props) => {
           <button htmlFor='menuIcon' type='button' className='hmenu' onClick={(e) => onClick(e)}/>
           <ul>
             <Li MENU_ID='INSP' index='0' nam='검수'></Li>
-            <Li MENU_ID='DISP' index='1' nam='배차'></Li>
+            <Li MENU_ID='DISP' index='1' nam='출차'></Li>
             <Li MENU_ID='ENTR' index='2' nam='입차'></Li>
-            <Li              index='3'           ></Li>
-            <Li              index='4'           ></Li>
+            <Li MENU_ID='CFRM' index='3' nam='확정'></Li>
           </ul>
-          <div className='footer_menu'>
+          {/* <div className='footer_menu'>
             <span className='user'>유저</span>
             <div className='setting'><span>옵션</span></div>
-          </div>
+          </div> */}
         </div>
         <div className='move_menu'>
           <Title />

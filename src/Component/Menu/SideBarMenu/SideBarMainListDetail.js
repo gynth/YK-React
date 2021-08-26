@@ -29,26 +29,38 @@ const SideBarMainListDetail = (props) => {
           MENU_ID : 'INSP_HIST',
           MENU_NAM: '검수이력'
         },{
-          MENU_ID : 'INSP_INFO',
-          MENU_NAM: '배차정보'
+          MENU_ID : 'SHIP_PROC',
+          MENU_NAM: '해상운송건'
         }]
       )
     }
-    // else if(MENU_ID === 'DISP'){
-    //   setList(
-    //     [{
-    //       MENU_ID : 'DISP_WAIT',
-    //       MENU_NAM: '출차대기'
-    //     }]
-    //   )
-    // }else if(MENU_ID === 'ENTR'){
-    //   setList(
-    //     [{
-    //       MENU_ID : 'ENTR_WAIT',
-    //       MENU_NAM: '입차대기'
-    //     }]
-    //   )
-    // }
+    else if(MENU_ID === 'DISP'){
+      setList(
+        [{
+          MENU_ID : 'DISP_PROC',
+          MENU_NAM: '출차대기'
+        }]
+      )
+    }
+    else if(MENU_ID === 'ENTR'){
+      setList(
+        [{
+          MENU_ID : 'ENTR_PROC',
+          MENU_NAM: '입차대기'
+        }]
+      )
+    }
+    else if(MENU_ID === 'CFRM'){
+      setList(
+        [{
+          MENU_ID : 'INSP_CFRM',
+          MENU_NAM: '검수확정'
+        },{
+          MENU_ID : 'INSP_CANC',
+          MENU_NAM: '검수취소'
+        }]
+      )
+    }
   }, [MENU_ID])
 
   return (

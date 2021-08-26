@@ -7,7 +7,7 @@ import WindowFrame from './Program/WindowFrame';
 
 import './Home.css';
 import { getSessionCookie } from "./Cookies";
-import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER } from './Method/Store';
+import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER, gfs_dispatch } from './Method/Store';
 
 import GifPlayer from 'react-gif-player';
 import LoadingOverlay from 'react-loading-overlay';
@@ -52,16 +52,42 @@ const defaultData = async() => {
   gfs_injectAsyncReducer('USER_REDUCER', userReducer);
 }
 
+const onActiveWindow = (e) => {
+  if(document.visibilityState === 'visible'){
+    gfs_dispatch('MASK_REDUCER', 'ON_ACTIVE', {
+      active : true,
+      time   : new Date()
+    });
+  }else{
+    gfs_dispatch('MASK_REDUCER', 'ON_ACTIVE', {
+      active : false,
+      time   : new Date()
+    });
+  }
+}
+
 const Home = (props) => {  
   useEffect(e => {
     const MASK_REDUCER = (nowState, action) => {
       if(action.reducer !== 'MASK_REDUCER') {
         return {
-          MASK : nowState === undefined ? false : nowState.MASK
+          MASK     : nowState === undefined ? false : nowState.MASK,
+          ON_ACTIVE: nowState === undefined ? {
+            active : true,
+            time   : new Date() 
+          } : nowState.ON_ACTIVE,
         };
       }
       
-      if(action.type === 'MASK'){
+      if(action.type === 'ON_ACTIVE'){
+
+        return Object.assign({}, nowState, {
+          ON_ACTIVE : {
+            active: action.active,
+            time  : action.time
+          }
+        })
+      }else if(action.type === 'MASK'){
 
         return Object.assign({}, nowState, {
           MASK : action.MASK
@@ -70,6 +96,7 @@ const Home = (props) => {
     }
 
     gfs_injectAsyncReducer('MASK_REDUCER', MASK_REDUCER);
+    document.onvisibilitychange = e => onActiveWindow(e);
 
     //#region 윈도우 리듀서 생성
     gfs_WINDOWFRAME_REDUCER();

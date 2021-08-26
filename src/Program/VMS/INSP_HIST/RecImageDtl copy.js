@@ -90,12 +90,12 @@ function RecImageDtl(props) {
   const img = <>
                 <div style={{width:'100%', height:'100%'}}>
                   {/* <video controls autoPlay width='100%' height='100%'>
-                    <source src='http://211.231.136.182:3003/1.mp4' type='video/mp4' />
+                    <source src='http://10.10.10.136:3003/1.mp4' type='video/mp4' />
                   </video> */}
                   <ReactPlayer ref={movieRef} 
                     width='100%' 
                     height='100%' 
-                    url='http://211.231.136.182:3003/1.mp4'
+                    url='http://10.10.10.136:3003/1.mp4'
                     
                     controls
                     playing 

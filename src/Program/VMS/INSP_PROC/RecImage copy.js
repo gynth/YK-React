@@ -18,7 +18,7 @@ function RecImage(props) {
   });
 
   const isActive = useSelector((e) => {
-    return e.MASK_REDUCER['ON_ACTIVE'];
+    return e.INSP_PROC_MAIN['ON_ACTIVE'];
   }, (p, n) => {
     return p.active === n.active;
   });

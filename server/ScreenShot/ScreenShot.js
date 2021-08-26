@@ -42,14 +42,14 @@ router.post('/Milestone', (req, res) => {
   // if(!fs.existsSync(`${__dirname}/Screenshot`)){
   //   fs.mkdirSync(`${__dirname}/Screenshot`);
   // }
-  if(!fs.existsSync(`D:\\IMS`)){
-    fs.mkdirSync(`D:\\IMS`);
+  if(!fs.existsSync(`F:\\IMS`)){
+    fs.mkdirSync(`F:\\IMS`);
   }
-  if(!fs.existsSync(`D:\\IMS\\Screenshot`)){
-    fs.mkdirSync(`D:\\IMS\\Screenshot`);
+  if(!fs.existsSync(`F:\\IMS\\Screenshot`)){
+    fs.mkdirSync(`F:\\IMS\\Screenshot`);
   }
 
-  const root = `D:\\IMS\\Screenshot/${scaleNo}`;
+  const root = `F:\\IMS\\Screenshot/${scaleNo}`;
   // const root = `C:\\IMS\\Screenshot\\${scaleNo}`;
 
   if(!fs.existsSync(root)){
@@ -114,8 +114,8 @@ router.post('/YK_Chit_YN', (req, res) => {
   const scaleNo = req.body.scaleNo;
   const folder = scaleNo.substring(0, 8);
 
-  if(fs.existsSync(`D:\\IMS\\Chit\\${folder}\\${scaleNo}.jpg`)){
-    const readFile = fs.readFileSync(`D:\\IMS\\Chit\\${folder}\\${scaleNo}.jpg`);
+  if(fs.existsSync(`F:\\IMS\\Chit\\${folder}\\${scaleNo}.jpg`)){
+    const readFile = fs.readFileSync(`F:\\IMS\\Chit\\${folder}\\${scaleNo}.jpg`);
     const encode = Buffer.from(readFile).toString('base64');
     res.end(encode);
   }else{
@@ -130,8 +130,8 @@ router.post('/YK_Chit_YN', (req, res) => {
 //   const scrp_ord_no = req.body.scrp_ord_no;
 //   const folder = scaleNo.substring(0, 8);
 
-//   if(fs.existsSync(`D:\\IMS\\Disp\\${folder}\\${fileName}`)){
-//     const readFile = fs.readFileSync(`D:\\IMS\\Disp\\${folder}\\${fileName}`);
+//   if(fs.existsSync(`F:\\IMS\\Disp\\${folder}\\${fileName}`)){
+//     const readFile = fs.readFileSync(`F:\\IMS\\Disp\\${folder}\\${fileName}`);
 //     const encode = Buffer.from(readFile).toString('base64');
 //     res.end(encode);
 //   }else{
@@ -147,18 +147,18 @@ router.post('/YK_Chit', (req, res) => {
   const filename = req.body.filename;
   const folder = filename.substring(0, 8);
   
-  if(!fs.existsSync(`D:\\IMS`)){
-    fs.mkdirSync(`D:\\IMS`);
+  if(!fs.existsSync(`F:\\IMS`)){
+    fs.mkdirSync(`F:\\IMS`);
   }
-  if(!fs.existsSync(`D:\\IMS\\Chit`)){
-    fs.mkdirSync(`D:\\IMS\\Chit`);
+  if(!fs.existsSync(`F:\\IMS\\Chit`)){
+    fs.mkdirSync(`F:\\IMS\\Chit`);
   }
-  if(!fs.existsSync(`D:\\IMS\\Chit\\${folder}`)){
-    fs.mkdirSync(`D:\\IMS\\Chit\\${folder}`);
+  if(!fs.existsSync(`F:\\IMS\\Chit\\${folder}`)){
+    fs.mkdirSync(`F:\\IMS\\Chit\\${folder}`);
   }
 
-  // const root4 = `D:\\Project\\01.YK\\Screenshot\\20210805\\test.png`;
-  // const root5 = `D:\\Project\\01.YK\\Screenshot\\20210805\\test2.png`;
+  // const root4 = `F:\\Project\\01.YK\\Screenshot\\20210805\\test.png`;
+  // const root5 = `F:\\Project\\01.YK\\Screenshot\\20210805\\test2.png`;
   makeImg(img, folder, filename).then(e => {
     res.json(e);
   });
@@ -166,10 +166,10 @@ router.post('/YK_Chit', (req, res) => {
 
 const makeImg = async(img, folder, filename) => {
 
-  const root = `D:\\IMS\\Chit\\${folder}\\${filename}_temp1.png`;
-  const root1 = `D:\\IMS\\Chit\\${folder}\\${filename}_temp2.png`;
-  const root2 = `D:\\IMS\\Chit\\${folder}\\${filename}_temp3.png`;
-  const root3 = `D:\\IMS\\Chit\\${folder}\\${filename}.jpg`;
+  const root = `F:\\IMS\\Chit\\${folder}\\${filename}_temp1.png`;
+  const root1 = `F:\\IMS\\Chit\\${folder}\\${filename}_temp2.png`;
+  const root2 = `F:\\IMS\\Chit\\${folder}\\${filename}_temp3.png`;
+  const root3 = `F:\\IMS\\Chit\\${folder}\\${filename}.jpg`;
 
   try{
     await fsPromises.writeFile(root, img, 'base64');

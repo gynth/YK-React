@@ -112,7 +112,7 @@ function RecImageDtl(props) {
         cameraName: props.Name}).then(e => {
           if(e.data === '0'){
             var req = new XMLHttpRequest();
-            req.open('GET', `http://211.231.136.182:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}`, true);
+            req.open('GET', `http://10.10.10.136:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}`, true);
             req.responseType = 'blob';
         
             req.onload = function() {

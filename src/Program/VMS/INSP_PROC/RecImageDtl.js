@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
+import { TOKEN, MILESTONE, RTSP } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
 import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import RecTimer from './RecTimer';
@@ -15,7 +15,7 @@ function RecImageDtl(props) {
   }, (p, n) => {
     return p === n;
   });
-
+  
   const setModalIsOpen = (open) => {
     
     let obj = {};
@@ -24,7 +24,7 @@ function RecImageDtl(props) {
     gfs_dispatch('INSP_PROC_MAIN', props.cam, obj);
   }
 
-  const start = async(ip) => {
+  const start = async() => {
       MILESTONE({reqAddr: 'CONNECT',
                  device : props.device})
   }
@@ -62,7 +62,7 @@ function RecImageDtl(props) {
   const setRtsp = () => {
 
     jsmpeg = require('jsmpeg');
-    client = new WebSocket(`ws://211.231.136.182:${props.rtspPort}`);
+    client = new WebSocket(`ws://10.10.10.136:${props.rtspPort}`);
     canvas = imageRef.current;
     new jsmpeg(client, {
       canvas 
@@ -70,18 +70,17 @@ function RecImageDtl(props) {
   }
 
   useEffect(() => { 
-    start(props.ip);
+    start();
+    RTSP({reqAddr: 'RTSPStart',
+          device: props.device,
+          streamUrl: props.rtspUrl,
+          port: props.rtspPort
+        }).then(e => {
+          if(e.data === 'OK'){
+            setRtsp();
+          }
+        })
 
-    MILESTONE({reqAddr: 'RTSPStart',
-               device: props.device,
-               streamUrl: props.rtspUrl,
-               port: props.rtspPort
-              }).then(e => {
-                if(e.data === 'OK'){
-                  setRtsp();
-                }
-              })
-    
     return() => {
       client.close();
     }
@@ -130,10 +129,14 @@ function RecImageDtl(props) {
                 </div>
                 {/* rtsp://admin:admin13579@10.10.136.112:554/video1+audio1  */}
 
-                <canvas ref={imageRef} style={{width:'100%', height:'100%'}}
-                        onDoubleClick={e => {
-                          setModalIsOpen(true);
-                        }}/>
+                <canvas 
+                  ref={imageRef} 
+                  style={{width:'100%', height:'100%'}}
+                  onDoubleClick={e => {
+                    setModalIsOpen(true);
+                  }}
+                  
+                />
 
                 {/* <img style={{height:'100%', width:'100%'}} alt='yk_image' 
                     ref={imageRef}

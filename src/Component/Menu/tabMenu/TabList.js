@@ -20,6 +20,10 @@ async function onClick(flag){
   const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER').activeWindow['programId'];
   const window = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === pgm)
 
+  if(window.length === 0){
+    return;
+  }
+
   if(flag !== 1 && flag !== 5 && flag !== 3){
     gfs_getStoreValue(pgm, 'Grid').map(e => e.Grid.blur())
     await gfc_sleep(50);

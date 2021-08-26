@@ -1,8 +1,15 @@
 import numeral from 'numeral';
+import moment from 'moment';
 import { gfs_dispatch } from '../Method/Store';
 // import html2canvas from 'html2canvas'
 import html2canvas from 'html2canvas-render-offscreen'
 import axios from 'axios';
+import { getDynamicSql_Oracle } from '../db/Oracle/Oracle';
+
+export const gfc_now = async () => {
+  const result = await getDynamicSql_Oracle('Common/Common', 'SYSDATE', null);
+  return moment(result.data.rows[0][0]).format('yyyy-MM-DD HH:mm:ss');
+}
 
 export const gfc_getMultiLang = (code, text) => {
   // alert(code + '[' + text + ']');
@@ -185,7 +192,7 @@ export const gfc_screenshot = (element, filename) => {
 
 export const gfc_screenshot_srv_from_milestone = (device, scaleNo) => {
 
-  const host = 'http://211.231.136.182:3001/ScreenShot/Milestone';
+  const host = 'http://10.10.10.136:3001/ScreenShot/Milestone';
   // const host = `http://211.231.136.150:3001/ScreenShot/Milestone`;
   const option = {
     url   : host,
@@ -218,7 +225,7 @@ export const gfc_screenshot_srv = (element, filename, height, root) => {
   }).then(canvas => {
     let img = canvas.toDataURL('image/png');
 
-    const host = 'http://211.231.136.182:3001/ScreenShot';
+    const host = 'http://10.10.10.136:3001/ScreenShot';
     const option = {
       url   : host,
       method: 'POST',
@@ -246,7 +253,7 @@ export const gfc_screenshot_srv = (element, filename, height, root) => {
 }
 
 export const gfc_chit_yn_YK = (scaleNo) => {
-  const host = 'http://211.231.136.182:3001/ScreenShot/YK_Chit_YN';
+  const host = 'http://10.10.10.136:3001/ScreenShot/YK_Chit_YN';
   const option = {
     url   : host,
     method: 'POST',
@@ -277,7 +284,7 @@ export const gfc_screenshot_srv_YK = (element, filename) => {
   }).then(canvas => {
     let img = canvas.toDataURL('image/png');
 
-    const host = 'http://211.231.136.182:3001/ScreenShot/YK_Chit';
+    const host = 'http://10.10.10.136:3001/ScreenShot/YK_Chit';
     const option = {
       url   : host,
       method: 'POST',
@@ -303,7 +310,7 @@ export const gfc_screenshot_srv_YK = (element, filename) => {
 }
 
 export const gfc_test = (element, filename, root) => {    
-  const host = 'http://211.231.136.182:3001/ScreenShot/TEST';
+  const host = 'http://10.10.10.136:3001/ScreenShot/TEST';
   const option = {
     url   : host,
     method: 'POST',

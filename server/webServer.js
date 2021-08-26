@@ -9,20 +9,11 @@ const cors = require('cors');
 var edge = require('edge-js');
 // const soap = require('soap'); 
 
-global.MILESTONE_IP = '211.231.136.182';
+global.MILESTONE_IP = '10.10.10.136';
 global.MILESTONE_TOKEN = '';
 global.MILESTONE_DEVICE = {};
 global.MILESTONE_TOKEN_TIME = '';
 global.MILESTONE_DATA = {};
-global.MILESTONE_RTSP = {};
-global.MILESTONE_REPLAY = undefined;
-
-var httpAttach = require('http-attach') // useful module for attaching middlewares
-const fs = require('fs');
-// const hls = require('hls-server');
-
-var http = require('http');
-var url = require('url');
 
 app3001.use(express.json({
   limit: '100mb'
@@ -70,27 +61,7 @@ app3002.listen(port3002, () => {
   refreshToken();
 });  
 //#endregion
- 
-
-// const Stream = require('node-rtsp-stream');
-// const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
-// // const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
-
-// const streams = new Stream({
-//   name: 'foscam_stream', 
-//   streamUrl: streamUrl,
-//   wsPort: 3100,
-//   width: 1920,
-//   height: 1080
-// });    
-    
- 
-         
-                  
-        
-         
- 
-  
+      
 //#region  마일스톤 토큰 처리
 const getToken = () => {
   try{
@@ -173,145 +144,3 @@ app3002.post('/Token', (req, res) => {
   res.json({TOKEN: global.MILESTONE_TOKEN, DEVICE: global.MILESTONE_DEVICE});
 });
 //#endregion
-
-
- 
-
-// app.use('/Socket', () => {
-//   try{
-//     console.log(111);
-//     var net = require('net');
-//     var socket = new net.Socket();
-//     socket.connect({host:'10.0.10.155', port:7563}, function() {
-//        console.log('서버와 연결 성공');
-    
-//        socket.write('Hello Socket Server\n');
-//        socket.end(); 
-    
-//         socket.on('data', function(chunk) {
-//             console.log('서버가 보냄 : ',
-//             chunk.toString());        
-//         }); 
-    
-//         socket.on('end', function() {
-//             console.log('서버 연결 종료');
-//         });
-//     });
-//   }catch (e){
-//     console.log(e)
-//   }
-// })
-
-
-
-
-
-let server = http.createServer(function(request,response){
- 
-  try{
-    let scaleNumb = url.parse(request.url, true).query['scaleNumb'];
-    let Name = url.parse(request.url, true).query['cameraName'];
-    let streamYn = url.parse(request.url, true).query['stream'];
-    let requestPath = request.url.substring(0, request.url.indexOf('?'));
-
-    let resourcePath = `D:/IMS/Replay/${scaleNumb}/${Name}/${requestPath}`;
-    
-    // fs.readFile(resourcePath, function(error, data) {
-    //   // request.end(data);
-    //   response.write(data);
-    // });
-
-    if(streamYn === 'Y'){
-      let stream = fs.createReadStream(resourcePath);
-    
-      stream.on('data', (movie) => {
-        // 3.1. data 이벤트가 발생되면 해당 data를 클라이언트로 전송
-        response.write(movie);
-      });  
-    
-      stream.on('end', function () {
-        // console.log('end streaming');
-        response.end();
-      });
-       
-      stream.on('error', function(err) {
-        response.end('500 Internal Server '+err);
-      });
-    }else{
-      
-      let stream = fs.createReadStream(resourcePath);
-      stream.pipe(response);
-      // fs.readFile(resourcePath, function(error, data) {
-      //   // request.end(data);
-      //   response.write(data);
-      // });
-    }
-  }catch (e){ 
-    response.statusMessage = e; 
-    response.end(e);
-  }
-}); 
-  
-const port3003 = 3003;
-server.listen(port3003, function(){
-  console.log(`Replay on port: ${port3003}..`)
-});
-function replayMiddleware (req, res, next) {
-  res.setHeader('Accept-Ranges', 'bytes');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  next()
-} 
-httpAttach(server, replayMiddleware)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// app.get('/Stream',  (req, res) => {
-//   return res.status(200).sendFile(`${__dirname}/index.html`);
-// });
-
-// const server = app.listen(3002);
-// new hls(server, {
-//   provider: {
-//     exists: (req, cb) => {
-//       const ext = req.url.split('.').pop();
-
-//       // if(ext !== 'm3u8' && ext !== 'ts'){
-//       //   return cb(null, true);
-//       // }
-
-//       fs.access(__dirname + req.url, fs.constants.F_OK, (err) => {
-//         if(err){
-//           console.log('file not exists');
-//           return cb(null, false);
-//         }  
-//         cb(null, true); 
-//       });
-//     },
-//     getManifestStream: (req, cb) => {
-//       console.log('1');
-//       const stream = fs.createReadStream(__dirname + req.url);
-//       cb(null, stream);
-//     },
-//     getSegmentStream: (req, cb) => {
-//       const stream = fs.createReadStream(__dirname + req.url);
-//       cb(null, stream);
-//     }
-//   }    
-// })  
-// function yourMiddleware (req, res, next) {
-//   // set your headers here
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   next() 
-// }
-// httpAttach(server, yourMiddleware)

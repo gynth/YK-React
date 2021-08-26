@@ -36,21 +36,30 @@ const SideBarMainList = (props) => {
         }]
       )
     }
-    // else if(MENU_ID === 'DISP'){
-    //   setList(
-    //     [{
-    //       MENU_ID,
-    //       MENU_NAM: '배차'
-    //     }]
-    //   )
-    // }else if(MENU_ID === 'ENTR'){
-    //   setList(
-    //     [{
-    //       MENU_ID,
-    //       MENU_NAM: '입차'
-    //     }]
-    //   )
-    // }
+    else if(MENU_ID === 'DISP'){
+      setList(
+        [{
+          MENU_ID,
+          MENU_NAM: '출차'
+        }]
+      )
+    }
+    else if(MENU_ID === 'ENTR'){
+      setList(
+        [{
+          MENU_ID,
+          MENU_NAM: '입차'
+        }]
+      )
+    }
+    else if(MENU_ID === 'CFRM'){
+      setList(
+        [{
+          MENU_ID,
+          MENU_NAM: '확정'
+        }]
+      )
+    }
   }, [MENU_ID])
 
   return (

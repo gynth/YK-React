@@ -10,6 +10,10 @@ var edge = require('edge-js');
 //3: PTZ flag(up, down.....)
 //4: Scale No. 배차번호
 //5: Rec Owner - '0':자동녹화, '1':수동녹화
+//6: Camera Name
+//7: User Id
+//8: rec_fr_dttm
+//9: rec_to_dttm
 
 //#region JPEGGetLive
 router.post('/JPEGGetLive', (req, res) => {
@@ -37,38 +41,6 @@ router.post('/JPEGGetLive', (req, res) => {
 })
 //#endregion
 
-router.post('/RTSPStart', (req, res) => {
-  const device = req.body.device;
- 
-  if(global.MILESTONE_RTSP[device] === undefined){
-    const streamUrl = req.body.streamUrl;
-    const port = req.body.port;
-    
-    // const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
-    // const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
-  
-    const Stream = require('node-rtsp-stream');
-    const streams = new Stream({
-      name: device, 
-      streamUrl: streamUrl,
-      wsPort: port, //3100, 
-      width: 1920,  
-      height: 1080 
-    });            
-    
-    global.MILESTONE_RTSP[device] = streams;
-  }   
-   
-  res.json('OK') ;     
-});    
-
-router.post('/RTSPStop', (req, res) => {
-  const device = req.body.device;
-  global.MILESTONE_RTSP[device] = undefined;
-   
-  res.json('OK') ;   
-});  
-  
 router.post('/CONNECT', (req, res) => {
   const device = req.body.device;
 
@@ -78,11 +50,6 @@ router.post('/CONNECT', (req, res) => {
       assemblyFile:`${__dirname}/Milestone.dll`,
       methodName: 'Connect'
     });
- 
-    // global.MILESTONE_DATA[device] = {
-    //   method : Connect
-    // }
-
 
     Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
       console.log(result[1]);
@@ -93,48 +60,49 @@ router.post('/CONNECT', (req, res) => {
       }
     })
 
-    Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
-      if(result[1] === 'Y') {
-        global.MILESTONE_DATA[device] = {
-          method : Connect,
-          nodeLoop: setInterval(() => {
-                      global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
-                        if(result[1] === 'Y') {
-                          global.MILESTONE_DATA[device].liveImg = result[2];
-                        }
-                      })   
-                    }, 1)
-        }
-      }
-    })
+    // Connect([global.MILESTONE_TOKEN, device, 'Start', '', ''], (error, result) => { 
+    //   if(result[1] === 'Y') {
+    //     global.MILESTONE_DATA[device] = {
+    //       method : Connect,
+    //       nodeLoop: setInterval(() => {
+    //                   global.MILESTONE_DATA[device].method([global.MILESTONE_TOKEN, device, 'Live', '', ''], (error, result) => { 
+    //                     if(result[1] === 'Y') {
+    //                       global.MILESTONE_DATA[device].liveImg = result[2];
+    //                     }
+    //                   })   
+    //                 }, 1)
+    //     }
+    //   }
+    // })
   }   
     
   res.json({result:'OK'}) 
 });  
 
-router.post('/Replay', (req, res) => { 
+router.post('/RecYn', (req, res) => { 
   const device = req.body.device;
   const scaleNo = req.body.scaleNo;
-  const cameraName = req.body.cameraName; 
+  const recYn = req.body.recYn; 
 
   //설정된 메서드가 없으면 생성.
-  if(global.MILESTONE_REPLAY === undefined){
+  if(global.MILESTONE_REPLAY[device] === undefined){
     let Connect = edge.func({
       assemblyFile:`${__dirname}/Milestone.dll`,
       methodName: 'Connect'
     });
       
-    Connect([global.MILESTONE_TOKEN, device, 'Start', '', scaleNo, '', cameraName], (error, result) => { 
+    Connect([global.MILESTONE_TOKEN, device, 'Start', '', scaleNo, '', ''], (error, result) => { 
       if(result[1] === 'Y') {
-        global.MILESTONE_REPLAY = Connect;
+        global.MILESTONE_REPLAY[device] = {
+          method : Connect,
+          recYn  : 'N'
+        }
       }
     })   
   }  
  
-  global.MILESTONE_REPLAY([global.MILESTONE_TOKEN, device, 'Replay', '', scaleNo, '', cameraName], (error, result) => { 
-    if(error === undefined) res.json(result);
-    else res.json(error)
-  })   
+  if(recYn !== '') global.MILESTONE_REPLAY[device].recYn = recYn;
+  res.json(global.MILESTONE_REPLAY[device].recYn);
 });  
 
 router.post('/Download', (req, res) => { 

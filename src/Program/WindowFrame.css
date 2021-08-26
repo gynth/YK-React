@@ -10,13 +10,15 @@
 .content .win_body {overflow:hidden; background:#fff; height:100%; border:1px solid #A0B2CF; border-width:0px 1px 1px 1px; min-height:200px; border-radius:0px 0px 5px 5px;}
 
 .car_manager {height:calc(100vh - 109px);}
-.car_manager .car_list {position:relative; padding-top:67px; padding-bottom:161px; float:left; width:740px; height:100%; box-sizing:border-box; border-right:1px solid #E1E7EF}
+.car_manager .car_list {position:relative; padding-top:67px; padding-bottom:161px; float:left; width:820px; height:100%; box-sizing:border-box; border-right:1px solid #E1E7EF}
 .car_list .search_line {position:absolute; left:0; top:0; width:100%; box-sizing:border-box; padding:8px;}
 .car_list .search_line .wp {position:relative; padding-left:124px; padding-right:60px; border-bottom:1px solid #415294; padding-bottom:8px}
 .car_list .search_line select{position:absolute; left:0; top:0; width:124px; height:42px; font-size:16px; padding-left:10px;}
 .car_list .search_line input{height:40px; width:calc(100% - 20px); padding-bottom:2px; padding-left:14px; border:none; font-size:22px; }
 .car_list .search_line input::placeholder {color:#A0ABB4}
 .car_list .search_line button {cursor:pointer; position:absolute; right:0; top:0; width:60px; height:42px; background:url(../Image/carsearch_bu@2x.png) no-repeat 50% 50%; background-size:28px 28px; border:none; text-indent:-9999px; }
+
+
 
 .car_list .grid {position:relative; padding:0 0 40px; height:100%; box-sizing:border-box;}
 .car_list .grid .wp {height:100%; overflow:auto;}
@@ -80,7 +82,7 @@
 .car_info .data_list .doc {border:1px solid #000; margin-top:15px}
 .car_info .data_list .doc>h5 { font-size:16px; font-weight:bold; text-align:center; height:43px; line-height:43px; border-bottom:1px solid #000}
 .car_info .data_list ul {}
-.car_info .data_list ul li {height:43px; line-height:43px; font-size:16px; border-bottom:1px solid #ACACAC}
+.car_info .data_list ul li {height:43px; line-height:43px; font-size:14px; border-bottom:1px solid #ACACAC}
 .car_info .data_list ul li:last-child {border-bottom:none;}
 .car_info .data_list ul li .t {display:block; float:left; width:84px; font-weight:bold; text-align:center; border-right:1px solid #000; box-sizing:border-box;} 
 .car_info .data_list ul li .v {display:block; float:left; width:calc(100% - 84px); text-align:center; font-weight:bold;} 
@@ -94,14 +96,23 @@
 .car_info .complete_btn button span {padding-left:30px; background:url('../Image/carcomplete_bu@2x.png') no-repeat 0 5px; background-size:24px;}
 .car_info .complete_btn button:hover {background-color:#0063A9}
 
-.car_manager .cctv_viewer {position:relative; padding-top:61px; padding-bottom:17px; float:left; width:calc(100% - 1105px); height:100%; background:#0C1D33; box-sizing:border-box;}
+.car_manager.type2 {position:relative; padding-right:365px}
+.car_manager.type2 .car_list {width:100%}
+.car_manager.type2 .car_info {position:absolute; right: 0; top:0; }
+
+.car_manager.type3 {position:relative; }
+.car_manager.type3 .car_list {width:100%}
+
+
+.car_manager .cctv_viewer {position:relative; padding-top:61px; padding-bottom:17px; float:left; width:calc(100% - 1185px); height:100%; background:#0C1D33; box-sizing:border-box;}
 .cctv_viewer h4 {position:absolute; left:0; top:0; color:#ffffff; height:61px; line-height:61px; font-size:18px; padding-left:58px; background:url('../Image/cctv_bu@2x.png') no-repeat 27px 50%; background-size:22px 27px;}
 .cctv_viewer .cctv_list {padding:0 17px; height:100%;}
 .cctv {position:relative; height:50%; box-sizing:border-box;}
 .cctv:first-child {padding-bottom:8px}
 .cctv:last-child {padding-top:8px}
 .cctv .viewer {background:#000000; width:100%; height:100%; cursor:pointer; box-sizing:border-box;}
-.cctv .viewer.on {border:2px solid #2D7ADE}
+/* .cctv .viewer.on {border:2px solid #2D7ADE} */
+.cctv .viewer.on {border:2px solid red}
 
 /*
 .cctv .controller {position:absolute; right:10px; bottom:20px; border:1px solid rgba(0,0,0,0.3); padding:5px; height:30px; border-radius:30px; }
@@ -140,8 +151,11 @@
 .cctv .direction .top {position:absolute; left:50%; top:10px; margin-left:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_top@2x.png') no-repeat 50% 50%; background-size:20px auto; }
 .cctv .direction .down {position:absolute; left:50%; bottom:20px; margin-left:-20px; background:rgba(0,0,0,0.2) url('../Image/car_controll_down@2x.png') no-repeat 50% 50%; background-size:20px auto; }
 
-.picture_save {opacity:0.7; position: absolute; right: 10px; top: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:10px; background:rgba(0,0,0,0.5) url('../Image/camera_bu.png') no-repeat 21px 10px;}
+.picture_save {opacity:0.7; position: absolute; right: 10px; top: 20px; height: 42px; border-radius:21px; line-height:42px; width:60px; background:rgba(0,0,0,0.5) url('../Image/camera_bu.png') no-repeat 20px 50%; background-size:26px}
 .picture_save:hover {opacity:1}
+
+.file_download {opacity:0.7; position: absolute; right: 10px; top: 70px; height: 42px; border-radius:21px; line-height:42px; width:60px; background:rgba(0,0,0,0.5) url('../Image/download_bu.png') no-repeat 50% 50%;}
+.file_download:hover {opacity:1}
 
 /* .picture_save2 {opacity:0.7; position: absolute; right:10px; top: 20px; height: 42px; border-radius:21px; line-height:42px; padding-left:57px; padding-right:10px; background:rgba(0,0,0,0.5) url('../Image/camera_bu.png') no-repeat 21px 10px;}
 .picture_save2:hover {opacity:1} */
