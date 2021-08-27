@@ -35,23 +35,23 @@ html,body {height:100%;}
 	-o-transition: all 0.2s ease-in-out;
 	transition: all 0.2s ease-in-out;
 }
-.sidebarmenu .left_menu .fixed_menu ul li.m0 span{background: url('../../Image/menu1@2x.png') 50% 11px no-repeat; background-size:20px 62px}
-.sidebarmenu .left_menu .fixed_menu ul li.m1 span{background: url('../../Image/menu2@2x.png') 50% 10px no-repeat; background-size:21px 59px}
-.sidebarmenu .left_menu .fixed_menu ul li.m2 span{background: url('../../Image/menu3@2x.png') 50% 11px no-repeat; background-size:20px 62px}
-.sidebarmenu .left_menu .fixed_menu ul li.m3 span{background: url('../../Image/menu4@2x.png') 50% 11px no-repeat; background-size:20px 62px}
+.sidebarmenu .left_menu .fixed_menu ul li.m0 span{background: url('../../Image/menu1.png') 50% -26px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu ul li.m1 span{background: url('../../Image/menu2.png') 50% -31px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu ul li.m2 span{background: url('../../Image/menu3.png') 50% -28px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu ul li.m3 span{background: url('../../Image/menu4.png') 50% -32px no-repeat; }
 .sidebarmenu .left_menu .fixed_menu ul li.m4 span{background: url('../../Image/menu5@2x.png') 10px 10px no-repeat; background-size:21px 62px}
 .sidebarmenu .left_menu .fixed_menu ul li:hover {background:#E3EBF3; cursor:pointer; }
-.sidebarmenu .left_menu .fixed_menu ul li.m0:hover span{background-position:50% -31px}
-.sidebarmenu .left_menu .fixed_menu ul li.m1:hover span{background-position:50% -31px}
-.sidebarmenu .left_menu .fixed_menu ul li.m2:hover span{background-position:50% -31px}
-.sidebarmenu .left_menu .fixed_menu ul li.m3:hover span{background-position:50% -31px}
+.sidebarmenu .left_menu .fixed_menu ul li.m0:hover span{background-position:50% 13px}
+.sidebarmenu .left_menu .fixed_menu ul li.m1:hover span{background-position:50% 9px}
+.sidebarmenu .left_menu .fixed_menu ul li.m2:hover span{background-position:50% 12px}
+.sidebarmenu .left_menu .fixed_menu ul li.m3:hover span{background-position:50% 10px}
 .sidebarmenu .left_menu .fixed_menu ul li.m4:hover span{background-position:10px -32px}
 
 .sidebarmenu .left_menu .fixed_menu ul li.on {background:#E3EBF3;}
-.sidebarmenu .left_menu .fixed_menu ul li.m0.on span{background-position:50% -31px}
-.sidebarmenu .left_menu .fixed_menu ul li.m1.on span{background-position:50% -31px}
-.sidebarmenu .left_menu .fixed_menu ul li.m2.on span{background-position:50% -31px}
-.sidebarmenu .left_menu .fixed_menu ul li.m3.on span{background-position:50% -31px}
+.sidebarmenu .left_menu .fixed_menu ul li.m0.on span{background-position:50% 13px}
+.sidebarmenu .left_menu .fixed_menu ul li.m1.on span{background-position:50% 9px}
+.sidebarmenu .left_menu .fixed_menu ul li.m2.on span{background-position:50% 12px}
+.sidebarmenu .left_menu .fixed_menu ul li.m3.on span{background-position:50% 10px}
 .sidebarmenu .left_menu .fixed_menu ul li.m4.on span{background-position:10px -32px}
 
 .sidebarmenu .left_menu .fixed_menu .footer_menu {position:absolute; bottom:0; left:0;}

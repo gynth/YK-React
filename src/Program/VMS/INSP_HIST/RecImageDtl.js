@@ -202,11 +202,12 @@ function RecImageDtl(props) {
                     <ReactHlsPlayer
                       playerRef={movieRef}
                       src={playUrl}
-                      autoPlay={true}
+                      autoPlay={false}
                       controls={true}
                       width="100%"
                       height="100%"
                       muted="muted"
+                      onLoadedData={e => e.target.play()}
                       hlsConfig={{
                         autoStartLoad: true,
                         startPosition: -1,

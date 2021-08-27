@@ -7,7 +7,8 @@ import WindowFrame from './Program/WindowFrame';
 
 import './Home.css';
 import { getSessionCookie } from "./Cookies";
-import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER, gfs_dispatch } from './Method/Store';
+import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER, gfs_dispatch, gfs_PGM_REDUCER } from './Method/Store';
+import { gfc_sleep } from './Method/Comm';
 
 import GifPlayer from 'react-gif-player';
 import LoadingOverlay from 'react-loading-overlay';
@@ -19,7 +20,7 @@ const defaultData = async() => {
     if(action.reducer !== 'USER_REDUCER') {
       return {
         COP_CD    : nowState === undefined ? ''           : nowState.COP_CD,
-        USER_ID   : nowState === undefined ? 'KKH'        : nowState.USER_ID,
+        USER_ID   : nowState === undefined ? '1989'       : nowState.USER_ID,
         USER_NAM  : nowState === undefined ? '김경현'      : nowState.USER_NAM,
         LANGUAGE  : nowState === undefined ? 'KOR'        : nowState.LANGUAGE,
         YMD_FORMAT: nowState === undefined ? 'yyyy-MM-DD' : nowState.YMD_FORMAT,
@@ -66,6 +67,65 @@ const onActiveWindow = (e) => {
   }
 }
 
+const defaultOpen = async() => {
+
+    //검수대기 Open
+    gfs_PGM_REDUCER('INSP_PROC');
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 0,
+      activeWindow: {programId: 'INSP_PROC',
+                      programNam: '검수진행'
+                    }
+    }));
+
+    await gfc_sleep(20);
+
+    //검수이력 Open
+    gfs_PGM_REDUCER('INSP_HIST');
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 1,
+      activeWindow: {programId: 'INSP_HIST',
+                      programNam: '검수이력'
+                    }
+    }));
+
+    await gfc_sleep(20);
+
+    //출차대기 Open
+    gfs_PGM_REDUCER('DISP_PROC');
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 2,
+      activeWindow: {programId: 'DISP_PROC',
+                      programNam: '출차대기'
+                    }
+    }));
+
+    await gfc_sleep(20);
+
+    //입차대기 Open
+    gfs_PGM_REDUCER('ENTR_PROC');
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 3,
+      activeWindow: {programId: 'ENTR_PROC',
+                      programNam: '입차대기'
+                    }
+    }));
+
+    await gfc_sleep(20);
+
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 0,
+      activeWindow: {programId: 'INSP_PROC',
+                      programNam: '검수진행'
+                    }
+    }));
+}
+
 const Home = (props) => {  
   useEffect(e => {
     const MASK_REDUCER = (nowState, action) => {
@@ -103,6 +163,9 @@ const Home = (props) => {
     //#endregion
 
     defaultData();
+
+    //화면Open
+    defaultOpen();
   }, [])
 
   const session = getSessionCookie("session");

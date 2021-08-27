@@ -69,35 +69,6 @@ class DISP_PROC extends Component {
 
   onTabChg = async() => {
 
-    await gfc_sleep(200);
-
-    const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
-    if(activeWindow.programId !== 'DISP_PROC'){
-      return;
-    }
-
-    const carNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_CARNO');
-    if(carNumb !== undefined && carNumb !== ''){
-
-      const befCarNumb = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-
-      if(befCarNumb !== carNumb){
-        gfo_getInput(this.props.pgm, 'search_txt').setValue(carNumb);
-        await gfc_sleep(100);
-        
-        this.Retrieve();
-
-        //차량번호, 총중량, 입차시간 세팅
-        const scaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
-        const totalWgt = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_WEIGHT');
-        const date = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_DATE');
-
-        gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: scaleNumb});
-        gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: carNumb});
-        gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: totalWgt});
-        gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: date});
-      }
-    }
   }
 
   //#region onActiveWindow 스토어 subscribe로 실행됨.
@@ -369,11 +340,50 @@ class DISP_PROC extends Component {
 
     gfs_dispatch('DISP_PROC_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
 
+    //계량증명서 정보여부
+    const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
+    if(!chitInfoYn.data.dataSend){
+      alert('계량증명서 정보가 없습니다.');
+      return;
+    }
+
+    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.preItemGrade); //사전등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    gfo_getCombo(this.props.pgm, 'detail_warning').setValue('');  //경고
+
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
+
     //계량증명서 여부 확인.
     const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
-    gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-      chit     : chitYn.data
-    });
+    if(chitYn.data === 'N'){
+      gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
+        date     : chitInfoYn.data.dataSend[0].date,
+        scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
+        carNumb  : chitInfoYn.data.dataSend[0].carNumb,
+        vender   : chitInfoYn.data.dataSend[0].vendor,
+        itemFlag : e.preItemGrade,
+        Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
+        loc      : chitInfoYn.data.dataSend[0].area,
+        user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+        chit     : 'N'
+      });
+    }else{
+      gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
+        itemFlag : e.preItemGrade,
+        chit     : chitYn.data
+      });
+    }
   }
 
   render() {
@@ -425,7 +435,6 @@ class DISP_PROC extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
-                        dblclick={(e) => this.dblclick(e)}
                         rowHeight={46}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
@@ -445,7 +454,7 @@ class DISP_PROC extends Component {
                             align : 'center'
                           }),   
                           columnInput({
-                            name: 'itemGrade',
+                            name: 'preItemGrade',
                             header: '사전등급',
                             width : 135,
                             readOnly: true,
@@ -482,7 +491,7 @@ class DISP_PROC extends Component {
                           columnTextArea({
                             name: 'vendor',
                             header: 'Vendor',
-                            width : 150,
+                            width : 200,
                             height: 38,
                             readOnly: true,
                             align : 'left'
@@ -752,6 +761,7 @@ class DISP_PROC extends Component {
 
               
             </div>
+            <CompleteBtn pgm={this.props.pgm}/>
 
 
 

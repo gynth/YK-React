@@ -124,22 +124,6 @@ router.post('/YK_Chit_YN', (req, res) => {
 });   
 //#endregion
 
-// //#region 출발보고 불러오기
-// router.post('/YK_Disp_YN', (req, res) => {
-//   const fileName = req.body.fileName; 
-//   const scrp_ord_no = req.body.scrp_ord_no;
-//   const folder = scaleNo.substring(0, 8);
-
-//   if(fs.existsSync(`F:\\IMS\\Disp\\${folder}\\${fileName}`)){
-//     const readFile = fs.readFileSync(`F:\\IMS\\Disp\\${folder}\\${fileName}`);
-//     const encode = Buffer.from(readFile).toString('base64');
-//     res.end(encode);
-//   }else{
-//     res.json('N');
-//   }
-// });  
-// //#endregion
-
 //#region 계량표 저장
 router.post('/YK_Chit', (req, res) => {
 
@@ -221,6 +205,30 @@ const makeImg = async(img, folder, filename) => {
     return e;
   }
 }
+
+//#region 계량표 삭제
+
+router.post('/YK_Chit_DEL', (req, res) => {
+  const filename = req.body.filename;
+  const folder = filename.substring(0, 8);
+
+  delImg(folder, filename).then(e => {
+    res.json(e);
+  });
+}); 
+
+const delImg = async(folder, filename) => {
+  const root = `F:\\IMS\\Chit\\${folder}\\${filename}.jpg`;
+
+  try{
+    await fsPromises.unlink(root);
+
+    return 'Y';
+  }catch(e){
+    return e;
+  }
+}
+//#endregion
 
 const sleep = (ms) => {
   return new Promise(resolve=>setTimeout(resolve, ms));

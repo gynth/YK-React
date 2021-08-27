@@ -390,6 +390,14 @@ const RtnGrid = (props) => {
       }
     })
 
+    gridRef.current.getInstance().on('click', (e) => {
+      if(e.targetType === 'columnHeader'){
+        if(props.headerClick !== undefined){
+          props.headerClick(e);
+        }
+      }
+    })
+
     gridRef.current.getInstance().on('afterChange', (e) => {
       if(props.afterChange !== undefined)
         props.afterChange(e.changes[0]);

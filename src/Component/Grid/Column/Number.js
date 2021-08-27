@@ -27,6 +27,7 @@ export const Number = (props) => {
   const width     = props.width !== undefined ? props.width : 100;
   const align     = props.align !== undefined ? props.align : 'right';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
+  const fontSize  = props.fontSize !== undefined ? props.fontSize : '13';
   const resizable = props.resizable !== undefined ? props.resizable : true;
   const readOnly = props.readOnly !== undefined ? props.readOnly : true;
 
@@ -35,6 +36,7 @@ export const Number = (props) => {
                width,
                align,
                valign,
+               fontSize,
                resizable}
 
   // if(!readOnly){
@@ -61,7 +63,8 @@ export const Number = (props) => {
       align,
       valign,
       onRender: props.onRender,
-      readOnly
+      readOnly,
+      fontSize
     }
   }
 
@@ -71,7 +74,8 @@ export const Number = (props) => {
       align,
       valign,
       onRender: props.onRender,
-      readOnly
+      readOnly,
+      fontSize
     }
   }
 
@@ -87,6 +91,7 @@ class NumberEditor {
                               display:table-cell; 
                               width:100%; 
                               padding:0px;
+                              font-size:${option['fontSize']}; 
                               text-align:${option['align']}; 
                               vertical-align:${option['valign']};
                               ` )
@@ -159,6 +164,7 @@ class NumberRenderer {
                                    text-align:${option['align']}; 
                                    vertical-align:${option['valign']}; 
                                    background-color:${backGround};
+                                   font-size:${option['fontSize']}; 
                                    `);
                                   
     this.el.value = value;

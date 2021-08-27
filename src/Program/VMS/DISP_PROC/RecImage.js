@@ -19,21 +19,22 @@ function RecImage(props) {
  
   const img = <a 
                 href='#!'
-                onFocus={() => {
-                  if(!isOpen){ 
-                    let obj = {}; 
-                    obj[props.focus] = true;
+                // onFocus={() => {
+                //   if(!isOpen){ 
+                //     let obj = {}; 
+                //     obj[props.focus] = true;
   
-                    gfs_dispatch('DISP_PROC_MAIN', props.focus, obj);
-                  } 
-                }}
-                onBlur={() => {
-                  if(!isOpen){
-                    let obj = {}; 
-                    obj[props.focus] = false; 
-                    gfs_dispatch('DISP_PROC_MAIN', props.focus, obj);
-                  }
-                }}>
+                //     gfs_dispatch('DISP_PROC_MAIN', props.focus, obj);
+                //   } 
+                // }}
+                // onBlur={() => {
+                //   if(!isOpen){
+                //     let obj = {}; 
+                //     obj[props.focus] = false; 
+                //     gfs_dispatch('DISP_PROC_MAIN', props.focus, obj);
+                //   }
+                // }}
+                >
                 <div id={props.rec} style={{height: isOpen === true && '100%'}} className={isFocus === true ? 'cctv select' : 'cctv'}>
                   <div className={isFocus === true ? 'viewer on' : 'viewer'}>
                     <div style={{width:'100%', height:'100%'}}>

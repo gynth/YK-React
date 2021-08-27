@@ -31,7 +31,7 @@ function Chit(props) {
   return (
     <>
       {
-        value.chit === 'N' && props.reducer === 'INSP_PROC_MAIN' ?
+        value.chit === 'N' && (props.reducer === 'INSP_PROC_MAIN' || props.reducer === 'DISP_PROC_MAIN') ?
         <div className='data_list' id={`content2_${props.pgm}`}>
           <div className='doc'>
             <h5>계 량 증 명 서</h5>
@@ -62,7 +62,7 @@ function Chit(props) {
               </li>
               <li>
                 <span className='t'>지&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;역</span>
-                <span className='v'>{value.loc}</span>
+                <div style={{lineHeight:'20px'}} className='v'>{value.loc}</div>
               </li>
               <li>
                 <span className='t'>검&nbsp;&nbsp;수&nbsp;&nbsp;자</span>

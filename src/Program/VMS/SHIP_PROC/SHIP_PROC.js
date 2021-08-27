@@ -6,13 +6,15 @@ import Input from '../../../Component/Control/Input';
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getTextarea } from '../../../Method/Component';
-import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
+import { gfg_getGrid, gfg_getRow, gfg_setSelectRow, gfg_setValue } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
+import { Number as columnNumber } from '../../../Component/Grid/Column/Number';
+import { Checkbox as columnCheckbox } from '../../../Component/Grid/Column/Checkbox';
 
 import Combobox from '../../../Component/Control/Combobox';
 
@@ -263,36 +265,15 @@ class SHIP_PROC extends Component {
   }
 
   Retrieve = async () => {
-    const carNumb = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-    if(carNumb === undefined || carNumb === ''){
-      alert('선택된 차량번호가 없습니다.');
-      return;
-    }
 
     gfc_showMask();
 
-    const mainData = await YK_WEB_REQ(`tally_process_f2.jsp?carnumb=${carNumb}&ld=20210417&nd=20210617`);
+    const mainData = await YK_WEB_REQ(`tally_ship_wait.jsp`);
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     if(main){
-
-      const dataMod = [];
-      main.forEach(e => {
-        dataMod.push({
-          totalWgt : e['감량'],
-          grade    : e['검수등급'],
-          scaleNumb: e['계근번호'],
-          date     : e['계근일자'],
-          rtn      : e['반품구분'],
-          vendor   : e['업체명'],
-          carNumb  : e['차량번호'],
-          loc      : e['상차주소'],
-          // warning  : e['경고'] === 'N' ? '' : '경고'
-          warning  : '경고'
-        })
-      })
-
-      grid.resetData(dataMod);
+      
+      grid.resetData(main);
       gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
       
       await gfc_sleep(100);
@@ -309,13 +290,10 @@ class SHIP_PROC extends Component {
   onSelectChange = async (e) => {
     if(e === null) return;
 
-    gfs_dispatch('SHIP_PROC_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
-
-    //계량증명서 여부 확인.
-    const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
-    gfs_dispatch('SHIP_PROC_MAIN', 'CHIT_INFO', {
-      chit     : chitYn.data
-    });
+    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
+    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vendorname});
+    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.netweight});
+    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.deliverydate});
   }
 
   render() {
@@ -334,7 +312,6 @@ class SHIP_PROC extends Component {
                             width   = {124}
                             height  = {42}
                             emptyRow
-                            isDisabled
                             data    = {[{
                               code: '1',
                               name: '계근번호'
@@ -368,75 +345,64 @@ class SHIP_PROC extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
+                        headerClick={(e) => {
+                          if(e.columnName === 'chk'){
+                            const grid = gfg_getGrid(this.props.pgm, 'main10');
+                            if(grid.gridEl.dataset.checked === undefined){
+                              grid.gridEl.dataset.checked = true;
+                            }else if(grid.gridEl.dataset.checked === 'true'){
+                              grid.gridEl.dataset.checked = false;
+                            }else{
+                              grid.gridEl.dataset.checked = true;
+                            }
+    
+                            for(let i = 0; i < grid.getRowCount(); i++){
+                              gfg_setValue(grid, 'chk', grid.gridEl.dataset.checked, i);
+                            }
+                          }
+                        }}
                         rowHeight={41}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
+                          columnCheckbox({
+                            name: 'chk',
+                            header: '선택',
+                            width : 50,
+                            readOnly: true,
+                            align : 'center',
+                            type: 'checkbox'
+                          }),
                           columnInput({
                             name: 'scaleNumb',
                             header: '계근번호',
-                            width : 100,
+                            width : 150,
                             readOnly: true,
                             color : '#0063A9',
                             align : 'center',
-                            fontSize: '12'
+                            fontSize: '18'
                           }),
                           columnInput({
-                            name: 'carNumb',
-                            header: '차량번호',
-                            width : 90,
-                            readOnly: true,
-                            align : 'center',
-                            fontSize: '12'
-                          }),   
-                          columnInput({
-                            name: 'grade',
-                            header: '검수등급',
-                            width : 90,
-                            readOnly: true,
-                            align : 'left',
-                            fontSize: '12'
-                          }),
-                          columnInput({
-                            name: 'date',
-                            header: '계근일자',
-                            width : 80,
-                            readOnly: true,
-                            align : 'center',
-                            fontSize: '12'
-                          }),   
-                          columnTextArea({
-                            name: 'vendor',
+                            name: 'vendorname',
                             header: '업체명',
-                            width : 95,
-                            height: 38,
+                            width : 300,
                             readOnly: true,
                             align : 'left',
-                            fontSize: '12'
+                            fontSize: '18'
                           }),
-                          columnTextArea({
-                            name: 'loc',
-                            header: '상차주소',
-                            width : 120,
-                            height: 38,
-                            readOnly: true,
-                            align : 'left',
-                            fontSize: '12'
+                          columnNumber({
+                            name    : 'netweight', 
+                            header  : '무게(KG)', 
+                            width   : 150, 
+                            readOnly: false,
+                            fontSize: '18'
                           }),
                           columnInput({
-                            name: 'totalWgt',
-                            header: '감량',
-                            width : 35,
-                            readOnly: true,
-                            align : 'right',
-                            fontSize: '12'
-                          }),
-                          columnInput({
-                            name: 'warning',
-                            header: '경고',
-                            width : 40,
+                            name: 'deliverydate',
+                            header: '입차일자',
+                            width : 220,
                             readOnly: true,
                             align : 'center',
-                            fontSize: '12'
+                            fontSize: '18'
                           })
                         ]}
                   />
@@ -451,8 +417,8 @@ class SHIP_PROC extends Component {
             <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='SHIP_PROC_MAIN'/></div>
             <div style={{height:'130px'}} className='detail'>
               <ul>
-                <li><span className='t'>차량번호</span><Detailspan flag={2}  reducer='SHIP_PROC_MAIN'/></li>
-                <li><span className='t'>총중량(KG)</span><Detailspan flag={3} reducer='SHIP_PROC_MAIN' /></li>
+                <li><span className='t'>Vender</span><Detailspan flag={2}  reducer='SHIP_PROC_MAIN'/></li>
+                <li><span className='t'>무게(KG)</span><Detailspan flag={3} reducer='SHIP_PROC_MAIN' /></li>
                 <li><span className='t'>입차시간</span><Detailspan flag={4}  reducer='SHIP_PROC_MAIN'/></li> 
               </ul>
             </div>
@@ -461,14 +427,6 @@ class SHIP_PROC extends Component {
             <div className='tab_content' id='tabMain'>
               <div className='input_list on' id={`content1_${this.props.pgm}`}>
                 <ul>
-                  <li>
-                    <h5>사전등급</h5>
-                      <Input pgm     = {this.props.pgm}
-                             id      = 'detail_pre_grade'
-                             width   = '100%'
-                             disabled
-                      />
-                  </li>
                   <li>
                     <h5>등급책정</h5>
                     <div style={{marginBottom:'5px'}}>
@@ -677,7 +635,7 @@ class SHIP_PROC extends Component {
                             }}
                     />
                   </li>
-                  <li>
+                  {/* <li>
                     <h5>경고</h5>
                     <Combobox pgm = {this.props.pgm}
                           id      = 'detail_warning'
@@ -690,7 +648,7 @@ class SHIP_PROC extends Component {
                           }]}
                           emptyRow
                     />
-                  </li>
+                  </li> */}
                 </ul>
               </div>
 

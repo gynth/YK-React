@@ -30,7 +30,8 @@ app3000.post('/RTSPStart', (req, res) => {
         streamUrl: streamUrl,
         wsPort: port, //3100, 
         width: 1920,  
-        height: 1080 
+        height: 1080,
+        interval: null
       });            
       
       global.MILESTONE_RTSP[device] = streams;

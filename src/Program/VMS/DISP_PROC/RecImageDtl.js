@@ -1,22 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { TOKEN, MILESTONE, MILESTONE_LIVE } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
 import { gfs_dispatch, gfs_subscribe, gfs_getStoreValue } from '../../../Method/Store';
-import { gfc_addClass, gfc_removeClass, gfc_hasClass, gfc_lpad } from '../../../Method/Comm';
-import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
-import ReactPlayer from 'react-player'
-import { throttle } from 'lodash';
+import { gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
 import axios from 'axios';
+import ReactHlsPlayer from 'react-hls-player';
 
 function RecImageDtl(props) {
   
   const movieRef = useRef();
-  const prgRef = useRef();
-  const timeRef = useRef();
-  const btnRef = useRef();
+  // const prgRef = useRef();
+  // const timeRef = useRef();
+  // const btnRef = useRef();
 
-  let isSeek = false;
+  // let isSeek = false;
 
   const isOpen = useSelector((e) => {
     return e.DISP_PROC_MAIN[props.cam];
@@ -30,100 +27,113 @@ function RecImageDtl(props) {
     return p === n;
   });
 
-  const activeWindow = useSelector((e) => {
-    return e.WINDOWFRAME_REDUCER.activeWindow;
-  }, (p, n) => {
-    return p.programId === n.programId;
-  });
+  // const isActive = useSelector((e) => {
+  //   return e.DISP_PROC_MAIN['ON_ACTIVE'];
+  // }, (p, n) => {
+  //   return p.active === n.active;
+  // });
+
+  // const activeWindow = useSelector((e) => {
+  //   return e.WINDOWFRAME_REDUCER.activeWindow;
+  // }, (p, n) => {
+  //   return p.programId === n.programId;
+  // });
 
   const movieDown = () => {
-    MILESTONE({
-      reqAddr : 'Download',
-      device  : props.device,
-      scaleNo : value,
-      cameraName: props.Name}).then(e => {
-        if(e.data === '0'){
-          axios({
-            url: `http://10.10.10.136:3003/${value}.mp4?scaleNumb=${value}&cameraName=${props.Name}&stream=N`,
-            method: 'GET',
-            responseType: 'blob'
-          })
-            .then((response) => {
-                  const url = window.URL
-                        .createObjectURL(new Blob([response.data]));
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.setAttribute('download', 'image.avi');
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-            }).catch(e => console.log(e))
-        }else{
-          alert('파일저장에 실패 했습니다.')
-        }
+    gfc_showMask();
+    const host = `http://10.10.10.136:3003/`;
+    const option = {
+      url   : host,
+      method: 'POST',
+      // headers: {
+      //   'Access-Control-Allow-Origin': '*'
+      // },
+      data: {
+        scaleNumb: value,
+        Name     : props.Name
+      },
+      responseType: 'blob'
+    };
+  
+    axios(option)
+      .then(res => {
+        gfc_hideMask();
+        const url = window.URL
+              .createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${value}.mp4`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       })
-
+      .catch(err => {
+        gfc_hideMask();
+        console.log(err);
+      })
   }
   
-  const playToggle = (_play) => {
-    var menu = document.getElementById(_play);
-    if(gfc_hasClass(menu,'play')){
-      gfc_removeClass(menu,'play')
-      movieRef.current.player.player.play();
-    }else{
-      gfc_addClass(menu,'play');
-      movieRef.current.player.player.pause();
-    }
-  }
-
-  if(activeWindow.programId === 'DISP_PROC'){
-    window.onkeydown = e => onKeyDown(e);
-  //   if(window.onkeydown === null){
-  //     window.onkeydown = e => onKeyDown(e);
+  // const playToggle = (_play) => {
+  //   var menu = document.getElementById(_play);
+  //   if(gfc_hasClass(menu,'play')){
+  //     gfc_removeClass(menu,'play')
+  //     movieRef.current.player.player.play();
+  //   }else{
+  //     gfc_addClass(menu,'play');
+  //     movieRef.current.player.player.pause();
   //   }
-  // }else{
-  //   if(window.onkeydown !== null){
-  //     window.onkeydown = null;
-  //   }
-  }
+  // }
 
-  const onKeyDown = (e) => {
-    e.stopPropagation();
+  // if(activeWindow.programId === 'DISP_PROC'){
+  //   window.onkeydown = e => onKeyDown(e);
+  // //   if(window.onkeydown === null){
+  // //     window.onkeydown = e => onKeyDown(e);
+  // //   }
+  // // }else{
+  // //   if(window.onkeydown !== null){
+  // //     window.onkeydown = null;
+  // //   }
+  // }
 
-    const STD_CAM_FOCUS = gfs_getStoreValue('DISP_PROC_MAIN', 'STD_CAM_FOCUS');
-    const DUM_CAM_FOCUS = gfs_getStoreValue('DISP_PROC_MAIN', 'DUM_CAM_FOCUS');
+  // const onKeyDown = (e) => {
+  //   e.stopPropagation();
+
+  //   const STD_CAM_FOCUS = gfs_getStoreValue('DISP_PROC_MAIN', 'STD_CAM_FOCUS');
+  //   const DUM_CAM_FOCUS = gfs_getStoreValue('DISP_PROC_MAIN', 'DUM_CAM_FOCUS');
     
-    if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
-      debounceKeyDown(e, STD_CAM_FOCUS ? 'STD_CAM_FOCUS' : 'DUM_CAM_FOCUS');
-    }
-  }
+  //   if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
+  //     debounceKeyDown(e, STD_CAM_FOCUS ? 'STD_CAM_FOCUS' : 'DUM_CAM_FOCUS');
+  //   }
+  // }
   
-  const debounceKeyDown = throttle((e, owner) => {
-    let move = '';
-    if(e.keyCode === 37) move = 'left';
-    else if(e.keyCode === 39) move = 'right';
+  // const debounceKeyDown = throttle((e, owner) => {
+  //   let move = '';
+  //   if(e.keyCode === 37) move = 'left';
+  //   else if(e.keyCode === 39) move = 'right';
 
-    if(move !== ''){
-      if(owner === props.focus){
-        let curTime;
-        if(move === 'left'){
-          curTime = movieRef.current.getCurrentTime() - 5;
-        }else{
-          curTime = movieRef.current.getCurrentTime() + 5;
-        }
+  //   if(move !== ''){
+  //     if(owner === props.focus){
+  //       let curTime;
+  //       if(move === 'left'){
+  //         curTime = movieRef.current.getCurrentTime() - 5;
+  //       }else{
+  //         curTime = movieRef.current.getCurrentTime() + 5;
+  //       }
 
-        const totalMin = gfc_lpad(parseInt((curTime%3600)/60), 2, '0');
-        const totalSec = gfc_lpad(parseInt(curTime%60), 2, '0');
+  //       const loadedSeconds = movieRef.current.player.prevLoaded;
 
-        const curMin = gfc_lpad(parseInt((curTime%3600)/60), 2, '0');
-        const curSec = gfc_lpad(parseInt(curTime%60), 2, '0');
+  //       const totalMin = gfc_lpad(parseInt((loadedSeconds%3600)/60), 2, '0');
+  //       const totalSec = gfc_lpad(parseInt(loadedSeconds%60), 2, '0');
 
-        timeRef.current.textContent = `${curMin}:${curSec} / ${totalMin}:${totalSec}`;
+  //       const curMin = gfc_lpad(parseInt((curTime%3600)/60), 2, '0');
+  //       const curSec = gfc_lpad(parseInt(curTime%60), 2, '0');
 
-        movieRef.current.seekTo(curTime);
-      }
-    }
-  }, 300);
+  //       timeRef.current.textContent = `${curMin}:${curSec} / ${totalMin}:${totalSec}`;
+
+  //       movieRef.current.seekTo(curTime);
+  //     }
+  //   }
+  // }, 300);
 
   const setModalIsOpen = (open) => {
     
@@ -163,52 +173,51 @@ function RecImageDtl(props) {
 
   useEffect(() => { 
     if(value !== ''){
-      gfc_showMask();
-      setPlayUrl('');
-
-      // movieRef.current.get(0).stop();
-      // movieRef.current.get(0).stop();
-
-      MILESTONE({
-        reqAddr : 'Replay',
-        device  : props.device,
-        scaleNo : value,
-        cameraName: props.Name}).then(e => {
-          if(e.data === '0' || e.data === ''){
-            var req = new XMLHttpRequest();
-            req.open('GET', `http://10.10.10.136:3003/${value}.mkv?scaleNumb=${value}&cameraName=${props.Name}&stream=Y`, true);
-            req.responseType = 'blob';
-        
-            req.onload = function() {
-              // Onload is triggered even on 404
-              // so we need to check the status code
-              if (this.status === 200) {
-                  var videoBlob = this.response;
-                  var vid = URL.createObjectURL(videoBlob); // IE10+
-                  // Video is now downloaded
-                  // and we can set it as source on the video element
-                   
-                  // movieRef.current.src = vid;
-                  setPlayUrl(vid);
-              }
-            }
-            req.onerror = function() {
-              gfc_hideMask();
-            }
-        
-            req.send();
-          }else{
-            gfc_hideMask();
-          } 
-        })
+      setPlayUrl(`http://10.10.10.136:3003/${value}/${encodeURIComponent(props.Name)}/${value}.m3u8`);
     }
   }, [props.device, props.Name, value])
+
+  const onActiveWindow = () => {
+    const isActive = gfs_getStoreValue('MASK_REDUCER', 'ON_ACTIVE');
+    const isPlay = movieRef.current.paused;
+
+    if(isActive.active){
+      if(isPlay === false){
+        movieRef.current.play();
+      }
+    }else{
+      if(isPlay){
+        movieRef.current.pause();
+      }
+    }
+  }
+  useEffect(() => {
+    gfs_subscribe(onActiveWindow);
+  }, [])
  
   const img = <>
                 <div 
                   style={{width:'100%', height:'100%'}} 
                   className='player-wrapper'>
-                  <ReactPlayer 
+                    <ReactHlsPlayer
+                      playerRef={movieRef}
+                      src={playUrl}
+                      autoPlay={false}
+                      controls={true}
+                      width="100%"
+                      height="100%"
+                      muted="muted"
+                      onLoadedData={e => e.target.play()}
+                      hlsConfig={{
+                        autoStartLoad: true,
+                        startPosition: -1,
+                        debug: false
+                      }}
+                    />
+
+
+
+                  {/* <ReactPlayer 
                     ref={movieRef} 
                     className='react-player'
                     width='100%' 
@@ -223,14 +232,24 @@ function RecImageDtl(props) {
 
                     
                     onError={e => {
-                      btnRef.current.style = 'display:none;';
-                      gfc_hideMask();
+                      if(e.target.error.code === 3){
+                        console.log(e.target);
+                        const curTime = movieRef.current.getCurrentTime() + 1;
+                        movieRef.current.seekTo(curTime);
+                        e.target.play();
+                      }else{
+                        btnRef.current.style = 'display:none;';
+                        gfc_hideMask();
+                      }
                     }}
 
                     onDuration={e => {
                       btnRef.current.style = 'display:block;';
-                      gfc_hideMask();
                       prgRef.current.max = e;
+                    }}
+
+                    onPlay={e => {
+                      gfc_hideMask();
                     }}
 
                     onProgress={e => {
@@ -245,10 +264,10 @@ function RecImageDtl(props) {
                       prgRef.current.value = e.playedSeconds;
                       timeRef.current.textContent = `${curMin}:${curSec} / ${totalMin}:${totalSec}`;
                     }}
-                  /> 
+                  />  */}
                 </div>
 
-                <div className='viewer_range'>
+                {/* <div className='viewer_range'>
                   <div className='wp'>
                     <button type='button' id='play1' onClick={() => playToggle('play1')}></button>
                     <span className='time' ref={timeRef}>00:00 / 00:00 </span>
@@ -269,8 +288,9 @@ function RecImageDtl(props) {
                     min={0} 
                     defaultValue={0} 
                     className='cctv_gauge'/> 
-                </div>
+                </div> */}
 
+                <div className='file_download' onClick={() => movieDown()}></div>
                 <div className='picture_save' onClick={e => {
                   
                   // gfc_showMask();

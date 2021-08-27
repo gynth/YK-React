@@ -309,6 +309,30 @@ export const gfc_screenshot_srv_YK = (element, filename) => {
   });
 }
 
+export const gfc_screenshot_del_yk = (filename) => {
+  const host = 'http://10.10.10.136:3001/ScreenShot/YK_Chit_DEL';
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+      filename
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
 export const gfc_test = (element, filename, root) => {    
   const host = 'http://10.10.10.136:3001/ScreenShot/TEST';
   const option = {

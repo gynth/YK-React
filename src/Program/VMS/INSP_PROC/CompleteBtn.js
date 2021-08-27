@@ -155,6 +155,9 @@ const CompleteBtn = (props) => {
 
     //#endregion
 
+    const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_PROC');
+    pgm[0].Retrieve();
+
     gfc_hideMask();
   }
   //#endregion

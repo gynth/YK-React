@@ -58,17 +58,17 @@ class INSP_PROC extends Component {
       let ipArr = ['10.10.136.112', '10.10.136.128'];
       let rtspUrl = ['rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp', 'rtsp://admin:pass@10.10.136.128:554/video1'];
       let rtspPort = [3100, 3101];
-      let infoArr = [];
+      this.infoArr = [];
 
       ipArr.forEach(e => {
         const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
         if(camera){
-          infoArr.push({camera, rtspUrl, rtspPort}); 
+          this.infoArr.push({camera, rtspUrl, rtspPort}); 
         }
       })
 
-      if(infoArr.length > 0){
-        this.setState(this.state.device = infoArr);
+      if(this.infoArr.length > 0){
+        this.setState(this.state.device = this.infoArr);
       }
     }
   }
@@ -122,7 +122,7 @@ class INSP_PROC extends Component {
     const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
     
     if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
-      this.debounceKeyDown(e, STD_CAM_FOCUS ? this.device[3] : this.device[0]);
+      this.debounceKeyDown(e, STD_CAM_FOCUS ? this.infoArr[0].camera : this.infoArr[1].camera);
     }
   }
 
@@ -131,9 +131,9 @@ class INSP_PROC extends Component {
 
     const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
     const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
-    
+
     if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
-      this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.device[3] : this.device[0]);
+      this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.infoArr[0].camera : this.infoArr[1].camera);
     }
   }
   //#endregion
@@ -477,28 +477,6 @@ class INSP_PROC extends Component {
 
   Init = async() => {
     this.milestoneInfo();
-
-    //#region 검수이력 Open
-    gfs_PGM_REDUCER('INSP_HIST');
-
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 0,
-      activeWindow: {programId: 'INSP_HIST',
-                      programNam: '검수이력'
-                    }
-    }));
-    //#endregion
-
-    await gfc_sleep(50);
-
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 1,
-      activeWindow: {programId: 'INSP_PROC',
-                      programNam: '검수진행'
-                    }
-    }));
   }
 
   componentDidMount(){
@@ -713,7 +691,7 @@ class INSP_PROC extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
-                        dblclick={(e) => this.dblclick(e)}
+                        // dblclick={(e) => this.dblclick(e)}
                         rowHeight={46}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
@@ -770,7 +748,7 @@ class INSP_PROC extends Component {
                           columnTextArea({
                             name: 'vendor',
                             header: 'Vendor',
-                            width : 150,
+                            width : 180,
                             height: 38,
                             readOnly: true,
                             align : 'left'
@@ -819,9 +797,9 @@ class INSP_PROC extends Component {
                   <button onClick={e => {
                         MILESTONE({
                           reqAddr : 'Replay',
-                          device  : this.device[3].Guid,
+                          device  : this.infoArr[0].camera.Guid,
                           scaleNo: 'test11',
-                          cameraName: this.device[3].Name})
+                          cameraName: this.infoArr[0].camera.Name})
                   }}>Replay
 
                   </button>

@@ -47,13 +47,6 @@ const TabList = (props) => {
         
         const btnElement = document.getElementById(btnList[i]);
           if(btnElement !== null) gfc_removeClass(btnElement,'on');
-
-        if(props.pgm === 'DISP_PROC'){
-          const detail_grade1 = gfo_getCombo(props.pgm, 'detail_grade1').getLabel(); //고철등급
-          gfs_dispatch(props.reducer, 'CHIT_INFO_ITEM_FLAG', {
-            itemFlag : detail_grade1
-          });
-        }
       }
     }
   }
