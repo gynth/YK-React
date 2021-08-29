@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
 
 import { gfc_sleep } from '../../../Method/Comm';
+import { gfg_getRow } from '../../../Method/Grid';
 
 /**
  * name : 컬럼명
@@ -17,6 +18,8 @@ import { gfc_sleep } from '../../../Method/Comm';
  * format(설정값) : 날짜포맷
  * 
  * fontSize :  폰트크기
+ * 
+ * onRender: {(value, el, rows)}
  * 
  * align(center(기본) | left | right) : 좌우정렬
  * 
@@ -57,6 +60,7 @@ export const Combobox = (props) => {
   const valign    = props.valign !== undefined ? props.valign : 'middle';
   const resizable = props.resizable !== undefined ? props.resizable : false;
   const data      = props.data !== undefined ? props.data : undefined;
+  const etcData   = props.etcData !== undefined ? props.etcData : undefined;
   const editor    = props.editor;
 
   const rtn = {name,  
@@ -66,7 +70,8 @@ export const Combobox = (props) => {
                valign, 
                resizable,
                fontSize,
-               data}
+               data,
+               etcData}
 
   const queryResult = new ComboInit({
     location: editor !== undefined ? editor.location : '',
@@ -77,7 +82,8 @@ export const Combobox = (props) => {
     param   : editor !== undefined ? editor.param : '',
     emptyRow: editor !== undefined ? editor.emptyRow : '',
     fontSize: editor !== undefined ? editor.fontSize : '13',
-    data
+    data,
+    etcData
   });
 
   // rtn.editor = {
@@ -91,10 +97,12 @@ export const Combobox = (props) => {
     rtn.editor = {
       type   : ComboEditor,
       data,
+      etcData,
       options: {
         align,
         fontSize,
         queryResult,
+        onRender: props.onRender,
         onFilter: editor !== undefined ? editor.onFilter : ''
       }
     }
@@ -103,10 +111,12 @@ export const Combobox = (props) => {
   rtn.renderer = {
     type   : ComboboxRenderer,
     data,
+    etcData,
     options: {
       align,
       valign,
       fontSize,
+      onRender: props.onRender,
       listItems: queryResult.optionList
     }
   }
@@ -139,7 +149,8 @@ class ComboEditor {
       container: (base) => ({
         ...base,
         flex : 1,
-        width: props.width,
+        width: props.width === undefined ? '100%' : props.width,
+        // width: '100%',
         margin:0
       }),
     
@@ -164,12 +175,13 @@ class ComboEditor {
         ...base,
         margin: '0px 0px 0px 3px'
       }),
-  
       menu: (base, e2) => ({
-        zIndex: 100,
         ...base,  
         marginTop: 1,
-        width: props.width
+        // width: '100%',
+        width: ComboInit.width,
+        zIndex: 1000,
+        fontSize: option.fontSize
       }),
   
       option: (base, state) => ({
@@ -180,6 +192,7 @@ class ComboEditor {
       singleValue: (base) => ({
         ...base,
         margin: '0px 0px 0px 4px',
+        fontSize: option.fontSize
         // ...dot()
       }),
   
@@ -211,14 +224,16 @@ class ComboEditor {
                             defaultValue={optionList.find(e => e.value === props.value)}
                             
                             isMulti={false}
-                            defaultMenuIsOpen
                             ref={this.ref}
                             placeholder=''
                             menuPlacement='auto'
+
+                            // isDisabled
+                            // defaultMenuIsOpen
   
                             // blurInputOnSelect={true}
-                            onBlur={(e) => onBlur(e)}
-                            onFocus={e => console.log(e)}
+                            // onBlur={(e) => onBlur(e)}
+                            // onFocus={e => console.log(e)}
                             // onMenuOpen={e => console.log(e)}                            
                             
   
@@ -238,6 +253,13 @@ class ComboEditor {
                         />;
       ReactDOM.render(combo, el)
       this.el = el;
+
+      if(option['onRender'] !== undefined){
+        const onRender = option.onRender;
+        const rows = gfg_getRow(props.grid, props.rowKey);
+        // onRender(props.value, combo.ref.current, rows);
+        combo.ref.current.select.isDisabled = true;
+      }
 
       const input = combo._self.el.getElementsByTagName('input');
       if(input !== undefined && input !== null){
@@ -284,6 +306,13 @@ class ComboInit {
       result.data = {};
       result.data.result = true;
       result.data.data = props.data;
+    }else if(props.etcData !== undefined){
+      result = await props.etcData;
+      if(Object.keys(result.data) !== 'result'){
+        result.data.result = true;
+        result.data.data = result.data[Object.keys(result.data)[0]];
+        delete result.data[Object.keys(result.data)[0]];
+      }
     }else{
       result = await getDynamicSql_Mysql(
         props.location,
@@ -298,12 +327,12 @@ class ComboInit {
         for(let idx in result.data.data){
           let canvas = document.createElement("canvas");
           let context = canvas.getContext("2d");
-          context.font = props.fontSize + "px bold";
-          let metrics = context.measureText(result.data.data[idx][props.value]);
+          context.font = (props.fontSize === undefined ? '13' : props.fontSize) + "px bold";
+          let metrics = context.measureText(result.data.data[idx][props.value] );
 
           if(this.width < metrics.width + 10) {
             if(props.fontSize >= 9)
-              this.width = Math.ceil(metrics.width) + 10
+              this.width = Math.ceil(metrics.width) + 25
             else
               this.width = Math.ceil(metrics.width) + 20
           };

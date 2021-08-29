@@ -45,6 +45,33 @@ const Common = (fn, param) => {
     query = 
     ` DELETE FROM ZM_IMS_REC      ` +
     `  WHERE scaleNumb   = '${param[0].scaleNumb}'`;
+  }else if(fn === 'ZM_IMS_CAMERA_SELECT'){
+    query = 
+    ` SELECT * FROM ZM_IMS_CAMERA      `;
+  }else if(fn === 'ZM_IMS_CAMERA_INSERT'){
+    query = 
+    ` INSERT INTO ZM_IMS_CAMERA      ` +
+    ` (AREA_TP   ` +
+    ` ,CAMERA_IP ` + 
+    ` ,RTSP_URL  ` +
+    ` ,RTSP_PORT ` +
+    ` ,USE_YN    ` +
+    `)VALUES     ` +
+    ` ('${param[0].AREA_TP}'` +
+    ` ,'${param[0].CAMERA_IP}'` +
+    ` ,'${param[0].RTSP_URL}'` +
+    ` ,${param[0].RTSP_PORT}` +
+    ` ,'${param[0].USE_YN}')`;
+  }else if(fn === 'ZM_IMS_CAMERA_UPDATE'){
+    query = 
+    ` UPDATE ZM_IMS_CAMERA      ` +
+    `    SET AREA_TP  = '${param[0].AREA_TP}',` +
+    `        USE_YN   = '${param[0].USE_YN}'` +
+    `  WHERE CAMERA_IP = '${param[0].CAMERA_IP}'` ;
+  }else if(fn === 'ZM_IMS_CAMERA_DELETE'){
+    query = 
+    ` DELETE FROM ZM_IMS_CAMERA      ` +
+    `  WHERE CAMERA_IP = '${param[0].CAMERA_IP}'` ;
   }
 
   return query;

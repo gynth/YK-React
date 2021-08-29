@@ -793,7 +793,7 @@ class INSP_PROC extends Component {
                 
                 
                 
-                <li>
+                {/* <li>
                   <button onClick={e => {
                         MILESTONE({
                           reqAddr : 'Replay',
@@ -821,7 +821,7 @@ class INSP_PROC extends Component {
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
                     <button onClick={() =>{
                     }}>oracle</button>
-                </li>
+                </li> */}
 
 
 
