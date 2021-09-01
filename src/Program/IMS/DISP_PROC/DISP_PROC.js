@@ -6,13 +6,11 @@ import Checkbox from '../../../Component/Control/Checkbox';
 
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
-import { gfo_getCombo, gfo_getInput, gfo_getTextarea, gfo_getCheckbox } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
-import { Image as columnImage } from '../../../Component/Grid/Column/Image';
-import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 
 import Combobox from '../../../Component/Control/Combobox';
@@ -26,46 +24,14 @@ import TabList from './TabList';
 import RecImage from './RecImage';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
-import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
+import { TOKEN } from '../../../WebReq/WebReq';
 //#endregion
 
 class DISP_PROC extends Component {
 
   state = {
     wait_list: [],
-    device: []
-  }
-
-  milestoneInfo = async() => {
-
-    // 선택된 공정의 카메라를 찾아서 스트리밍 받는다
-    // 지금은 하드코딩 되어있지만 나중엔 로컬스토리지와 콤보박스를 써서 선택된 공정의 아이피를 가지고 카메라를 가져온다.
-    // 1. 선택된 공정의 카메라 정보를 가지고온다.
-    // const milestone = TOKEN({reqAddr: 'LOGIN', MilestoneIP: gfs_getStoreValue('CAMERA_REDUCER', 'MilestoneIP')});
-    const milestone = await TOKEN({});
-    this.token  = milestone.data.TOKEN;
-    this.device = milestone.data.DEVICE;
-    if(this.token === ''){
-      alert('마일스톤 서버에 접속할 수 없습니다.'); 
-    }else if(this.device === ''){
-      alert('마일스톤 서버에 접속할 수 없습니다.');
-    }else{
-      let ipArr = ['10.10.136.112', '10.10.136.128'];
-      let rtspUrl = ['rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp', 'rtsp://admin:pass@10.10.136.128:554/video1'];
-      let rtspPort = [3100, 3101];
-      let infoArr = [];
-
-      ipArr.forEach(e => {
-        const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
-        if(camera){
-          infoArr.push({camera, rtspUrl, rtspPort}); 
-        }
-      })
-
-      if(infoArr.length > 0){
-        this.setState(this.state.device = infoArr);
-      }
-    }
+    scaleNumb: ''
   }
 
   onTabChg = async() => {
@@ -311,7 +277,7 @@ class DISP_PROC extends Component {
   }
 
   componentDidMount(){
-    this.milestoneInfo();
+    
   }
 
   Retrieve = async () => {
@@ -771,26 +737,18 @@ class DISP_PROC extends Component {
             <div className='cctv_viewer'>
               <h4>녹화영상</h4>
               <div className='cctv_list'>
-                {this.state.device[0] !== undefined && 
-                  <RecImage device={this.state.device[0].camera.Guid} 
-                            Name={this.state.device[0].camera.Name}
-                            rtspUrl={this.state.device[0].rtspUrl[0]}
-                            rtspPort={this.state.device[0].rtspPort[0]}
-                            cam='STD_CAM_OPEN' 
-                            focus='STD_CAM_FOCUS' 
-                            rec='STD_CAM_REC' 
-                            image='STD_CAM_IMG'/> 
-                }
-                {this.state.device[1] !== undefined && 
-                  <RecImage device={this.state.device[1].camera.Guid} 
-                            Name={this.state.device[1].camera.Name}
-                            rtspUrl={this.state.device[1].rtspUrl[1]}
-                            rtspPort={this.state.device[1].rtspPort[1]}
-                            cam='DUM_CAM_OPEN' 
-                            focus='DUM_CAM_FOCUS' 
-                            rec='DUM_CAM_REC' 
-                            image='DUM_CAM_IMG'/> 
-                }
+                  <RecImage 
+                    seq   = {1}
+                    cam   = 'STD_CAM_OPEN' 
+                    focus = 'STD_CAM_FOCUS' 
+                    rec   = 'STD_CAM_REC' 
+                    image = 'STD_CAM_IMG'/> 
+                  <RecImage 
+                    seq   = {2}
+                    cam   = 'DUM_CAM_OPEN' 
+                    focus = 'DUM_CAM_FOCUS' 
+                    rec   = 'DUM_CAM_REC' 
+                    image = 'DUM_CAM_IMG'/> 
               </div>
             </div>
         </div>

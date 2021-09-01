@@ -9,6 +9,11 @@ const cors = require('cors');
 
 app3003.use(express.json());
 app3003.use(cors());  
+app3003.post('/File',  (req, res) => {
+  console.log('aa');
+  res.json('aa');
+});
+
 app3003.post('/',  (req, res) => {
   let scaleNumb = req.body.scaleNumb;
   let Name = req.body.Name;

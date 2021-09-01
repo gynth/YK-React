@@ -36,18 +36,17 @@ const getRecData = async(file, fn, param) => {
   return result;
 }
 
-
-//당진공장용은 인터벌에서처리할게 아니라
 //global.MILESTONE_REPLAY[Guid]이거별로 인터벌을 만들어서처리
 setInterval(async() => {
   const select = await getRecData('Common/Common', 'ZM_IMS_REC_MAKE', null);
   if(select.data.rows.length > 0){
     select.data.rows.forEach(e => {
       const scaleNumb = e[0];
-      const Guid = e[2];
-      const Name = e[4];
-      const rec_fr_dttm = moment(e[1]).format('yyyy-MM-DD HH:mm:ss');
+      const seq  = e[1];
+      const rec_fr_dttm = moment(e[2]).format('yyyy-MM-DD HH:mm:ss');
       const rec_to_dttm = moment(e[3]).format('yyyy-MM-DD HH:mm:ss');
+      const Guid = e[4];
+      const Name = e[5];
 
       //설정된 메서드가 없으면 생성.
       if(global.MILESTONE_REPLAY[Guid] === undefined){
@@ -68,7 +67,7 @@ setInterval(async() => {
 
       global.MILESTONE_REPLAY[Guid].method([Guid, Guid, 'Video', '', scaleNumb, '', Name, '', rec_fr_dttm, rec_to_dttm], (error, result) => { 
         if(result === '0') {
-          getRecData('Common/Common', 'ZM_IMS_REC_DELETE', [{scaleNumb}])
+          getRecData('Common/Common', 'ZM_IMS_REC_DELETE', [{scaleNumb, seq}])
             .then(e => {
               console.log(`${scaleNumb} -> 영상저장에 성공 했습니다.`);
               global.MILESTONE_REPLAY[Guid].recYn = 'N';

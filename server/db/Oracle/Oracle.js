@@ -3,8 +3,9 @@ var dbConfig = require('../Oracle/dbConfig');
 const express = require('express');
 const router = express.Router();
 
-const executeSP = async(param) => {
-
+const executeSP = async(connection, query, data) => {
+  const result = await connection.execute(query, data);
+  return result.outBinds.p_out;
 }
 
 router.post('/SPYK', (req, res) => {
@@ -13,24 +14,31 @@ router.post('/SPYK', (req, res) => {
     password     : dbConfig.password,
     connectString: dbConfig.connectString
   },
-  (err, connection) => {
+  async (err, connection) => {
     if(err){
       console.log(err.message);
       return;
     }
-
+    
     const param = req.body.param;
     for(let i = 0; i < param.length; i++){
       let query = param[i].sp;
       let data  = param[i].data;
+      let errSeq = param[i].errSeq;
       data.p_out = { type: oracleDb.STRING, dir: oracleDb.BIND_OUT};
       
-      console.log(query, data);
-      const result = connection.execute(query, data);
-      console.log(result.outBinds);
-      if(result.outBinds !== 'OK'){
+      const result = await executeSP(connection, query, data);
+      if(result !== 'OK'){
+
+        connection.rollback((err) => {
+          if(err !== null)
+            console.log('rollback Error: ' + err);
+        })
+
         doRelease(connection);
-        res.json(result.outBinds);
+        res.json({scaleNumb: errSeq.delivery_id,
+                  seq      : errSeq.seq,
+                  result   : result});
         return;
       }
     }
@@ -40,26 +48,12 @@ router.post('/SPYK', (req, res) => {
         console.log('Commit Error: ' + err);
     })
 
-    // const query = Common(fn, param);
-
-    // connection.execute(query, (err, result) => {
-    //   if(err){
-    //     console.log(err.message);
-    //     doRelease(connection);
-    //     return;
-    //   }else{
-    //     connection.commit((err) => {
-    //       if(err !== null)
-    //         console.log('Commit Error: ' + err);
-    //     })
-    //   }
-
-    //   // console.log(result);
-    //   res.send(result);
-    // })
+    res.json({scaleNumb: 'OK',
+              seq      : 0,
+              result   : 'OK'});
   }) 
 });
-
+ 
 router.post('/Query', (req, res) => {
   oracleDb.getConnection({
     user         : dbConfig.user,

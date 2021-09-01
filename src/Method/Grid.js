@@ -72,8 +72,10 @@ export const gfg_setValue = (grid, column, value, row) => {
 } 
 
 export const gfg_setSelectRow = (grid, columnName, row = 0, setScroll = true) => {
-  if(columnName !== undefined)
+  if(columnName !== undefined){
     grid.focus(row, columnName, setScroll);
-  else
+  }
+  else{
     grid.focusAt(row, 0, setScroll);
+  }
 }

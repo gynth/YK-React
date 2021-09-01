@@ -1,19 +1,16 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 
-import { gfg_getGrid, gfg_getRow } from '../../../Method/Grid';
-import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
-import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_chit_yn_YK, gfc_sleep, gfc_screenshot_del_yk } from '../../../Method/Comm';
+import { gfg_getGrid, gfg_getRow, gfg_setSelectRow } from '../../../Method/Grid';
+import { gfs_getStoreValue } from '../../../Method/Store';
+import { gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 import { getSp_Oracle_YK } from '../../../db/Oracle/Oracle';
-
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 
 const CompleteBtn = (props) => {
 
   //#region 검수등록
   const onProcess = async() => {
-    const scaleNumb = gfs_getStoreValue('INSP_CFRM_MAIN', 'DETAIL_SCALE');
+    const scaleNumb = gfs_getStoreValue('INSP_CANC_MAIN', 'DETAIL_SCALE');
 
     if(scaleNumb === ''){
       alert('선택된 배차정보가 없습니다.');
@@ -37,11 +34,13 @@ const CompleteBtn = (props) => {
       return;
     }
 
+    if(window.confirm('확정취소 하시겠습니까?') === false){
+      return;
+    }
+
     const return_reason = gfo_getCombo(props.pgm, 'return_reason'); //취소사유
     if(return_reason.getValue() === null){
       alert('필수입력값이 없습니다. > 취소사유');
-
-      gfc_hideMask();
       return;
     }
     const return_reason_desc = gfo_getInput(props.pgm, 'return_reason_desc'); //취소사유
@@ -56,7 +55,7 @@ const CompleteBtn = (props) => {
       if(column.chk.toString() === 'true'){
         param.push({
           sp   : `BEGIN 
-                    emm_inspect_apporve_cancel(
+                    apps.emm_inspect_apporve_cancel(
                       :p_delivery_id,
                       :p_approve_name,
                       :p_reason_code,
@@ -72,6 +71,10 @@ const CompleteBtn = (props) => {
             p_reason_code : return_reason.getValue(),
             p_reason_desc : return_reason_desc.getValue(),
             p_erp_id      : 1989
+          },
+          errSeq : {
+            delivery_id : column.scaleNumb,
+            seq         : i
           }
         })
       }
@@ -81,7 +84,16 @@ const CompleteBtn = (props) => {
       param
     ); 
 
-    console.log(param);
+    if(result.data.result !== 'OK'){
+      alert('확정취소중 오류가 발생했습니다. > ' + result.data.result);
+
+      const ROW_KEY = result.data.seq;
+      gfg_setSelectRow(grid, '', ROW_KEY);
+    }else{
+      alert('확정취소 되었습니다.');
+      const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_CANC');
+      pgm[0].Retrieve();
+    }
 
     //#endregion
 
@@ -89,53 +101,10 @@ const CompleteBtn = (props) => {
   }
   //#endregion
 
-  //#region 계량표저장
-  // const onScaleChit = async() => {
-  //   const img = document.getElementById(`content2_${props.pgm}`);
-  //   const scaleNumb = gfs_getStoreValue('INSP_CFRM_MAIN', 'CHIT_INFO');
-
-  //   if(scaleNumb.scaleNumb === ''){
-  //     alert('선택된 배차정보가 없습니다.');
-  //     return;
-  //   }
-
-  //   gfc_showMask();
-
-  //   const memo = gfs_getStoreValue('INSP_CFRM_MAIN', 'CHIT_MEMO').trim();
-  //   if(memo.length === 0){
-  //     if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
-  //       gfc_hideMask();
-  //       return;
-  //     }
-  //   }
-
-  //   //다른쪽에서 저장된 계량표가 있는지 한번더 확인한다.
-  //   const chitYn = await gfc_chit_yn_YK(scaleNumb.scaleNumb);
-  //   if(chitYn.data !== 'N'){
-  //     alert('이미처리된 계량표 입니다. 재조회 후 확인바랍니다.');
-  //     gfc_hideMask();
-  //     return;
-  //   }
-
-  //   const result = await gfc_screenshot_srv_YK(img, scaleNumb.scaleNumb);
-    
-  //   if(result.data === 'Y'){
-  //     const chitYn = await gfc_chit_yn_YK(scaleNumb.scaleNumb);
-  //     gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
-  //       chit     : chitYn.data
-  //     });
-  //   }else{
-  //     alert('계량표 저장에 실패 했습니다.')
-  //   }
-    
-  //   gfc_hideMask();
-  // }
-  //#endregion
-
   return (
     <div className='complete_btn'>
-      <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>검수확정</span></button>
-      <button type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>검수확정</span></button>
+      <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>확정취소</span></button>
+      <button type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>확정취소</span></button>
     </div>
   );
 }

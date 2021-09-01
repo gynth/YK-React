@@ -1,13 +1,9 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 
-import { gfg_getGrid, gfg_getRow } from '../../../Method/Grid';
-import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
-import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_chit_yn_YK, gfc_sleep, gfc_screenshot_del_yk } from '../../../Method/Comm';
-import { gfo_getCombo } from '../../../Method/Component';
+import { gfg_getGrid, gfg_getRow, gfg_setSelectRow } from '../../../Method/Grid';
+import { gfs_getStoreValue } from '../../../Method/Store';
+import { gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
 import { getSp_Oracle_YK } from '../../../db/Oracle/Oracle';
-
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 
 const CompleteBtn = (props) => {
 
@@ -47,7 +43,7 @@ const CompleteBtn = (props) => {
       if(column.chk.toString() === 'true'){
         param.push({
           sp   : `begin 
-                    emm_inspect_apporve(
+                    apps.emm_inspect_apporve(
                       :p_delivery_id,
                       :p_approve_name,
                       :p_erp_id,
@@ -68,55 +64,22 @@ const CompleteBtn = (props) => {
       param
     ); 
 
-    console.log(result);
+
+    if(result.data.result !== 'OK'){
+      alert('검수확정중 오류가 발생했습니다. > ' + result.data.result);
+
+      const ROW_KEY = result.data.seq;
+      gfg_setSelectRow(grid, '', ROW_KEY);
+    }else{
+      alert('검수확정 되었습니다.');
+      const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_CFRM');
+      pgm[0].Retrieve();
+    }
 
     //#endregion
 
     gfc_hideMask();
   }
-  //#endregion
-
-  //#region 계량표저장
-  // const onScaleChit = async() => {
-  //   const img = document.getElementById(`content2_${props.pgm}`);
-  //   const scaleNumb = gfs_getStoreValue('INSP_CFRM_MAIN', 'CHIT_INFO');
-
-  //   if(scaleNumb.scaleNumb === ''){
-  //     alert('선택된 배차정보가 없습니다.');
-  //     return;
-  //   }
-
-  //   gfc_showMask();
-
-  //   const memo = gfs_getStoreValue('INSP_CFRM_MAIN', 'CHIT_MEMO').trim();
-  //   if(memo.length === 0){
-  //     if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
-  //       gfc_hideMask();
-  //       return;
-  //     }
-  //   }
-
-  //   //다른쪽에서 저장된 계량표가 있는지 한번더 확인한다.
-  //   const chitYn = await gfc_chit_yn_YK(scaleNumb.scaleNumb);
-  //   if(chitYn.data !== 'N'){
-  //     alert('이미처리된 계량표 입니다. 재조회 후 확인바랍니다.');
-  //     gfc_hideMask();
-  //     return;
-  //   }
-
-  //   const result = await gfc_screenshot_srv_YK(img, scaleNumb.scaleNumb);
-    
-  //   if(result.data === 'Y'){
-  //     const chitYn = await gfc_chit_yn_YK(scaleNumb.scaleNumb);
-  //     gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
-  //       chit     : chitYn.data
-  //     });
-  //   }else{
-  //     alert('계량표 저장에 실패 했습니다.')
-  //   }
-    
-  //   gfc_hideMask();
-  // }
   //#endregion
 
   return (

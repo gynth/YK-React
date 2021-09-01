@@ -47,14 +47,16 @@ function RecImage(props) {
                   <div>
                     <div style={{width:'100%', height:'100%'}}>
                       {isActive.active === true &&
-                        <ReactImageDtl device={props.device} 
-                                      Name={props.Name}
-                                      rtspUrl={props.rtspUrl}
-                                      rtspPort={props.rtspPort}
-                                      cam={props.cam}
-                                      focus={props.focus}
-                                      rec={props.rec} 
-                                      car={props.car}/>
+                        <ReactImageDtl 
+                          seq={props.seq}
+                          device={props.device} 
+                          Name={props.Name}
+                          rtspUrl={props.rtspUrl}
+                          rtspPort={props.rtspPort}
+                          cam={props.cam}
+                          focus={props.focus}
+                          rec={props.rec} 
+                          car={props.car}/>
                       }
                     </div>
                   </div>

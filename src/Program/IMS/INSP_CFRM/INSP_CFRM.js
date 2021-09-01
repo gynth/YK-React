@@ -5,13 +5,11 @@ import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
-import { gfo_getCombo, gfo_getInput, gfo_getTextarea } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow, gfg_setValue } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
-import { Image as columnImage } from '../../../Component/Grid/Column/Image';
-import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 import { Checkbox as columnCheckbox } from '../../../Component/Grid/Column/Checkbox';
 
@@ -26,46 +24,13 @@ import TabList from './TabList';
 import RecImage from './RecImage';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
-import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 //#endregion
 
 class INSP_CFRM extends Component {
 
   state = {
     wait_list: [],
-    device: []
-  }
-
-  milestoneInfo = async() => {
-
-    // 선택된 공정의 카메라를 찾아서 스트리밍 받는다
-    // 지금은 하드코딩 되어있지만 나중엔 로컬스토리지와 콤보박스를 써서 선택된 공정의 아이피를 가지고 카메라를 가져온다.
-    // 1. 선택된 공정의 카메라 정보를 가지고온다.
-    // const milestone = TOKEN({reqAddr: 'LOGIN', MilestoneIP: gfs_getStoreValue('CAMERA_REDUCER', 'MilestoneIP')});
-    const milestone = await TOKEN({});
-    this.token  = milestone.data.TOKEN;
-    this.device = milestone.data.DEVICE;
-    if(this.token === ''){
-      alert('마일스톤 서버에 접속할 수 없습니다.'); 
-    }else if(this.device === ''){
-      alert('마일스톤 서버에 접속할 수 없습니다.');
-    }else{
-      let ipArr = ['10.10.136.112', '10.10.136.128'];
-      let rtspUrl = ['rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp', 'rtsp://admin:pass@10.10.136.128:554/video1'];
-      let rtspPort = [3100, 3101];
-      let infoArr = [];
-
-      ipArr.forEach(e => {
-        const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
-        if(camera){
-          infoArr.push({camera, rtspUrl, rtspPort}); 
-        }
-      })
-
-      if(infoArr.length > 0){
-        this.setState(this.state.device = infoArr);
-      }
-    }
+    scaleNumb: ''
   }
 
   onTabChg = async() => {
@@ -311,7 +276,7 @@ class INSP_CFRM extends Component {
   }
 
   componentDidMount(){
-    this.milestoneInfo();
+    
   }
 
   Retrieve = async () => {
@@ -321,6 +286,28 @@ class INSP_CFRM extends Component {
     const mainData = await YK_WEB_REQ('tally_approve_wait.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    
+    grid.clear();
+    gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(''); //사전등급
+    gfo_getInput(this.props.pgm, 'iron_grade').setValue('');   //고철등급
+    gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue('');   //상세고철등급
+    gfo_getInput(this.props.pgm, 'reduce_wgt').setValue('');     //감량중량
+    gfo_getInput(this.props.pgm, 'reduce_name').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'return_code').setValue('');      //반품구분
+    gfo_getInput(this.props.pgm, 'return_gubun_name').setValue('');     //반품구분사유
+
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+
+    gfs_dispatch('INSP_CFRM_MAIN', 'GRID_SCALE', {GRID_SCALE: ''});
+
+    //계량증명서 여부 확인.
+    gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
+      chit     : 'N'
+    });
+
     if(main){
       grid.resetData(main);
       gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
@@ -344,12 +331,8 @@ class INSP_CFRM extends Component {
     gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue(e.iron_grade_item_name);   //상세고철등급
     gfo_getInput(this.props.pgm, 'reduce_wgt').setValue(e.reduce_wgt);     //감량중량
     gfo_getInput(this.props.pgm, 'reduce_name').setValue(e.reduce_name); //감량사유
-    // gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
-    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
-    // gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
     gfo_getCombo(this.props.pgm, 'return_code').setValue(e.return_gubun);      //반품구분
     gfo_getInput(this.props.pgm, 'return_gubun_name').setValue(e.return_gubun_name);     //반품구분사유
-    // gfo_getCombo(this.props.pgm, 'detail_warning').setValue('');  //경고
 
     gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vehicle_no});
@@ -634,26 +617,18 @@ class INSP_CFRM extends Component {
             <div className='cctv_viewer'>
               <h4>녹화영상</h4>
               <div className='cctv_list'>
-                {this.state.device[0] !== undefined && 
-                  <RecImage device={this.state.device[0].camera.Guid} 
-                            Name={this.state.device[0].camera.Name}
-                            rtspUrl={this.state.device[0].rtspUrl[0]}
-                            rtspPort={this.state.device[0].rtspPort[0]}
-                            cam='STD_CAM_OPEN' 
-                            focus='STD_CAM_FOCUS' 
-                            rec='STD_CAM_REC' 
-                            image='STD_CAM_IMG'/> 
-                }
-                {this.state.device[1] !== undefined && 
-                  <RecImage device={this.state.device[1].camera.Guid} 
-                            Name={this.state.device[1].camera.Name}
-                            rtspUrl={this.state.device[1].rtspUrl[1]}
-                            rtspPort={this.state.device[1].rtspPort[1]}
-                            cam='DUM_CAM_OPEN' 
-                            focus='DUM_CAM_FOCUS' 
-                            rec='DUM_CAM_REC' 
-                            image='DUM_CAM_IMG'/> 
-                }
+                <RecImage 
+                  seq   = {1}
+                  cam   = 'STD_CAM_OPEN' 
+                  focus = 'STD_CAM_FOCUS' 
+                  rec   = 'STD_CAM_REC' 
+                  image = 'STD_CAM_IMG'/> 
+                <RecImage
+                  seq   = {2}
+                  cam   = 'DUM_CAM_OPEN' 
+                  focus = 'DUM_CAM_FOCUS' 
+                  rec   = 'DUM_CAM_REC' 
+                  image = 'DUM_CAM_IMG'/> 
               </div>
             </div>
         </div>

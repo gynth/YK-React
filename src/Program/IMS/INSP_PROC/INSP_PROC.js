@@ -57,6 +57,11 @@ class INSP_PROC extends Component {
       alert('마일스톤 서버에 접속할 수 없습니다.');
     }else{
       const select = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT_EACH', [{AREA_TP:'E001'}]);
+      if(select.data === undefined){
+        alert('설정된 카메라가 없습니다.');
+        return;
+      }
+
       if(select.data.rows.length === 0){
         alert('설정된 카메라가 없습니다.');
         return;
@@ -86,12 +91,12 @@ class INSP_PROC extends Component {
       // let rtspPort = [3100, 3101];
       this.infoArr = [];
 
-      ipArr.forEach(e => {
-        const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
+      for(let i = 0; i < ipArr.length; i++){
+        const camera = this.device.find(e1 => e1.Name.indexOf(ipArr[i]) >= 0);
         if(camera){
-          this.infoArr.push({camera, rtspUrl, rtspPort}); 
+          this.infoArr.push({camera, ipArr: ipArr[i], rtspUrl: rtspUrl[i], rtspPort: rtspPort[i]}); 
         }
-      })
+      }
 
       if(this.infoArr.length > 0){
         this.setState(this.state.device = this.infoArr);
@@ -165,41 +170,57 @@ class INSP_PROC extends Component {
   //#endregion
 
   //#region 녹화제어
-  startRec = async (device, scaleNo) => {
-    const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{scaleNumb:scaleNo}]);
+  startRec = async (Guid, Name, scaleNo, seq) => {
+    const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{
+      scaleNumb:scaleNo,
+      seq
+    }]);
     if(select.data.rows.length === 0){
 
       const insert = await this.callOracle('Common/Common', 'ZM_IMS_REC_INSERT', [{
         scaleNumb: scaleNo,
-        Guid     : device.Guid,
-        Name     : device.Name
+        seq,
+        Guid,
+        Name
       }]);
 
       if(insert.data.rowsAffected === 0){
         alert('녹화시작에 실패 했습니다.');
-      }else{
-        // MILESTONE({reqAddr : 'RecYn',
-        //           device  : device.Guid,
-        //           scaleNo,
-        //           recYn   : 'Y'})
       }
+    }else{
+      console.log('이미 녹화중 입니다.');
     }
   }
 
-  stopRec = async (device, scaleNo) => {
+  stopRec = async (Guid, Name, camera_ip, scaleNo, seq) => {
     const now = await gfc_now();
-    const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{scaleNumb:scaleNo}]);
+    const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{
+      scaleNumb:scaleNo,
+      seq
+    }]);
 
     if(select.data.rows.length > 0){
-      console.log(device, scaleNo);
-
-      const insert = await this.callOracle('Common/Common', 'ZM_IMS_REC_UPDATE', [{
+      const insert = await this.callOracle('Common/Common', 'ZM_IMS_VIDEO_INSERT', [{
         scaleNumb: scaleNo,
-        rec_to_dttm: now
+        seq,
+        rec_fr_dttm: select.data.rows[0][2],
+        camera_ip,
+        Guid,
+        Name
       }]);
 
       if(insert.data.rowsAffected === 0){
-        alert('녹화저장에 실패 했습니다.');
+        alert('녹화저장에 실패 했습니다. insert');
+      }
+
+      const update = await this.callOracle('Common/Common', 'ZM_IMS_REC_UPDATE', [{
+        scaleNumb: scaleNo,
+        seq,
+        rec_to_dttm: now
+      }]);
+
+      if(update.data.rowsAffected === 0){
+        alert('녹화저장에 실패 했습니다. update');
       }
     }
   }
@@ -819,7 +840,7 @@ class INSP_PROC extends Component {
                 
                 
                 
-                {/* <li>
+                <li>
                   <button onClick={e => {
                         MILESTONE({
                           reqAddr : 'Replay',
@@ -831,23 +852,28 @@ class INSP_PROC extends Component {
                   </button>
                     <button onClick={() => 
                       {
-                        const device = this.device[0];
                         const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-                        this.startRec(device, scaleNumb);
+                        this.startRec(this.state.device[0].camera.Guid, 
+                                      this.state.device[0].camera.Name, 
+                                      scaleNumb, 
+                                      1);
                       }}>on1
                     </button>
                     <button onClick={() => 
                       {
-                        const device = this.device[0];
                         const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-                        this.stopRec(device, scaleNumb);
+                        this.stopRec(this.state.device[0].camera.Guid, 
+                                     this.state.device[0].camera.Name, 
+                                     this.state.device[0].ipArr,
+                                     scaleNumb, 
+                                     1);
                       }}>off1
                     </button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
                     <button onClick={() =>{
                     }}>oracle</button>
-                </li> */}
+                </li>
 
 
 
@@ -1113,24 +1139,28 @@ class INSP_PROC extends Component {
 	            </div> */}
               <div className='cctv_list'>
                 {this.state.device[0] !== undefined && 
-                  <RecImage device={this.state.device[0].camera.Guid} 
-                            Name={this.state.device[0].camera.Name}
-                            rtspUrl={this.state.device[0].rtspUrl[0]}
-                            rtspPort={this.state.device[0].rtspPort[0]}
-                            cam='STD_CAM_OPEN' 
-                            focus='STD_CAM_FOCUS' 
-                            rec='STD_CAM_REC' 
-                            image='STD_CAM_IMG'/> 
+                  <RecImage 
+                    seq={1}
+                    device={this.state.device[0].camera.Guid} 
+                    Name={this.state.device[0].camera.Name}
+                    rtspUrl={this.state.device[0].rtspUrl}
+                    rtspPort={this.state.device[0].rtspPort}
+                    cam='STD_CAM_OPEN' 
+                    focus='STD_CAM_FOCUS' 
+                    rec='STD_CAM_REC' 
+                    image='STD_CAM_IMG'/> 
                 }
                 {this.state.device[1] !== undefined && 
-                  <RecImage device={this.state.device[1].camera.Guid} 
-                            Name={this.state.device[1].camera.Name}
-                            rtspUrl={this.state.device[1].rtspUrl[1]}
-                            rtspPort={this.state.device[1].rtspPort[1]}
-                            cam='DUM_CAM_OPEN' 
-                            focus='DUM_CAM_FOCUS' 
-                            rec='DUM_CAM_REC' 
-                            image='DUM_CAM_IMG'/> 
+                  <RecImage
+                    seq={2} 
+                    device={this.state.device[1].camera.Guid} 
+                    Name={this.state.device[1].camera.Name}
+                    rtspUrl={this.state.device[1].rtspUrl}
+                    rtspPort={this.state.device[1].rtspPort}
+                    cam='DUM_CAM_OPEN' 
+                    focus='DUM_CAM_FOCUS' 
+                    rec='DUM_CAM_REC' 
+                    image='DUM_CAM_IMG'/> 
                 }
               </div>
             </div>
