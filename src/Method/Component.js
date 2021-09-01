@@ -18,6 +18,24 @@ export const gfo_getInput = (parent, inputId) => {
   }
 }
 
+export const gfo_getCheckbox = (parent, checkboxId) => {
+  const type = typeof(parent);
+  let storeValue;
+
+  if(type === 'string'){
+    storeValue = gfs_getStoreValue(parent, 'Checkbox');
+  }else{
+    storeValue = parent['Checkbox'];
+  }
+
+  if(storeValue !== undefined && storeValue.length > 0) {
+    const findValue = storeValue.find(e => e.id === checkboxId);
+
+    if(findValue !== undefined)
+      return findValue.Checkbox;
+  }
+}
+
 export const gfo_getTextarea = (parent, inputId) => {
   const type = typeof(parent);
   let storeValue;

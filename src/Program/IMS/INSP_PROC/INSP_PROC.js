@@ -2,11 +2,13 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Input from '../../../Component/Control/Input';
+import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_now } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
-import { gfo_getCombo, gfo_getInput, gfo_getTextarea } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getInput, gfo_getTextarea, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
+import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
@@ -22,6 +24,9 @@ import Botspan from '../Common/Botspan';
 import Chit from '../Common/Chit/Chit';
 import CompleteBtn from './CompleteBtn';
 import TabList from '../Common/TabList';
+import DispInfo from './DispInfo';
+import DispImg from './DispImg';
+import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
 
@@ -30,7 +35,7 @@ import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import { throttle } from 'lodash';
 //#endregion
 
-class INSP_CFRM extends Component {
+class INSP_PROC extends Component {
 
   state = {
     wait_list: [],
@@ -51,39 +56,55 @@ class INSP_CFRM extends Component {
     }else if(this.device === ''){
       alert('마일스톤 서버에 접속할 수 없습니다.');
     }else{
-      let ipArr = ['10.10.136.112', '10.10.136.128'];
-      let rtspUrl = ['rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp', 'rtsp://admin:pass@10.10.136.128:554/video1'];
-      let rtspPort = [3100, 3101];
-      let infoArr = [];
+      const select = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT_EACH', [{AREA_TP:'E001'}]);
+      if(select.data.rows.length === 0){
+        alert('설정된 카메라가 없습니다.');
+        return;
+      }
+      let data = [];
+      for(let i = 0; i < select.data.rows.length; i++){
+  
+        let col = {};
+        for(let j = 0; j < select.data.rows[i].length; j++){
+          col[select.data.metaData[j].name] = select.data.rows[i][j];
+        }
+        data.push(col);
+      }
+
+      let ipArr = [];
+      let rtspUrl = [];
+      let rtspPort = [];
+
+      for(let i = 0; i < data.length; i++){
+        ipArr.push(data[i].CAMERA_IP);
+        rtspUrl.push(data[i].RTSP_URL);
+        rtspPort.push(data[i].RTSP_PORT);
+      }
+
+      // let ipArr = ['10.10.136.112', '10.10.136.128'];
+      // let rtspUrl = ['rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp', 'rtsp://admin:pass@10.10.136.128:554/video1'];
+      // let rtspPort = [3100, 3101];
+      this.infoArr = [];
 
       ipArr.forEach(e => {
         const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
         if(camera){
-          infoArr.push({camera, rtspUrl, rtspPort}); 
+          this.infoArr.push({camera, rtspUrl, rtspPort}); 
         }
       })
 
-      if(infoArr.length > 0){
-        this.setState(this.state.device = infoArr);
+      if(this.infoArr.length > 0){
+        this.setState(this.state.device = this.infoArr);
       }
     }
   }
 
-  //#region onActiveWindow 스토어 subscribe로 실행됨.
-  onActiveWindow = () => {
+  //#region onActivePage 스토어 subscribe로 실행됨.
+  onActivePage = () => {
     const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
-    if(activeWindow.programId === 'INSP_CFRM'){
+    if(activeWindow.programId === 'INSP_PROC'){
       window.onkeydown = e => this.onKeyDown(e);
       window.onmousewheel = e => this.onMouseWheel(e);
-    //   if(window.onkeydown === null){
-    //     window.onkeydown = e => this.onKeyDown(e);
-    //     window.onmousewheel = e => this.onMouseWheel(e);
-    //   }
-    // }else{
-    //   if(window.onkeydown !== null){
-    //     window.onkeydown = null;
-    //     window.onmousewheel = null;
-    //   }
     }
   }
   //#endregion
@@ -123,38 +144,64 @@ class INSP_CFRM extends Component {
   onKeyDown = (e) => {
     e.stopPropagation();
 
-    const STD_CAM_FOCUS = gfs_getStoreValue('INSP_CFRM_MAIN', 'STD_CAM_FOCUS');
-    const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_CFRM_MAIN', 'DUM_CAM_FOCUS');
+    const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
+    const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
     
     if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
-      this.debounceKeyDown(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
+      this.debounceKeyDown(e, STD_CAM_FOCUS ? this.infoArr[0].camera : this.infoArr[1].camera);
     }
   }
 
   onMouseWheel = (e) => {
     e.stopPropagation();
 
-    const STD_CAM_FOCUS = gfs_getStoreValue('INSP_CFRM_MAIN', 'STD_CAM_FOCUS');
-    const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_CFRM_MAIN', 'DUM_CAM_FOCUS');
-    
+    const STD_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'STD_CAM_FOCUS');
+    const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_PROC_MAIN', 'DUM_CAM_FOCUS');
+
     if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
-      this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.device[0] : this.device[1]);
+      this.debounceMouseWheel(e, STD_CAM_FOCUS ? this.infoArr[0].camera : this.infoArr[1].camera);
     }
   }
   //#endregion
 
   //#region 녹화제어
-  startRec = (device, scaleNo, recOwner) => {
-    MILESTONE({reqAddr : 'StartManualRecording',
-               device  : device.Guid,
-               scaleNo,
-               recOwner})
+  startRec = async (device, scaleNo) => {
+    const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{scaleNumb:scaleNo}]);
+    if(select.data.rows.length === 0){
+
+      const insert = await this.callOracle('Common/Common', 'ZM_IMS_REC_INSERT', [{
+        scaleNumb: scaleNo,
+        Guid     : device.Guid,
+        Name     : device.Name
+      }]);
+
+      if(insert.data.rowsAffected === 0){
+        alert('녹화시작에 실패 했습니다.');
+      }else{
+        // MILESTONE({reqAddr : 'RecYn',
+        //           device  : device.Guid,
+        //           scaleNo,
+        //           recYn   : 'Y'})
+      }
+    }
   }
 
-  stopRec = (device, scaleNo) => {
-    MILESTONE({reqAddr : 'StopManualRecording',
-               device  : device.Guid,
-               scaleNo})
+  stopRec = async (device, scaleNo) => {
+    const now = await gfc_now();
+    const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{scaleNumb:scaleNo}]);
+
+    if(select.data.rows.length > 0){
+      console.log(device, scaleNo);
+
+      const insert = await this.callOracle('Common/Common', 'ZM_IMS_REC_UPDATE', [{
+        scaleNumb: scaleNo,
+        rec_to_dttm: now
+      }]);
+
+      if(insert.data.rowsAffected === 0){
+        alert('녹화저장에 실패 했습니다.');
+      }
+    }
   }
   //#endregion
 
@@ -164,10 +211,15 @@ class INSP_CFRM extends Component {
     gfc_initPgm(props.pgm, props.nam, this)
 
     //#region 리듀서
-    const INSP_CFRM_MAIN = (nowState, action) => {
+    const INSP_PROC_MAIN = (nowState, action) => {
 
-      if(action.reducer !== 'INSP_CFRM_MAIN') {
+      if(action.reducer !== 'INSP_PROC_MAIN') {
         return {
+          ON_ACTIVE    : nowState === undefined ? {
+            active : true,
+            time   : new Date() 
+          } : nowState.ON_ACTIVE,
+
           MAIN_WAIT    : nowState === undefined ? 0 : nowState.MAIN_WAIT,
           MAIN_TOTAL   : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
           MAIN_WEIGHT  : nowState === undefined ? 0 : nowState.MAIN_WEIGHT,
@@ -363,22 +415,24 @@ class INSP_CFRM extends Component {
             time    : action.time
           }
         })
-      }else if(action.type === 'CHIT_INFO_ITEM_FLAG'){
+      }
+      // else if(action.type === 'CHIT_INFO_ITEM_FLAG'){
 
-        return Object.assign({}, nowState, {
-          CHIT_INFO : {
-            date     :  nowState.CHIT_INFO.date,
-            scaleNumb:  nowState.CHIT_INFO.scaleNumb,
-            carNumb  :  nowState.CHIT_INFO.carNumb,
-            vender   :  nowState.CHIT_INFO.vender,
-            itemFlag :  action.itemFlag,
-            Wgt      :  nowState.CHIT_INFO.Wgt,
-            loc      :  nowState.CHIT_INFO.loc,
-            user     :  nowState.CHIT_INFO.user,
-            chit     :  nowState.CHIT_INFO.chit
-          }
-        })
-      }else if(action.type === 'CHIT_INFO'){
+      //   return Object.assign({}, nowState, {
+      //     CHIT_INFO : {
+      //       date     :  nowState.CHIT_INFO.date,
+      //       scaleNumb:  nowState.CHIT_INFO.scaleNumb,
+      //       carNumb  :  nowState.CHIT_INFO.carNumb,
+      //       vender   :  nowState.CHIT_INFO.vender,
+      //       itemFlag :  action.itemFlag,
+      //       Wgt      :  nowState.CHIT_INFO.Wgt,
+      //       loc      :  nowState.CHIT_INFO.loc,
+      //       user     :  nowState.CHIT_INFO.user,
+      //       chit     :  nowState.CHIT_INFO.chit
+      //     }
+      //   })
+      // }
+      else if(action.type === 'CHIT_INFO'){
 
         return Object.assign({}, nowState, {
           CHIT_INFO : {
@@ -432,35 +486,23 @@ class INSP_CFRM extends Component {
       }
     }
 
-    gfs_injectAsyncReducer('INSP_CFRM_MAIN', INSP_CFRM_MAIN);
-    gfs_subscribe(this.onActiveWindow);
+    gfs_injectAsyncReducer('INSP_PROC_MAIN', INSP_PROC_MAIN);
+    gfs_subscribe(this.onActivePage);
     //#endregion
+  }
+
+  callOracle = async(file, fn, param) => {
+    let result = await getDynamicSql_Oracle(
+      file,
+      fn,
+      param
+    ); 
+
+    return result;
   }
 
   Init = async() => {
     this.milestoneInfo();
-
-    //#region 검수이력 Open
-    gfs_PGM_REDUCER('INSP_HIST');
-
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 0,
-      activeWindow: {programId: 'INSP_HIST',
-                      programNam: '검수이력'
-                    }
-    }));
-    //#endregion
-
-    await gfc_sleep(50);
-
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 1,
-      activeWindow: {programId: 'INSP_CFRM',
-                      programNam: '검수진행'
-                    }
-    }));
   }
 
   componentDidMount(){
@@ -468,22 +510,18 @@ class INSP_CFRM extends Component {
   }
 
   Retrieve = async () => {
-    // const search_car_no = gfo_getInput(this.props.pgm, 'search_car_no').getValue();
-    
-    // console.log(gfs_getStoreValue('INSP_CFRM_MAIN', 'MAIN_WAIT'));
-
     gfc_showMask();
 
     const headData = await YK_WEB_REQ('tally_mstr_header.jsp');
     const header = headData.data.dataSend;
     if(header){
-      gfs_dispatch('INSP_CFRM_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
-      gfs_dispatch('INSP_CFRM_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
-      gfs_dispatch('INSP_CFRM_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
     }else{
-      gfs_dispatch('INSP_CFRM_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
-      gfs_dispatch('INSP_CFRM_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
-      gfs_dispatch('INSP_CFRM_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
     }
 
     const mainData = await YK_WEB_REQ('tally_mstr_wait.jsp');
@@ -493,56 +531,29 @@ class INSP_CFRM extends Component {
       grid.resetData(main);
       gfg_setSelectRow(grid);
 
-      gfs_dispatch('INSP_CFRM_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
-      gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
+      gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
     }else{
-      gfs_dispatch('INSP_CFRM_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
-      gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
-
-    // const data = {'dataSend':[
-    //               {'date':'2021-06-24 13:39:00','vendor':'경원스틸(주)\/ 대경스틸(주)','itemFlag':'M1KDO0001','totalWgt':'43500','scaleNumb':'202106240215','carNumb':'광주88바5884'},
-    //               {'date':'2021-06-24 13:43:39','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'36960','scaleNumb':'202106240218','carNumb':'경남80사5946'},
-    //               {'date':'2021-06-24 13:45:05','vendor':'(주)거산\/ (주)거산 동부산 지점','itemFlag':'M1KDO0001','totalWgt':'35020','scaleNumb':'202106240219','carNumb':'81버7666'},
-    //               {'date':'2021-06-24 14:21:42','vendor':'(주)우신\/ 주식회사 우신','itemFlag':'M1KDO0001','totalWgt':'43620','scaleNumb':'202106240230','carNumb':'경북86아4725'},
-    //               {'date':'2021-06-24 14:26:24','vendor':'(주)진광스틸\/ 금와산업','itemFlag':'M1KDO0002','totalWgt':'43800','scaleNumb':'202106240233','carNumb':'경남82사5143'},
-    //               {'date':'2021-06-24 14:34:09','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'36240','scaleNumb':'202106240236','carNumb':'경남82사3319'},
-    //               {'date':'2021-06-24 14:40:18','vendor':'(주)진광스틸\/ (주)진광스틸','itemFlag':'M1KDO0001','totalWgt':'31800','scaleNumb':'202106240241','carNumb':'부산94아3089'},
-    //               {'date':'2021-06-24 15:15:05','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0002','totalWgt':'43100','scaleNumb':'202106240248','carNumb':'경북83아8533'},
-    //               {'date':'2021-06-24 15:42:51','vendor':'(주)와이제이스틸\/ 강한스틸철','itemFlag':'M1KDO0001','totalWgt':'43320','scaleNumb':'202106240255','carNumb':'경북82아8342'},
-    //               {'date':'2021-06-24 15:49:33','vendor':'(주)대지에스텍\/ ㈜대지에스텍','itemFlag':'M1KDO0001','totalWgt':'44040','scaleNumb':'202106240257','carNumb':'부산92아7287'}
-    //             ]
-    //           }['dataSend'];
-
-    // const sort = [];
-    // main.forEach(e => {
-    //   if(e.rec === '1'){
-    //     sort.unshift(e);
-    //   }else{
-    //     sort.push(e);
-    //   }
-    // })
-
-    // grid.resetData(
-    //   sort
-    // );
 
     //출차대기
     const headData2 = await YK_WEB_REQ('tally_mstr_pass.jsp');
     const header2 = headData2.data.dataSend;
     if(header2){
-      gfs_dispatch('INSP_CFRM_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
+      gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
     }else{
-      gfs_dispatch('INSP_CFRM_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
     }
 
     //입차대기
     const headData3 = await YK_WEB_REQ('tally_mstr_drive.jsp');
     const header3 = headData3.data.dataSend;
     if(header3){
-      gfs_dispatch('INSP_CFRM_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
+      gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
     }else{
-      gfs_dispatch('INSP_CFRM_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
+      gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
     }
 
     gfc_hideMask();
@@ -560,102 +571,101 @@ class INSP_CFRM extends Component {
   }
 
   onSelectChange = async (e) => {
-    // if(e === null) return;
+    if(e === null) return;
 
-    // gfc_showMask();
+    gfc_showMask();
 
-    // document.getElementById('tab1_INSP_CFRM').click(0);
-    // await gfc_sleep(100);
+    document.getElementById('tab1_INSP_PROC').click(0);
+    await gfc_sleep(100);
 
-    // gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.itemGrade); //사전등급
-    // gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
-    // gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
-    // gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
-    // gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
-    // gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
-    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
-    // gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
-    // gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
-    // gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
-    // gfo_getCombo(this.props.pgm, 'detail_warning').setValue('');  //경고
+    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.itemGrade); //사전등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
 
-    // gfo_getInput(this.props.pgm, 'disp_scrp_ord_no').setValue('');      //배차번호
-    // gfo_getInput(this.props.pgm, 'disp_scrp_grd_nm').setValue('');      //배차등급
-    // gfo_getInput(this.props.pgm, 'disp_real_vender_name').setValue(''); //실공급자
-    // gfo_getInput(this.props.pgm, 'disp_load_area_nm').setValue('');     //실상차지
-    // gfo_getInput(this.props.pgm, 'disp_load_area_addr').setValue('');   //주소
+    gfo_getInput(this.props.pgm, 'disp_scrp_ord_no').setValue('');      //배차번호
+    gfo_getInput(this.props.pgm, 'disp_scrp_grd_nm').setValue('');      //배차등급
+    gfo_getInput(this.props.pgm, 'disp_real_vender_name').setValue(''); //실공급자
+    gfo_getInput(this.props.pgm, 'disp_load_area_nm').setValue('');     //실상차지
+    gfo_getInput(this.props.pgm, 'disp_load_area_addr').setValue('');   //주소
 
-    // gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
-    // gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
-    // gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
-    // gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
 
-    // //계량증명서 정보여부
-    // const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
-    // if(!chitInfoYn.data.dataSend){
-    //   alert('계량증명서 정보가 없습니다.');
-    //   return;
-    // }
+    //계량증명서 정보여부
+    const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
+    if(!chitInfoYn.data.dataSend){
+      alert('계량증명서 정보가 없습니다.');
+      return;
+    }
 
-    // //계량증명서 여부 확인.
-    // const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
-    // if(chitYn.data === 'N'){
-    //   gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
-    //     date     : chitInfoYn.data.dataSend[0].date,
-    //     scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
-    //     carNumb  : chitInfoYn.data.dataSend[0].carNumb,
-    //     vender   : chitInfoYn.data.dataSend[0].vendor,
-    //     itemFlag : '',
-    //     Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
-    //     // loc      : chitInfoYn.data.dataSend[0].area,
-    //     loc      : '부산',
-    //     user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-    //     chit     : 'N'
-    //   });
-    // }else{
-    //   gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
-    //     chit     : chitYn.data
-    //   });
-    // }
+    //계량증명서 여부 확인.
+    const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
+    if(chitYn.data === 'N'){
+      gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+        date     : chitInfoYn.data.dataSend[0].date,
+        scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
+        carNumb  : chitInfoYn.data.dataSend[0].carNumb,
+        vender   : chitInfoYn.data.dataSend[0].vendor,
+        itemFlag : e.itemGrade,
+        Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
+        loc      : chitInfoYn.data.dataSend[0].area,
+        user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+        chit     : 'N'
+      });
+    }else{
+      gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+        chit     : chitYn.data
+      });
+    }
 
-    // //배차정보
-    // // const chitInfoYn = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 나중에 이형식으로 바꿔야함
-    // const dispInfo = await YK_WEB_REQ_DIRECT('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108240001');
-    // if(dispInfo.data.dataSend){
-    //   gfs_dispatch('INSP_CFRM_MAIN', 'DISP_INFO', {
-    //     scaleNumb       : chitInfoYn.data.dataSend[0].scaleNumb,
-    //     scrp_ord_no     : dispInfo.data.dataSend[0].SCRP_ORD_NO,
-    //     scrp_grd_nm     : dispInfo.data.dataSend[0].SCRP_GRD_NM,
-    //     real_vender_name: dispInfo.data.dataSend[0].REAL_VENDER_NAME,
-    //     load_area_nm    : dispInfo.data.dataSend[0].LOAD_AREA_NM,
-    //     load_area_addr  : dispInfo.data.dataSend[0].LOAD_AREA_ADDR
-    //   });
+    //배차정보
+    // const chitInfoYn = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 나중에 이형식으로 바꿔야함
+    const dispInfo = await YK_WEB_REQ_DIRECT('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108300001');
+    if(dispInfo.data.dataSend){
+      gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
+        scaleNumb       : chitInfoYn.data.dataSend[0].scaleNumb,
+        scrp_ord_no     : dispInfo.data.dataSend[0].SCRP_ORD_NO,
+        scrp_grd_nm     : dispInfo.data.dataSend[0].SCRP_GRD_NM,
+        real_vender_name: dispInfo.data.dataSend[0].REAL_VENDER_NAME,
+        load_area_nm    : dispInfo.data.dataSend[0].LOAD_AREA_NM,
+        load_area_addr  : dispInfo.data.dataSend[0].LOAD_AREA_ADDR
+      });
 
-    //   const scrp_ord_no = dispInfo.data.dataSend[0].SCRP_ORD_NO;
-    //   const yyyy = scrp_ord_no.substr(2, 4);
-    //   const mm = scrp_ord_no.substr(6, 2);
-    //   const dd = scrp_ord_no.substr(8, 2);
+      const scrp_ord_no = dispInfo.data.dataSend[0].SCRP_ORD_NO;
+      const yyyy = scrp_ord_no.substr(2, 4);
+      const mm = scrp_ord_no.substr(6, 2);
+      const dd = scrp_ord_no.substr(8, 2);
 
-    //   gfs_dispatch('INSP_CFRM_MAIN', 'DISP_PIC', {
-    //     scaleNumb           : chitInfoYn.data.dataSend[0].scaleNumb,
-    //     scrp_ord_no         : dispInfo.data.dataSend[0].SCRP_ORD_NO,
+      gfs_dispatch('INSP_PROC_MAIN', 'DISP_PIC', {
+        scaleNumb           : chitInfoYn.data.dataSend[0].scaleNumb,
+        scrp_ord_no         : dispInfo.data.dataSend[0].SCRP_ORD_NO,
     
-    //     empty_front_date    : dispInfo.data.PIC[0].EMPTY_FRONT_DATE,
-    //     empty_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_FRONT}`,
-    //     empty_front_gps_addr: dispInfo.data.PIC[0].EMPTY_FRONT_GPS_ADDR,
-    //     empty_rear_date     : dispInfo.data.PIC[0].EMPTY_REAR_DATE,
-    //     empty_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_REAR}`,
-    //     empty_rear_gps_addr : dispInfo.data.PIC[0].EMPTY_REAR_GPS_ADDR,
-    //     cargo_front_date    : dispInfo.data.PIC[0].CARGO_FRONT_DATE,
-    //     cargo_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_FRONT}`,
-    //     cargo_front_gps_addr: dispInfo.data.PIC[0].CARGO_FRONT_GPS_ADDR,
-    //     cargo_rear_date     : dispInfo.data.PIC[0].CARGO_REAR_DATE,
-    //     cargo_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_REAR}`,
-    //     cargo_rear_gps_addr : dispInfo.data.PIC[0].CARGO_REAR_GPS_ADDR
-    //   });
-    // }
+        empty_front_date    : dispInfo.data.PIC[0].EMPTY_FRONT_DATE,
+        empty_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_FRONT}`,
+        empty_front_gps_addr: dispInfo.data.PIC[0].EMPTY_FRONT_GPS_ADDR,
+        empty_rear_date     : dispInfo.data.PIC[0].EMPTY_REAR_DATE,
+        empty_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_REAR}`,
+        empty_rear_gps_addr : dispInfo.data.PIC[0].EMPTY_REAR_GPS_ADDR,
+        cargo_front_date    : dispInfo.data.PIC[0].CARGO_FRONT_DATE,
+        cargo_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_FRONT}`,
+        cargo_front_gps_addr: dispInfo.data.PIC[0].CARGO_FRONT_GPS_ADDR,
+        cargo_rear_date     : dispInfo.data.PIC[0].CARGO_REAR_DATE,
+        cargo_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_REAR}`,
+        cargo_rear_gps_addr : dispInfo.data.PIC[0].CARGO_REAR_GPS_ADDR
+      });
+    }
     
-    // gfc_hideMask();
+    gfc_hideMask();
   }
 
   render() {
@@ -707,44 +717,49 @@ class INSP_CFRM extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
-                        dblclick={(e) => this.dblclick(e)}
+                        // dblclick={(e) => this.dblclick(e)}
                         rowHeight={46}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
                           columnInput({
                             name: 'scaleNumb',
                             header: '계근번호',
-                            width : 155,
+                            width : 120,
                             readOnly: true,
                             color : '#0063A9',
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'center'
                           }),
                           columnInput({
                             name: 'carNumb',
                             header: '차량번호',
+                            width : 110,
+                            readOnly: true,
+                            align : 'center'
+                          }),   
+                          columnInput({
+                            name: 'itemGrade',
+                            header: '사전등급',
                             width : 135,
                             readOnly: true,
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'center'
                           }),   
-                          columnCombobox({
-                            name: 'itemFlag', 
-                            header: '구분',
-                            readOnly: true,
-                            width   : 75,
-                            data: [{
-                              'code': 'M1KDO0001',
-                              'name': '고철'
-                            },{
-                              'code': 'M1KDO0002',
-                              'name': '분철'
-                            }],
-                            editor: {
-                              value   : 'code',
-                              display : 'name'
-                            }
-                          }),
+                          // columnCombobox({
+                          //   name: 'itemFlag', 
+                          //   header: '구분',
+                          //   readOnly: true,
+                          //   width   : 75,
+                          //   data: [{
+                          //     'code': 'M1KDO0001',
+                          //     'name': '고철'
+                          //   },{
+                          //     'code': 'M1KDO0002',
+                          //     'name': '분철'
+                          //   }],
+                          //   editor: {
+                          //     value   : 'code',
+                          //     display : 'name'
+                          //   }
+                          // }),
                           columnTextArea({
                             name  : 'date',
                             header: '입차시간',
@@ -759,7 +774,7 @@ class INSP_CFRM extends Component {
                           columnTextArea({
                             name: 'vendor',
                             header: 'Vendor',
-                            width : 150,
+                            width : 180,
                             height: 38,
                             readOnly: true,
                             align : 'left'
@@ -778,82 +793,69 @@ class INSP_CFRM extends Component {
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>잔여차량</span><Botspan reducer='INSP_CFRM_MAIN' />
+                <span className='title'>잔여차량</span><Botspan reducer='INSP_PROC_MAIN' />
               </div>
             </div>
             <div className='total_info'>
               <ul>
-                <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_CFRM_MAIN' flag={1} /></li>
-                <li><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_CFRM_MAIN' flag={2} /></li>
-                <li><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_CFRM_MAIN' flag={3} /></li>
+                <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
+                <li><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
+                <li><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
               </ul>
               <ul>
-                <li><span className='title'>검수대기</span><Mainspan reducer='INSP_CFRM_MAIN' flag={4} /></li>
-                <li><span className='title'>출차대기</span><Mainspan reducer='INSP_CFRM_MAIN' flag={5} /></li>
-                <li><span className='title'>입차대기</span><Mainspan reducer='INSP_CFRM_MAIN' flag={6} /></li>
+                <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
+                <li><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
+                <li><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
               </ul>
             </div>
           </div>
           <div className='car_info' id='car_info'>
-            <div className='title'><span>계근번호</span><Detailspan reducer='INSP_CFRM_MAIN' flag={1} /></div>
+            <div className='title'><span>계근번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
             <div className='detail'>
               <ul>
-                <li><span className='t'>차량번호</span><Detailspan reducer='INSP_CFRM_MAIN' flag={2} /></li>
-                <li><span className='t'>총중량(KG)</span><Detailspan reducer='INSP_CFRM_MAIN' flag={3} /></li>
-                <li><span className='t'>입차시간</span><Detailspan reducer='INSP_CFRM_MAIN' flag={4} /></li>
-                <li>
+                <li><span className='t'>차량번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={2} /></li>
+                <li><span className='t'>총중량(KG)</span><Detailspan reducer='INSP_PROC_MAIN' flag={3} /></li>
+                <li><span className='t'>입차시간</span><Detailspan reducer='INSP_PROC_MAIN' flag={4} /></li>
+                
+                
+                
+                {/* <li>
                   <button onClick={e => {
                         MILESTONE({
                           reqAddr : 'Replay',
-                          device  : this.device[0].Guid,
+                          device  : this.infoArr[0].camera.Guid,
                           scaleNo: 'test11',
-                          cameraName: this.device[0].Name})
+                          cameraName: this.infoArr[0].camera.Name})
                   }}>Replay
 
                   </button>
                     <button onClick={() => 
                       {
                         const device = this.device[0];
-                        this.startRec(device, 'testScale', '0');
+                        const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+                        this.startRec(device, scaleNumb);
                       }}>on1
                     </button>
                     <button onClick={() => 
                       {
                         const device = this.device[0];
-                        this.stopRec(device, 'testScale');
+                        const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+                        this.stopRec(device, scaleNumb);
                       }}>off1
                     </button>
-                    <button onClick={() => gfs_dispatch('INSP_CFRM_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
-                    <button onClick={() => gfs_dispatch('INSP_CFRM_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
+                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
+                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
                     <button onClick={() =>{
-                        const host = 'http://10.10.10.136:3001/Oracle/Query';
-                        // const host = 'http://10.10.10.136:3001/Mysql/Query';
-                        const option = {
-                          url   : host,
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                          },
-                          data: {
-
-                          } 
-                        };
-                      
-                        return axios(option)
-                          .then(res => {
-                            return res
-                          })
-                          .catch(err => {
-                            console.log(err)
-                            return err;
-                          })
                     }}>oracle</button>
-                </li>
+                </li> */}
+
+
+
+
               </ul> 
             </div>
 
-            <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_CFRM_MAIN'/>
+            <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_PROC_MAIN'/>
 
             <div className='tab_content' id='tabMain'>
               <div className='input_list on' id={`content1_${this.props.pgm}`}>
@@ -875,15 +877,20 @@ class INSP_CFRM extends Component {
                                 display = 'item'
                                 placeholder = '고철등급 검색'
                                 height  = {42}
-                                data    = ''
-                                onFocus = {ComboCreate => {
-                                  YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
-                                    .then(res => {
-                                      ComboCreate({data   : res.data.dataSend,
-                                                  value  : 'itemCode',
-                                                  display: 'item'});
-                                    })
+                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
+                                onChange = {e => {
+                                  const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
+                                  combo.setValue('');
+                                  // combo.setFilter('aaa');
                                 }}
+                                // onFocus = {ComboCreate => {
+                                //   YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
+                                //     .then(res => {
+                                //       ComboCreate({data   : res.data.dataSend,
+                                //                   value  : 'itemCode',
+                                //                   display: 'item'});
+                                //     })
+                                // }}
                       />
                     </div>
                     <Combobox pgm     = {this.props.pgm}
@@ -912,16 +919,16 @@ class INSP_CFRM extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감량중량 검색(KG)'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
-                            }}
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
+                            // onFocus = {ComboCreate => {
+                            //   YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
+                            //     .then(res => {
+                            //       ComboCreate({data   : res.data.dataSend,
+                            //                   value  : 'itemCode',
+                            //                   display: 'item',
+                            //                   emptyRow: true});
+                            //     })
+                            // }}
                       />
                     </div>
                     <Combobox pgm     = {this.props.pgm}
@@ -929,16 +936,16 @@ class INSP_CFRM extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량사유 검색'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
+                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
+                          // onFocus = {ComboCreate => {
+                          //   YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
+                          //     .then(res => {
+                          //       ComboCreate({data   : res.data.dataSend,
+                          //                   value  : 'itemCode',
+                          //                   display: 'item',
+                          //                   emptyRow: true});
+                          //     })
+                          // }}
                     /> 
                   </li>
                   <li>
@@ -949,16 +956,16 @@ class INSP_CFRM extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감가내역 검색'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
-                            }}
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
+                            // onFocus = {ComboCreate => {
+                            //   YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
+                            //     .then(res => {
+                            //       ComboCreate({data   : res.data.dataSend,
+                            //                   value  : 'itemCode',
+                            //                   display: 'item',
+                            //                   emptyRow: true});
+                            //     })
+                            // }}
                       />
                     </div>
                     <Combobox pgm = {this.props.pgm}
@@ -1025,15 +1032,15 @@ class INSP_CFRM extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '차종선택'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
+                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
+                          // onFocus = {ComboCreate => {
+                          //   YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
+                          //     .then(res => {
+                          //       ComboCreate({data   : res.data.dataSend,
+                          //                   value  : 'itemCode',
+                          //                   display: 'item'});
+                          //     })
+                          // }}
                   />
                   </li>
                   <li>
@@ -1044,16 +1051,16 @@ class INSP_CFRM extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '일부,전량 선택'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
-                            }}
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                            // onFocus = {ComboCreate => {
+                            //   YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
+                            //     .then(res => {
+                            //       ComboCreate({data   : res.data.dataSend,
+                            //                   value  : 'itemCode',
+                            //                   display: 'item',
+                            //                   emptyRow: true});
+                            //     })
+                            // }}
                     />
                   </div>
                   <Combobox pgm     = {this.props.pgm}
@@ -1076,40 +1083,36 @@ class INSP_CFRM extends Component {
                   </li>
                   <li>
                     <h5>경고</h5>
-                    <Combobox pgm = {this.props.pgm}
-                          id      = 'detail_warning'
-                          value   = 'code'
-                          display = 'name'
-                          placeholder = '경고'
-                          data    = {[{
-                            'code': 'Y',
-                            'name': '경고'
-                          }]}
-                          emptyRow
+                    <Checkbox pgm   = {this.props.pgm}
+                              id    = 'detail_warning'
+                              width = '30px'
+                              height= '30px'
+
                     />
                   </li>
                 </ul>
               </div>
               
-              <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_CFRM_MAIN'/>
+              <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_PROC_MAIN'/>
               
-              <div className='input_list' id={`content4_${this.props.pgm}`}>
-                <INSP_CFRM pgm={this.props.pgm} />
+              <div className='input_list' id={`content3_${this.props.pgm}`}>
+                <DispInfo pgm={this.props.pgm} />
               </div>
 
-
-              
+              <div className='input_list' id={`content4_${this.props.pgm}`}>
+                <DispImg pgm={this.props.pgm} />
+              </div>
             </div>
             
             <CompleteBtn pgm={this.props.pgm}/>
           </div>
             <div className='cctv_viewer'>
               <h4>실시간 CCTV</h4>
-              <div className='rain_info'>
+              {/* <div className='rain_info'>
 		            <span className='title'>강수량</span><span className='value'>100mm</span>
-	            </div>
+	            </div> */}
               <div className='cctv_list'>
-                {/* {this.state.device[0] !== undefined && 
+                {this.state.device[0] !== undefined && 
                   <RecImage device={this.state.device[0].camera.Guid} 
                             Name={this.state.device[0].camera.Name}
                             rtspUrl={this.state.device[0].rtspUrl[0]}
@@ -1128,7 +1131,7 @@ class INSP_CFRM extends Component {
                             focus='DUM_CAM_FOCUS' 
                             rec='DUM_CAM_REC' 
                             image='DUM_CAM_IMG'/> 
-                } */}
+                }
               </div>
             </div>
         </div>
@@ -1137,4 +1140,4 @@ class INSP_CFRM extends Component {
   }
 }
 
-export default INSP_CFRM;
+export default INSP_PROC;

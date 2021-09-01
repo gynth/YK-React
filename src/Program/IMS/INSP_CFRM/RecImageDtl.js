@@ -16,19 +16,19 @@ function RecImageDtl(props) {
   // let isSeek = false;
 
   const isOpen = useSelector((e) => {
-    return e.INSP_HIST_MAIN[props.cam];
+    return e.INSP_CFRM_MAIN[props.cam];
   }, (p, n) => {
     return p === n;
   });
 
   const value = useSelector((e) => {
-    return e.INSP_HIST_MAIN.GRID_SCALE;
+    return e.INSP_CFRM_MAIN.GRID_SCALE;
   }, (p, n) => {
     return p === n;
   });
 
   // const isActive = useSelector((e) => {
-  //   return e.INSP_HIST_MAIN['ON_ACTIVE'];
+  //   return e.INSP_CFRM_MAIN['ON_ACTIVE'];
   // }, (p, n) => {
   //   return p.active === n.active;
   // });
@@ -84,7 +84,7 @@ function RecImageDtl(props) {
   //   }
   // }
 
-  // if(activeWindow.programId === 'INSP_HIST'){
+  // if(activeWindow.programId === 'DISP_PROC'){
   //   window.onkeydown = e => onKeyDown(e);
   // //   if(window.onkeydown === null){
   // //     window.onkeydown = e => onKeyDown(e);
@@ -98,8 +98,8 @@ function RecImageDtl(props) {
   // const onKeyDown = (e) => {
   //   e.stopPropagation();
 
-  //   const STD_CAM_FOCUS = gfs_getStoreValue('INSP_HIST_MAIN', 'STD_CAM_FOCUS');
-  //   const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_HIST_MAIN', 'DUM_CAM_FOCUS');
+  //   const STD_CAM_FOCUS = gfs_getStoreValue('INSP_CFRM_MAIN', 'STD_CAM_FOCUS');
+  //   const DUM_CAM_FOCUS = gfs_getStoreValue('INSP_CFRM_MAIN', 'DUM_CAM_FOCUS');
     
   //   if(STD_CAM_FOCUS || DUM_CAM_FOCUS){
   //     debounceKeyDown(e, STD_CAM_FOCUS ? 'STD_CAM_FOCUS' : 'DUM_CAM_FOCUS');
@@ -140,7 +140,7 @@ function RecImageDtl(props) {
     let obj = {};
     obj[props.cam] = open;
 
-    gfs_dispatch('INSP_HIST_MAIN', props.cam, obj);
+    gfs_dispatch('INSP_CFRM_MAIN', props.cam, obj);
   }
   const style={
     overlay: {
@@ -291,19 +291,19 @@ function RecImageDtl(props) {
                 </div> */}
 
                 <div className='file_download' onClick={() => movieDown()}></div>
-                <div className='picture_save' onClick={e => {
+                {/* <div className='picture_save' onClick={e => {
                   
-                  // gfc_showMask();
-                  // gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
-                  //   e => {
-                  //     gfc_hideMask();
-                  //     if(e.data.Result !== 'OK'){
-                  //       alert('파일저장에 실패 했습니다.');
-                  //     } 
-                  //   }
-                  // )
+                   gfc_showMask();
+                   gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
+                     e => {
+                       gfc_hideMask();
+                       if(e.data.Result !== 'OK'){
+                         alert('파일저장에 실패 했습니다.');
+                       } 
+                     }
+                   )
                 }}>
-                </div>
+                </div> */}
               </>;
 
   return (

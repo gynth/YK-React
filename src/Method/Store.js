@@ -327,6 +327,7 @@ export const gfs_PGM_REDUCER = (pgm) => {
         return {
           Grid    : nowState === undefined ? [] : nowState.Grid,
           Input   : nowState === undefined ? [] : nowState.Input,
+          Checkbox: nowState === undefined ? [] : nowState.Checkbox,
           Textarea: nowState === undefined ? [] : nowState.Textarea,
           Combo   : nowState === undefined ? [] : nowState.Combo,
           DateTime: nowState === undefined ? [] : nowState.DateTime,
@@ -355,6 +356,18 @@ export const gfs_PGM_REDUCER = (pgm) => {
 
         return Object.assign({}, nowState, {
           Input: [...nowState.Input.filter(e => {
+            return e.id !== action.id
+          })]
+        })
+      }else if(action.type === 'INITCHECKBOX'){
+
+        return Object.assign({}, nowState, {
+          Checkbox: [...nowState.Checkbox, action.Checkbox]
+        })
+      }else if(action.type === 'CLEARCHECKBOX'){
+
+        return Object.assign({}, nowState, {
+          Checkbox: [...nowState.Checkbox.filter(e => {
             return e.id !== action.id
           })]
         })

@@ -3,20 +3,20 @@ import { useSelector } from 'react-redux';
 
 import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
-import { gfo_getCombo } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getCheckbox } from '../../../Method/Component';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 
 const CompleteBtn = (props) => {
   const value = useSelector((e) => {
-    return e.INSP_CFRM_MAIN.CHIT_INFO;
+    return e.INSP_PROC_MAIN.CHIT_INFO;
   }, (p, n) => {
     return p.scaleNumb === n.scaleNumb;
   });
 
   //#region 검수등록
   const onProcess = async() => {
-    const scaleNumb = gfs_getStoreValue('INSP_CFRM_MAIN', 'DETAIL_SCALE');
+    const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
 
     if(scaleNumb === ''){
       alert('선택된 배차정보가 없습니다.');
@@ -87,13 +87,13 @@ const CompleteBtn = (props) => {
       }
     }
 
-    const detail_warning = gfo_getCombo(props.pgm, 'detail_warning'); //경고
+    const detail_warning = gfo_getCheckbox(props.pgm, 'detail_warning'); //경고
     
     //#endregion
     
     //#region 계량표저장
     const chitYn = await gfc_chit_yn_YK(scaleNumb);
-    const memo = gfs_getStoreValue('INSP_CFRM_MAIN', 'CHIT_MEMO').trim();
+    const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
     if(chitYn.data === 'N'){
       document.getElementById(`tab2_${props.pgm}`).click(2);
 
@@ -111,7 +111,7 @@ const CompleteBtn = (props) => {
       
       if(result.data === 'Y'){
         const chitYn = await gfc_chit_yn_YK(scaleNumb);
-        gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
+        gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
           chit     : chitYn.data
         });
       }else{
@@ -147,13 +147,15 @@ const CompleteBtn = (props) => {
                 `dOutageReasonEtcEdit=&` + //기타의견???
 
                 `dCarTypeCode=${detail_car.getValue()}&` +
-                `dWarning=${detail_warning.getValue() === null ? '' : detail_warning.getValue()}&` +
+                `dWarning=${detail_warning.getValue() === true ? 'Y' : 'N'}&` +
                 `dRain=0`;
-
     const Data = await YK_WEB_REQ(`tally_process_erp_procedure.jsp?${msg}`);
     console.log(Data);
 
     //#endregion
+
+    const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_PROC');
+    pgm[0].Retrieve();
 
     gfc_hideMask();
   }
@@ -162,7 +164,7 @@ const CompleteBtn = (props) => {
   //#region 계량표저장
   // const onScaleChit = async() => {
   //   const img = document.getElementById(`content2_${props.pgm}`);
-  //   const scaleNumb = gfs_getStoreValue('INSP_CFRM_MAIN', 'CHIT_INFO');
+  //   const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_INFO');
 
   //   if(scaleNumb.scaleNumb === ''){
   //     alert('선택된 배차정보가 없습니다.');
@@ -171,7 +173,7 @@ const CompleteBtn = (props) => {
 
   //   gfc_showMask();
 
-  //   const memo = gfs_getStoreValue('INSP_CFRM_MAIN', 'CHIT_MEMO').trim();
+  //   const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
   //   if(memo.length === 0){
   //     if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
   //       gfc_hideMask();
@@ -191,7 +193,7 @@ const CompleteBtn = (props) => {
     
   //   if(result.data === 'Y'){
   //     const chitYn = await gfc_chit_yn_YK(scaleNumb.scaleNumb);
-  //     gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
+  //     gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
   //       chit     : chitYn.data
   //     });
   //   }else{

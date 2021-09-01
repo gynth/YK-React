@@ -72,8 +72,16 @@ const Common = (fn, param) => {
     query = 
     ` DELETE FROM ZM_IMS_CAMERA      ` +
     `  WHERE CAMERA_IP = '${param[0].CAMERA_IP}'` ;
-  }
-
+  }else if(fn === 'ZM_IMS_CAMERA_SELECT_EACH'){
+    query = 
+    ` SELECT * FROM ZM_IMS_CAMERA      ` +
+    `  WHERE AREA_TP  = '${param[0].AREA_TP}' ` +
+    `    AND USE_YN   = 'Y' `;
+  }else if(fn === 'INSP_CANC_REASON')
+    query = 
+    ` SELECT C.CODEID,C.KORFNM ` +
+    ` FROM PO_IRON_CODE_LINE C ` + 
+    ` WHERE C.CODETP = 'P670'  ` ;
   return query;
 };
 

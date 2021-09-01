@@ -47,7 +47,13 @@ class TextArea extends Component{
   }
 
   onKeyDownBase = (e) => {
-    this.props.onKeyDown(e);
+    if(this.props.onKeyDown !== undefined)
+      this.props.onKeyDown(e);
+  }
+
+  onKeyUpBase = (e) => {
+    if(this.props.onKeyUp !== undefined)
+    this.props.onKeyUp(e);
   }
 
   setValue = (value) => {    
@@ -78,6 +84,7 @@ class TextArea extends Component{
 
                  onChange  = {e => this.onChangeBase(e)}
                  onKeyDown = {e => this.onKeyDownBase(e)}
+                 onKeyUp   = {e => this.onKeyUpBase(e)}
 
                  ref={this.textareaRef}
                  autoComplete = 'off'

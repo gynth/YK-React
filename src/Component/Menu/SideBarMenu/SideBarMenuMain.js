@@ -76,7 +76,6 @@ const SideBarMenu = (props) => {
             <Li MENU_ID='CFRM' index='3' nam='확정'></Li>
           </ul>
           <div className='footer_menu'>
-            {/* <span className='user'>유저</span> */}
             <div className='setting'><span onClick={e => {
 
               gfs_PGM_REDUCER('CAMR_SETTING');

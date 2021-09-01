@@ -291,19 +291,19 @@ function RecImageDtl(props) {
                 </div> */}
 
                 <div className='file_download' onClick={() => movieDown()}></div>
-                <div className='picture_save' onClick={e => {
+                {/* <div className='picture_save' onClick={e => {
                   
-                  // gfc_showMask();
-                  // gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
-                  //   e => {
-                  //     gfc_hideMask();
-                  //     if(e.data.Result !== 'OK'){
-                  //       alert('파일저장에 실패 했습니다.');
-                  //     } 
-                  //   }
-                  // )
+                   gfc_showMask();
+                   gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
+                     e => {
+                       gfc_hideMask();
+                       if(e.data.Result !== 'OK'){
+                         alert('파일저장에 실패 했습니다.');
+                       } 
+                     }
+                   )
                 }}>
-                </div>
+                </div> */}
               </>;
 
   return (

@@ -6,14 +6,13 @@ import Input from '../../../Component/Control/Input';
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getTextarea } from '../../../Method/Component';
-import { gfg_getGrid, gfg_getRow, gfg_setSelectRow, gfg_setValue } from '../../../Method/Grid';
+import { gfg_getGrid, gfg_setSelectRow, gfg_setValue } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
-import { Number as columnNumber } from '../../../Component/Grid/Column/Number';
 import { Checkbox as columnCheckbox } from '../../../Component/Grid/Column/Checkbox';
 
 import Combobox from '../../../Component/Control/Combobox';
@@ -21,18 +20,68 @@ import Combobox from '../../../Component/Control/Combobox';
 // import Mainspan from './Mainspan';
 import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
+import Chit from '../Common/Chit/Chit';
 import CompleteBtn from './CompleteBtn';
+import TabList from './TabList';
+import RecImage from './RecImage';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 //#endregion
 
-class SHIP_PROC extends Component {
+class INSP_CFRM extends Component {
 
   state = {
     wait_list: [],
     device: []
   }
+
+  milestoneInfo = async() => {
+
+    // 선택된 공정의 카메라를 찾아서 스트리밍 받는다
+    // 지금은 하드코딩 되어있지만 나중엔 로컬스토리지와 콤보박스를 써서 선택된 공정의 아이피를 가지고 카메라를 가져온다.
+    // 1. 선택된 공정의 카메라 정보를 가지고온다.
+    // const milestone = TOKEN({reqAddr: 'LOGIN', MilestoneIP: gfs_getStoreValue('CAMERA_REDUCER', 'MilestoneIP')});
+    const milestone = await TOKEN({});
+    this.token  = milestone.data.TOKEN;
+    this.device = milestone.data.DEVICE;
+    if(this.token === ''){
+      alert('마일스톤 서버에 접속할 수 없습니다.'); 
+    }else if(this.device === ''){
+      alert('마일스톤 서버에 접속할 수 없습니다.');
+    }else{
+      let ipArr = ['10.10.136.112', '10.10.136.128'];
+      let rtspUrl = ['rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp', 'rtsp://admin:pass@10.10.136.128:554/video1'];
+      let rtspPort = [3100, 3101];
+      let infoArr = [];
+
+      ipArr.forEach(e => {
+        const camera = this.device.find(e1 => e1.Name.indexOf(e) >= 0);
+        if(camera){
+          infoArr.push({camera, rtspUrl, rtspPort}); 
+        }
+      })
+
+      if(infoArr.length > 0){
+        this.setState(this.state.device = infoArr);
+      }
+    }
+  }
+
+  onTabChg = async() => {
+
+  }
+
+  //#region onActiveWindow 스토어 subscribe로 실행됨.
+  onActiveWindow = () => {
+    const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
+    if(activeWindow.programId === 'INSP_CFRM'){
+      this.onTabChg();
+    }
+  }
+  //#endregion
+
+  //#endregion
 
   constructor(props){
     super(props)
@@ -40,9 +89,9 @@ class SHIP_PROC extends Component {
     gfc_initPgm(props.pgm, props.nam, this)
 
     //#region 리듀서
-    const SHIP_PROC_MAIN = (nowState, action) => {
+    const INSP_CFRM_MAIN = (nowState, action) => {
 
-      if(action.reducer !== 'SHIP_PROC_MAIN') {
+      if(action.reducer !== 'INSP_CFRM_MAIN') {
         return {
           MAIN_WAIT    : nowState === undefined ? 0 : nowState.MAIN_WAIT,
           MAIN_TOTAL   : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
@@ -256,31 +305,31 @@ class SHIP_PROC extends Component {
       }
     }
 
-    gfs_injectAsyncReducer('SHIP_PROC_MAIN', SHIP_PROC_MAIN);
+    gfs_injectAsyncReducer('INSP_CFRM_MAIN', INSP_CFRM_MAIN);
+    gfs_subscribe(this.onActiveWindow);
     //#endregion
   }
 
   componentDidMount(){
-    
+    this.milestoneInfo();
   }
 
   Retrieve = async () => {
 
     gfc_showMask();
 
-    const mainData = await YK_WEB_REQ(`tally_ship_wait.jsp`);
+    const mainData = await YK_WEB_REQ('tally_approve_wait.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     if(main){
-      
       grid.resetData(main);
-      gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+      gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
       
       await gfc_sleep(100);
 
       gfg_setSelectRow(grid);
     }else{
-      gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
 
     gfc_hideMask();
@@ -290,17 +339,37 @@ class SHIP_PROC extends Component {
   onSelectChange = async (e) => {
     if(e === null) return;
 
-    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
-    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vendorname});
-    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.netweight});
-    gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.deliverydate});
+    gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(e.pre_item_grade); //사전등급
+    gfo_getInput(this.props.pgm, 'iron_grade').setValue(e.iron_grade);   //고철등급
+    gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue(e.iron_grade_item_name);   //상세고철등급
+    gfo_getInput(this.props.pgm, 'reduce_wgt').setValue(e.reduce_wgt);     //감량중량
+    gfo_getInput(this.props.pgm, 'reduce_name').setValue(e.reduce_name); //감량사유
+    // gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    // gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    gfo_getCombo(this.props.pgm, 'return_code').setValue(e.return_gubun);      //반품구분
+    gfo_getInput(this.props.pgm, 'return_gubun_name').setValue(e.return_gubun_name);     //반품구분사유
+    // gfo_getCombo(this.props.pgm, 'detail_warning').setValue('');  //경고
+
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vehicle_no});
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.net_weight});
+    gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.delivery_date});
+
+    gfs_dispatch('INSP_CFRM_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
+
+    //계량증명서 여부 확인.
+    const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
+    gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
+      chit     : chitYn.data
+    });
   }
 
   render() {
 
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
-        <div className='car_manager type2' >
+        <div className='car_manager' >
           <div style={{paddingBottom:'0'}} className='car_list'>
             <div className='search_line'>
               <div className='wp' >
@@ -345,6 +414,8 @@ class SHIP_PROC extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
+                        rowHeight={46}
+                        rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         headerClick={(e) => {
                           if(e.columnName === 'chk'){
                             const grid = gfg_getGrid(this.props.pgm, 'main10');
@@ -361,8 +432,6 @@ class SHIP_PROC extends Component {
                             }
                           }
                         }}
-                        rowHeight={41}
-                        rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
                           columnCheckbox({
                             name: 'chk',
@@ -375,190 +444,146 @@ class SHIP_PROC extends Component {
                           columnInput({
                             name: 'scaleNumb',
                             header: '계근번호',
-                            width : 150,
+                            width : 120,
                             readOnly: true,
                             color : '#0063A9',
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'center'
                           }),
                           columnInput({
-                            name: 'vendorname',
-                            header: '업체명',
-                            width : 300,
+                            name: 'vehicle_no',
+                            header: '차량번호',
+                            width : 110,
                             readOnly: true,
-                            align : 'left',
-                            fontSize: '18'
-                          }),
-                          columnNumber({
-                            name    : 'netweight', 
-                            header  : '무게(KG)', 
-                            width   : 150, 
-                            readOnly: false,
-                            fontSize: '18'
+                            align : 'center'
+                          }),   
+                          columnInput({
+                            name: 'pre_item_grade',
+                            header: '사전등급',
+                            width : 135,
+                            readOnly: true,
+                            align : 'center'
+                          }),   
+                          columnInput({
+                            name: 'iron_grade',
+                            header: '등급',
+                            width : 135,
+                            readOnly: true,
+                            align : 'center'
+                          }),    
+                          columnInput({
+                            name: 'iron_grade_item_name',
+                            header: '상세등급',
+                            width : 135,
+                            readOnly: true,
+                            align : 'left'
                           }),
                           columnInput({
-                            name: 'deliverydate',
-                            header: '입차일자',
-                            width : 220,
+                            name: 'reduce_name',
+                            header: '감량사유',
+                            width : 180,
                             readOnly: true,
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'left'
+                          }),
+                          columnInput({
+                            name: 'reduce_wgt',
+                            header: '감량',
+                            width : 80,
+                            readOnly: true,
+                            align : 'right'
+                          }),
+                          columnInput({
+                            name: 'return_gubun_name',
+                            header: '반품내용',
+                            width : 200,
+                            readOnly: true,
+                            align : 'left'
+                          }),
+                          columnInput({
+                            name: 'inspector',
+                            header: '검수자',
+                            width : 100,
+                            readOnly: true,
+                            align : 'center'
+                          }),  
+                          columnTextArea({
+                            name  : 'delivery_date',
+                            header: '출차시간',
+                            width : 80,
+                            height: 38,
+                            // paddingTop: ''
+                            readOnly: true,
+                            valign:'middle',
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                            time  : 'HH:mm'
+                          }),
+                          columnTextArea({
+                            name: 'vendor_name',
+                            header: 'Vendor',
+                            width : 200,
+                            height: 38,
+                            readOnly: true,
+                            align : 'left'
                           })
                         ]}
                   />
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>전체차량</span><Botspan reducer='SHIP_PROC_MAIN' />
+                <span className='title'>전체차량</span><Botspan reducer='INSP_CFRM_MAIN' />
               </div>
             </div>
           </div>
-          <div style={{paddingBottom:'90px', paddingTop:'200px'}} className='car_info'>
-            <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='SHIP_PROC_MAIN'/></div>
-            <div style={{height:'130px'}} className='detail'>
+          <div className='car_info'>
+            <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='INSP_CFRM_MAIN'/></div>
+            <div className='detail'>
               <ul>
-                <li><span className='t'>Vender</span><Detailspan flag={2}  reducer='SHIP_PROC_MAIN'/></li>
-                <li><span className='t'>무게(KG)</span><Detailspan flag={3} reducer='SHIP_PROC_MAIN' /></li>
-                <li><span className='t'>입차시간</span><Detailspan flag={4}  reducer='SHIP_PROC_MAIN'/></li> 
+                <li><span className='t'>차량번호</span><Detailspan flag={2}  reducer='INSP_CFRM_MAIN'/></li>
+                <li><span className='t'>총중량(KG)</span><Detailspan flag={3} reducer='INSP_CFRM_MAIN' /></li>
+                <li><span className='t'>출차시간</span><Detailspan flag={4}  reducer='INSP_CFRM_MAIN'/></li> 
               </ul>
             </div>
 
+            <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_CFRM_MAIN'/>
 
             <div className='tab_content' id='tabMain'>
               <div className='input_list on' id={`content1_${this.props.pgm}`}>
                 <ul>
                   <li>
-                    <h5>등급책정</h5>
+                    <h5>사전등급</h5>
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'pre_item_grade'
+                             width   = '100%'
+                             disabled
+                      />
+                  </li>
+                  <li>
+                    <h5>등급</h5>
                     <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                                id      = 'detail_grade1'
-                                value   = 'itemCode'
-                                display = 'item'
-                                placeholder = '고철등급 검색'
-                                height  = {42}
-                                data    = ''
-                                onFocus = {ComboCreate => {
-                                  YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
-                                    .then(res => {
-                                      ComboCreate({data   : res.data.dataSend,
-                                                  value  : 'itemCode',
-                                                  display: 'item'});
-                                    })
-                                }}
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'iron_grade'
+                             width   = '100%'
+                             disabled
                       />
                     </div>
-                    <Combobox pgm     = {this.props.pgm}
-                              id      = 'detail_grade2'
-                              value   = 'itemCode'
-                              display = 'item'
-                              data    = ''
-                              onFocus = {ComboCreate => {
-                                const value = gfo_getCombo(this.props.pgm, 'detail_grade1').getValue();
-                                if(value === null) return;
-
-                                YK_WEB_REQ(`tally_process_pop.jsp?division=${value}`, {})
-                                  .then(res => {
-                                    ComboCreate({data   : res.data.dataSend,
-                                                value  : 'itemCode',
-                                                display: 'item'});
-                                  })
-                              }}
+                    <Input pgm     = {this.props.pgm}
+                            id      = 'iron_grade_item_name'
+                            width   = '100%'
+                            disabled
                     />
                   </li>
                   <li>
                     <h5>감량중량</h5>
                     <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_subt'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '감량중량 검색(KG)'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
-                            }}
+                      <Input pgm     = {this.props.pgm}
+                              id      = 'reduce_wgt'
+                              width   = '100%'
+                              disabled
                       />
                     </div>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_subt_leg'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감량사유 검색'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
-                    /> 
-                  </li>
-                  <li>
-                    <h5>감가내역</h5>
-                    <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_depr'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '감가내역 검색'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
-                            }}
-                      />
-                    </div>
-                    <Combobox pgm = {this.props.pgm}
-                          id      = 'detail_depr2'
-                          value   = 'code'
-                          display = 'name'
-                          placeholder = '감가비율'
-                          data    = {[{
-                            'code': '10',
-                            'name': '10%'
-                          },{
-                            'code': '20',
-                            'name': '20%'
-                          },{
-                            'code': '30',
-                            'name': '30%'
-                          },{
-                            'code': '40',
-                            'name': '40%'
-                          },{
-                            'code': '50',
-                            'name': '50%'
-                          },{
-                            'code': '60',
-                            'name': '60%'
-                          },{
-                            'code': '70',
-                            'name': '70%'
-                          },{
-                            'code': '80',
-                            'name': '80%'
-                          },{
-                            'code': '90',
-                            'name': '90%'
-                          },{
-                            'code': '100',
-                            'name': '100%'
-                          }]}
-                          emptyRow
+                    <Input pgm     = {this.props.pgm}
+                            id      = 'reduce_name'
+                            width   = '100%'
+                            disabled
                     />
                   </li>
                   {/* <li>
@@ -580,91 +605,61 @@ class SHIP_PROC extends Component {
                   />
                   </li> */}
                   <li>
-                    <h5>차종구분</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_car'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '차종선택'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                  />
-                  </li>
-                  <li>
-                    <h5>반품구분</h5>
+                    <h5>반품내용</h5>
                     <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '일부,전량 선택'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
-                            }}
-                    />
-                  </div>
-                  <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn2'
-                            value   = 'itemCode'
-                            display = 'item'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              const value = gfo_getCombo(this.props.pgm, 'detail_rtn').getValue();
-                              if(value === null) return;
-
-                              YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item'});
-                                })
-                            }}
-                    />
+                      <div style={{marginBottom:'5px'}}>
+                        <Combobox pgm     = {this.props.pgm}
+                              id      = 'return_code'
+                              value   = 'itemCode'
+                              display = 'item'
+                              isDisabled
+                              etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                        />
+                      </div>
+                      <Input pgm     = {this.props.pgm}
+                              id      = 'return_gubun_name'
+                              width   = '100%'
+                              disabled
+                      />
+                    </div>
                   </li>
-                  {/* <li>
-                    <h5>경고</h5>
-                    <Combobox pgm = {this.props.pgm}
-                          id      = 'detail_warning'
-                          value   = 'code'
-                          display = 'name'
-                          placeholder = '경고'
-                          data    = {[{
-                            'code': 'Y',
-                            'name': '경고'
-                          }]}
-                          emptyRow
-                    />
-                  </li> */}
                 </ul>
               </div>
-
-
+              
+              <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_CFRM_MAIN'/>
               
             </div>
-            
             <CompleteBtn pgm={this.props.pgm}/>
-
-
-
           </div>
+            <div className='cctv_viewer'>
+              <h4>녹화영상</h4>
+              <div className='cctv_list'>
+                {this.state.device[0] !== undefined && 
+                  <RecImage device={this.state.device[0].camera.Guid} 
+                            Name={this.state.device[0].camera.Name}
+                            rtspUrl={this.state.device[0].rtspUrl[0]}
+                            rtspPort={this.state.device[0].rtspPort[0]}
+                            cam='STD_CAM_OPEN' 
+                            focus='STD_CAM_FOCUS' 
+                            rec='STD_CAM_REC' 
+                            image='STD_CAM_IMG'/> 
+                }
+                {this.state.device[1] !== undefined && 
+                  <RecImage device={this.state.device[1].camera.Guid} 
+                            Name={this.state.device[1].camera.Name}
+                            rtspUrl={this.state.device[1].rtspUrl[1]}
+                            rtspPort={this.state.device[1].rtspPort[1]}
+                            cam='DUM_CAM_OPEN' 
+                            focus='DUM_CAM_FOCUS' 
+                            rec='DUM_CAM_REC' 
+                            image='DUM_CAM_IMG'/> 
+                }
+              </div>
+            </div>
         </div>
       </div>
     );
   }
 }
 
-export default SHIP_PROC;
+export default INSP_CFRM;

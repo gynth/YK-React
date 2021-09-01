@@ -83,14 +83,11 @@ const TabList = (props) => {
           <ul className='list'>
             {selectWindow !== null &&
               selectWindow.sort((a, b) => {
-                if (a.makeDttm.valueOf() > b.makeDttm.valueOf()) {
+                if (a.makeDttm.valueOf() >= b.makeDttm.valueOf()) {
                   return 1;
-                }
-                if (a.makeDttm.valueOf() < b.makeDttm.valueOf()) {
+                }else{
                   return -1;
                 }
-                // a must be equal to b
-                return 0;
               }).map((e) => 
                 <TabListItem key={e.programId}
                              programId={e.programId}

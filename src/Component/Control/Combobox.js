@@ -25,6 +25,29 @@ class Combobox extends Component{
       result.data = {};
       result.data.result = true;
       result.data.data = props.data;
+    }else if(props.etcData !== undefined){
+      result = await props.etcData;
+      if(Object.keys(result.data) !== 'result'){
+        result.data.result = true;
+        result.data.data = result.data[Object.keys(result.data)[0]];
+        delete result.data[Object.keys(result.data)[0]];
+      }
+    }else if(props.oracleData !== undefined){
+      result = await props.oracleData;
+      if(Object.keys(result.data) !== 'result'){
+        result.data.result = true;
+        let data = [];
+        for(let i = 0; i < result.data.rows.length; i++){
+    
+          let col = {};
+          for(let j = 0; j < result.data.rows[i].length; j++){
+            col[result.data.metaData[j].name] = result.data.rows[i][j];
+          }
+          data.push(col);
+        }
+
+        result.data.data = data;
+      }
     }else{
       result = await getDynamicSql_Mysql(
         props.location,
@@ -140,12 +163,15 @@ class Combobox extends Component{
       ...base,
       margin:0,
       height: this.props.height,
-      textAlign: this.align
+      textAlign: this.align,
+      backgroundColor: this.props.isDisabled === true && '#FAFAFA',
+      borderColor:'#B5B5B5'
     }),
 
     valueContainer: (base) => ({
       ...base,
       padding:0,
+      margin: '0px 0px 0px 5px'
       // zIndex: 100
     }),
 
@@ -165,6 +191,7 @@ class Combobox extends Component{
       marginTop: 1,
       // width: this.width,
       width: '100%',
+      // width: this.width > this.props.width ? this.width : this.props.width, //지금 this.props.width를 구할수 없어 추후 수정
       zIndex: 1000
       // width: 400
     }),
@@ -177,6 +204,7 @@ class Combobox extends Component{
     singleValue: (base) => ({
       ...base,
       margin: '0px 0px 0px 4px',
+      color: this.props.isDisabled === true && 'black',
       // ...dot()
     }),
 
@@ -229,7 +257,11 @@ class Combobox extends Component{
 
   setValue = (value) => {
     this.ref.current.select.setValue(this.options.find(e => e.value === value));
-  } 
+  }
+
+  setFilter = (value) => {
+    console.log(value);
+  }
   
   render(){
     this.ref = React.createRef();
@@ -249,6 +281,7 @@ class Combobox extends Component{
                 menuPlacement= 'auto'
                 ref          = {this.ref}
                 isDisabled   = {this.props.isDisabled}
+                // isOptionDisabled={(option) => option.disabled}
                 onBlur       = {e => this.onBlurBase(e)}
                 onFocus      = {e => this.onFocusBase(e)}
                 onChange     = {e => this.onChangeBase(e)}
@@ -302,7 +335,7 @@ Combobox.propTypes = {
 Combobox.defaultProps = {
   // width       : 150,
   height      : 23,
-  fontSize    : 12,
+  fontSize    : 14,
   label       : '',
   menuIsOpen  : false,
   isDisabled  : false,

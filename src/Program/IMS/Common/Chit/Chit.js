@@ -71,14 +71,14 @@ function Chit(props) {
             </ul>
           </div>
           <div className='memo'>
-            <h5>MEMO</h5>
+            {/* <h5>MEMO</h5> */}
             <ChitMemo pgm={props.pgm} id={props.id} reducer={props.reducer}/>
           </div>
         </div>
       :
       
       <div className='data_list' id={`content2_${props.pgm}`}>
-        {value.chit !== 'N' && <img src={'data:image/jpeg;base64,' + value.chit} style={{width:'100%', height:690}} alt='chit' />}
+        {value.chit !== 'N' && <img src={'data:image/jpeg;base64,' + value.chit} style={{width:'100%', height:600}} alt='chit' />}
       </div>
       }
     </>

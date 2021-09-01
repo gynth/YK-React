@@ -179,7 +179,7 @@ class ComboEditor {
         ...base,  
         marginTop: 1,
         // width: '100%',
-        width: ComboInit.width,
+        width: ComboInit.width > props.width ? ComboInit.width : props.width,
         zIndex: 1000,
         fontSize: option.fontSize
       }),

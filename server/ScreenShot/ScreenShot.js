@@ -160,7 +160,7 @@ const makeImg = async(img, folder, filename) => {
   
     await sleep(300);
   
-    await sharp(root).extract({left:16, top:0, width:336, height:690})    
+    await sharp(root).extract({left:16, top:0, width:336, height:548})    
     .toFile(root1);
    
     await sleep(300);

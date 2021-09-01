@@ -85,9 +85,10 @@ class CAMR_SETTING extends Component {
       )
     }
     
+    grid.resetOriginData()
+    grid.restore();
+
     this.Retrieve();
-    // grid.resetOriginData()
-    // grid.restore();
   }
 
   Save = async() => {
@@ -117,8 +118,8 @@ class CAMR_SETTING extends Component {
       )
     });
     
-    // grid.resetOriginData()
-    // grid.restore();
+    grid.resetOriginData()
+    grid.restore();
     
     this.Retrieve();
   }
