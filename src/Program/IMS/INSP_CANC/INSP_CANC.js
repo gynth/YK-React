@@ -550,8 +550,8 @@ class INSP_CANC extends Component {
                         />
                       </div>
                       <Input pgm     = {this.props.pgm}
-                              id      = 'return_reason_desc'
-                              width   = '100%'
+                             id      = 'return_reason_desc'
+                             width   = '100%'
                       />
                     </div>
                   </li>

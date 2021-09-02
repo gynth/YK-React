@@ -24,14 +24,14 @@ import TabList from './TabList';
 import RecImage from './RecImage';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
-import { TOKEN } from '../../../WebReq/WebReq';
 //#endregion
 
 class DISP_PROC extends Component {
 
   state = {
     wait_list: [],
-    scaleNumb: ''
+    scaleNumb: '',
+    detail_grade2: YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
   }
 
   onTabChg = async() => {
@@ -284,6 +284,28 @@ class DISP_PROC extends Component {
 
     gfc_showMask();
 
+    // gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
+    // gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+    // gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
+    // gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
+    // gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+    // gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    // gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    // gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+    // gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    // gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
+
+    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
+    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+
+    // gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
+    //   itemFlag : '',
+    //   chit     : 'N'
+    // });
+
     const mainData = await YK_WEB_REQ('tally_mstr_pass.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
@@ -314,17 +336,26 @@ class DISP_PROC extends Component {
       return;
     }
 
+    //기존 등록된 정보
+    const dtlInfo = await YK_WEB_REQ(`tally_process_f_sel.jsp?scaleNumb=${e.scaleNumb}`);
+    if(!dtlInfo.data.dataSend){
+      alert('검수정보를 불러올수 없습니다.');
+      return;
+    }
+
     gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.preItemGrade); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
-    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
-    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
-    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
-    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.dataSend[0].IRON_GRADE);   //고철등급
+    const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2');
+    await detail_grade2.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${dtlInfo.data.dataSend[0].IRON_GRADE}`, {})});
+    detail_grade2.setValue(dtlInfo.data.dataSend[0].IRON_GRADE_ITEM);   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT);     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT_REASON_CODE); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);     //감가내역
+    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.dataSend[0].CAR_TYPE);      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.dataSend[0].RETURN_CODE);      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.dataSend[0].RETURN_GUBUN);     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.dataSend[0].WARNING);  //경고
 
     gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
@@ -507,37 +538,24 @@ class DISP_PROC extends Component {
                                 placeholder = '고철등급 검색'
                                 height  = {42}
                                 etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
-                                onChange = {e => {
+                                onChange = {async (e) => {
                                   const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
-                                  combo.setValue('');
-                                  // combo.setFilter('aaa');
+                                  combo.setValue(null);
+
+                                  if(e !== undefined && e.value !== ''){
+                                    await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                                    combo.setDisabled(false);
+                                  }else{
+                                    combo.setDisabled(true);
+                                  }
                                 }}
-                                // onFocus = {ComboCreate => {
-                                //   YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
-                                //     .then(res => {
-                                //       ComboCreate({data   : res.data.dataSend,
-                                //                   value  : 'itemCode',
-                                //                   display: 'item'});
-                                //     })
-                                // }}
                       />
                     </div>
                     <Combobox pgm     = {this.props.pgm}
                               id      = 'detail_grade2'
                               value   = 'itemCode'
                               display = 'item'
-                              data    = ''
-                              onFocus = {ComboCreate => {
-                                const value = gfo_getCombo(this.props.pgm, 'detail_grade1').getValue();
-                                if(value === null) return;
-
-                                YK_WEB_REQ(`tally_process_pop.jsp?division=${value}`, {})
-                                  .then(res => {
-                                    ComboCreate({data   : res.data.dataSend,
-                                                value  : 'itemCode',
-                                                display: 'item'});
-                                  })
-                              }}
+                              isDisabled
                     />
                   </li>
                   <li>
@@ -549,15 +567,19 @@ class DISP_PROC extends Component {
                             display = 'item'
                             placeholder = '감량중량 검색(KG)'
                             etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
-                            // onFocus = {ComboCreate => {
-                            //   YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
-                            //     .then(res => {
-                            //       ComboCreate({data   : res.data.dataSend,
-                            //                   value  : 'itemCode',
-                            //                   display: 'item',
-                            //                   emptyRow: true});
-                            //     })
-                            // }}
+                            onChange = {async (e) => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e.value === '0'){
+                                combo.setDisabled(true);
+                              }else{
+                                await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                                combo.setDisabled(false);
+                              }
+                            }}
                       />
                     </div>
                     <Combobox pgm     = {this.props.pgm}
@@ -566,15 +588,7 @@ class DISP_PROC extends Component {
                           display = 'item'
                           placeholder = '감량사유 검색'
                           etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
-                          // onFocus = {ComboCreate => {
-                          //   YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
-                          //     .then(res => {
-                          //       ComboCreate({data   : res.data.dataSend,
-                          //                   value  : 'itemCode',
-                          //                   display: 'item',
-                          //                   emptyRow: true});
-                          //     })
-                          // }}
+                          isDisabled
                     /> 
                   </li>
                   <li>
@@ -586,15 +600,19 @@ class DISP_PROC extends Component {
                             display = 'item'
                             placeholder = '감가내역 검색'
                             etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
-                            // onFocus = {ComboCreate => {
-                            //   YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
-                            //     .then(res => {
-                            //       ComboCreate({data   : res.data.dataSend,
-                            //                   value  : 'itemCode',
-                            //                   display: 'item',
-                            //                   emptyRow: true});
-                            //     })
-                            // }}
+                            emptyRow
+                            onChange = {async (e) => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e !== undefined && e.value !== ''){
+                                combo.setDisabled(false);
+                              }else{
+                                combo.setDisabled(true);
+                              }
+                            }}
                       />
                     </div>
                     <Combobox pgm = {this.props.pgm}
@@ -602,6 +620,7 @@ class DISP_PROC extends Component {
                           value   = 'code'
                           display = 'name'
                           placeholder = '감가비율'
+                          isDisabled
                           data    = {[{
                             'code': '10',
                             'name': '10%'
@@ -633,7 +652,7 @@ class DISP_PROC extends Component {
                             'code': '100',
                             'name': '100%'
                           }]}
-                          emptyRow
+                          // emptyRow
                     />
                   </li>
                   {/* <li>
@@ -662,14 +681,6 @@ class DISP_PROC extends Component {
                           display = 'item'
                           placeholder = '차종선택'
                           etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
-                          // onFocus = {ComboCreate => {
-                          //   YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
-                          //     .then(res => {
-                          //       ComboCreate({data   : res.data.dataSend,
-                          //                   value  : 'itemCode',
-                          //                   display: 'item'});
-                          //     })
-                          // }}
                   />
                   </li>
                   <li>
@@ -681,33 +692,28 @@ class DISP_PROC extends Component {
                             display = 'item'
                             placeholder = '일부,전량 선택'
                             etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
-                            // onFocus = {ComboCreate => {
-                            //   YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
-                            //     .then(res => {
-                            //       ComboCreate({data   : res.data.dataSend,
-                            //                   value  : 'itemCode',
-                            //                   display: 'item',
-                            //                   emptyRow: true});
-                            //     })
-                            // }}
+                            emptyRow
+                            onChange = {e => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e.value === ''){
+                                combo.setDisabled(true);
+                              }else{
+                                combo.setDisabled(false);
+                              }
+                              // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                            }}
                     />
                   </div>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'detail_rtn2'
                             value   = 'itemCode'
                             display = 'item'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              const value = gfo_getCombo(this.props.pgm, 'detail_rtn').getValue();
-                              if(value === null) return;
-
-                              YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item'});
-                                })
-                            }}
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
+                            isDisabled
                     />
                   </li>
                   <li>

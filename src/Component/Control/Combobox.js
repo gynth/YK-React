@@ -12,7 +12,11 @@ class Combobox extends Component{
 
   state = {
     value: '',
-    optionList: []
+    optionList: [],
+    data: this.props.data,
+    etcData: this.props.etcData,
+    oracleData: this.props.oracleData,
+    isDisabled: this.props.isDisabled
   }
 
   width = 0
@@ -21,19 +25,19 @@ class Combobox extends Component{
     this.options = []
     let result = {};
 
-    if(props.data !== undefined){
+    if(this.state.data !== undefined){
       result.data = {};
       result.data.result = true;
-      result.data.data = props.data;
-    }else if(props.etcData !== undefined){
-      result = await props.etcData;
+      result.data.data = this.state.data;
+    }else if(this.state.etcData !== undefined){
+      result = await this.state.etcData;
       if(Object.keys(result.data) !== 'result'){
         result.data.result = true;
         result.data.data = result.data[Object.keys(result.data)[0]];
         delete result.data[Object.keys(result.data)[0]];
       }
-    }else if(props.oracleData !== undefined){
-      result = await props.oracleData;
+    }else if(this.state.oracleData !== undefined){
+      result = await this.state.oracleData;
       if(Object.keys(result.data) !== 'result'){
         result.data.result = true;
         let data = [];
@@ -49,11 +53,11 @@ class Combobox extends Component{
         result.data.data = data;
       }
     }else{
-      result = await getDynamicSql_Mysql(
-        props.location,
-        props.fn,
-        [props.param]
-      );
+      // result = await getDynamicSql_Mysql(
+      //   props.location,
+      //   props.fn,
+      //   [props.param]
+      // );
     }
 
     try{
@@ -164,7 +168,7 @@ class Combobox extends Component{
       margin:0,
       height: this.props.height,
       textAlign: this.align,
-      backgroundColor: this.props.isDisabled === true && '#FAFAFA',
+      backgroundColor: this.state.isDisabled === true && '#FAFAFA',
       borderColor:'#B5B5B5'
     }),
 
@@ -204,7 +208,7 @@ class Combobox extends Component{
     singleValue: (base) => ({
       ...base,
       margin: '0px 0px 0px 4px',
-      color: this.props.isDisabled === true && 'black',
+      color: this.state.isDisabled === true && 'black',
       // ...dot()
     }),
 
@@ -213,6 +217,20 @@ class Combobox extends Component{
       margin: '0px 0px 0px 4px',
       // display: isFoucs //'none', 'flex'
     })
+  }
+
+  onReset = async (e) => {
+    const Key = Object.keys(e);
+    const value = e[Key];
+    let values = {};
+
+    values[Key] = await value;
+    
+    this.setState(
+      values
+    )
+
+    await this.ComboCreate(this.props);
   }
 
   onFocusBase = (e) => {
@@ -262,6 +280,12 @@ class Combobox extends Component{
   setFilter = (value) => {
     console.log(value);
   }
+
+  setDisabled = (value) => {
+    this.setState({
+      isDisabled: value
+    })
+  }
   
   render(){
     this.ref = React.createRef();
@@ -280,7 +304,7 @@ class Combobox extends Component{
                 placeholder  = {this.props.placeholder}
                 menuPlacement= 'auto'
                 ref          = {this.ref}
-                isDisabled   = {this.props.isDisabled}
+                isDisabled   = {this.state.isDisabled}
                 // isOptionDisabled={(option) => option.disabled}
                 onBlur       = {e => this.onBlurBase(e)}
                 onFocus      = {e => this.onFocusBase(e)}

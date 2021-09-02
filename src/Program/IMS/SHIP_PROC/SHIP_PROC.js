@@ -436,14 +436,17 @@ class SHIP_PROC extends Component {
                                 display = 'item'
                                 placeholder = '고철등급 검색'
                                 height  = {42}
-                                data    = ''
-                                onFocus = {ComboCreate => {
-                                  YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
-                                    .then(res => {
-                                      ComboCreate({data   : res.data.dataSend,
-                                                  value  : 'itemCode',
-                                                  display: 'item'});
-                                    })
+                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
+                                onChange = {async (e) => {
+                                  const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
+                                  combo.setValue(null);
+
+                                  if(e !== undefined && e.value !== ''){
+                                    await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                                    combo.setDisabled(false);
+                                  }else{
+                                    combo.setDisabled(true);
+                                  }
                                 }}
                       />
                     </div>
@@ -451,18 +454,7 @@ class SHIP_PROC extends Component {
                               id      = 'detail_grade2'
                               value   = 'itemCode'
                               display = 'item'
-                              data    = ''
-                              onFocus = {ComboCreate => {
-                                const value = gfo_getCombo(this.props.pgm, 'detail_grade1').getValue();
-                                if(value === null) return;
-
-                                YK_WEB_REQ(`tally_process_pop.jsp?division=${value}`, {})
-                                  .then(res => {
-                                    ComboCreate({data   : res.data.dataSend,
-                                                value  : 'itemCode',
-                                                display: 'item'});
-                                  })
-                              }}
+                              isDisabled
                     />
                   </li>
                   <li>
@@ -473,15 +465,19 @@ class SHIP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감량중량 검색(KG)'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
+                            onChange = {async (e) => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e.value === '0'){
+                                combo.setDisabled(true);
+                              }else{
+                                await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                                combo.setDisabled(false);
+                              }
                             }}
                       />
                     </div>
@@ -490,16 +486,8 @@ class SHIP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량사유 검색'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item',
-                                            emptyRow: true});
-                              })
-                          }}
+                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
+                          isDisabled
                     /> 
                   </li>
                   <li>
@@ -510,15 +498,19 @@ class SHIP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감가내역 검색'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
+                            emptyRow
+                            onChange = {async (e) => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e !== undefined && e.value !== ''){
+                                combo.setDisabled(false);
+                              }else{
+                                combo.setDisabled(true);
+                              }
                             }}
                       />
                     </div>
@@ -527,6 +519,7 @@ class SHIP_PROC extends Component {
                           value   = 'code'
                           display = 'name'
                           placeholder = '감가비율'
+                          isDisabled
                           data    = {[{
                             'code': '10',
                             'name': '10%'
@@ -558,7 +551,7 @@ class SHIP_PROC extends Component {
                             'code': '100',
                             'name': '100%'
                           }]}
-                          emptyRow
+                          // emptyRow
                     />
                   </li>
                   {/* <li>
@@ -586,15 +579,7 @@ class SHIP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '차종선택'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
+                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
                   />
                   </li>
                   <li>
@@ -605,15 +590,20 @@ class SHIP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '일부,전량 선택'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item',
-                                              emptyRow: true});
-                                })
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                            emptyRow
+                            onChange = {e => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e.value === ''){
+                                combo.setDisabled(true);
+                              }else{
+                                combo.setDisabled(false);
+                              }
+                              // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
                             }}
                     />
                   </div>
@@ -621,18 +611,8 @@ class SHIP_PROC extends Component {
                             id      = 'detail_rtn2'
                             value   = 'itemCode'
                             display = 'item'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              const value = gfo_getCombo(this.props.pgm, 'detail_rtn').getValue();
-                              if(value === null) return;
-
-                              YK_WEB_REQ(`tally_process_pop.jsp?division=P120`, {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item'});
-                                })
-                            }}
+                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
+                            isDisabled
                     />
                   </li>
                   {/* <li>

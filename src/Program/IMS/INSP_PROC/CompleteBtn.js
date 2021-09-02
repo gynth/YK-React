@@ -27,7 +27,7 @@ const CompleteBtn = (props) => {
 
     //#region 필수입력확인 및 변수세팅
     const detail_grade1 = gfo_getCombo(props.pgm, 'detail_grade1'); //고철등급
-    if(detail_grade1.getValue() === null){
+    if(detail_grade1.getValue() === null || detail_grade1.getValue() === ''){
       alert('필수입력값이 없습니다. > 고철등급');
       const chitBtn = document.getElementById(`tab1_${props.pgm}`);
       chitBtn.click(0);
@@ -36,7 +36,7 @@ const CompleteBtn = (props) => {
       return;
     }
     const detail_grade2 = gfo_getCombo(props.pgm, 'detail_grade2'); //상세고철등급
-    if(detail_grade2.getValue() === null){
+    if(detail_grade2.getValue() === null || detail_grade2.getValue() === ''){
       alert('필수입력값이 없습니다. > 등급세부코드');
       const chitBtn = document.getElementById(`tab1_${props.pgm}`);
       chitBtn.click(0);
@@ -46,10 +46,21 @@ const CompleteBtn = (props) => {
     }
     const detail_subt = gfo_getCombo(props.pgm, 'detail_subt'); //감량중량
     const detail_subt_leg = gfo_getCombo(props.pgm, 'detail_subt_leg'); //감량사유
+    if(detail_subt.getValue() !== null &&  detail_subt.getValue() !== '' &&  detail_subt.getValue() !== '0'){
+      if(detail_subt_leg.getValue() === null || detail_subt_leg.getValue() === ''){
+        alert('필수입력값이 없습니다. > 감량사유');
+        const chitBtn = document.getElementById(`tab1_${props.pgm}`);
+        chitBtn.click(0);
+  
+        gfc_hideMask();
+        return;
+      }
+    }
+
     const detail_depr = gfo_getCombo(props.pgm, 'detail_depr'); //감가내역
     const detail_depr2 = gfo_getCombo(props.pgm, 'detail_depr2'); //감가비율
-    if(detail_depr.getValue() !== null){
-      if(detail_depr2.getValue() === null){
+    if(detail_depr.getValue() !== null &&  detail_depr.getValue() !== ''){
+      if(detail_depr2.getValue() === null || detail_depr2.getValue() === ''){
         alert('필수입력값이 없습니다. > 감가비율');
         const chitBtn = document.getElementById(`tab1_${props.pgm}`);
         chitBtn.click(0);
@@ -66,7 +77,7 @@ const CompleteBtn = (props) => {
     //   return;
     // }
     const detail_car = gfo_getCombo(props.pgm, 'detail_car'); //차종구분
-    if(detail_car.getValue() === null){
+    if(detail_car.getValue() === null ||  detail_car.getValue() === ''){
       alert('필수입력값이 없습니다. > 차종구분');
       const chitBtn = document.getElementById(`tab1_${props.pgm}`);
       chitBtn.click(0);
@@ -76,8 +87,8 @@ const CompleteBtn = (props) => {
     }
     const detail_rtn = gfo_getCombo(props.pgm, 'detail_rtn'); //반품구분
     const detail_rtn2 = gfo_getCombo(props.pgm, 'detail_rtn2'); //반품구분사유
-    if(detail_rtn !== null){
-      if(detail_rtn2.getValue() === null){
+    if(detail_rtn !== null && detail_rtn.getValue() !== ''){
+      if(detail_rtn2.getValue() === null || detail_rtn2.getValue() === ''){
         alert('필수입력값이 없습니다. > 반품구분사유');
         const chitBtn = document.getElementById(`tab1_${props.pgm}`);
         chitBtn.click(0);

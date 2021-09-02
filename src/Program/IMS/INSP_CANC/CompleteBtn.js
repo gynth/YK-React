@@ -34,16 +34,16 @@ const CompleteBtn = (props) => {
       return;
     }
 
-    if(window.confirm('확정취소 하시겠습니까?') === false){
-      return;
-    }
-
     const return_reason = gfo_getCombo(props.pgm, 'return_reason'); //취소사유
     if(return_reason.getValue() === null){
       alert('필수입력값이 없습니다. > 취소사유');
       return;
     }
     const return_reason_desc = gfo_getInput(props.pgm, 'return_reason_desc'); //취소사유
+
+    if(window.confirm('확정취소 하시겠습니까?') === false){
+      return;
+    }
 
     gfc_showMask();
 
