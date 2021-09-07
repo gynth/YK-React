@@ -8,6 +8,7 @@ import ReactHlsPlayer from 'react-hls-player';
 
 function RecImageDtl(props) {
   
+  let name = '';
   const movieRef = useRef();
 
   const value = useSelector((e) => {
@@ -32,21 +33,22 @@ function RecImageDtl(props) {
     const option = {
       url   : host,
       method: 'POST',
+      responseType: "arraybuffer",
       // headers: {
       //   'Access-Control-Allow-Origin': '*'
       // },
       data: {
         scaleNumb: value,
-        Name     : props.Name
+        Name     : cameraName
       },
-      responseType: 'blob'
     };
   
     axios(option)
       .then(res => {
         gfc_hideMask();
-        const url = window.URL
-              .createObjectURL(new Blob([res.data]));
+        const url = window.URL.createObjectURL(
+          new Blob([res.data], {type: 'application/mp4'})
+        );
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', `${value}.mp4`);
@@ -60,7 +62,42 @@ function RecImageDtl(props) {
       })
   }
 
+  // const movieDown = () => {
+  //   gfc_showMask();
+  //   const host = `http://10.10.10.136:3003/`;
+  //   const option = {
+  //     url   : host,
+  //     method: 'POST',
+  //     // headers: {
+  //     //   'Access-Control-Allow-Origin': '*'
+  //     // },
+  //     data: {
+  //       scaleNumb: value,
+  //       Name     : cameraName
+  //     },
+  //     responseType: 'blob'
+  //   };
+  
+  //   axios(option)
+  //     .then(res => {
+  //       gfc_hideMask();
+  //       const url = window.URL
+  //             .createObjectURL(new Blob([res.data]));
+  //       const link = document.createElement('a');
+  //       link.href = url;
+  //       link.setAttribute('download', `${value}.mp4`);
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       document.body.removeChild(link);
+  //     })
+  //     .catch(err => {
+  //       gfc_hideMask();
+  //       console.log(err);
+  //     })
+  // }
+
   const [playUrl, setPlayUrl] = useState('');
+  const [cameraName, setCameraName] = useState('');
 
   useEffect(() => { 
     if(value !== ''){
@@ -73,14 +110,14 @@ function RecImageDtl(props) {
         }]
       ).then(e => {
         if(e.data.rows.length > 0){
-          const Name = e.data.rows[0][5];
-          setPlayUrl(`http://10.10.10.136:3003/${value}/${encodeURIComponent(Name)}/${value}.m3u8`);
+          setCameraName(e.data.rows[0][5]);
+          setPlayUrl(`http://10.10.10.136:3003/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
         }
       }).catch(e => {
         console.log('DISP_PROC>' + e);
       })
     }
-  }, [props.seq, value])
+  }, [cameraName, props.seq, value])
 
   const onActiveWindow = () => {
     const isActive = gfs_getStoreValue('MASK_REDUCER', 'ON_ACTIVE');

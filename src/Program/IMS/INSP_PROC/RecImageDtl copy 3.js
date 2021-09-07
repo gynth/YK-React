@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { MILESTONE, RTSP } from '../../../WebReq/WebReq';
+import { TOKEN, MILESTONE, RTSP } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
-import { gfs_dispatch } from '../../../Method/Store';
-import { gfc_showMask, gfc_sleep, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
-import axios from 'axios';
+import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import RecTimer from './RecTimer';
+import { throttle } from 'lodash';
+import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
+import ScriptTag from 'react-script-tag';
 
 const jsmpeg = require('jsmpeg');
 
@@ -16,8 +18,6 @@ function RecImageDtl(props) {
   }, (p, n) => {
     return p === n;
   });
-
-  const [port, setPort] = useState(0);
   
   const setModalIsOpen = (open) => {
     
@@ -30,27 +30,6 @@ function RecImageDtl(props) {
   const start = async() => {
       MILESTONE({reqAddr: 'CONNECT',
                  device : props.device})
-  }
-
-  const getPort = async() => {
-    const host = `http://10.10.10.136:3000/getEmptyPort`;
-    const option = {
-      url   : host,
-      method: 'POST',
-      // headers: {
-      //   'Access-Control-Allow-Origin': '*'
-      // },
-      data: {
-        device : props.device,
-        MAX_CONNECTION: props.maxCon,
-        START_PORT: props.startPort
-      }
-    };
-  
-    await gfc_sleep(500);
-
-    const result = await axios(option);
-    setPort(result.data.port);
   }
 
   const style={
@@ -84,34 +63,19 @@ function RecImageDtl(props) {
   var canvas = null;
   const setRtsp = () => {
 
-    client = new WebSocket(`ws://10.10.10.136:${port}`);
+    client = new WebSocket(`ws://10.10.10.136:${props.rtspPort}`);
     canvas = imageRef.current;
     new jsmpeg(client, {
       canvas 
     });
   }
 
-  useEffect(() => {
-    start();
-  }, [])
-
   useEffect(() => { 
-    if(port === 0)
-      getPort();
-
-    if(port === 'Connection Full'){
-      alert(`${props.cameraNam} 카메라의 최대접속 유저가 초과되었습니다.`);
-      return;
-    }
-
-    if(port === 0){
-      return;
-    }
-
+    start();
     RTSP({reqAddr: 'RTSPStart',
-          device   : props.device,
-          streamUrl: `rtsp://admin:admin@10.10.10.136:554/live/${props.device}`,
-          port: port
+          device: props.device,
+          streamUrl: props.rtspUrl,
+          port: props.rtspPort
         }).then(e => {
           if(e.data === 'OK'){
             setRtsp();
@@ -119,12 +83,11 @@ function RecImageDtl(props) {
         })
 
     return() => {
-      setPort(0);
       client.close();
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, port])
+  }, [isOpen])
 
   // const debounceOnClick = throttle((e, ptz) => {
   //   TOKEN({}).then(e => {
@@ -149,6 +112,11 @@ function RecImageDtl(props) {
   }
 
   const img = <>
+                <div style={{position:'absolute'}}>
+                  <RecTimer device={props.device} rec={props.rec} car={props.car} />
+                </div>
+                {/* rtsp://admin:admin13579@10.10.136.112:554/video1+audio1  */}
+
                 <canvas 
                   ref={imageRef} 
                   style={{width:'100%', height:'100%'}}
@@ -157,6 +125,13 @@ function RecImageDtl(props) {
                   }}
                   
                 />
+
+                {/* <img style={{height:'100%', width:'100%'}} alt='yk_image' 
+                    ref={imageRef}
+                    onDoubleClick={e => {
+                      setModalIsOpen(true);
+                    }}>
+                </img> */}
                 <div className='picture_save' onClick={e => {
                   
                   gfc_showMask();
@@ -169,6 +144,7 @@ function RecImageDtl(props) {
                     }
                   )
                 }}>
+                  {/* <a href='#!' className='server'></a> */}
                 </div>
                 <div className="direction">
                 <button type='' className='left' onClick={e => {

@@ -2,7 +2,7 @@ import React from 'react';
 
 import Input from './Component/Control/Input';
 import { gfo_getInput } from './Method/Component';
-import { getDynamicSql_Mysql } from './db/Mysql/Mysql';
+import { getDynamicSql_Oracle } from './db/Oracle/Oracle';
 import { setSessionCookie, getSessionCookie} from './Cookies';
 import { gfs_PGM_REDUCER, gfs_getStoreValue, gfs_dispatch } from './Method/Store';
 import './login.css';
@@ -12,33 +12,28 @@ gfs_PGM_REDUCER('login');
 
 const onClick = async(e, user_id, pass_cd) => {
 
-  let result = await getDynamicSql_Mysql(
+  let result = await getDynamicSql_Oracle(
     'Common/Common',
-    'login',
+    'LOGIN',
     [{user_id,
       pass_cd}]
   ); 
 
-  if(result.data.result){
-    if(result.data.data.length === 0){
-      alert('로그인 정보가 잘못되었습니다.');
-    }else{
+  if(result.data.rows.length > 0){
+    gfo_getInput('login', 'id').setValue('');
+    gfo_getInput('login', 'pwd').setValue('');
 
-      gfo_getInput('login', 'id').setValue('');
-      gfo_getInput('login', 'pwd').setValue('');
+    const width = window.screen.availWidth;
+    const height = window.screen.availHeight;
 
-      const width = window.screen.availWidth;
-      const height = window.screen.availHeight;
+    const winProperties = 'fullscreen=yes, location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
 
-      const winProperties = 'fullscreen=yes, location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
-
-      e.preventDefault(); 
-      setSessionCookie('session', 'SUCCESS', 1/1440);   
-      let win = window.open('Home', 'DK', winProperties);
-      win.moveTo(0, 0);
-    }
+    e.preventDefault(); 
+    setSessionCookie('session', 'SUCCESS', 1/1440);   
+    let win = window.open('Home', 'YK', winProperties);
+    win.moveTo(0, 0);
   }else{
-    alert('로그인에 실패했습니다.')
+    alert('로그인 정보가 잘못되었습니다.');
   }
 };
 

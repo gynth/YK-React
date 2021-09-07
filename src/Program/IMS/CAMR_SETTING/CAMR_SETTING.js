@@ -77,10 +77,7 @@ class CAMR_SETTING extends Component {
         'ZM_IMS_CAMERA_DELETE',
         [{
           AREA_TP: selectRow.AREA_TP,
-          CAMERA_IP: selectRow.CAMERA_IP,
-          RTSP_URL: selectRow.RTSP_URL,
-          RTSP_PORT: selectRow.RTSP_PORT,
-          USE_YN : selectRow.USE_YN
+          CAMERA_IP: selectRow.CAMERA_IP
         }]
       )
     }
@@ -111,8 +108,10 @@ class CAMR_SETTING extends Component {
         [{
           AREA_TP: e.AREA_TP,
           CAMERA_IP: e.CAMERA_IP,
-          RTSP_URL: e.RTSP_URL,
-          RTSP_PORT: e.RTSP_PORT,
+          CAMERA_NAM: e.CAMERA_NAM,
+          SEQ: e.SEQ,
+          START_PORT: e.START_PORT,
+          MAX_CONNECTION: e.MAX_CONNECTION,
           USE_YN : e.USE_YN
         }]
       )
@@ -252,11 +251,27 @@ class CAMR_SETTING extends Component {
                             }
                           }),
                           columnInput({
-                            name: 'RTSP_URL',
-                            header: 'RTSP URL',
+                            name: 'CAMERA_NAM',
+                            header: '카메라이름',
                             width : 250,
-                            readOnly: true,
+                            readOnly: false,
+                            color : '#0063A9',
                             align : 'left',
+                            fontSize: '18',
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.readOnly = false;
+                              }else{
+                                control.readOnly = true;
+                              }
+                            }
+                          }),
+                          columnInput({
+                            name: 'SEQ',
+                            header: '구성순서',
+                            width : 150,
+                            readOnly: true,
+                            align : 'right',
                             fontSize: '18',
                             onRender: (value, control, rows) => {
                               if(rows.phantom){
@@ -267,8 +282,23 @@ class CAMR_SETTING extends Component {
                             }
                           }),   
                           columnInput({
-                            name: 'RTSP_PORT',
-                            header: 'RTSP PORT',
+                            name: 'START_PORT',
+                            header: '시작Port',
+                            width : 200,
+                            readOnly: true,
+                            align : 'right',
+                            fontSize: '18',
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.readOnly = false;
+                              }else{
+                                control.readOnly = true;
+                              }
+                            }
+                          }),   
+                          columnInput({
+                            name: 'MAX_CONNECTION',
+                            header: '최대접속자',
                             width : 100,
                             readOnly: true,
                             align : 'right',

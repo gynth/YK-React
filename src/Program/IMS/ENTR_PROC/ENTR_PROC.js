@@ -58,6 +58,8 @@ class ENTR_PROC extends Component {
     const mainData = await YK_WEB_REQ(`tally_mstr_drive.jsp`);
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    grid.clear();
+    
     if(main){
 
       grid.resetData(main);

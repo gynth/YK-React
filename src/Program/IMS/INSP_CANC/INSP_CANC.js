@@ -288,8 +288,8 @@ class INSP_CANC extends Component {
     const mainData = await YK_WEB_REQ('tally_approve_cancel.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
-
     grid.clear();
+
     gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(''); //사전등급
     gfo_getInput(this.props.pgm, 'iron_grade').setValue('');   //고철등급
     gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue('');   //상세고철등급
@@ -297,8 +297,8 @@ class INSP_CANC extends Component {
     gfo_getInput(this.props.pgm, 'reduce_name').setValue(''); //감량사유
     gfo_getCombo(this.props.pgm, 'return_code').setValue('');      //반품구분
     gfo_getInput(this.props.pgm, 'return_gubun_name').setValue('');     //반품구분사유
-    gfo_getCombo(this.props.pgm, 'return_reason').setValue('');      //반품구분
-    gfo_getInput(this.props.pgm, 'return_reason_desc').setValue('');     //반품구분사유
+    gfo_getCombo(this.props.pgm, 'return_reason').setValue('');      //취소사유
+    gfo_getInput(this.props.pgm, 'return_reason_desc').setValue('');     //취소사유
 
     gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
     gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});

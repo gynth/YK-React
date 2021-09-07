@@ -271,6 +271,8 @@ class SHIP_PROC extends Component {
     const mainData = await YK_WEB_REQ(`tally_ship_wait.jsp`);
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    grid.clear();
+    
     if(main){
       
       grid.resetData(main);

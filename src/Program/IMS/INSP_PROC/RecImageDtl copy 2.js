@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { MILESTONE, RTSP } from '../../../WebReq/WebReq';
+import { TOKEN, MILESTONE, RTSP } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
-import { gfs_dispatch } from '../../../Method/Store';
-import { gfc_showMask, gfc_sleep, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
-import axios from 'axios';
-
+import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import { throttle } from 'lodash';
+import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
 const jsmpeg = require('jsmpeg');
 
 function RecImageDtl(props) {
@@ -16,8 +15,6 @@ function RecImageDtl(props) {
   }, (p, n) => {
     return p === n;
   });
-
-  const [port, setPort] = useState(0);
   
   const setModalIsOpen = (open) => {
     
@@ -28,29 +25,25 @@ function RecImageDtl(props) {
   }
 
   const start = async() => {
-      MILESTONE({reqAddr: 'CONNECT',
-                 device : props.device})
-  }
+      MILESTONE({
+        reqAddr: 'CONNECT',
+        device : props.device
+      });
 
-  const getPort = async() => {
-    const host = `http://10.10.10.136:3000/getEmptyPort`;
-    const option = {
-      url   : host,
-      method: 'POST',
-      // headers: {
-      //   'Access-Control-Allow-Origin': '*'
-      // },
-      data: {
-        device : props.device,
-        MAX_CONNECTION: props.maxCon,
-        START_PORT: props.startPort
+      let conText = imageRef.current.getContext('2d');
+      let img = new Image();
+      img.onload = () => {
+       conText.drawImage(img, 0, 0, imageRef.current.width, imageRef.current.height);
       }
-    };
-  
-    await gfc_sleep(500);
 
-    const result = await axios(option);
-    setPort(result.data.port);
+      setInterval(() => {
+        MILESTONE({
+          reqAddr: 'LIVE',
+          device : props.device
+        }).then(e => {
+            img.src = e.data;
+        })
+      }, 30);
   }
 
   const style={
@@ -80,51 +73,35 @@ function RecImageDtl(props) {
     }
   };
 
-  var client = null;
-  var canvas = null;
-  const setRtsp = () => {
+  // var client = null;
+  // var canvas = null;
+  // const setRtsp = () => {
 
-    client = new WebSocket(`ws://10.10.10.136:${port}`);
-    canvas = imageRef.current;
-    new jsmpeg(client, {
-      canvas 
-    });
-  }
-
-  useEffect(() => {
-    start();
-  }, [])
+  //   client = new WebSocket(`ws://10.10.10.136:${props.rtspPort}`);
+  //   canvas = imageRef.current;
+  //   new jsmpeg(client, {
+  //     canvas 
+  //   });
+  // }
 
   useEffect(() => { 
-    if(port === 0)
-      getPort();
+    start();
+    // RTSP({reqAddr: 'RTSPStart',
+    //       device: props.device,
+    //       streamUrl: props.rtspUrl,
+    //       port: props.rtspPort
+    //     }).then(e => {
+    //       if(e.data === 'OK'){
+    //         setRtsp();
+    //       }
+    //     })
 
-    if(port === 'Connection Full'){
-      alert(`${props.cameraNam} 카메라의 최대접속 유저가 초과되었습니다.`);
-      return;
-    }
-
-    if(port === 0){
-      return;
-    }
-
-    RTSP({reqAddr: 'RTSPStart',
-          device   : props.device,
-          streamUrl: `rtsp://admin:admin@10.10.10.136:554/live/${props.device}`,
-          port: port
-        }).then(e => {
-          if(e.data === 'OK'){
-            setRtsp();
-          }
-        })
-
-    return() => {
-      setPort(0);
-      client.close();
-    }
+    // return() => {
+    //   client.close();
+    // }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, port])
+  }, [])
 
   // const debounceOnClick = throttle((e, ptz) => {
   //   TOKEN({}).then(e => {
@@ -149,14 +126,22 @@ function RecImageDtl(props) {
   }
 
   const img = <>
+                {/* rtsp://admin:admin13579@10.10.136.112:554/video1+audio1  */}
+
                 <canvas 
                   ref={imageRef} 
                   style={{width:'100%', height:'100%'}}
                   onDoubleClick={e => {
                     setModalIsOpen(true);
                   }}
-                  
                 />
+
+                {/* <img style={{height:'100%', width:'100%'}} alt='yk_image' 
+                    ref={imageRef}
+                    onDoubleClick={e => {
+                      setModalIsOpen(true);
+                    }}>
+                </img> */}
                 <div className='picture_save' onClick={e => {
                   
                   gfc_showMask();
@@ -169,6 +154,7 @@ function RecImageDtl(props) {
                     }
                   )
                 }}>
+                  {/* <a href='#!' className='server'></a> */}
                 </div>
                 <div className="direction">
                 <button type='' className='left' onClick={e => {

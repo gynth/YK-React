@@ -77,13 +77,15 @@ class INSP_PROC extends Component {
       }
 
       let ipArr = [];
-      let rtspUrl = [];
-      let rtspPort = [];
+      let startPort = [];
+      let maxCon = [];
+      let cameraNam = [];
 
       for(let i = 0; i < data.length; i++){
         ipArr.push(data[i].CAMERA_IP);
-        rtspUrl.push(data[i].RTSP_URL);
-        rtspPort.push(data[i].RTSP_PORT);
+        startPort.push(data[i].START_PORT);
+        maxCon.push(data[i].MAX_CONNECTION);
+        cameraNam.push(data[i].CAMERA_NAM);
       }
 
       // let ipArr = ['10.10.136.112', '10.10.136.128'];
@@ -94,7 +96,13 @@ class INSP_PROC extends Component {
       for(let i = 0; i < ipArr.length; i++){
         const camera = this.device.find(e1 => e1.Name.indexOf(ipArr[i]) >= 0);
         if(camera){
-          this.infoArr.push({camera, ipArr: ipArr[i], rtspUrl: rtspUrl[i], rtspPort: rtspPort[i]}); 
+          this.infoArr.push({
+            camera, 
+            ipArr: ipArr[i], 
+            maxCon: maxCon[i], 
+            startPort: startPort[i], 
+            cameraNam: cameraNam[i]
+          }); 
         }
       }
 
@@ -115,7 +123,39 @@ class INSP_PROC extends Component {
   //#endregion
 
   //#region PTZ
-  debounceKeyDown = throttle((e, device) => {
+  // debounceKeyDown = throttle((e, device) => {
+  //   let ptz = '';
+  //   if(e.keyCode === 37) ptz = 'left';
+  //   else if(e.keyCode === 38) ptz = 'up';
+  //   else if(e.keyCode === 39) ptz = 'right';
+  //   else if(e.keyCode === 40) ptz = 'down';
+
+  //   if(ptz !== ''){
+  //     MILESTONE({reqAddr: 'PTZ',
+  //     device: device.Guid,
+  //     ptz})
+  //   }
+  // }, 1000);
+
+  // debounceMouseWheel = throttle((e, device) => {
+  //   let ptz = '';
+  //   if(e.deltaX === -0){
+  //     if (e.wheelDelta > 0){
+  //       ptz = 'zoomin';
+  //     }else{
+  //       ptz = 'zoomout';
+  //     }
+  //   }
+
+  //   if(ptz !== ''){
+  //     MILESTONE({reqAddr: 'PTZ',
+  //     device: device.Guid,
+  //     ptz})
+  //   }
+  // }, 1000);
+
+
+  debounceKeyDown = (e, device) => {
     let ptz = '';
     if(e.keyCode === 37) ptz = 'left';
     else if(e.keyCode === 38) ptz = 'up';
@@ -127,9 +167,9 @@ class INSP_PROC extends Component {
       device: device.Guid,
       ptz})
     }
-  }, 1000);
+  };
 
-  debounceMouseWheel = throttle((e, device) => {
+  debounceMouseWheel = (e, device) => {
     let ptz = '';
     if(e.deltaX === -0){
       if (e.wheelDelta > 0){
@@ -144,7 +184,7 @@ class INSP_PROC extends Component {
       device: device.Guid,
       ptz})
     }
-  }, 1000);
+  };
 
   onKeyDown = (e) => {
     e.stopPropagation();
@@ -533,6 +573,59 @@ class INSP_PROC extends Component {
   Retrieve = async () => {
     gfc_showMask();
 
+    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
+
+    gfo_getInput(this.props.pgm, 'disp_scrp_ord_no').setValue('');      //배차번호
+    gfo_getInput(this.props.pgm, 'disp_scrp_grd_nm').setValue('');      //배차등급
+    gfo_getInput(this.props.pgm, 'disp_real_vender_name').setValue(''); //실공급자
+    gfo_getInput(this.props.pgm, 'disp_load_area_nm').setValue('');     //실상차지
+    gfo_getInput(this.props.pgm, 'disp_load_area_addr').setValue('');   //주소
+
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
+    gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+    gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+      chit     : 'N'
+    });
+
+    gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
+      scaleNumb       : '',
+      scrp_ord_no     : '',
+      scrp_grd_nm     : '',
+      real_vender_name: '',
+      load_area_nm    : '',
+      load_area_addr  : ''
+    });
+
+    gfs_dispatch('INSP_PROC_MAIN', 'DISP_PIC', {
+      scaleNumb           : '',
+      scrp_ord_no         : '',
+  
+      empty_front_date    : '',
+      empty_front         : '',
+      empty_front_gps_addr: '',
+      empty_rear_date     : '',
+      empty_rear          : '',
+      empty_rear_gps_addr : '',
+      cargo_front_date    : '',
+      cargo_front         : '',
+      cargo_front_gps_addr: '',
+      cargo_rear_date     : '',
+      cargo_rear          : '',
+      cargo_rear_gps_addr : ''
+    });
+
     const headData = await YK_WEB_REQ('tally_mstr_header.jsp');
     const header = headData.data.dataSend;
     if(header){
@@ -548,6 +641,8 @@ class INSP_PROC extends Component {
     const mainData = await YK_WEB_REQ('tally_mstr_wait.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    grid.clear();
+    
     if(main){
       grid.resetData(main);
       gfg_setSelectRow(grid);
@@ -1118,8 +1213,9 @@ class INSP_PROC extends Component {
                     seq={1}
                     device={this.state.device[0].camera.Guid} 
                     Name={this.state.device[0].camera.Name}
-                    rtspUrl={this.state.device[0].rtspUrl}
-                    rtspPort={this.state.device[0].rtspPort}
+                    maxCon={this.state.device[0].maxCon}
+                    startPort={this.state.device[0].startPort}
+                    cameraNam={this.state.device[0].cameraNam}
                     cam='STD_CAM_OPEN' 
                     focus='STD_CAM_FOCUS' 
                     rec='STD_CAM_REC' 
@@ -1130,13 +1226,22 @@ class INSP_PROC extends Component {
                     seq={2} 
                     device={this.state.device[1].camera.Guid} 
                     Name={this.state.device[1].camera.Name}
-                    rtspUrl={this.state.device[1].rtspUrl}
-                    rtspPort={this.state.device[1].rtspPort}
+                    maxCon={this.state.device[1].maxCon}
+                    startPort={this.state.device[1].startPort}
+                    cameraNam={this.state.device[1].cameraNam}
                     cam='DUM_CAM_OPEN' 
                     focus='DUM_CAM_FOCUS' 
                     rec='DUM_CAM_REC' 
                     image='DUM_CAM_IMG'/> 
                 }
+              </div>
+              <div className="cctv_other_list">
+                  <ul>
+                      <li></li>
+                      <li></li>
+                      <li></li>
+                      <li></li>
+                  </ul>
               </div>
             </div>
         </div>

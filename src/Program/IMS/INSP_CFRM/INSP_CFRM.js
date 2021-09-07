@@ -286,8 +286,8 @@ class INSP_CFRM extends Component {
     const mainData = await YK_WEB_REQ('tally_approve_wait.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
-    
     grid.clear();
+    
     gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(''); //사전등급
     gfo_getInput(this.props.pgm, 'iron_grade').setValue('');   //고철등급
     gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue('');   //상세고철등급

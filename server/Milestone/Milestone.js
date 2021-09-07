@@ -70,7 +70,7 @@ router.post('/CONNECT', (req, res) => {
     //                       global.MILESTONE_DATA[device].liveImg = result[2];
     //                     }
     //                   })   
-    //                 }, 1)
+    //                 }, 10)
     //     }
     //   }
     // })

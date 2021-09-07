@@ -316,6 +316,8 @@ class INSP_HIST extends Component {
     const mainData = await YK_WEB_REQ(`tally_process_f2.jsp?carnumb=${carNumb}&ld=20210417&nd=20210617`);
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    grid.clear();
+    
     if(main){
 
       const dataMod = [];

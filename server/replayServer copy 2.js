@@ -4,6 +4,7 @@ const hls = require('hls-server');
 const express = require('express');
 const app3003 = express();
 const cors = require('cors');
+var mime = require('mime');
 
 app3003.use(express.json());
 app3003.use(cors());  
@@ -12,9 +13,41 @@ app3003.post('/',  (req, res) => {
   let scaleNumb = req.body.scaleNumb;
   let Name = req.body.Name;
   let resourcePath = `F:/IMS/Replay/${scaleNumb}/${Name}/${scaleNumb}.mp4`;
-  
+
+  let mimetype = mime.getType(resourcePath);
   let stream = fs.createReadStream(resourcePath);
- 
+  
+  if(stream){
+    res.writeHead(200, {
+      'Content-Type': mimetype,
+      'Content-Disposition': 'attachment; filename=' + scaleNumb + '.mp4'
+    })
+  }
+
+  stream.on('data', (chunk) => {
+    console.log(`전송 데이터 청크 ${chunk.length} bytes.`);
+
+    if(!res.write(chunk)){
+      console.log('pause');
+      stream.pause();
+    }
+  });
+
+  stream.on('end', () => {
+    console.log('파일 전송 끝');
+    // remove zip file
+    // fs.unlink(zipFilePath, function (err) {
+    //   if (err) throw new errors.NotFound('File not found.');
+    //   console.log('file deleted');
+    // });
+    
+    res.end();
+  });
+  res.on('drain', function () {
+    console.log('drain');
+    stream.resume();
+ });
+
   stream.pipe(res);
 });
 

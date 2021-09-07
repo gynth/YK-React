@@ -82,26 +82,30 @@ const Common = (fn, param) => {
     `    AND seq       = ${param[0].seq}` ;
   }else if(fn === 'ZM_IMS_CAMERA_SELECT'){
     query = 
-    ` SELECT * FROM ZM_IMS_CAMERA      `;
+    ` SELECT * FROM ZM_IMS_CAMERA ORDER BY SEQ     `;
   }else if(fn === 'ZM_IMS_CAMERA_INSERT'){
     query = 
     ` INSERT INTO ZM_IMS_CAMERA      ` +
-    ` (AREA_TP   ` +
-    ` ,CAMERA_IP ` + 
-    ` ,RTSP_URL  ` +
-    ` ,RTSP_PORT ` +
-    ` ,USE_YN    ` +
-    `)VALUES     ` +
+    ` (AREA_TP    ` +
+    ` ,CAMERA_IP  ` + 
+    ` ,CAMERA_NAM ` +
+    ` ,SEQ        ` +
+    ` ,START_PORT ` +
+    ` ,MAX_CONNECTION ` +
+    ` ,USE_YN     ` +
+    `)VALUES      ` +
     ` ('${param[0].AREA_TP}'` +
     ` ,'${param[0].CAMERA_IP}'` +
-    ` ,'${param[0].RTSP_URL}'` +
-    ` ,${param[0].RTSP_PORT}` +
+    ` ,'${param[0].CAMERA_NAM}'` +
+    ` ,${param[0].SEQ}` +
+    ` ,${param[0].START_PORT}` +
+    ` ,${param[0].MAX_CONNECTION}` +
     ` ,'${param[0].USE_YN}')`;
   }else if(fn === 'ZM_IMS_CAMERA_UPDATE'){
     query = 
     ` UPDATE ZM_IMS_CAMERA      ` +
-    `    SET AREA_TP  = '${param[0].AREA_TP}',` +
-    `        USE_YN   = '${param[0].USE_YN}'` +
+    `    SET USE_YN   = '${param[0].USE_YN}'` +
+    `       ,SEQ      = ${param[0].SEQ}` +
     `  WHERE CAMERA_IP = '${param[0].CAMERA_IP}'` ;
   }else if(fn === 'ZM_IMS_CAMERA_DELETE'){
     query = 
@@ -111,12 +115,21 @@ const Common = (fn, param) => {
     query = 
     ` SELECT * FROM ZM_IMS_CAMERA      ` +
     `  WHERE AREA_TP  = '${param[0].AREA_TP}' ` +
-    `    AND USE_YN   = 'Y' `;
-  }else if(fn === 'INSP_CANC_REASON')
+    `    AND USE_YN   = 'Y' ` +
+    `  ORDER BY SEQ `;
+  }else if(fn === 'INSP_CANC_REASON'){
     query = 
     ` SELECT C.CODEID,C.KORFNM ` +
     ` FROM PO_IRON_CODE_LINE C ` + 
     ` WHERE C.CODETP = 'P670'  ` ;
+  }else if(fn === 'LOGIN'){
+    query = 
+    ` SELECT * ` +
+    `   FROM zm_ims_user ` + 
+    `  WHERE USER_ID = '${param[0].user_id}'  `+ 
+    `    AND USER_PWD = '${param[0].pass_cd}'  ` ;
+  }
+
   return query;
 };
 

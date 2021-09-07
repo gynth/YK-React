@@ -284,31 +284,33 @@ class DISP_PROC extends Component {
 
     gfc_showMask();
 
-    // gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
-    // gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
-    // gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
-    // gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
-    // gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
-    // gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
-    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
-    // gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
-    // gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
-    // gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
-    // gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
+    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
 
-    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
-    // gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
 
-    // gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-    //   itemFlag : '',
-    //   chit     : 'N'
-    // });
+    gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
+      itemFlag : '',
+      chit     : 'N'
+    });
 
     const mainData = await YK_WEB_REQ('tally_mstr_pass.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    grid.clear();
+    
     if(main){
       grid.resetData(main);
       gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});

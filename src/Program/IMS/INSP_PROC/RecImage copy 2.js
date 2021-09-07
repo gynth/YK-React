@@ -24,7 +24,7 @@ function RecImage(props) {
   });
 
  
-  const img = <a href='#!' 
+  const img = <a href='#!'
                   onFocus={() => {
                     if(!isOpen){ 
                       let obj = {}; 
@@ -51,9 +51,8 @@ function RecImage(props) {
                           seq={props.seq}
                           device={props.device} 
                           Name={props.Name}
-                          maxCon={props.maxCon}
-                          startPort={props.startPort}
-                          cameraNam={props.cameraNam}
+                          rtspUrl={props.rtspUrl}
+                          rtspPort={props.rtspPort}
                           cam={props.cam}
                           focus={props.focus}
                           rec={props.rec} 
