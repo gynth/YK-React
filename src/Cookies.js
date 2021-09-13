@@ -1,4 +1,3 @@
-import React from "react";
 import * as Cookies from "js-cookie";
 
 export const setSessionCookie = (key, value, expire) => {

@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import GifPlayer from 'react-gif-player';
-import { MILESTONE } from '../../../WebReq/WebReq';
 
 // let interval;
 

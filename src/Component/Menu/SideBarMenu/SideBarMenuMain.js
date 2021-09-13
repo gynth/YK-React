@@ -1,7 +1,7 @@
 import React from 'react';
 import '../Menu.css';
 import { useSelector } from 'react-redux';
-import { gfs_dispatch, gfs_PGM_REDUCER, gfs_injectAsyncReducer } from '../../../Method/Store';
+import { gfs_dispatch, gfs_injectAsyncReducer } from '../../../Method/Store';
 
 import Li from './SideBarMainView';
 import Title from './SideBarMenuTitle';
@@ -76,7 +76,10 @@ const SideBarMenu = (props) => {
             <Li MENU_ID='CFRM' index='3' nam='확정'></Li>
           </ul>
           <div className='footer_menu'>
-            <div className='setting'><span onClick={e => {
+            <ul>
+              <Li MENU_ID='SETT' index='5' nam='설정'></Li>
+            </ul>
+            {/* <div className='setting'><span onClick={e => {
 
               gfs_PGM_REDUCER('CAMR_SETTING');
               gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
@@ -86,7 +89,7 @@ const SideBarMenu = (props) => {
                                 programNam: '카메라정보'
                               }
               }));
-            }}>옵션</span></div>
+            }}>옵션</span></div> */}
           </div>
         </div>
         <div className='move_menu'>

@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 export function YK_WEB_REQ(addr){
-  const host = 'http://10.10.10.136:3001/YK';
+  // const host = 'http://10.10.10.136:3001/YK';
   // const host = 'http://211.231.136.150:3001/YK';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/YK';
   const option = {
     url   : host,
     method: 'POST',
@@ -25,8 +26,9 @@ export function YK_WEB_REQ(addr){
 };
 
 export function YK_WEB_REQ_DIRECT(addr){
-  const host = 'http://10.10.10.136:3001/YK/DIRECT';
+  // const host = 'http://10.10.10.136:3001/YK/DIRECT';
   // const host = 'http://211.231.136.150:3001/YK';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/YK/DIRECT';
   const option = {
     url   : host,
     method: 'POST',
@@ -49,8 +51,9 @@ export function YK_WEB_REQ_DIRECT(addr){
 };
 
 export function YK_WEB_REQ_DISP(addr){
-  const host = 'http://10.10.10.136:3001/YK/DISP';
+  // const host = 'http://10.10.10.136:3001/YK/DISP';
   // const host = 'http://211.231.136.150:3001/YK';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/YK/DISP';
   const option = {
     url   : host,
     method: 'POST',
@@ -73,8 +76,9 @@ export function YK_WEB_REQ_DISP(addr){
 };
 
 export function MILESTONE_LIVE(data) {
-  const host = `http://10.10.10.136:3002/MILESTONE/LIVE?device=${data['device']}`;
+  // const host = `http://10.10.10.136:3002/MILESTONE/LIVE?device=${data['device']}`;
   // const host = `http://211.231.136.150:3002/MILESTONE/LIVE?device=${data['device']}`;
+  const host = `http://ims.yksteel.co.kr:90/WebServer/MILESTONE/LIVE?device=${data['device']}`;
   const option = {
     url   : host,
     method: 'GET',
@@ -97,8 +101,9 @@ export function MILESTONE_LIVE(data) {
 }
 
 export function MILESTONE(data){
-  const host = `http://10.10.10.136:3002/MILESTONE/${data['reqAddr']}`;
+  // const host = `http://10.10.10.136:3002/MILESTONE/${data['reqAddr']}`;
   // const host = `http://211.231.136.150:3002/MILESTONE/${data['reqAddr']}`;
+  const host = `http://ims.yksteel.co.kr:90/WebServer/MILESTONE/${data['reqAddr']}`;
   const option = {
     url   : host,
     method: 'POST',
@@ -135,7 +140,8 @@ export function MILESTONE(data){
 };
 
 export function RTSP(data){
-  const host = `http://10.10.10.136:3000/${data['reqAddr']}`;
+  // const host = `http://10.10.10.136:3000/${data['reqAddr']}`;
+  const host = `http://ims.yksteel.co.kr:90/WebServer/${data['reqAddr']}`;
   const option = {
     url   : host,
     method: 'POST',
@@ -146,7 +152,12 @@ export function RTSP(data){
       device     : data['device'],
       streamUrl  : data['streamUrl'],
       port       : data['port'],
-      reqAddr    : data['reqAddr']
+      reqAddr    : data['reqAddr'],
+      width      : data['width'],
+      height     : data['height'],
+      fps        : data['fps'],
+      client     : data['client'],
+      canvas     : data['canvas']
     },
     timeout: 30000
   };
@@ -162,8 +173,9 @@ export function RTSP(data){
 };
 
 export function TOKEN(data){
-  const host = `http://10.10.10.136:3002/Token`;
+  // const host = `http://10.10.10.136:3002/Token`;
   // const host = `http://211.231.136.150:3002/Token`;
+  const host = `http://ims.yksteel.co.kr:90/WebServer/Token`;
   const option = {
     url   : host,
     method: 'POST',

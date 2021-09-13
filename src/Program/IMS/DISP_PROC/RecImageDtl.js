@@ -29,7 +29,9 @@ function RecImageDtl(props) {
 
   const movieDown = () => {
     gfc_showMask();
-    const host = `http://10.10.10.136:3003/`;
+    // const host = `http://10.10.10.136:3003/`;
+    // const host = `http://10.10.10.136:3003/MovieDown`;
+    const host = 'http://ims.yksteel.co.kr:90/WebServer/MovieDown';
     const option = {
       url   : host,
       method: 'POST',
@@ -111,7 +113,8 @@ function RecImageDtl(props) {
       ).then(e => {
         if(e.data.rows.length > 0){
           setCameraName(e.data.rows[0][5]);
-          setPlayUrl(`http://10.10.10.136:3003/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
+          // setPlayUrl(`http://10.10.10.136:3003/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
+          setPlayUrl(`http://ims.yksteel.co.kr:90/WebServer/Replay/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
         }
       }).catch(e => {
         console.log('DISP_PROC>' + e);

@@ -132,7 +132,8 @@
     "webpack-manifest-plugin": "2.2.0",
     "websocket": "^1.0.34",
     "winston": "^3.3.3",
-    "workbox-webpack-plugin": "5.1.4"
+    "workbox-webpack-plugin": "5.1.4",
+    "ws": "^8.2.2"
   },
   "scripts": {
     "start": "npm-run-all -p starts:**",

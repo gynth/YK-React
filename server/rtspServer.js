@@ -39,37 +39,97 @@ app3000.post('/getEmptyPort', (req, res) => {
   }
 })
 
+app3000.post('/WebSocket', (req, res) => {
+  // const wsModule = require('ws');
+  const port = req.body.port;
+
+  var WebSocketClient = require('websocket').client;
+  var client = new WebSocketClient();
+  client.on('connectFailed', function(error) {
+    console.log('Connect Error: ' + error.toString());
+  });
+  
+  client.on('connect', (con) => {
+    res.send(
+      client
+    );
+
+    // con.on('message', function(message) {
+    //   res.json({message});
+    // });
+    // res.send({client: con});
+  })
+
+  // res.send({client});
+
+  // client.on('connect', function(connection) {
+  //   console.log('WebSocket Client Connected');
+  //   connection.on('error', function(error) {
+  //       console.log("Connection Error: " + error.toString());
+  //   });
+  //   connection.on('close', function() {
+  //       console.log('echo-protocol Connection Closed');
+  //   });
+  //   connection.on('message', function(message) {
+  //       if (message.type === 'utf8') {
+  //           console.log("Received: '" + message.utf8Data + "'");
+  //       }
+  //   });
+
+  //   res.json('OK');
+  // });
+
+  // client.connect(`ws://localhost:${port}/`, 'echo-protocol');
+  client.connect(`ws://10.10.10.136:${port}/`);
+
+  
+  // const WebSocket = req.body.client;
+  // const canvas = req.body.canvas;
+
+  // const client = new WebSocket(`ws://10.10.10.136:${port}`)
+  // res.json('OK');
+})
+
 app3000.post('/RTSPStart', (req, res) => {
   
   try{
-    // if(global.MILESTONE_RTSP[device] === undefined){
-      const device = req.body.device;
-      const streamUrl = req.body.streamUrl;
-      const port = req.body.port;
-      
-      // const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
-      // const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
+    const device = req.body.device;
+    const streamUrl = req.body.streamUrl;
+    const port = req.body.port;
+    const width = req.body.width;
+    const height = req.body.height;
+    const fps = req.body.fps;
     
-      // const streams = new Stream({
-      //   name: device, 
-      //   streamUrl: streamUrl,
-      //   wsPort: port, //3100, 
-      //   width: 1920,  
-      //   height: 1080,
-      //   interval: null
-      // });            
+    // const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
+    // const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
+  
+    // const streams = new Stream({
+    //   name: device, 
+    //   streamUrl: streamUrl,
+    //   wsPort: port, //3100, 
+    //   width: 1920,  
+    //   height: 1080,
+    //   interval: null
+    // });            
 
+    if(global.MILESTONE_RTSP[device] === undefined){
       new Stream({
         name : device,
         streamUrl,
         wsPort: port, //3100, 
-        width: 1920,  
-        height: 1080,
-        interval: null
+        // width: 1920,  
+        // height: 1080,
+        width,
+        height,
+        interval: null,
+        ffmpegOptions: { // options ffmpeg flags
+          '-stats': '',
+          '-r': fps,
+        }
       });          
       
-    //   global.MILESTONE_RTSP[device] = streams;
-    // }
+      global.MILESTONE_RTSP[device] = 'Y';
+    }
      
     res.json('OK') ;
   }catch(e){
@@ -81,12 +141,14 @@ app3000.post('/RTSPStop', (req, res) => {
   try{
     const device = req.body.device;
     const port   = req.body.port;
-    global.MILESTONE_RTSP[device].port = global.MILESTONE_RTSP[device].port.filter(e => {
-      if(e === port) return false;
-      else return true;
-    })
+    // global.MILESTONE_RTSP[device].port = global.MILESTONE_RTSP[device].port.filter(e => {
+    //   if(e === port) return false;
+    //   else return true;
+    // })
 
-    console.log(global.MILESTONE_RTSP[device]);
+    global.MILESTONE_RTSP[device] = undefined;
+
+    // console.log(global.MILESTONE_RTSP[device]);
      
     res.json('OK') ;   
   }catch (e){

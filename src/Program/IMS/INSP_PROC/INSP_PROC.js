@@ -1,19 +1,17 @@
 //#region import
 import React, { Component } from 'react';
-import axios from 'axios';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
 import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_now } from '../../../Method/Comm';
-import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
-import { gfo_getCombo, gfo_getInput, gfo_getTextarea, gfo_getCheckbox } from '../../../Method/Component';
+import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
+import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
-import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 
 import Combobox from '../../../Component/Control/Combobox';
@@ -30,9 +28,8 @@ import RecImage from './RecImage';
 
 import GifPlayer from 'react-gif-player';
 
-import { YK_WEB_REQ, YK_WEB_REQ_DIRECT, YK_WEB_REQ_DISP } from '../../../WebReq/WebReq';
+import { YK_WEB_REQ, YK_WEB_REQ_DIRECT } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
-import { throttle } from 'lodash';
 //#endregion
 
 class INSP_PROC extends Component {
@@ -107,7 +104,8 @@ class INSP_PROC extends Component {
       }
 
       if(this.infoArr.length > 0){
-        this.setState(this.state.device = this.infoArr);
+        // this.setState(this.state.device = this.infoArr);
+        gfs_dispatch('INSP_PROC_MAIN', 'DEVICE', {DEVICE: this.infoArr});
       }
     }
   }
@@ -119,6 +117,19 @@ class INSP_PROC extends Component {
       window.onkeydown = e => this.onKeyDown(e);
       window.onmousewheel = e => this.onMouseWheel(e);
     }
+  }
+
+  onCameraChange = () => {
+    const cameraDevice = gfs_getStoreValue('INSP_PROC_MAIN', 'DEVICE');
+    if(cameraDevice !== undefined){
+      if(cameraDevice === 0) return;
+
+      if(JSON.stringify(cameraDevice) !== JSON.stringify(this.state.device)){
+        this.setState({
+          device: cameraDevice
+        });
+      }
+    } 
   }
   //#endregion
 
@@ -281,6 +292,8 @@ class INSP_PROC extends Component {
             time   : new Date() 
           } : nowState.ON_ACTIVE,
 
+          DEVICE       : nowState === undefined ? 0 :nowState.DEVICE,
+
           MAIN_WAIT    : nowState === undefined ? 0 : nowState.MAIN_WAIT,
           MAIN_TOTAL   : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
           MAIN_WEIGHT  : nowState === undefined ? 0 : nowState.MAIN_WEIGHT,
@@ -296,12 +309,18 @@ class INSP_PROC extends Component {
 
           STD_CAM_IMG  : nowState === undefined ? null : nowState.STD_CAM_IMG,
           DUM_CAM_IMG  : nowState === undefined ? null : nowState.DUM_CAM_IMG,
+          ETC1_CAM_IMG : nowState === undefined ? false : nowState.ETC1_CAM_IMG,
+          ETC2_CAM_IMG : nowState === undefined ? false : nowState.ETC2_CAM_IMG,
 
           STD_CAM_OPEN : nowState === undefined ? false : nowState.STD_CAM_OPEN,
           DUM_CAM_OPEN : nowState === undefined ? false : nowState.DUM_CAM_OPEN,
+          ETC1_CAM_OPEN : nowState === undefined ? false : nowState.ETC1_CAM_OPEN,
+          ETC2_CAM_OPEN : nowState === undefined ? false : nowState.ETC2_CAM_OPEN,
 
           STD_CAM_FOCUS: nowState === undefined ? false : nowState.STD_CAM_FOCUS,
           DUM_CAM_FOCUS: nowState === undefined ? false : nowState.DUM_CAM_FOCUS,
+          ETC1_CAM_FOCUS : nowState === undefined ? false : nowState.ETC1_CAM_FOCUS,
+          ETC2_CAM_FOCUS : nowState === undefined ? false : nowState.ETC2_CAM_FOCUS,
 
           STD_CAM_REC  : nowState === undefined ? {
             rec     : false,
@@ -355,7 +374,12 @@ class INSP_PROC extends Component {
         };
       }
 
-      if(action.type === 'MAIN_WAIT'){
+      if(action.type === 'DEVICE'){
+
+        return Object.assign({}, nowState, {
+          DEVICE : action.DEVICE
+        })
+      }else if(action.type === 'MAIN_WAIT'){
 
         return Object.assign({}, nowState, {
           MAIN_WAIT : action.MAIN_WAIT
@@ -420,6 +444,16 @@ class INSP_PROC extends Component {
         return Object.assign({}, nowState, {
           DUM_CAM_IMG : action.DUM_CAM_IMG
         })
+      }else if(action.type === 'ETC1_CAM_IMG'){
+
+        return Object.assign({}, nowState, {
+          ETC1_CAM_IMG : action.ETC1_CAM_IMG
+        })
+      }else if(action.type === 'ETC2_CAM_IMG'){
+
+        return Object.assign({}, nowState, {
+          ETC2_CAM_IMG : action.ETC2_CAM_IMG
+        })
       }else if(action.type === 'STD_CAM_OPEN'){
 
         return Object.assign({}, nowState, {
@@ -430,6 +464,16 @@ class INSP_PROC extends Component {
         return Object.assign({}, nowState, {
           DUM_CAM_OPEN : action.DUM_CAM_OPEN
         })
+      }else if(action.type === 'ETC1_CAM_OPEN'){
+
+        return Object.assign({}, nowState, {
+          ETC1_CAM_OPEN : action.ETC1_CAM_OPEN
+        })
+      }else if(action.type === 'ETC2_CAM_OPEN'){
+
+        return Object.assign({}, nowState, {
+          ETC2_CAM_OPEN : action.ETC2_CAM_OPEN
+        })
       }else if(action.type === 'STD_CAM_FOCUS'){
 
         return Object.assign({}, nowState, {
@@ -439,6 +483,16 @@ class INSP_PROC extends Component {
 
         return Object.assign({}, nowState, {
           DUM_CAM_FOCUS : action.DUM_CAM_FOCUS
+        })
+      }else if(action.type === 'ETC1_CAM_FOCUS'){
+
+        return Object.assign({}, nowState, {
+          ETC1_CAM_FOCUS : action.ETC1_CAM_FOCUS
+        })
+      }else if(action.type === 'ETC2_CAM_FOCUS'){
+
+        return Object.assign({}, nowState, {
+          ETC2_CAM_FOCUS : action.ETC2_CAM_FOCUS
         })
       }else if(action.type === 'STD_CAM_REC'){
 
@@ -549,6 +603,7 @@ class INSP_PROC extends Component {
 
     gfs_injectAsyncReducer('INSP_PROC_MAIN', INSP_PROC_MAIN);
     gfs_subscribe(this.onActivePage);
+    gfs_subscribe(this.onCameraChange);
     //#endregion
   }
 
@@ -563,7 +618,7 @@ class INSP_PROC extends Component {
   }
 
   Init = async() => {
-    this.milestoneInfo();
+    await this.milestoneInfo();
   }
 
   componentDidMount(){
@@ -969,10 +1024,6 @@ class INSP_PROC extends Component {
                     <button onClick={() =>{
                     }}>oracle</button>
                 </li>
-
-
-
-
               </ul> 
             </div>
 
@@ -1202,48 +1253,61 @@ class INSP_PROC extends Component {
             
             <CompleteBtn pgm={this.props.pgm}/>
           </div>
-            <div className='cctv_viewer'>
-              <h4>실시간 CCTV</h4>
-              {/* <div className='rain_info'>
-		            <span className='title'>강수량</span><span className='value'>100mm</span>
-	            </div> */}
-              <div className='cctv_list'>
-                {this.state.device[0] !== undefined && 
-                  <RecImage 
-                    seq={1}
-                    device={this.state.device[0].camera.Guid} 
-                    Name={this.state.device[0].camera.Name}
-                    maxCon={this.state.device[0].maxCon}
-                    startPort={this.state.device[0].startPort}
-                    cameraNam={this.state.device[0].cameraNam}
-                    cam='STD_CAM_OPEN' 
-                    focus='STD_CAM_FOCUS' 
-                    rec='STD_CAM_REC' 
-                    image='STD_CAM_IMG'/> 
-                }
-                {this.state.device[1] !== undefined && 
-                  <RecImage
-                    seq={2} 
-                    device={this.state.device[1].camera.Guid} 
-                    Name={this.state.device[1].camera.Name}
-                    maxCon={this.state.device[1].maxCon}
-                    startPort={this.state.device[1].startPort}
-                    cameraNam={this.state.device[1].cameraNam}
-                    cam='DUM_CAM_OPEN' 
-                    focus='DUM_CAM_FOCUS' 
-                    rec='DUM_CAM_REC' 
-                    image='DUM_CAM_IMG'/> 
-                }
-              </div>
-              <div className="cctv_other_list">
-                  <ul>
-                      <li></li>
-                      <li></li>
-                      <li></li>
-                      <li></li>
-                  </ul>
-              </div>
+          <div className='cctv_viewer'>
+            <h4>실시간 CCTV</h4>
+            {/* <div className='rain_info'>
+              <span className='title'>강수량</span><span className='value'>100mm</span>
+            </div> */}
+            <div className='cctv_list' 
+            >
+              {this.state.device[0] !== undefined && 
+                <RecImage 
+                  seq={1}
+                  device={this.state.device[0].camera.Guid} 
+                  Name={this.state.device[0].camera.Name}
+                  maxCon={this.state.device[0].maxCon}
+                  startPort={this.state.device[0].startPort}
+                  cameraNam={this.state.device[0].cameraNam}
+                  cam='STD_CAM_OPEN' 
+                  focus='STD_CAM_FOCUS' 
+                  rec='STD_CAM_REC' 
+                  image='STD_CAM_IMG'/> 
+              }
+              {this.state.device[1] !== undefined && 
+                <RecImage
+                  seq={2} 
+                  device={this.state.device[1].camera.Guid} 
+                  Name={this.state.device[1].camera.Name}
+                  maxCon={this.state.device[1].maxCon}
+                  startPort={this.state.device[1].startPort}
+                  cameraNam={this.state.device[1].cameraNam}
+                  cam='DUM_CAM_OPEN' 
+                  focus='DUM_CAM_FOCUS' 
+                  rec='DUM_CAM_REC' 
+                  image='DUM_CAM_IMG'/> 
+              }
             </div>
+            <div className="cctv_other_list">
+              <ul>
+                <li>
+                  {this.state.device[2] !== undefined && 
+                    <RecImage
+                      seq={3} 
+                      device={this.state.device[2].camera.Guid} 
+                      Name={this.state.device[2].camera.Name}
+                      maxCon={this.state.device[2].maxCon}
+                      startPort={this.state.device[2].startPort}
+                      cameraNam={this.state.device[2].cameraNam}
+                      cam='ETC1_CAM_OPEN' 
+                      focus='ETC1_CAM_FOCUS' 
+                      rec='ETC1_CAM_REC' 
+                      image='ETC1_CAM_IMG'/> 
+                  }
+                </li>
+                <li></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     );

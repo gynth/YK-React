@@ -203,15 +203,14 @@ class ComboEditor {
       })
     }
 
-    // console.log(queryResult.optionList.findIndex(e => e.value === props.value))
-    const onBlur = async(e) => {
-      await gfc_sleep(10);
+    // const onBlur = async(e) => {
+    //   await gfc_sleep(10);
 
-      var event = document.createEvent("Events");
-      event.initEvent('keydown', true, true);
-      event.keyCode = 9;
-      this.el.dispatchEvent(event);
-    }
+    //   var event = document.createEvent("Events");
+    //   event.initEvent('keydown', true, true);
+    //   event.keyCode = 9;
+    //   this.el.dispatchEvent(event);
+    // }
 
     const init = async(e) => {
 
@@ -255,8 +254,8 @@ class ComboEditor {
       this.el = el;
 
       if(option['onRender'] !== undefined){
-        const onRender = option.onRender;
-        const rows = gfg_getRow(props.grid, props.rowKey);
+        // const onRender = option.onRender;
+        // const rows = gfg_getRow(props.grid, props.rowKey);
         // onRender(props.value, combo.ref.current, rows);
         combo.ref.current.select.isDisabled = true;
       }
@@ -411,16 +410,20 @@ class ComboboxRenderer {
     if(org === undefined || org === null) org = '';
 
     let backGround = 'white';
-    if(org.toString() !== value.toString()) backGround = 'greenYellow'
+    if(org.toString() !== value.toString()) {
+      backGround = 'greenYellow'
+    }
     
     this.el.type = 'text';
     // this.el.setAttribute('style', `height:33px; margin:0 5px 0 5px; text-align:${option['align']}; border: 0px; background-color:${backGround};display:table-cell; width:calc(100% - 10px);`)
+    // this.el.setAttribute('style', `height: ${height - 1}px; 
     this.el.setAttribute('style', `height: ${height - 1}px; 
+                                   width:100%; 
+                                   padding: 0px 5px 0px 5px;
                                    text-align:${option['align']}; 
                                    border: 0px; 
                                    background-color:${backGround};
                                    display:table-cell; 
-                                   font-size:${option['fontSize']}; 
-                                   width:100%;`)
+                                   font-size:${option['fontSize']};`)
   }
 }

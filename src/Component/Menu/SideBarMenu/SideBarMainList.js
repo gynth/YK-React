@@ -60,6 +60,14 @@ const SideBarMainList = (props) => {
         }]
       )
     }
+    else if(MENU_ID === 'SETT'){
+      setList(
+        [{
+          MENU_ID,
+          MENU_NAM: '설정'
+        }]
+      )
+    }
   }, [MENU_ID])
 
   return (

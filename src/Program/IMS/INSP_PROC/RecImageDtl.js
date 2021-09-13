@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { MILESTONE, RTSP } from '../../../WebReq/WebReq';
 import Modal from 'react-modal';
-import { gfs_dispatch } from '../../../Method/Store';
+import { Rnd } from 'react-rnd';
+import { gfs_dispatch, gfs_getStoreValue, gfs_injectAsyncReducer } from '../../../Method/Store';
 import { gfc_showMask, gfc_sleep, gfc_hideMask, gfc_screenshot_srv_from_milestone } from '../../../Method/Comm';
-import axios from 'axios';
 
 const jsmpeg = require('jsmpeg');
 
 function RecImageDtl(props) {
   const imageRef = useRef();
+  const dragRef = useRef();
 
   const isOpen = useSelector((e) => {
     return e.INSP_PROC_MAIN[props.cam];
@@ -32,26 +33,27 @@ function RecImageDtl(props) {
                  device : props.device})
   }
 
-  const getPort = async() => {
-    const host = `http://10.10.10.136:3000/getEmptyPort`;
-    const option = {
-      url   : host,
-      method: 'POST',
-      // headers: {
-      //   'Access-Control-Allow-Origin': '*'
-      // },
-      data: {
-        device : props.device,
-        MAX_CONNECTION: props.maxCon,
-        START_PORT: props.startPort
-      }
-    };
+  // const getPort = async() => {
+  //   // const host = `http://10.10.10.136:3000/getEmptyPort`;
+  //   const host = 'http://ims.yksteel.co.kr:90/WebServer/getEmptyPort';
+  //   const option = {
+  //     url   : host,
+  //     method: 'POST',
+  //     // headers: {
+  //     //   'Access-Control-Allow-Origin': '*'
+  //     // },
+  //     data: {
+  //       device : props.device,
+  //       MAX_CONNECTION: props.maxCon,
+  //       START_PORT: props.startPort
+  //     }
+  //   };
   
-    await gfc_sleep(500);
+  //   await gfc_sleep(500);
 
-    const result = await axios(option);
-    setPort(result.data.port);
-  }
+  //   const result = await axios(option);
+  //   setPort(result.data.port);
+  // }
 
   const style={
     overlay: {
@@ -80,11 +82,10 @@ function RecImageDtl(props) {
     }
   };
 
-  var client = null;
-  var canvas = null;
+  let client = null;
+  let canvas = null;
   const setRtsp = () => {
-
-    client = new WebSocket(`ws://10.10.10.136:${port}`);
+    client = new WebSocket(`ws://ims.yksteel.co.kr:90/ws/${props.startPort}`);
     canvas = imageRef.current;
     new jsmpeg(client, {
       canvas 
@@ -93,25 +94,37 @@ function RecImageDtl(props) {
 
   useEffect(() => {
     start();
+
+    if(props.seq > 2){
+      const dragReducer = (nowState, action) => {
+        if(action.reducer !== 'INSP_PROC_MAIN_DRAG') {
+          return {
+            CLICK: nowState === undefined ? false :nowState.CLICK
+          }
+        }
+
+        if(action.type === 'ONMOUSEDOWN'){
+
+          return Object.assign({}, nowState, {
+            CLICK : action.CLICK
+          })
+        }
+      }
+
+      gfs_injectAsyncReducer('INSP_PROC_MAIN_DRAG', dragReducer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => { 
-    if(port === 0)
-      getPort();
-
-    if(port === 'Connection Full'){
-      alert(`${props.cameraNam} 카메라의 최대접속 유저가 초과되었습니다.`);
-      return;
-    }
-
-    if(port === 0){
-      return;
-    }
 
     RTSP({reqAddr: 'RTSPStart',
           device   : props.device,
           streamUrl: `rtsp://admin:admin@10.10.10.136:554/live/${props.device}`,
-          port: port
+          port: props.startPort,
+          width: 1920,
+          height: 1080,
+          fps: 24
         }).then(e => {
           if(e.data === 'OK'){
             setRtsp();
@@ -124,7 +137,7 @@ function RecImageDtl(props) {
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, port])
+  }, [isOpen, port, props.device])
 
   // const debounceOnClick = throttle((e, ptz) => {
   //   TOKEN({}).then(e => {
@@ -149,49 +162,125 @@ function RecImageDtl(props) {
   }
 
   const img = <>
-                <canvas 
-                  ref={imageRef} 
-                  style={{width:'100%', height:'100%'}}
-                  onDoubleClick={e => {
-                    setModalIsOpen(true);
-                  }}
-                  
-                />
-                <div className='picture_save' onClick={e => {
-                  
-                  gfc_showMask();
-                  gfc_screenshot_srv_from_milestone(props.device, 'TESTScaleNo').then(
-                    e => {
-                      gfc_hideMask();
-                      if(e.data.Result !== 'OK'){
-                        alert('파일저장에 실패 했습니다.');
+                {(props.seq < 3 || isOpen === true)?
+                  <>
+                    <canvas 
+                      data-seq={props.seq}
+                      ref={imageRef} 
+                      style={{
+                        width:'100%', 
+                        height:'100%'
+                      }}
+                      onDoubleClick={e => {
+                        setModalIsOpen(true);
+                      }}
+                    />
+                    <div className='picture_save' onClick={e => {
+                      const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+                      if(scaleNumb === '' || scaleNumb === undefined || scaleNumb === null){
+                        alert('선택된 계근번호가 없습니다.');
+                        return;
                       }
-                    }
-                  )
-                }}>
-                </div>
-                <div className="direction">
-                <button type='' className='left' onClick={e => {
-                    e.stopPropagation();
-                    onClick(e, 'left')}}>왼쪽</button>
-                  <button type='' className='top' onClick={e => {
-                    e.stopPropagation();
-                    onClick(e, 'up')}}>위쪽</button>
-                  <button type='' className='down' onClick={e => {
-                    e.stopPropagation();
-                    onClick(e, 'down')}}>아래</button>
-                  <button type='' className='right' onClick={e => {
-                    e.stopPropagation();
-                    onClick(e, 'right')}}>오른쪽</button>
-                </div>
-                <div className={isOpen === true ? 'controller on' : 'controller'}>
-                    <button type='' className='plus' onClick={e => {
-                    e.stopPropagation();
-                    onClick(e, 'zoomin')}}>확대</button>
-                    <button type='' className='minus' onClick={e => {
-                    e.stopPropagation();
-                    onClick(e, 'zoomout')}}>축소</button>
-                </div>
+
+                      gfc_showMask();
+
+                      gfc_screenshot_srv_from_milestone(props.device, scaleNumb).then(
+                        e => {
+                          gfc_hideMask();
+                          if(e.data.Result !== 'OK'){
+                            alert('파일저장에 실패 했습니다.');
+                          }
+                        }
+                      )
+                    }}>
+                    </div>
+                    
+                    <div className="direction">
+                      <button 
+                        type='' 
+                        className='left' 
+                        onClick={e => {
+                          e.stopPropagation();
+                          onClick(e, 'left')}}>왼쪽
+                      </button>
+                      <button 
+                        type='' 
+                        className='top' 
+                        onClick={e => {
+                          e.stopPropagation();
+                          onClick(e, 'up')}}>위쪽
+                      </button>
+                      <button 
+                        type='' 
+                        className='down' 
+                        onClick={e => {
+                          e.stopPropagation();
+                          onClick(e, 'down')}}>아래
+                      </button>
+                      <button 
+                        type='' 
+                        className='right' 
+                        onClick={e => {
+                          e.stopPropagation();
+                          onClick(e, 'right')}}>오른쪽
+                      </button>
+                    </div>
+                    <div className={isOpen === true ? 'controller on' : 'controller'}>
+                      <button type='' className='plus' onClick={e => {
+                        e.stopPropagation();
+                        onClick(e, 'zoomin')}}>확대</button>
+                      <button type='' className='minus' onClick={e => {
+                        e.stopPropagation();
+                        onClick(e, 'zoomout')}}>축소</button>
+                    </div>
+                  </>
+
+                  :
+                  
+                  <div
+                  >
+                    <Rnd
+                      ref={dragRef}
+                      default={{
+                        x: 0,
+                        y: 0,
+                        width: '100%',
+                        height: '100%'
+                      }}
+                      style={{
+                        // zIndex: 100,
+                        overflow:'hidden'
+                      }}
+                      onDragStop={(e, data) => {
+                        dragRef.current.updatePosition({x:0, y:0});
+                      }}
+                    >
+                      <canvas 
+                        ref={imageRef} 
+                        style={{
+                          width:'100%', 
+                          height:'100%',
+                          overflow:'hidden'
+                        }}
+                        onDoubleClick={e => {
+                          setModalIsOpen(true);
+                        }}
+                        data-seq={props.seq}
+                        onMouseOver={e => e.stopPropagation()}
+                        onMouseDown={async e => {
+                          // e.stopPropagation();
+                          await gfc_sleep(50);
+                          gfs_dispatch('INSP_PROC_MAIN_DRAG', 'ONMOUSEDOWN', {CLICK: false});
+                        }}
+                        onMouseUp={async e => {
+                          // e.stopPropagation();
+                          await gfc_sleep(50);
+                          gfs_dispatch('INSP_PROC_MAIN_DRAG', 'ONMOUSEDOWN', {CLICK: true});
+                        }}
+                      />
+                    </Rnd>
+                  </div>
+                }
               </>;
 
   return (

@@ -18,19 +18,19 @@ const handler = proxy({
 app3000.ws('/RTSPStart', handler);
 
 
-app3000.get('/', (req, res) =>
-  res.send(`
-  <canvas id='canvas'></canvas>
+// app3000.get('/', (req, res) =>
+//   res.send(`
+//   <canvas id='canvas'></canvas>
 
-  <script src='${scriptUrl}'></script>
-  <script>
-    loadPlayer({
-      url: 'ws://' + location.host + '/api/stream',
-      canvas: document.getElementById('canvas')
-    });
-  </script>
-`),
-);
+//   <script src='${scriptUrl}'></script>
+//   <script>
+//     loadPlayer({
+//       url: 'ws://' + location.host + '/api/stream',
+//       canvas: document.getElementById('canvas')
+//     });
+//   </script>
+// `),
+// );
 const port3000 = 3000;
 app3000.listen(port3000, function(){
   console.log(`RTSP on port: ${port3000}..`)

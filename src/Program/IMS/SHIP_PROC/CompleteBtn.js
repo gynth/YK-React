@@ -1,12 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
-import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
+import { gfs_getStoreValue } from '../../../Method/Store';
+import { gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
 import { gfo_getCombo } from '../../../Method/Component';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
-import { gfg_getGrid, gfg_getModyfiedRow, gfg_getRow, gfg_setValue } from '../../../Method/Grid';
+import { gfg_getGrid, gfg_getRow } from '../../../Method/Grid';
 
 const CompleteBtn = (props) => {
   const value = useSelector((e) => {

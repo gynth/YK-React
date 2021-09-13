@@ -35,7 +35,7 @@ app3000.post('/RTSPStart', (req, res) => {
         interval: null
       });            
       
-      global.MILESTONE_RTSP[device] = streams;
+      global.MILESTONE_RTSP[device] = 'Y';
     }
      
     res.json('OK') ;

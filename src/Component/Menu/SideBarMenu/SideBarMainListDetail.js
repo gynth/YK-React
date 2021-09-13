@@ -61,6 +61,14 @@ const SideBarMainListDetail = (props) => {
         }]
       )
     }
+    else if(MENU_ID === 'SETT'){
+      setList(
+        [{
+          MENU_ID : 'INSP_CFRM',
+          MENU_NAM: '검수확정'
+        }]
+      )
+    }
   }, [MENU_ID])
 
   return (

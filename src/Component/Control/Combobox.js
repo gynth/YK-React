@@ -2,7 +2,7 @@ import React from 'react';
 import Select from 'react-select';
 import { gfs_dispatch } from '../../Method/Store';
 import PropTypes from 'prop-types';
-import { getDynamicSql_Mysql } from '../../db/Mysql/Mysql.js';
+// import { getDynamicSql_Mysql } from '../../db/Mysql/Mysql.js';
 import { Component } from 'react';
 import { gfo_getCombo } from '../../Method/Component';
 import { gfc_getMultiLang } from '../../Method/Comm';

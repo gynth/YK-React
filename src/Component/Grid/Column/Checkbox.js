@@ -171,15 +171,9 @@ class CheckboxRenderer {
   }
 
   render(props) {
-    // store.subscribe((e1, e2) => console.log(store.getState()))
-
-    const option = props.columnInfo.renderer.options;
-    // console.log(option)
     const orgData = props.grid.dataManager.getOriginData();
     let org = orgData.length <= props.rowKey ? '' : props.grid.dataManager.getOriginData()[props.rowKey][props.columnInfo.name];
     if(org === null) org = '';
-
-    let backGround = 'white';
 
     const value = props.value;
 
@@ -193,16 +187,5 @@ class CheckboxRenderer {
                                    width : 30px;
                                    vertical-align:middle;
     `);
-                                  //  width:calc(100% - 5px); 
-                                  //  padding: 0px 5px 0px 5px;
-                                  //  text-align:${option['align']}; 
-                                  //  vertical-align:${option['valign']}; 
-                                   
-                                  //  `)
-
-    // let value = String((props.value === null || props.value === undefined) ? '' : props.value);
-
-    // this.el.value = String((props.value === null || props.value === undefined) ? '' : props.value);
-    // this.el.value = value
   }
 }

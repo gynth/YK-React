@@ -161,6 +161,9 @@ class InputRenderer {
     // store.subscribe((e1, e2) => console.log(store.getState()))
 
     const option = props.columnInfo.renderer.options;
+    const grid = props.grid;
+    const rowKey = props.rowKey;
+    const height = grid.store.rowCoords.heights[rowKey];
     // console.log(option)
     const orgData = props.grid.dataManager.getOriginData();
     let org = orgData.length <= props.rowKey ? '' : props.grid.dataManager.getOriginData()[props.rowKey][props.columnInfo.name];
@@ -173,8 +176,9 @@ class InputRenderer {
     }
 
     this.el.type  = password ? 'password' : 'text';
-    this.el.setAttribute('style', `height: 100%; 
-                                   width:calc(100% - 5px); 
+    // this.el.setAttribute('style', `height: 100%; 
+    this.el.setAttribute('style', `height: ${height - 1}px; 
+                                   width:100%; 
                                    padding: 0px 5px 0px 5px;
                                    border: 0px; 
                                    text-align:${option['align']}; 

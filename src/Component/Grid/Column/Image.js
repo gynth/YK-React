@@ -1,4 +1,3 @@
-import { gfg_getRow } from '../../../Method/Grid';
 import ReactDOM from 'react-dom';
 /**
  * name : 컬럼명

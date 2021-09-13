@@ -3,8 +3,9 @@ import React from 'react';
 import Input from './Component/Control/Input';
 import { gfo_getInput } from './Method/Component';
 import { getDynamicSql_Oracle } from './db/Oracle/Oracle';
-import { setSessionCookie, getSessionCookie} from './Cookies';
-import { gfs_PGM_REDUCER, gfs_getStoreValue, gfs_dispatch } from './Method/Store';
+// import { setSessionCookie, getSessionCookie} from './Cookies';
+import { setSessionCookie} from './Cookies';
+import { gfs_PGM_REDUCER } from './Method/Store';
 import './login.css';
 
 
