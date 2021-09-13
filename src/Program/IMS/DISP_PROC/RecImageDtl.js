@@ -8,7 +8,6 @@ import ReactHlsPlayer from 'react-hls-player';
 
 function RecImageDtl(props) {
   
-  let name = '';
   const movieRef = useRef();
 
   const value = useSelector((e) => {

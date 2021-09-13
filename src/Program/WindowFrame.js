@@ -119,9 +119,15 @@ const applyWindow = (programId, programNam) => {
   // else if (programId === 'ED010') return <PgmTest2 pgm={programId} nam={programNam}/>
   // else if (programId === 'ED050') return <Menu pgm={programId} nam={programNam}/>
 
-  const pgm = require(`../Program/IMS/${programId}/${programId}.js`);
-
-  return <pgm.default pgm={programId} nam={programNam} />
+  if(programId === 'COMM'){
+    const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+  
+    return <pgm.default pgm={programId} nam={programNam} />
+  }else{
+    const pgm = require(`../Program/IMS/${programId}/${programId}.js`);
+  
+    return <pgm.default pgm={programId} nam={programNam} />
+  }
 }
 
 const WindowFrame = (props) => {

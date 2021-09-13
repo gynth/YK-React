@@ -99,6 +99,8 @@ app3000.post('/RTSPStart', (req, res) => {
     const width = req.body.width;
     const height = req.body.height;
     const fps = req.body.fps;
+    const bv = req.body.bv;
+    const ba = req.body.ba;
     
     // const streamUrl = 'rtsp://admin:pass@10.10.136.128:554/video1'; //트루엔
     // const streamUrl = 'rtsp://admin:admin13579@10.10.136.112:554/profile2/media.smp'; //한화
@@ -125,6 +127,9 @@ app3000.post('/RTSPStart', (req, res) => {
         ffmpegOptions: { // options ffmpeg flags
           '-stats': '',
           '-r': fps,
+          //'-b:v', '4000k',
+          //'-maxrate', '4000k',
+          //'-bufsize', '4000k',
         }
       });          
       

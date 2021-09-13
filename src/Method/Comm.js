@@ -288,7 +288,7 @@ export const gfc_screenshot_srv_YK = (element, filename) => {
     let img = canvas.toDataURL('image/png');
 
     // const host = 'http://10.10.10.136:3001/ScreenShot/YK_Chit';
-    const host = 'http://ims.yksteel.co.kr:90/WebServer/YK_Chit';
+    const host = 'http://ims.yksteel.co.kr:90/WebServer/ScreenShot/YK_Chit';
     const option = {
       url   : host,
       method: 'POST',

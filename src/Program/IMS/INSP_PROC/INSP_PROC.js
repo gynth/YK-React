@@ -25,6 +25,7 @@ import TabList from '../Common/TabList';
 import DispInfo from './DispInfo';
 import DispImg from './DispImg';
 import RecImage from './RecImage';
+import RainInfo from './RainInfo';
 
 import GifPlayer from 'react-gif-player';
 
@@ -277,10 +278,12 @@ class INSP_PROC extends Component {
   }
   //#endregion
 
+
+
   constructor(props){
     super(props)
     
-    gfc_initPgm(props.pgm, props.nam, this)
+    gfc_initPgm(props.pgm, props.nam, this);
 
     //#region 리듀서
     const INSP_PROC_MAIN = (nowState, action) => {
@@ -292,7 +295,9 @@ class INSP_PROC extends Component {
             time   : new Date() 
           } : nowState.ON_ACTIVE,
 
-          DEVICE       : nowState === undefined ? 0 :nowState.DEVICE,
+          DEVICE       : nowState === undefined ? 0 : nowState.DEVICE,
+
+          RAIN_INFO    : nowState === undefined ? 0 : nowState.RAIN_INFO,
 
           MAIN_WAIT    : nowState === undefined ? 0 : nowState.MAIN_WAIT,
           MAIN_TOTAL   : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
@@ -378,6 +383,11 @@ class INSP_PROC extends Component {
 
         return Object.assign({}, nowState, {
           DEVICE : action.DEVICE
+        })
+      }else if(action.type === 'RAIN_INFO'){
+
+        return Object.assign({}, nowState, {
+          RAIN_INFO : action.RAIN_INFO
         })
       }else if(action.type === 'MAIN_WAIT'){
 
@@ -1021,8 +1031,9 @@ class INSP_PROC extends Component {
                     </button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
                     <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
-                    <button onClick={() =>{
-                    }}>oracle</button>
+                    <button onClick={async () =>{
+                      await this.getRain();
+                    }}>강수량</button>
                 </li>
               </ul> 
             </div>
@@ -1255,9 +1266,7 @@ class INSP_PROC extends Component {
           </div>
           <div className='cctv_viewer'>
             <h4>실시간 CCTV</h4>
-            {/* <div className='rain_info'>
-              <span className='title'>강수량</span><span className='value'>100mm</span>
-            </div> */}
+            <RainInfo />
             <div className='cctv_list' 
             >
               {this.state.device[0] !== undefined && 

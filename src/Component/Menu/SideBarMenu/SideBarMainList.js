@@ -60,7 +60,7 @@ const SideBarMainList = (props) => {
         }]
       )
     }
-    else if(MENU_ID === 'SETT'){
+    else if(MENU_ID === 'COMM'){
       setList(
         [{
           MENU_ID,

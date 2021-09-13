@@ -61,11 +61,11 @@ const SideBarMainListDetail = (props) => {
         }]
       )
     }
-    else if(MENU_ID === 'SETT'){
+    else if(MENU_ID === 'COMM'){
       setList(
         [{
-          MENU_ID : 'INSP_CFRM',
-          MENU_NAM: '검수확정'
+          MENU_ID : 'COMM',
+          MENU_NAM: '공통코드'
         }]
       )
     }

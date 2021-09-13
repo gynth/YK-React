@@ -25,7 +25,6 @@ import TabList from './TabList';
 import RecImage from './RecImage';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
-import { TOKEN } from '../../../WebReq/WebReq';
 //#endregion
 
 class INSP_CANC extends Component {

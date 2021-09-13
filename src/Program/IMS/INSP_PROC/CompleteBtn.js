@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfo_getCombo, gfo_getCheckbox } from '../../../Method/Component';
 
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
+import { YK_WEB_REQ, YK_WEB_REQ_RAIN } from '../../../WebReq/WebReq';
 
 const CompleteBtn = (props) => {
   const value = useSelector((e) => {
@@ -13,6 +13,22 @@ const CompleteBtn = (props) => {
   }, (p, n) => {
     return p.scaleNumb === n.scaleNumb;
   });
+
+
+  const getRain = async() => {
+    const result = await YK_WEB_REQ_RAIN();
+    const rain = result.data.getRainfallInfo.item.filter(e => {
+      if(e.clientId === '1010'){
+        return true;
+      }else{
+        return false;
+      }
+    });
+
+    gfs_dispatch('INSP_PROC_MAIN', 'RAIN_INFO', {RAIN_INFO: rain.accRain});
+
+    return rain[0].accRain;
+  }
 
   //#region 검수등록
   const onProcess = async() => {
@@ -138,6 +154,8 @@ const CompleteBtn = (props) => {
       }
     }
 
+    const rain = await getRain();
+
     const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
                 // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
                 `dWorker=1989&` + //검수자(ERP ID)
@@ -159,7 +177,7 @@ const CompleteBtn = (props) => {
 
                 `dCarTypeCode=${detail_car.getValue()}&` +
                 `dWarning=${detail_warning.getValue() === true ? 'Y' : 'N'}&` +
-                `dRain=0`;
+                `dRain=${rain}`;
     const Data = await YK_WEB_REQ(`tally_process_erp_procedure.jsp?${msg}`);
     console.log(Data);
 
@@ -170,6 +188,15 @@ const CompleteBtn = (props) => {
 
     gfc_hideMask();
   }
+
+  useEffect(() => {
+    getRain();
+
+    //5분에 한번씩 강수량 체크한다.
+    setInterval(() => {
+      getRain();
+    }, 60000 * 5);
+  }, [])
   //#endregion
 
   //#region 계량표저장

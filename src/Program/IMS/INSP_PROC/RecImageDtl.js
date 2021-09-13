@@ -119,7 +119,7 @@ function RecImageDtl(props) {
   useEffect(() => { 
 
     RTSP({reqAddr: 'RTSPStart',
-          device   : props.device,
+          device   : props.device, 
           streamUrl: `rtsp://admin:admin@10.10.10.136:554/live/${props.device}`,
           port: props.startPort,
           width: 1920,

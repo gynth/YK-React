@@ -77,7 +77,7 @@ const SideBarMenu = (props) => {
           </ul>
           <div className='footer_menu'>
             <ul>
-              <Li MENU_ID='SETT' index='5' nam='설정'></Li>
+              <Li MENU_ID='COMM' index='5' nam='설정'></Li>
             </ul>
             {/* <div className='setting'><span onClick={e => {
 

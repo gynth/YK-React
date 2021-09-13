@@ -14,22 +14,23 @@ import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Comb
 import Combobox from '../../../Component/Control/Combobox';
 
 // import Mainspan from './Mainspan';
-import Botspan from '../Common/Botspan';
+// import Botspan from '../Common/Botspan';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
+import { getSp_Oracle_YK } from '../../../db/Oracle/Oracle';
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
-class CAMR_SETTING extends Component {
+class MENU extends Component {
   constructor(props){
     super(props)
     
     gfc_initPgm(props.pgm, props.nam, this)
 
     //#region 리듀서
-    const CAMR_SETTING_MAIN = (nowState, action) => {
+    const MENU_MAIN = (nowState, action) => {
 
-      if(action.reducer !== 'CAMR_SETTING_MAIN') {
+      if(action.reducer !== 'MENU_MAIN') {
         return {
           BOT_TOTAL    : nowState === undefined ? 0 : nowState.BOT_TOTAL,
         };
@@ -43,7 +44,7 @@ class CAMR_SETTING extends Component {
       }
     }
 
-    gfs_injectAsyncReducer('CAMR_SETTING_MAIN', CAMR_SETTING_MAIN);
+    gfs_injectAsyncReducer('MENU_MAIN', MENU_MAIN);
     //#endregion
   }
 
@@ -60,78 +61,79 @@ class CAMR_SETTING extends Component {
 
     return result;
   }
+
   Delete = () => {
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    const selectRow = gfg_getRow(grid);
-    if(selectRow === null){
-      alert('선택된건이 없습니다.');
-      return;
-    }
+    // const grid = gfg_getGrid(this.props.pgm, 'main10');
+    // const selectRow = gfg_getRow(grid);
+    // if(selectRow === null){
+    //   alert('선택된건이 없습니다.');
+    //   return;
+    // }
 
-    if(selectRow.phantom){
-      grid.removeRow(selectRow['rowKey']);
-      return;
-    }else{
-      this.callOracle(
-        'Common/Common',
-        'ZM_IMS_CAMERA_DELETE',
-        [{
-          AREA_TP: selectRow.AREA_TP,
-          CAMERA_IP: selectRow.CAMERA_IP
-        }]
-      )
-    }
+    // if(selectRow.phantom){
+    //   grid.removeRow(selectRow['rowKey']);
+    //   return;
+    // }else{
+    //   this.callOracle(
+    //     'Common/Common',
+    //     'ZM_IMS_CAMERA_DELETE',
+    //     [{
+    //       AREA_TP: selectRow.AREA_TP,
+    //       CAMERA_IP: selectRow.CAMERA_IP
+    //     }]
+    //   )
+    // }
     
-    grid.resetOriginData()
-    grid.restore();
+    // grid.resetOriginData()
+    // grid.restore();
 
-    this.Retrieve();
+    // this.Retrieve();
   }
 
   Save = async() => {
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    const mod = gfg_getModyfiedRow(grid);
-    if(mod.length === 0){
-      alert('추가되거나 수정된 건 이 없습니다.');
-    }
+    // const grid = gfg_getGrid(this.props.pgm, 'main10');
+    // const mod = gfg_getModyfiedRow(grid);
+    // if(mod.length === 0){
+    //   alert('추가되거나 수정된 건 이 없습니다.');
+    // }
 
-    mod.forEach(e => {
-      let FN = '';
-      if(e.rowStatus === 'I'){
-        FN = 'ZM_IMS_CAMERA_INSERT';
-      }else{
-        FN = 'ZM_IMS_CAMERA_UPDATE';
-      }
-      this.callOracle(
-        'Common/Common',
-        FN,
-        [{
-          AREA_TP: e.AREA_TP,
-          CAMERA_IP: e.CAMERA_IP,
-          CAMERA_NAM: e.CAMERA_NAM,
-          SEQ: e.SEQ,
-          START_PORT: e.START_PORT,
-          MAX_CONNECTION: e.MAX_CONNECTION,
-          USE_YN : e.USE_YN
-        }]
-      )
-    });
+    // mod.forEach(e => {
+    //   let FN = '';
+    //   if(e.rowStatus === 'I'){
+    //     FN = 'ZM_IMS_CAMERA_INSERT';
+    //   }else{
+    //     FN = 'ZM_IMS_CAMERA_UPDATE';
+    //   }
+    //   this.callOracle(
+    //     'Common/Common',
+    //     FN,
+    //     [{
+    //       AREA_TP: e.AREA_TP,
+    //       CAMERA_IP: e.CAMERA_IP,
+    //       CAMERA_NAM: e.CAMERA_NAM,
+    //       SEQ: e.SEQ,
+    //       START_PORT: e.START_PORT,
+    //       MAX_CONNECTION: e.MAX_CONNECTION,
+    //       USE_YN : e.USE_YN
+    //     }]
+    //   )
+    // });
     
-    grid.resetOriginData()
-    grid.restore();
+    // grid.resetOriginData()
+    // grid.restore();
     
-    this.Retrieve();
+    // this.Retrieve();
   }
 
   Insert = () => {
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    gfg_appendRow(grid, grid.getRowCount(), {}, 'AREA_TP')
+    // const grid = gfg_getGrid(this.props.pgm, 'main10');
+    // gfg_appendRow(grid, grid.getRowCount(), {}, 'AREA_TP')
   }
 
   Retrieve = async () => {
 
     gfc_showMask();
-    gfs_dispatch('CAMR_SETTING_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+    gfs_dispatch('MENU_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
 
     const result = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT', []);
     
@@ -147,20 +149,6 @@ class CAMR_SETTING extends Component {
     
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.resetData(data);
-
-    // const mainData = await YK_WEB_REQ(`tally_mstr_drive.jsp`);
-    // const main = mainData.data.dataSend;
-    // if(main){
-
-    //   grid.resetData(main);
-    //   gfs_dispatch('CAMR_SETTING_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
-      
-    //   await gfc_sleep(100);
-
-    //   gfg_setSelectRow(grid);
-    // }else{
-    //   gfs_dispatch('CAMR_SETTING_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-    // }
 
     gfc_hideMask();
   }
@@ -213,33 +201,11 @@ class CAMR_SETTING extends Component {
                         rowHeight={41}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
-                          columnCombobox({
-                            name: 'AREA_TP', 
-                            header: '하차구역',
-                            value   : 'itemCode',
-                            display : 'item',
-                            width   : 200, 
-                            readOnly: false,
-                            etcData : YK_WEB_REQ('tally_process_pop.jsp?division=P530', {}),
-                            editor: {
-                              value   : 'itemCode',
-                              display : 'item'
-                            },
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
-                          }),
                           columnInput({
-                            name: 'CAMERA_IP',
-                            header: '카메라IP',
+                            name: 'MENU_ID',
+                            header: '메뉴ID',
                             width : 180,
                             readOnly: false,
-                            color : '#0063A9',
                             align : 'left',
                             fontSize: '18',
                             onRender: (value, control, rows) => {
@@ -251,11 +217,10 @@ class CAMR_SETTING extends Component {
                             }
                           }),
                           columnInput({
-                            name: 'CAMERA_NAM',
-                            header: '카메라이름',
+                            name: 'MENU_NAM',
+                            header: '메뉴명',
                             width : 250,
                             readOnly: false,
-                            color : '#0063A9',
                             align : 'left',
                             fontSize: '18',
                             onRender: (value, control, rows) => {
@@ -333,9 +298,9 @@ class CAMR_SETTING extends Component {
                   />
                 </div>
               </div>
-              <div className='grid_info'>
-                <span className='title'>전체</span><Botspan reducer='CAMR_SETTING_MAIN' />
-              </div>
+              {/* <div className='grid_info'>
+                <span className='title'>전체</span><Botspan reducer='MENU_MAIN' />
+              </div> */}
             </div>
           </div>
         </div>
@@ -344,4 +309,4 @@ class CAMR_SETTING extends Component {
   }
 }
 
-export default CAMR_SETTING;
+export default MENU;

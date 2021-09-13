@@ -8,6 +8,51 @@ const executeSP = async(connection, query, data) => {
   return result.outBinds.p_out;
 }
 
+router.post('/SP', (req, res) => {
+  oracleDb.getConnection({
+    user         : dbConfig.user,
+    password     : dbConfig.password,
+    connectString: dbConfig.connectString
+  },
+  async (err, connection) => {
+    if(err){
+      console.log(err.message);
+      return;
+    }
+    
+    const param = req.body.param;
+    for(let i = 0; i < param.length; i++){
+      let query = param[i].sp;
+      let data  = param[i].data;
+      let errSeq = param[i].errSeq;
+      data.p_select = { type: oracleDb.STRING, dir: oracleDb.BIND_OUT};
+      data.p_out = { type: oracleDb.STRING, dir: oracleDb.BIND_OUT};
+      
+      const result = await executeSP(connection, query, data);
+      if(result !== 'OK'){
+
+        connection.rollback((err) => {
+          if(err !== null)
+            console.log('rollback Error: ' + err);
+        })
+
+        doRelease(connection);
+        res.json({seq      : errSeq.seq,
+                  result   : result});
+        return;
+      }
+    }
+
+    connection.commit((err) => {
+      if(err !== null)
+        console.log('Commit Error: ' + err);
+    })
+
+    res.json({seq      : 0,
+              result   : 'OK'});
+  }) 
+});
+
 router.post('/SPYK', (req, res) => {
   oracleDb.getConnection({
     user         : dbConfig.user,

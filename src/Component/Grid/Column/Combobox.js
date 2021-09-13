@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom';
 import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
 
 import { gfc_sleep } from '../../../Method/Comm';
-import { gfg_getRow } from '../../../Method/Grid';
 
 /**
  * name : 컬럼명

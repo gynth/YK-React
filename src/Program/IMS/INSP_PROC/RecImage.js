@@ -3,9 +3,8 @@ import { useSelector } from 'react-redux';
 import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import ReactImageDtl from './RecImageDtl';
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
-import { gfc_hideMask, gfc_showMask, gfc_sleep } from '../../../Method/Comm';
+import { gfc_hideMask, gfc_showMask } from '../../../Method/Comm';
 import { TOKEN } from '../../../WebReq/WebReq';
-import { clear } from 'winston';
 
 function RecImage(props) {  
 

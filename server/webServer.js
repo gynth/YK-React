@@ -58,7 +58,7 @@ app3002.listen(port3002, () => {
   //서버시작하면 global에 마일스톤 토큰과 디바이스를 세팅한다.
   //카메라가 추가되면 서버 재시작 해야함.
   console.log(`MileStoneServer on port: ${port3002}..`)
-  // refreshToken(); 김경현
+  refreshToken();
 });  
 //#endregion
       

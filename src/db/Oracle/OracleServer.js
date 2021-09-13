@@ -55,3 +55,30 @@ export function OracleServerSP_YN(param){
       return err;
     })
 };
+
+export function OracleServerSP(param){
+  // const host = 'http://211.231.136.182:3001/Oracle/SPYK';
+  // const host = 'http://10.10.10.136:3001/Oracle/SPYK';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      param
+    } ,
+    timeout: 10000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+};

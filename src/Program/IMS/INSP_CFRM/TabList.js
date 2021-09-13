@@ -1,8 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { gfc_addClass, gfc_removeClass, gfc_hasClass } from '../../../Method/Comm';
-import { gfo_getCombo } from '../../../Method/Component';
-import { gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import { gfs_getStoreValue } from '../../../Method/Store';
 
 const TabList = (props) => {
   const value = useSelector((e) => {
@@ -39,7 +38,7 @@ const TabList = (props) => {
           }else{
             car_info.style.paddingBottom = '10px';
           }
-        }
+        }  
       }
       else{
         gfc_removeClass(document.getElementById(tabList[i]),'on');
