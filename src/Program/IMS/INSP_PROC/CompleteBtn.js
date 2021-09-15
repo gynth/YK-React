@@ -25,7 +25,7 @@ const CompleteBtn = (props) => {
       }
     });
 
-    gfs_dispatch('INSP_PROC_MAIN', 'RAIN_INFO', {RAIN_INFO: rain.accRain});
+    gfs_dispatch('INSP_PROC_MAIN', 'RAIN_INFO', {RAIN_INFO: rain[0].accRain});
 
     return rain[0].accRain;
   }

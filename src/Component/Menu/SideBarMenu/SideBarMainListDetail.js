@@ -66,6 +66,9 @@ const SideBarMainListDetail = (props) => {
         [{
           MENU_ID : 'COMM',
           MENU_NAM: '공통코드'
+        },{
+          MENU_ID : 'CAMR_SETTING',
+          MENU_NAM: '카메라세팅'
         }]
       )
     }

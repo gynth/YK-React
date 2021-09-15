@@ -36,8 +36,29 @@ export const gfc_initPgm = (programId, programNam, init) => {
   );
 }
 
+export const gfc_oracleRetrieve = (result) => {
+  let data = [];
+  for(let i = 0; i < result.data.data.rows.length; i++){
+
+    let col = {};
+    for(let j = 0; j < result.data.data.rows[i].length; j++){
+      col[result.data.data.metaData[j].name] = result.data.data.rows[i][j];
+    }
+    data.push(col);
+  }
+
+  return data;
+}
+
 export const gfc_getAtt = (code) => { 
-  return code;
+  //추후 다국어 지원시 사용 xml or db 등등
+  let msg = '';
+  if(code === 'MSG01') msg = '조회된 건이 없습니다.';
+  else if(code === 'MSG02') msg = '해당건이 없습니다. 재조회 후 처리해주세요.';
+  else if(code === 'MSG03') msg = '중복값이 존재합니다.';
+  else msg = code;
+
+  return msg;
 }
 
 /**

@@ -11,8 +11,8 @@ const Common = (fn, param) => {
     `       ,CAMERA_GUID ` +
     `       ,CAMERA_NAME ` +
     `   FROM ZM_IMS_REC      ` +
-    `  WHERE SCALENUMB = '${param[0].scaleNumb}' `+
-    `    AND SEQ       = '${param[0].seq}' `;
+    `  WHERE SCALENUMB = '${param.scaleNumb}' `+
+    `    AND SEQ       = '${param.seq}' `;
   }else if(fn === 'ZM_IMS_REC_INSERT'){
     query = 
     ` INSERT INTO ZM_IMS_REC              ` +
@@ -23,11 +23,11 @@ const Common = (fn, param) => {
     ` ,CAMERA_NAME                        ` +
     ` )                                   ` +
     ` VALUES                              ` +
-    ` ('${param[0].scaleNumb}'            ` +
-    ` ,${param[0].seq}                    ` +
+    ` ('${param.scaleNumb}'            ` +
+    ` ,${param.seq}                    ` +
     ` ,SYSDATE                            ` +
-    ` ,'${param[0].Guid}'                 ` +
-    ` ,'${param[0].Name}')                ` ;
+    ` ,'${param.Guid}'                 ` +
+    ` ,'${param.Name}')                ` ;
   }else if(fn === 'ZM_IMS_VIDEO_SELECT'){
     query = 
     ` SELECT SCALENUMB   ` +
@@ -37,15 +37,15 @@ const Common = (fn, param) => {
     `       ,CAMERA_GUID ` +
     `       ,CAMERA_NAME ` +
     `   FROM ZM_IMS_VIDEO      ` +
-    `  WHERE SCALENUMB = '${param[0].scaleNumb}' `+
-    `    AND SEQ       = '${param[0].seq}' `;
+    `  WHERE SCALENUMB = '${param.scaleNumb}' `+
+    `    AND SEQ       = '${param.seq}' `;
   }else if(fn === 'ZM_IMS_REC_UPDATE'){
     query = 
     ` UPDATE ZM_IMS_REC              ` +
     `    SET REC_TO_DTTM = SYSDATE, ` + 
     `        REC_YN = 'Y'            ` +
-    `  WHERE scaleNumb = '${param[0].scaleNumb}'` +
-    `    AND seq       = ${param[0].seq}`;
+    `  WHERE scaleNumb = '${param.scaleNumb}'` +
+    `    AND seq       = ${param.seq}`;
   }else if(fn === 'ZM_IMS_VIDEO_INSERT'){
     query = 
     ` INSERT INTO ZM_IMS_VIDEO            ` +
@@ -58,13 +58,13 @@ const Common = (fn, param) => {
     ` ,CAMERA_NAME                        ` +
     ` )                                   ` +
     ` VALUES                              ` +
-    ` ('${param[0].scaleNumb}'            ` +
-    ` ,${param[0].seq}                    ` +
-    ` ,TO_DATE('${param[0].rec_fr_dttm}', 'YYYY-MM-DD HH24:MI:SS') ` +
+    ` ('${param.scaleNumb}'            ` +
+    ` ,${param.seq}                    ` +
+    ` ,TO_DATE('${param.rec_fr_dttm}', 'YYYY-MM-DD HH24:MI:SS') ` +
     ` ,SYSDATE                            ` +
-    ` ,'${param[0].camera_ip}'            ` +
-    ` ,'${param[0].Guid}'                 ` +
-    ` ,'${param[0].Name}')                ` ;
+    ` ,'${param.camera_ip}'            ` +
+    ` ,'${param.Guid}'                 ` +
+    ` ,'${param.Name}')                ` ;
   }else if(fn === 'ZM_IMS_REC_MAKE'){
     query = 
     ` SELECT SCALENUMB   ` +
@@ -78,8 +78,8 @@ const Common = (fn, param) => {
   }else if(fn === 'ZM_IMS_REC_DELETE'){ 
     query = 
     ` DELETE FROM ZM_IMS_REC      ` +
-    `  WHERE scaleNumb = '${param[0].scaleNumb}'` + 
-    `    AND seq       = ${param[0].seq}` ;
+    `  WHERE scaleNumb = '${param.scaleNumb}'` + 
+    `    AND seq       = ${param.seq}` ;
   }else if(fn === 'ZM_IMS_CAMERA_SELECT'){
     query = 
     ` SELECT * FROM ZM_IMS_CAMERA ORDER BY SEQ     `;
@@ -94,27 +94,27 @@ const Common = (fn, param) => {
     ` ,MAX_CONNECTION ` +
     ` ,USE_YN     ` +
     `)VALUES      ` +
-    ` ('${param[0].AREA_TP}'` +
-    ` ,'${param[0].CAMERA_IP}'` +
-    ` ,'${param[0].CAMERA_NAM}'` +
-    ` ,${param[0].SEQ}` +
-    ` ,${param[0].START_PORT}` +
-    ` ,${param[0].MAX_CONNECTION}` +
-    ` ,'${param[0].USE_YN}')`;
+    ` ('${param.AREA_TP}'` +
+    ` ,'${param.CAMERA_IP}'` +
+    ` ,'${param.CAMERA_NAM}'` +
+    ` ,${param.SEQ}` +
+    ` ,${param.START_PORT}` +
+    ` ,${param.MAX_CONNECTION}` +
+    ` ,'${param.USE_YN}')`;
   }else if(fn === 'ZM_IMS_CAMERA_UPDATE'){
     query = 
     ` UPDATE ZM_IMS_CAMERA      ` +
-    `    SET USE_YN   = '${param[0].USE_YN}'` +
-    `       ,SEQ      = ${param[0].SEQ}` +
-    `  WHERE CAMERA_IP = '${param[0].CAMERA_IP}'` ;
+    `    SET USE_YN   = '${param.USE_YN}'` +
+    `       ,SEQ      = ${param.SEQ}` +
+    `  WHERE CAMERA_IP = '${param.CAMERA_IP}'` ;
   }else if(fn === 'ZM_IMS_CAMERA_DELETE'){
     query = 
     ` DELETE FROM ZM_IMS_CAMERA      ` +
-    `  WHERE CAMERA_IP = '${param[0].CAMERA_IP}'` ;
+    `  WHERE CAMERA_IP = '${param.CAMERA_IP}'` ;
   }else if(fn === 'ZM_IMS_CAMERA_SELECT_EACH'){
     query = 
     ` SELECT * FROM ZM_IMS_CAMERA      ` +
-    `  WHERE AREA_TP  = '${param[0].AREA_TP}' ` +
+    `  WHERE AREA_TP  = '${param.AREA_TP}' ` +
     `    AND USE_YN   = 'Y' ` +
     `  ORDER BY SEQ `;
   }else if(fn === 'INSP_CANC_REASON'){
@@ -126,8 +126,8 @@ const Common = (fn, param) => {
     query = 
     ` SELECT * ` +
     `   FROM zm_ims_user ` + 
-    `  WHERE USER_ID = '${param[0].user_id}'  `+ 
-    `    AND USER_PWD = '${param[0].pass_cd}'  ` ;
+    `  WHERE USER_ID = '${param.user_id}'  `+ 
+    `    AND USER_PWD = '${param.pass_cd}'  ` ;
   }
 
   return query;

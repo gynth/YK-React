@@ -18,7 +18,7 @@ import Combobox from '../../../Component/Control/Combobox';
 import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
 import Chit from '../Common/Chit/Chit';
-import RecImage from './RecImage';
+import RecImage from '../Common/RecImage';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
@@ -507,17 +507,19 @@ class INSP_HIST extends Component {
               <h4>녹화영상</h4>
               <div className='cctv_list'>
                 <RecImage 
-                  seq   = {1}
-                  cam   = 'STD_CAM_OPEN' 
-                  focus = 'STD_CAM_FOCUS' 
-                  rec   = 'STD_CAM_REC' 
-                  image = 'STD_CAM_IMG'/> 
+                  seq     = {1}
+                  reducer = 'INSP_HIST_MAIN'
+                  cam     = 'STD_CAM_OPEN' 
+                  focus   = 'STD_CAM_FOCUS' 
+                  rec     = 'STD_CAM_REC' 
+                  image   = 'STD_CAM_IMG'/> 
                 <RecImage
-                  seq   = {2}
-                  cam   = 'DUM_CAM_OPEN' 
-                  focus = 'DUM_CAM_FOCUS' 
-                  rec   = 'DUM_CAM_REC' 
-                  image = 'DUM_CAM_IMG'/> 
+                  seq     = {2}
+                  reducer = 'INSP_HIST_MAIN'
+                  cam     = 'DUM_CAM_OPEN' 
+                  focus   = 'DUM_CAM_FOCUS' 
+                  rec     = 'DUM_CAM_REC' 
+                  image   = 'DUM_CAM_IMG'/> 
               </div>
             </div>
         </div>

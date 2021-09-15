@@ -132,7 +132,7 @@ class ENTR_PROC extends Component {
                           columnInput({
                             name: 'dispatchNumb',
                             header: '배차번호',
-                            width : 120,
+                            width : 160,
                             readOnly: true,
                             color : '#0063A9',
                             align : 'center',

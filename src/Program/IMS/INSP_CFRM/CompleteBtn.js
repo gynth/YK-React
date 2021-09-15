@@ -55,7 +55,8 @@ const CompleteBtn = (props) => {
             p_delivery_id : column.scaleNumb,
             p_approve_name: 'bjkim2',
             p_erp_id      : 1989
-          }
+          },
+          errSeq: i
         })
       }
     }

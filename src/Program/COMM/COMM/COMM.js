@@ -3,13 +3,15 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
-import { gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
-import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_getModyfiedRow } from '../../../Method/Grid';
+import { gfc_initPgm, gfc_getAtt, gfc_showMask, gfc_hideMask, gfc_oracleRetrieve } from '../../../Method/Comm';
+import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_getModyfiedRow, gfg_setSelectRow, gfg_getRowCount } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
+import Layout from '../../../Component/Layout/Layout';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
+import { Number as columnNumber} from '../../../Component/Grid/Column/Number';
 
 import Combobox from '../../../Component/Control/Combobox';
 
@@ -17,7 +19,7 @@ import Combobox from '../../../Component/Control/Combobox';
 // import Botspan from '../Common/Botspan';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
-import { getSp_Oracle } from '../../../db/Oracle/Oracle';
+import { getDynamicSql_OracleTran } from '../../../db/Oracle/Oracle';
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
@@ -52,123 +54,323 @@ class COMM extends Component {
     
   }
 
-  callOracle = async(file, fn, param) => {
-    let result = await getDynamicSql_Oracle(
+  callOracle = async(grid, rowStatus, file, fn, param, seq) => {
+    let result = await getDynamicSql_OracleTran(
+      grid,
+      rowStatus,
       file,
       fn,
-      param
+      param,
+      seq
     ); 
 
     return result;
   }
 
-  Delete = () => {
-    // const grid = gfg_getGrid(this.props.pgm, 'main10');
-    // const selectRow = gfg_getRow(grid);
-    // if(selectRow === null){
-    //   alert('선택된건이 없습니다.');
-    //   return;
-    // }
+  Delete = async () => {
+    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
+    const selectRow = gfg_getRow(mainGrid);
+    if(selectRow === null){
+      alert('선택된건이 없습니다.');
+      return;
+    }
 
-    // if(selectRow.phantom){
-    //   grid.removeRow(selectRow['rowKey']);
-    //   return;
-    // }else{
-    //   this.callOracle(
-    //     'Common/Common',
-    //     'ZM_IMS_CAMERA_DELETE',
-    //     [{
-    //       AREA_TP: selectRow.AREA_TP,
-    //       CAMERA_IP: selectRow.CAMERA_IP
-    //     }]
-    //   )
-    // }
+    if(window.confirm('삭제하시겠습니까?') === false){
+      return;
+    }
+
+    gfc_showMask();
+
+    if(selectRow.phantom){
+      mainGrid.removeRow(selectRow['rowKey']);
+      return;
+    }else{ 
+      let reqGrid  = ['main10'];
+      let reqRowStaus = ['D'];
+      let reqFile     = ['COMM/COMM'];
+      let reqFn       = ['ZM_IMS_CODE_DELETE_MAIN10'];
+      let reqParam    = [{
+        COP_CD     : selectRow.COP_CD,
+        COMM_CD    : selectRow.COMM_CD
+      }];
+      let reqSeq      = [];
+  
+      let result = await this.callOracle(
+        reqGrid,
+        reqRowStaus,
+        reqFile,
+        reqFn,
+        reqParam,
+        reqSeq
+      ); 
+  
+      if(result.data.result !== true){
+        alert(gfc_getAtt(result.data.message));
+        gfc_hideMask();
+  
+        return;
+      }
+    }
+
+    const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
+    dtlGrid.clear();
+    mainGrid.clear();
     
-    // grid.resetOriginData()
-    // grid.restore();
+    mainGrid.resetOriginData()
+    mainGrid.restore();
 
-    // this.Retrieve();
+    this.Retrieve();
+    gfc_hideMask();
   }
 
   Save = async() => {
-    // const grid = gfg_getGrid(this.props.pgm, 'main10');
-    // const mod = gfg_getModyfiedRow(grid);
-    // if(mod.length === 0){
-    //   alert('추가되거나 수정된 건 이 없습니다.');
-    // }
+    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
+    const dtlGrid = gfg_getGrid(this.props.pgm, 'detail10');
 
-    // mod.forEach(e => {
-    //   let FN = '';
-    //   if(e.rowStatus === 'I'){
-    //     FN = 'ZM_IMS_CAMERA_INSERT';
-    //   }else{
-    //     FN = 'ZM_IMS_CAMERA_UPDATE';
-    //   }
-    //   this.callOracle(
-    //     'Common/Common',
-    //     FN,
-    //     [{
-    //       AREA_TP: e.AREA_TP,
-    //       CAMERA_IP: e.CAMERA_IP,
-    //       CAMERA_NAM: e.CAMERA_NAM,
-    //       SEQ: e.SEQ,
-    //       START_PORT: e.START_PORT,
-    //       MAX_CONNECTION: e.MAX_CONNECTION,
-    //       USE_YN : e.USE_YN
-    //     }]
-    //   )
-    // });
+    if(gfg_getRowCount(mainGrid) === 0){
+      alert('데이터가 없습니다.');
+      return;
+    }
+
+    if(gfg_getRowCount(dtlGrid) === 0){
+      alert('데이터가 없습니다.');
+      return;
+    }
+
+    const mainMod = gfg_getModyfiedRow(mainGrid);
+    const dtlMod = gfg_getModyfiedRow(dtlGrid);
+    if(mainMod.length === 0 && dtlMod.length === 0){
+      alert('추가되거나 수정된건 이 없습니다.');
+      return;
+    }
+
+    gfc_showMask();
+
+    let reqGrid      = [];
+    let reqRowStatus = [];
+    let reqFile      = [];
+    let reqFn        = [];
+    let reqParam     = [];
+    let reqSeq       = [];
+    mainMod.forEach(e => {
+      if(e.COMM_CD === '' || e.COMM_CD === null){
+        alert('필수입력값이 없습니다. > 코드');
+        gfg_setSelectRow(mainGrid, 'COMM_CD', e.rowKey);
+        gfc_hideMask();
+
+        return;
+      }
+      if(e.COMM_NAM === '' || e.COMM_NAM === null){
+        alert('필수입력값이 없습니다. > 코드명');
+        gfg_setSelectRow(mainGrid, 'COMM_NAM', e.rowKey);
+        gfc_hideMask();
+
+        return;
+      }
+      if(e.USE_YN === '' || e.USE_YN === null){
+        alert('필수입력값이 없습니다. > 사용여부');
+        gfg_setSelectRow(mainGrid, 'USE_YN', e.rowKey);
+        gfc_hideMask();
+
+        return;
+      }
+
+      reqGrid.push('main10');
+      reqRowStatus.push(e.rowStatus);
+      reqFile.push('COMM/COMM');
+      if(e.rowStatus === 'I'){
+        reqFn.push('ZM_IMS_CODE_INSERT_MAIN10');
+      }else{
+        reqFn.push('ZM_IMS_CODE_UPDATE_MAIN10');
+      }
+      reqParam.push({
+        COP_CD      : '10',
+        COMM_CD     : e.COMM_CD,
+        COMM_DTL_CD : '*',
+        COMM_NAM    : e.COMM_NAM,
+        USE_YN      : e.USE_YN,
+        USER_ID     : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
+      });
+
+      reqSeq.push(e.rowKey);
+    });
+
+    dtlMod.forEach(e => {
+      if(e.COMM_DTL_CD === '' || e.COMM_DTL_CD === null){
+        alert('필수입력값이 없습니다. > 상세코드');
+        gfg_setSelectRow(dtlGrid, 'COMM_DTL_CD', e.rowKey);
+        gfc_hideMask();
+
+        return;
+      }
+
+      if(e.COMM_DTL_NAM === '' || e.COMM_DTL_NAM === null){
+        alert('필수입력값이 없습니다. > 상세코드명');
+        gfg_setSelectRow(dtlGrid, 'COMM_DTL_NAM', e.rowKey);
+        gfc_hideMask();
+
+        return;
+      }
+
+      if(e.SORT_SEQ === '' || e.SORT_SEQ === null){
+        alert('필수입력값이 없습니다. > 정렬순서');
+        gfg_setSelectRow(dtlGrid, 'SORT_SEQ', e.rowKey);
+        gfc_hideMask();
+
+        return;
+      }
+
+      reqGrid.push('detail10');
+      reqRowStatus.push(e.rowStatus);
+      reqFile.push('COMM/COMM');
+      if(e.rowStatus === 'I'){
+        reqFn.push('ZM_IMS_CODE_INSERT_DETAIL10');
+      }else{
+        reqFn.push('ZM_IMS_CODE_UPDATE_DETAIL10');
+      }
+
+      reqParam.push({
+        COP_CD      : '10',
+        COMM_CD     : gfg_getRow(mainGrid).COMM_CD,
+        COMM_NAM    : e.COMM_DTL_NAM,
+        COMM_DTL_CD : e.COMM_DTL_CD,
+        COMM_DTL_NAM: e.COMM_DTL_NAM,
+        SORT_SEQ    : e.SORT_SEQ,
+        USE_YN      : 'Y',
+        USER_ID     : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
+      });
+
+      reqSeq.push(e.rowKey);
+    });
+
+    let result = await this.callOracle(reqGrid, reqRowStatus, reqFile, reqFn, reqParam, reqSeq);
+    if(result.data.result !== true){
+      alert(gfc_getAtt(result.data.message));
+
+      const grid = gfg_getGrid(this.props.pgm, result.data.grid);
+      gfg_setSelectRow(grid, result.data.grid === 'main10' ? 'COMM_CD' : 'COMM_DTL_CD', result.data.applyRow);
+
+      gfc_hideMask();
+
+      return;
+    }
     
-    // grid.resetOriginData()
-    // grid.restore();
-    
-    // this.Retrieve();
+    this.Retrieve();
   }
 
   Insert = () => {
-    // const grid = gfg_getGrid(this.props.pgm, 'main10');
-    // gfg_appendRow(grid, grid.getRowCount(), {}, 'AREA_TP')
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+
+    const mod = gfg_getModyfiedRow(grid);
+    if(mod.length > 0){
+      alert('수정중인 내용이 있습니다. 저장부터 진행해주세요.');
+    }else{
+      const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
+      dtlGrid.clear();
+
+      gfg_appendRow(grid, grid.getRowCount(), {}, 'COMM_CD')
+    }
+  }
+
+  DtlInsert = () => {
+    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
+    const dtlGrid = gfg_getGrid(this.props.pgm, 'detail10');
+
+    const mainRow = gfg_getRow(mainGrid);
+    if(mainRow === null){
+      alert('선택된건이 없습니다.');
+      return;
+    }
+
+    gfg_appendRow(dtlGrid, dtlGrid.getRowCount(), {}, 'COMM_DTL_CD');
+
   }
 
   Retrieve = async () => {
 
     gfc_showMask();
+    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
+    const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
+    mainGrid.clear();
+    dtlGrid.clear();
+
     gfs_dispatch('COMM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
 
-    let param = [];
-    param.push({
-      sp   : `begin 
-                SP_ZM_IMS_CODE_MAIN10(
-                  :p_RowStatus,
-                  :p_COP_CD,
-                  :p_COMM_CD,
-                  :p_COMM_DTL_CD,
-                  :p_COMM_NAM,
-                  :p_USE_YN,
+    let reqGrid     = ['main10'];
+    let reqRowStaus = ['R'];
+    let reqFile     = ['COMM/COMM'];
+    let reqFn       = ['ZM_IMS_CODE_SELECT_MAIN10'];
+    let reqParam    = [{COMM_DTL_CD: '*'}];
+    let reqSeq      = [];
 
-                  :p_select,
-                  :p_out
-                );
-              end;
-              `,
-      data : {
-        p_RowStatus  : 'R',
-        p_COP_CD     : '10',
-        p_COMM_CD    : '',
-        p_COMM_DTL_CD: '',
-        p_COMM_NAM   : '',
-        p_USE_YN     : ''
-      }
-    })
-
-    let result = await getSp_Oracle(
-      param
+    let result = await this.callOracle(
+      reqGrid,
+      reqRowStaus,
+      reqFile,
+      reqFn,
+      reqParam,
+      reqSeq
     ); 
 
-    console.log(result);
+    if(result.data.result !== true){
+      alert(gfc_getAtt(result.data.message));
+      gfc_hideMask();
+
+      return;
+    }
     
-    // const grid = gfg_getGrid(this.props.pgm, 'main10');
-    // grid.resetData(data);
+    let data = gfc_oracleRetrieve(result);
+    
+    mainGrid.resetData(data);
+    mainGrid.resetOriginData()
+    mainGrid.restore();
+
+    gfg_setSelectRow(mainGrid);
+
+    gfc_hideMask();
+  }
+
+
+  onSelectChange = async (e) => {
+    if(e === null) return;
+
+    gfc_showMask();
+
+    const dtlGrid = gfg_getGrid(this.props.pgm, 'detail10');
+    dtlGrid.clear();
+
+    gfs_dispatch('COMM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+
+    let reqGrid     = ['detail10'];
+    let reqRowStaus = ['R'];
+    let reqFile     = ['COMM/COMM'];
+    let reqFn       = ['ZM_IMS_CODE_SELECT_DETAIL10'];
+    let reqParam    = [{
+      COP_CD : e.COP_CD,
+      COMM_CD: e.COMM_CD
+    }];
+    let reqSeq      = [];
+
+    let result = await this.callOracle(
+      reqGrid,
+      reqRowStaus,
+      reqFile,
+      reqFn,
+      reqParam,
+      reqSeq
+    ); 
+
+    if(result.data.result !== true){
+      alert(gfc_getAtt(result.data.message));
+      gfc_hideMask();
+
+      return;
+    }
+    
+    let data = gfc_oracleRetrieve(result);
+    
+    dtlGrid.resetData(data);
+    gfg_setSelectRow(dtlGrid);
 
     gfc_hideMask();
   }
@@ -216,48 +418,111 @@ class COMM extends Component {
             <div className='grid'>
               <div className='wp'>
                 <div style={{width:'100%', height:'100%', overflow:'auto'}}>
-                  <Grid pgm={this.props.pgm}
-                        id ='main10'
-                        rowHeight={41}
-                        rowHeaders= {[{ type: 'rowNum', width: 40 }]}
-                        columns={[
-                          columnInput({
-                            name: 'COMM_CD',
-                            header: '코드',
-                            width : 180,
-                            readOnly: false,
-                            align : 'left',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
+                  
+                  <Layout split       ='horizontal'
+                          minSize     ={[54]}
+                          defaultSize ={'40%'}
+                  >
+                    <Grid pgm={this.props.pgm}
+                          id ='main10'
+                          selectionChange={(e) => {
+                            this.onSelectChange(e);
+                          }}
+                          rowHeight={30}
+                          rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                          columns={[
+                            columnInput({
+                              name: 'COMM_CD',
+                              header: '코드',
+                              width : 180,
+                              readOnly: false,
+                              align : 'left',
+                              onRender: (value, control, rows) => {
+                                if(rows.phantom){
+                                  control.readOnly = false;
+                                }else{
+                                  control.readOnly = true;
+                                }
                               }
-                            }
-                          }),
-                          columnInput({
-                            name: 'COMM_NAM',
-                            header: '코드명',
-                            width : 250,
-                            readOnly: false,
-                            align : 'left',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
+                            }),
+                            columnInput({
+                              name: 'COMM_NAM',
+                              header: '코드명',
+                              width : 250,
+                              readOnly: false,
+                              align : 'left',
+                              onRender: (value, control, rows) => {
+                                if(rows.phantom){
+                                  control.readOnly = false;
+                                }else{
+                                  control.readOnly = true;
+                                }
                               }
-                            }
-                          })
-                        ]}
-                  />
+                            }),   
+                            columnCombobox({
+                              name: 'USE_YN', 
+                              header: '사용여부',
+                              readOnly: false,
+                              width   : 130,
+                              data    : [{
+                                'code': 'Y',
+                                'name': 'Yes'
+                              },{
+                                'code': 'N',
+                                'name': 'No'
+                              }],
+                              editor: {
+                                value   : 'code',
+                                display : 'name'
+                              }
+                            })
+                          ]}
+                    />
+
+                    <Grid pgm={this.props.pgm}
+                          id ='detail10'
+                          rowHeight={30}
+                          rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                          columns={[
+                            columnInput({
+                              name: 'COMM_DTL_CD',
+                              header: '상세코드',
+                              width : 180,
+                              readOnly: false,
+                              align : 'left',
+                              onRender: (value, control, rows) => {
+                                if(rows.phantom){
+                                  control.readOnly = false;
+                                }else{
+                                  control.readOnly = true;
+                                }
+                              }
+                            }),
+                            columnInput({
+                              name: 'COMM_DTL_NAM',
+                              header: '상세코드명',
+                              width : 250,
+                              readOnly: false,
+                              align : 'left',
+                              onRender: (value, control, rows) => {
+                                if(rows.phantom){
+                                  control.readOnly = false;
+                                }else{
+                                  control.readOnly = true;
+                                }
+                              }
+                            }),
+                            columnNumber({
+                              name    : 'SORT_SEQ', 
+                              header  : '정렬순서', 
+                              width   : 100, 
+                              readOnly: false
+                            })
+                          ]}
+                    />
+                  </Layout>
                 </div>
               </div>
-              {/* <div className='grid_info'>
-                <span className='title'>전체</span><Botspan reducer='COMM_MAIN' />
-              </div> */}
             </div>
           </div>
         </div>

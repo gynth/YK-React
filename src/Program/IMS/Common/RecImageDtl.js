@@ -11,7 +11,7 @@ function RecImageDtl(props) {
   const movieRef = useRef();
 
   const value = useSelector((e) => {
-    return e.INSP_CFRM_MAIN.GRID_SCALE;
+    return e[props.reducer].GRID_SCALE;
   }, (p, n) => {
     return p === n;
   });
@@ -61,7 +61,6 @@ function RecImageDtl(props) {
       })
   }
 
-
   const [playUrl, setPlayUrl] = useState('');
   const [cameraName, setCameraName] = useState('');
 
@@ -79,6 +78,8 @@ function RecImageDtl(props) {
           setCameraName(e.data.rows[0][5]);
           // setPlayUrl(`http://10.10.10.136:3003/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
           setPlayUrl(`http://ims.yksteel.co.kr:90/WebServer/Replay/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
+        }else{
+          setPlayUrl('');
         }
       }).catch(e => {
         console.log('DISP_PROC>' + e);
@@ -88,6 +89,11 @@ function RecImageDtl(props) {
 
   const onActiveWindow = () => {
     const isActive = gfs_getStoreValue('MASK_REDUCER', 'ON_ACTIVE');
+    
+    if(movieRef.current === undefined) return; 
+    if(value === '') return;
+    if(playUrl === '') return;
+    
     const isPlay = movieRef.current.paused;
 
     if(isActive.active){
@@ -100,34 +106,38 @@ function RecImageDtl(props) {
       }
     }
   }
-
+  
   useEffect(() => {
     gfs_subscribe(onActiveWindow);
   }, [])
 
   return (
     <>
-      <div 
-        style={{width:'100%', height:'100%'}} 
-        className='player-wrapper'>
-          <ReactHlsPlayer
-            playerRef={movieRef}
-            src={playUrl}
-            autoPlay={false}
-            controls={true}
-            width='100%'
-            height='100%'
-            muted='muted'
-            onLoadedData={e => e.target.play()}
-            hlsConfig={{
-              autoStartLoad: true,
-              startPosition: -1,
-              debug: false
-            }}
-          />
-      </div>
+    {(value !== '' && playUrl !== '') &&
+      <>
+        <div 
+          style={{width:'100%', height:'100%'}} 
+          className='player-wrapper'>
+            <ReactHlsPlayer
+              playerRef={movieRef}
+              src={playUrl}
+              autoPlay={false}
+              controls={true}
+              width='100%'
+              height='100%'
+              muted='muted'
+              onLoadedData={e => e.target.play()}
+              hlsConfig={{
+                autoStartLoad: true,
+                startPosition: -1,
+                debug: false
+              }}
+            />
+        </div>
 
-      <div className='file_download' onClick={() => movieDown()}></div>
+        <div className='file_download' onClick={() => movieDown()}></div>
+      </>
+    }
     </>
   );
 }

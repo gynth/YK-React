@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import TabListItem from './TabListItem';
 import { gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue } from '../../../Method/Store';
+import { gfg_getColumn, gfg_getModyfiedRow, gfg_getRow, gfg_setEventOnOff, gfg_setSelectRow } from '../../../Method/Grid';
 
 async function onClick(flag){
   // 1. Retrieve
@@ -24,8 +25,25 @@ async function onClick(flag){
     return;
   }
 
-  if(flag !== 1 && flag !== 5 && flag !== 3){
-    gfs_getStoreValue(pgm, 'Grid').map(e => e.Grid.blur())
+  if(flag !== 1 && flag !== 5 && flag !== 3 && flag !== 7){
+    gfs_getStoreValue(pgm, 'Grid').map(e => {
+      // const mod = gfg_getModyfiedRow(e.Grid);
+      // console.log(mod);
+      // const row = gfg_getRow(e.Grid);
+      // const column = gfg_getColumn(e.Grid);
+      // const handler = e.focusEvent;
+      // e.Grid.blur()
+      e.Grid.finishEditing();
+
+      // if(row !== null){
+      //   gfg_setEventOnOff(e.Grid, 'off', 'focusChange', handler);
+      //   gfg_setSelectRow(e.Grid, column, row.rowKey);
+      //   gfg_setEventOnOff(e.Grid, 'on', 'focusChange', handler);
+      // }
+
+      // return true;
+    });
+
     await gfc_sleep(50);
   }
 
@@ -98,6 +116,7 @@ const TabList = (props) => {
         </div>
         <div className='common_btns'>
           <button type='button' className='save' onClick={() => onClick(2)} ><span>추가</span></button>
+          <button type='button' className='save' onClick={() => onClick(7)} ><span>상세추가</span></button>
           <button type='button' className='save' onClick={() => onClick(4)} ><span>저장</span></button>
           <button type='button' className='del'  onClick={() => onClick(3)} ><span>삭제</span></button>
           <button type='button' className='search' onClick={() => onClick(1)} ><span>조회</span></button>

@@ -66,6 +66,10 @@ export const gfg_getRow = (grid, row) => {
   return rtn;
 }
 
+export const gfg_getColumn = (grid) => {
+  return grid.getFocusedCell().columnName;
+}
+
 export const gfg_setValue = (grid, column, value, row) => {
   const rowKey = row === undefined ? grid.getFocusedCell().rowKey : row;
   grid.setValue(rowKey, column, value)
@@ -78,4 +82,19 @@ export const gfg_setSelectRow = (grid, columnName, row = 0, setScroll = true) =>
   else{
     grid.focusAt(row, 0, setScroll);
   }
+}
+
+export const gfg_setEventOnOff = (grid, on_off, eventName, handler) => {
+  if(on_off === '' || on_off === null || on_off === undefined) return;
+  if(eventName === '' || eventName === null || eventName === undefined) return;
+
+  if(on_off === 'on'){
+    grid.on(eventName, handler);
+  }else if(on_off === 'off'){
+    grid.off(eventName, handler);
+  }
+}
+
+export const gfg_getRowCount = (grid) => {
+  return grid.getRowCount();
 }

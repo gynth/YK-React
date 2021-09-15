@@ -370,6 +370,22 @@ const RtnGrid = (props) => {
   // eslint-disable-next-line no-unused-vars
   const { width, height, ref } = useResizeDetector({onResize});
 
+  // const setFocusChange = () => {
+  //   gridRef.current.getInstance().on('focusChange', (e) => {
+  //     if(e.rowKey === e.prevRowKey){
+  //       return false;
+  //     }else{
+  //       // gridRef.current.getInstance().setSelectionRange({
+  //       //   start: [e.rowKey, 0],
+  //       //   end: [e.rowKey, gridRef.current.getInstance().getColumns().length - 1]
+  //       // });
+
+  //       if(props.selectionChange !== undefined)
+  //         props.selectionChange(gridRef.current.getInstance().getRow(e.rowKey));
+  //     }
+  //   })
+  // }
+
   useEffect(() => {
     if(gfg_getGrid(props.pgm, props.id) !== undefined){
       gfc_getMultiLang('dup', '그리드 아이디 중복입니다. > ' + props.pgm + ', ' + props.id);
@@ -377,9 +393,9 @@ const RtnGrid = (props) => {
     }
 
     gridRef.current.getInstance().on('focusChange', (e) => {
-      if(e.rowKey === e.prevRowKey)
+      if(e.rowKey === e.prevRowKey){
         return false;
-      else{
+      }else{
         // gridRef.current.getInstance().setSelectionRange({
         //   start: [e.rowKey, 0],
         //   end: [e.rowKey, gridRef.current.getInstance().getColumns().length - 1]
@@ -414,7 +430,9 @@ const RtnGrid = (props) => {
     gfs_dispatch(props.pgm, 'INITGRID', 
       ({
         Grid:{id  : props.id,
-              Grid: gridRef.current.getInstance()}
+              Grid: gridRef.current.getInstance(),
+              // focusEvent: setFocusChange
+        }
       })
     );
 

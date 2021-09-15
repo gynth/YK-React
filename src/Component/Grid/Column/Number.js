@@ -144,6 +144,9 @@ class NumberRenderer {
 
     const option = props.columnInfo.renderer.options;
     const orgData = props.grid.dataManager.getOriginData();
+    const grid = props.grid;
+    const rowKey = props.rowKey;
+    const height = grid.store.rowCoords.heights[rowKey];
     let org = orgData.length <= props.rowKey ? '' : props.grid.dataManager.getOriginData()[props.rowKey][props.columnInfo.name];
     if(org === null) org = '';
     const NUM_FORMAT = gfs_getStoreValue('USER_REDUCER', 'NUM_FORMAT');
@@ -157,8 +160,8 @@ class NumberRenderer {
     if(org !== value) backGround = 'greenYellow'
     
     this.el.type  = 'text';
-    this.el.setAttribute('style', `height: 27px; 
-                                   width:calc(100% - 5px); 
+    this.el.setAttribute('style', `height: ${height - 1}px; 
+                                   width:100%; 
                                    padding: 0px 5px 0px 5px;
                                    border: 0px; 
                                    text-align:${option['align']}; 
