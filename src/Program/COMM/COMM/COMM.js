@@ -18,9 +18,7 @@ import Combobox from '../../../Component/Control/Combobox';
 // import Mainspan from './Mainspan';
 // import Botspan from '../Common/Botspan';
 
-import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 import { getDynamicSql_OracleTran } from '../../../db/Oracle/Oracle';
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
 class COMM extends Component {

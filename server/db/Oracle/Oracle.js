@@ -2,11 +2,23 @@ var oracleDb = require('oracledb');
 var dbConfig = require('../Oracle/dbConfig');
 const express = require('express');
 const router = express.Router();
-const iconv = require('iconv-lite');
 
-const executeSP = async(connection, query, data) => {
+const executeSPYK = async(connection, query, data) => {
   const result = await connection.execute(query, data);
   return result.outBinds.p_out;
+}
+
+const executeSP = async(RowStatus, connection, query, data) => {
+  const result = await connection.execute(query, data);
+  console.log(RowStatus);
+  fetchRowsFromRS(result);
+  return result;
+}
+
+const fetchRowsFromRS = async(result) => {
+  const resultSet = await result.outBinds['p_select'].getRows();
+  const column = await result.outBinds['p_select'].metaData;
+  console.log(column, resultSet);
 }
 
 router.post('/SP', (req, res) => {
@@ -26,12 +38,14 @@ router.post('/SP', (req, res) => {
       let query = param[i].sp;
       let data  = param[i].data;
       let errSeq = param[i].errSeq;
-      data.p_select = { type: oracleDb.STRING, dir: oracleDb.BIND_OUT};
-      data.p_out = { type: oracleDb.STRING, dir: oracleDb.BIND_OUT};
-      
-      const result = await executeSP(connection, query, data);
+      data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
+      data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+      data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+      data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+      data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+    
+      const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
       if(result !== 'OK'){
-
         connection.rollback((err) => {
           if(err !== null)
             console.log('rollback Error: ' + err);
@@ -73,7 +87,7 @@ router.post('/SPYK', (req, res) => {
       let errSeq = param[i].errSeq;
       data.p_out = { type: oracleDb.STRING, dir: oracleDb.BIND_OUT};
       
-      const result = await executeSP(connection, query, data);
+      const result = await executeSPYK(connection, query, data);
       if(result !== 'OK'){
 
         connection.rollback((err) => {

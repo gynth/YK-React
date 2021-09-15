@@ -17,7 +17,7 @@ import Combobox from '../../../Component/Control/Combobox';
 // import Botspan from '../Common/Botspan';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
-import { getSp_Oracle_YK } from '../../../db/Oracle/Oracle';
+import { getSp_Oracle } from '../../../db/Oracle/Oracle';
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
@@ -126,31 +126,60 @@ class MENU extends Component {
   }
 
   Insert = () => {
-    // const grid = gfg_getGrid(this.props.pgm, 'main10');
-    // gfg_appendRow(grid, grid.getRowCount(), {}, 'AREA_TP')
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+    gfg_appendRow(grid, grid.getRowCount(), {}, 'MENU_GRP')
   }
 
   Retrieve = async () => {
+    let param = [];
+    param.push({
+      sp   : `begin 
+                SP_ZM_IMS_CODE_MAIN10(
+                  :p_RowStatus,
+                  :p_COP_CD,
+                  :p_COMM_CD,
+                  :p_COMM_DTL_CD,
+                  :p_COMM_NAM,
+                  :p_USE_YN,
+                  
+                  :p_select,
+                  :p_SUCCESS,
+                  :p_MSG_CODE,
+                  :p_MSG_TEXT,
+                  :p_COL_NAM
+                );
+              end;
+              `,
+      data : {
+        p_RowStatus : 'R',
+        p_COP_CD : 'R',
+        p_COMM_CD : 'R',
+        p_COMM_DTL_CD : 'R',
+        p_COMM_NAM : 'R',
+        p_USE_YN : 'R'
+      },
+      errSeq: 0
+    })
+    getSp_Oracle(param)
+    // gfc_showMask();
+    // gfs_dispatch('MENU_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
 
-    gfc_showMask();
-    gfs_dispatch('MENU_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-
-    const result = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT', []);
+    // const result = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT', []);
     
-    let data = [];
-    for(let i = 0; i < result.data.rows.length; i++){
+    // let data = [];
+    // for(let i = 0; i < result.data.rows.length; i++){
 
-      let col = {};
-      for(let j = 0; j < result.data.rows[i].length; j++){
-        col[result.data.metaData[j].name] = result.data.rows[i][j];
-      }
-      data.push(col);
-    }
+    //   let col = {};
+    //   for(let j = 0; j < result.data.rows[i].length; j++){
+    //     col[result.data.metaData[j].name] = result.data.rows[i][j];
+    //   }
+    //   data.push(col);
+    // }
     
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    grid.resetData(data);
+    // const grid = gfg_getGrid(this.props.pgm, 'main10');
+    // grid.resetData(data);
 
-    gfc_hideMask();
+    // gfc_hideMask();
   }
 
   render() {
@@ -198,102 +227,125 @@ class MENU extends Component {
                 <div style={{width:'100%', height:'100%', overflow:'auto'}}>
                   <Grid pgm={this.props.pgm}
                         id ='main10'
-                        rowHeight={41}
+                        rowHeight={30}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
-                          columnInput({
-                            name: 'MENU_ID',
-                            header: '메뉴ID',
-                            width : 180,
-                            readOnly: false,
-                            align : 'left',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
-                          }),
-                          columnInput({
-                            name: 'MENU_NAM',
-                            header: '메뉴명',
-                            width : 250,
-                            readOnly: false,
-                            align : 'left',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
-                          }),
-                          columnInput({
-                            name: 'SEQ',
-                            header: '구성순서',
-                            width : 150,
-                            readOnly: true,
-                            align : 'right',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
-                          }),   
-                          columnInput({
-                            name: 'START_PORT',
-                            header: '시작Port',
-                            width : 200,
-                            readOnly: true,
-                            align : 'right',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
-                          }),   
-                          columnInput({
-                            name: 'MAX_CONNECTION',
-                            header: '최대접속자',
-                            width : 100,
-                            readOnly: true,
-                            align : 'right',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
-                          }),   
                           columnCombobox({
-                            name: 'USE_YN', 
-                            header: '사용여부',
+                            name: 'MENU_GRP', 
+                            header: '메뉴그룹',
+                            value   : 'COMM_DTL_CD',
+                            display : 'COMM_DTL_NAM',
+                            width   : 100, 
                             readOnly: false,
-                            fontSize: '18',
-                            width   : 130,
-                            data    : [{
-                              'code': 'Y',
-                              'name': 'Yes'
-                            },{
-                              'code': 'N',
-                              'name': 'No'
-                            }],
+                            oracleData : getDynamicSql_Oracle(
+                               'COMM/COMM',
+                               'ZM_IMS_CODE_SELECT',
+                               [{COMM_CD: '1'}]),
                             editor: {
-                              value   : 'code',
-                              display : 'name'
+                              value   : 'COMM_DTL_CD',
+                              display : 'COMM_DTL_NAM'
+                            },
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.readOnly = false;
+                              }else{
+                                control.readOnly = true;
+                              }
                             }
-                          })
+                          }),
+                          // columnInput({
+                          //   name: 'MENU_ID',
+                          //   header: '메뉴ID',
+                          //   width : 180,
+                          //   readOnly: false,
+                          //   align : 'left',
+                          //   fontSize: '18',
+                          //   onRender: (value, control, rows) => {
+                          //     if(rows.phantom){
+                          //       control.readOnly = false;
+                          //     }else{
+                          //       control.readOnly = true;
+                          //     }
+                          //   }
+                          // }),
+                          // columnInput({
+                          //   name: 'MENU_NAM',
+                          //   header: '메뉴명',
+                          //   width : 250,
+                          //   readOnly: false,
+                          //   align : 'left',
+                          //   fontSize: '18',
+                          //   onRender: (value, control, rows) => {
+                          //     if(rows.phantom){
+                          //       control.readOnly = false;
+                          //     }else{
+                          //       control.readOnly = true;
+                          //     }
+                          //   }
+                          // }),
+                          // columnInput({
+                          //   name: 'SEQ',
+                          //   header: '구성순서',
+                          //   width : 150,
+                          //   readOnly: true,
+                          //   align : 'right',
+                          //   fontSize: '18',
+                          //   onRender: (value, control, rows) => {
+                          //     if(rows.phantom){
+                          //       control.readOnly = false;
+                          //     }else{
+                          //       control.readOnly = true;
+                          //     }
+                          //   }
+                          // }),   
+                          // columnInput({
+                          //   name: 'START_PORT',
+                          //   header: '시작Port',
+                          //   width : 200,
+                          //   readOnly: true,
+                          //   align : 'right',
+                          //   fontSize: '18',
+                          //   onRender: (value, control, rows) => {
+                          //     if(rows.phantom){
+                          //       control.readOnly = false;
+                          //     }else{
+                          //       control.readOnly = true;
+                          //     }
+                          //   }
+                          // }),   
+                          // columnInput({
+                          //   name: 'MAX_CONNECTION',
+                          //   header: '최대접속자',
+                          //   width : 100,
+                          //   readOnly: true,
+                          //   align : 'right',
+                          //   fontSize: '18',
+                          //   onRender: (value, control, rows) => {
+                          //     if(rows.phantom){
+                          //       control.readOnly = false;
+                          //     }else{
+                          //       control.readOnly = true;
+                          //     }
+                          //   }
+                          // }),   
+                          // columnCombobox({
+                          //   name: 'USE_YN', 
+                          //   header: '사용여부',
+                          //   readOnly: false,
+                          //   fontSize: '18',
+                          //   width   : 130,
+                          //   data    : [{
+                          //     'code': 'Y',
+                          //     'name': 'Yes'
+                          //   },{
+                          //     'code': 'N',
+                          //     'name': 'No'
+                          //   }],
+                          //   editor: {
+                          //     value   : 'code',
+                          //     display : 'name'
+                          //   }
+                          // })
                         ]}
                   />
                 </div>

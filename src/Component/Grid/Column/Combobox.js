@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import Select from 'react-select';
 import ReactDOM from 'react-dom';
 import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
@@ -61,6 +61,7 @@ export const Combobox = (props) => {
   const data      = props.data !== undefined ? props.data : undefined;
   const etcData   = props.etcData !== undefined ? props.etcData : undefined;
   const editor    = props.editor;
+  const oracleData = props.oracleData !== undefined ? props.oracleData : undefined;
 
   const rtn = {name,  
                header, 
@@ -70,7 +71,8 @@ export const Combobox = (props) => {
                resizable,
                fontSize,
                data,
-               etcData}
+               etcData,
+               oracleData}
 
   const queryResult = new ComboInit({
     location: editor !== undefined ? editor.location : '',
@@ -82,7 +84,8 @@ export const Combobox = (props) => {
     emptyRow: editor !== undefined ? editor.emptyRow : '',
     fontSize: editor !== undefined ? editor.fontSize : '13',
     data,
-    etcData
+    etcData,
+    oracleData
   });
 
   // rtn.editor = {
@@ -97,6 +100,7 @@ export const Combobox = (props) => {
       type   : ComboEditor,
       data,
       etcData,
+      oracleData,
       options: {
         align,
         fontSize,
@@ -111,6 +115,7 @@ export const Combobox = (props) => {
     type   : ComboboxRenderer,
     data,
     etcData,
+    oracleData,
     options: {
       align,
       valign,
@@ -292,10 +297,14 @@ class ComboEditor {
   }
 }
 
-class ComboInit {
+class ComboInit extends Component{
 
   optionList = []
   width = 0
+
+  state = {
+    oracleData: this.props.oracleData
+  }
 
   ComboCreate = async(props) => {
     let result = {};
@@ -310,6 +319,22 @@ class ComboInit {
         result.data.result = true;
         result.data.data = result.data[Object.keys(result.data)[0]];
         delete result.data[Object.keys(result.data)[0]];
+      }
+    }else if(this.state.oracleData !== undefined){
+      result = await this.state.oracleData;
+      if(Object.keys(result.data) !== 'result'){
+        result.data.result = true;
+        let data = [];
+        for(let i = 0; i < result.data.rows.length; i++){
+    
+          let col = {};
+          for(let j = 0; j < result.data.rows[i].length; j++){
+            col[result.data.metaData[j].name] = result.data.rows[i][j];
+          }
+          data.push(col);
+        }
+
+        result.data.data = data;
       }
     }else{
       result = await getDynamicSql_Mysql(
@@ -371,6 +396,7 @@ class ComboInit {
   }
 
   constructor(props){
+    super(props);
     this.ComboCreate(props);
   }
 }

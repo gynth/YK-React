@@ -26,23 +26,9 @@ async function onClick(flag){
   }
 
   if(flag !== 1 && flag !== 5 && flag !== 3 && flag !== 7){
-    gfs_getStoreValue(pgm, 'Grid').map(e => {
-      // const mod = gfg_getModyfiedRow(e.Grid);
-      // console.log(mod);
-      // const row = gfg_getRow(e.Grid);
-      // const column = gfg_getColumn(e.Grid);
-      // const handler = e.focusEvent;
-      // e.Grid.blur()
-      e.Grid.finishEditing();
-
-      // if(row !== null){
-      //   gfg_setEventOnOff(e.Grid, 'off', 'focusChange', handler);
-      //   gfg_setSelectRow(e.Grid, column, row.rowKey);
-      //   gfg_setEventOnOff(e.Grid, 'on', 'focusChange', handler);
-      // }
-
-      // return true;
-    });
+    gfs_getStoreValue(pgm, 'Grid').map(e => 
+      e.Grid.finishEditing()
+    );
 
     await gfc_sleep(50);
   }

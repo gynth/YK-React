@@ -1,14 +1,7 @@
-const COMM = (fn, param) => {
+const MENU = (fn, param) => {
   let query = '';
 
-  if(fn === 'ZM_IMS_CODE_SELECT'){
-    query = 
-    ` SELECT *  ` +
-    `   FROM zm_ims_code ` +
-    `  WHERE COMM_CD = '${param.COMM_CD}'` +
-    `    AND COMM_DTL_CD != '*'          ` +
-    `    AND USE_YN = 'Y'                ` ;
-  }else if(fn === 'ZM_IMS_CODE_SELECT_MAIN10'){
+  if(fn === 'ZM_IMS_CODE_SELECT_MAIN10'){
     query = 
     ` SELECT *  ` +
     `   FROM zm_ims_code ` +
@@ -102,5 +95,5 @@ const COMM = (fn, param) => {
   return query;
 };
 
-module.exports = COMM; 
+module.exports = MENU; 
 
