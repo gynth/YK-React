@@ -13,7 +13,7 @@ async function onClick(flag){
   // 5. Init
   // 6. Print
   // 7. DtlInsert
-  // 8. DelDelete
+  // 8. DtlDelete
   if(gfs_getStoreValue('WINDOWFRAME_REDUCER') === undefined) return;
 
   // const pgm = store.getState().WINDOWFRAME_REDUCER.activeWindow['programId'];
@@ -62,8 +62,8 @@ async function onClick(flag){
       window[0].DtlInsert();
     }
   }else{
-    if(window[0].DelDelete !== undefined){
-      window[0].DelDelete();
+    if(window[0].DtlDelete !== undefined){
+      window[0].DtlDelete();
     }
   }
 }
@@ -103,6 +103,7 @@ const TabList = (props) => {
         <div className='common_btns'>
           <button type='button' className='save' onClick={() => onClick(2)} ><span>추가</span></button>
           <button type='button' className='save' onClick={() => onClick(7)} ><span>상세추가</span></button>
+          <button type='button' className='save' onClick={() => onClick(8)} ><span>상세삭제</span></button>
           <button type='button' className='save' onClick={() => onClick(4)} ><span>저장</span></button>
           <button type='button' className='del'  onClick={() => onClick(3)} ><span>삭제</span></button>
           <button type='button' className='search' onClick={() => onClick(1)} ><span>조회</span></button>

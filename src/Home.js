@@ -69,61 +69,61 @@ const onActiveWindow = (e) => {
 
 const defaultOpen = async() => {
 
-    //검수대기 Open
-    gfs_PGM_REDUCER('INSP_PROC');
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 0,
-      activeWindow: {programId: 'INSP_PROC',
-                      programNam: '검수진행'
-                    }
-    }));
+    // //검수대기 Open
+    // gfs_PGM_REDUCER('INSP_PROC');
+    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    // ({
+    //   windowZindex: 0,
+    //   activeWindow: {programId: 'INSP_PROC',
+    //                   programNam: '검수진행'
+    //                 }
+    // }));
 
-    await gfc_sleep(20);
+    // await gfc_sleep(20);
 
-    //검수이력 Open
-    gfs_PGM_REDUCER('INSP_HIST');
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 1,
-      activeWindow: {programId: 'INSP_HIST',
-                      programNam: '검수이력'
-                    }
-    }));
+    // //검수이력 Open
+    // gfs_PGM_REDUCER('INSP_HIST');
+    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    // ({
+    //   windowZindex: 1,
+    //   activeWindow: {programId: 'INSP_HIST',
+    //                   programNam: '검수이력'
+    //                 }
+    // }));
 
-    await gfc_sleep(20);
+    // await gfc_sleep(20);
 
-    //출차대기 Open
-    gfs_PGM_REDUCER('DISP_PROC');
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 2,
-      activeWindow: {programId: 'DISP_PROC',
-                      programNam: '출차대기'
-                    }
-    }));
+    // //출차대기 Open
+    // gfs_PGM_REDUCER('DISP_PROC');
+    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    // ({
+    //   windowZindex: 2,
+    //   activeWindow: {programId: 'DISP_PROC',
+    //                   programNam: '출차대기'
+    //                 }
+    // }));
 
-    await gfc_sleep(20);
+    // await gfc_sleep(20);
 
-    //입차대기 Open
-    gfs_PGM_REDUCER('ENTR_PROC');
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 3,
-      activeWindow: {programId: 'ENTR_PROC',
-                      programNam: '입차대기'
-                    }
-    }));
+    // //입차대기 Open
+    // gfs_PGM_REDUCER('ENTR_PROC');
+    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    // ({
+    //   windowZindex: 3,
+    //   activeWindow: {programId: 'ENTR_PROC',
+    //                   programNam: '입차대기'
+    //                 }
+    // }));
 
-    await gfc_sleep(20);
+    // await gfc_sleep(20);
 
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 0,
-      activeWindow: {programId: 'INSP_PROC',
-                      programNam: '검수진행'
-                    }
-    }));
+    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    // ({
+    //   windowZindex: 0,
+    //   activeWindow: {programId: 'INSP_PROC',
+    //                   programNam: '검수진행'
+    //                 }
+    // }));
 }
 
 const Home = (props) => {  

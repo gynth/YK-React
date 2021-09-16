@@ -14,11 +14,9 @@ gfs_PGM_REDUCER('login');
 const onClick = async(e, user_id, pass_cd) => {
 
   let result = await getDynamicSql_Oracle(
-    ['R'],
-    ['Common/Common'],
-    ['ZM_IMS_CAMERA_DELETE'],
-    [{CAMERA_IP: '111'}],
-    [0]
+    'Common/Common',
+    'LOGIN',
+    [{user_id, pass_cd}]
   ); 
 
   if(result.data.rows.length > 0){

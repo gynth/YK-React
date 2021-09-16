@@ -109,6 +109,7 @@ function RecImageDtl(props) {
   
   useEffect(() => {
     gfs_subscribe(onActiveWindow);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

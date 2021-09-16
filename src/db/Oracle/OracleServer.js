@@ -91,6 +91,18 @@ export function OracleServerSP_YN(param){
 export function OracleServerSP(param){
   // const host = 'http://211.231.136.182:3001/Oracle/SPYK';
   // const host = 'http://10.10.10.136:3001/Oracle/SPYK';
+
+  for(let j = 0; j < param.length; j++){
+    let keys = Object.keys(param[j].data);
+    for(let i = 0; i < keys.length; i++){
+      if(param[j].data[keys[i]] === null || param[j].data[keys[i]] === undefined){
+        param[j].data[keys[i]] = '';
+      }
+    }
+  }
+  
+
+
   const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/SP';
   const option = {
     url   : host,

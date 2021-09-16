@@ -100,7 +100,9 @@ class NumberEditor {
     let value = String(props.value === null ? '' : props.value);
     const NUM_FORMAT = gfs_getStoreValue('USER_REDUCER', 'NUM_FORMAT');
     const NUM_ROUND = gfs_getStoreValue('USER_REDUCER', 'NUM_ROUND');
-    value = gfc_setNumberFormat(props.value, NUM_FORMAT, NUM_ROUND)
+    value = gfc_setNumberFormat(props.value, NUM_FORMAT, NUM_ROUND);
+    if(value === undefined)
+      value = '';
 
     el.value = value;
 

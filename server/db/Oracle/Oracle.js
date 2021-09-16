@@ -9,16 +9,54 @@ const executeSPYK = async(connection, query, data) => {
 }
 
 const executeSP = async(RowStatus, connection, query, data) => {
-  const result = await connection.execute(query, data);
-  console.log(RowStatus);
-  fetchRowsFromRS(result);
+  console.log(data);
+  const queryResult = await connection.execute(query, data);
+  let result = {};
+  
+  let ROWS;
+  let SUCCESS  = queryResult.outBinds['p_SUCCESS'];
+  let MSG_CODE = queryResult.outBinds['p_MSG_CODE'];
+  let MSG_TEXT = queryResult.outBinds['p_MSG_TEXT'];
+  let COL_NAM  = queryResult.outBinds['p_COL_NAM'];
+
+  if(RowStatus === 'R'){
+    ROWS = await fetchRowsFromRS(queryResult);
+
+    if(ROWS.length === 0){
+      ROWS     = null;
+      SUCCESS  = 'N';
+      MSG_CODE = 'MSG01';
+      MSG_TEXT = 'MSG01';
+      COL_NAM  = '';
+    }
+  }
+
+  result.ROWS     = ROWS;
+  result.SUCCESS  = SUCCESS;
+  result.MSG_CODE = MSG_CODE;
+  result.MSG_TEXT = MSG_TEXT;
+  result.COL_NAM  = COL_NAM;
+  
+  console.log(result);
+
   return result;
 }
 
 const fetchRowsFromRS = async(result) => {
   const resultSet = await result.outBinds['p_select'].getRows();
   const column = await result.outBinds['p_select'].metaData;
-  console.log(column, resultSet);
+  
+  let data = [];
+  for(let i = 0; i < resultSet.length; i++){
+
+    let col = {};
+    for(let j = 0; j < resultSet[i].length; j++){
+      col[column[j].name] = resultSet[i][j];
+    }
+    data.push(col);
+  }
+
+  return data;
 }
 
 router.post('/SP', (req, res) => {
@@ -30,6 +68,12 @@ router.post('/SP', (req, res) => {
   async (err, connection) => {
     if(err){
       console.log(err.message);
+      res.json({
+        SUCCESS : false,
+        MSG_CODE: err.message,
+        MSG_TEXT: err.message,
+        COL_NAM : ''
+      });
       return;
     }
     
@@ -38,6 +82,7 @@ router.post('/SP', (req, res) => {
       let query = param[i].sp;
       let data  = param[i].data;
       let errSeq = param[i].errSeq;
+      console.log(errSeq);
       data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
       data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
       data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
@@ -45,26 +90,42 @@ router.post('/SP', (req, res) => {
       data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
     
       const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
-      if(result !== 'OK'){
+      if(result.SUCCESS === 'N'){
         connection.rollback((err) => {
           if(err !== null)
             console.log('rollback Error: ' + err);
         })
 
         doRelease(connection);
-        res.json({seq      : errSeq.seq,
-                  result   : result});
+        res.json({
+          ROWS    : result.ROWS,
+          SUCCESS : result.SUCCESS,
+          MSG_CODE: result.MSG_CODE,
+          MSG_TEXT: result.MSG_TEXT,
+          COL_NAM : result.COL_NAM,
+          SEQ     : errSeq
+        });
+
         return;
+        
+      }else{
+        if(i === param.length - 1){
+          connection.commit((err) => {
+            if(err !== null)
+              console.log('Commit Error: ' + err);
+          })
+          
+          res.json({
+            ROWS    : result.ROWS,
+            SUCCESS : result.SUCCESS,
+            MSG_CODE: result.MSG_CODE,
+            MSG_TEXT: result.MSG_TEXT,
+            COL_NAM : result.COL_NAM,
+            SEQ     : errSeq
+          });
+        }
       }
     }
-
-    connection.commit((err) => {
-      if(err !== null)
-        console.log('Commit Error: ' + err);
-    })
-
-    res.json({seq      : 0,
-              result   : 'OK'});
   }) 
 });
 
@@ -102,15 +163,6 @@ router.post('/SPYK', (req, res) => {
         return;
       }
     }
-
-    connection.commit((err) => {
-      if(err !== null)
-        console.log('Commit Error: ' + err);
-    })
-
-    res.json({scaleNumb: 'OK',
-              seq      : 0,
-              result   : 'OK'});
   }) 
 });
  

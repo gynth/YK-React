@@ -359,7 +359,6 @@ class COMM extends Component {
     ); 
 
     if(result.data.result !== true){
-      alert(gfc_getAtt(result.data.message));
       gfc_hideMask();
 
       return;
@@ -413,7 +412,7 @@ class COMM extends Component {
                 />
               </div>
             </div>
-            <div className='grid'>
+            <div className='grid' style={{paddingBottom:'0'}}>
               <div className='wp'>
                 <div style={{width:'100%', height:'100%', overflow:'auto'}}>
                   
@@ -446,7 +445,7 @@ class COMM extends Component {
                             columnInput({
                               name: 'COMM_NAM',
                               header: '코드명',
-                              width : 250,
+                              width : 350,
                               readOnly: false,
                               align : 'left',
                               onRender: (value, control, rows) => {
@@ -499,7 +498,7 @@ class COMM extends Component {
                             columnInput({
                               name: 'COMM_DTL_NAM',
                               header: '상세코드명',
-                              width : 250,
+                              width : 400,
                               readOnly: false,
                               align : 'left',
                               onRender: (value, control, rows) => {

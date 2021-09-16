@@ -56,6 +56,10 @@ export const gfc_getAtt = (code) => {
   if(code === 'MSG01') msg = '조회된 건이 없습니다.';
   else if(code === 'MSG02') msg = '해당건이 없습니다. 재조회 후 처리해주세요.';
   else if(code === 'MSG03') msg = '중복값이 존재합니다.';
+  else if(code === 'MSG04') msg = '필수입력값이 없습니다.';
+  else if(code === 'MSG05') msg = '저장되었습니다.';
+  else if(code === 'MSG06') msg = '삭제되었습니다.';
+  else if(code === 'MSG07') msg = '데이터베이스처리중 에러가 발생했습니다.';
   else msg = code;
 
   return msg;

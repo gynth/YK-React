@@ -105,11 +105,11 @@ class CheckboxEditor {
       // el.value = value;
       // gfg_setValue(props.grid, props.columnInfo.name, value);
       if(e.target.checked){
-        el.value = true;
-        gfg_setValue(props.grid, props.columnInfo.name, true);
+        el.value = 'Y';
+        gfg_setValue(props.grid, props.columnInfo.name, 'Y');
       }else{
-        el.value = props.value;
-        gfg_setValue(props.grid, props.columnInfo.name, props.value);
+        el.value = 'N';
+        gfg_setValue(props.grid, props.columnInfo.name, 'N');
       }
     })
     el.setAttribute('style', `height: 20px; 
@@ -128,6 +128,14 @@ class CheckboxEditor {
     }
 
     this.el = el;
+    
+    const value = props.value;
+
+    if(value === true || value === 'true' || value === 'Y' || value === 'y' || value === '1' || value === 1 || value === 'on'){
+      this.el.checked = true;
+    }else{
+      this.el.checked = false;
+    }
   }
 
   getElement() {
@@ -137,7 +145,14 @@ class CheckboxEditor {
   getValue() {
     // console.log(this.props.grid.store.data.rawData[0].COP_CD)
     // this.props.grid.setValue(0, 'SAP_CD', '10')
-    return this.el.value;
+    let value = this.el.value;
+    if(value === true || value === 'true' || value === 'Y' || value === 'y' || value === '1' || value === 1 || value === 'on'){
+      value = 'Y';
+    }else{
+      value = 'N';
+    }
+
+    return value;
   }
 
   mounted() {
@@ -154,11 +169,11 @@ class CheckboxRenderer {
       // el.value = value;
       // gfg_setValue(props.grid, props.columnInfo.name, value);
       if(e.target.checked){
-        el.value = true;
-        gfg_setValue(props.grid, props.columnInfo.name, true);
+        el.value = 'Y';
+        gfg_setValue(props.grid, props.columnInfo.name, 'Y');
       }else{
-        el.value = props.value;
-        gfg_setValue(props.grid, props.columnInfo.name, props.value);
+        el.value = 'N';
+        gfg_setValue(props.grid, props.columnInfo.name, 'N');
       }
     })
 
@@ -177,14 +192,20 @@ class CheckboxRenderer {
 
     const value = props.value;
 
-    if(value === true || value === 'true' || value === 'Y' || value === 'y' || value === '1' || value === 1){
+    if(value === true || value === 'true' || value === 'Y' || value === 'y' || value === '1' || value === 1 || value === 'on'){
       this.el.checked = true;
     }else{
       this.el.checked = false;
     }
 
+    let backGround = 'white';
+    if(org !== value) {
+      backGround = 'greenYellow'
+    }
+
     this.el.setAttribute('style', `height: 20px; 
                                    width : 30px;
+                                   background-color:${backGround};
                                    vertical-align:middle;
     `);
   }
