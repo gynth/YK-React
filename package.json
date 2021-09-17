@@ -100,6 +100,7 @@
     "react-script-tag": "^1.1.1",
     "react-select": "^4.2.1",
     "react-split-pane": "^0.1.92",
+    "react-tabs": "^3.2.2",
     "reactjs-popup": "^2.0.4",
     "reactstrap": "^8.9.0",
     "readable-stream": "^3.6.0",

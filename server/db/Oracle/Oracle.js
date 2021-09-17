@@ -37,7 +37,7 @@ const executeSP = async(RowStatus, connection, query, data) => {
   result.MSG_TEXT = MSG_TEXT;
   result.COL_NAM  = COL_NAM;
   
-  console.log(result);
+  // console.log(result);
 
   return result;
 }
@@ -82,7 +82,7 @@ router.post('/SP', (req, res) => {
       let query = param[i].sp;
       let data  = param[i].data;
       let errSeq = param[i].errSeq;
-      console.log(errSeq);
+      
       data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
       data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
       data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};

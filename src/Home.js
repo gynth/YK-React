@@ -19,7 +19,7 @@ const defaultData = async() => {
   const userReducer = (nowState, action) => {
     if(action.reducer !== 'USER_REDUCER') {
       return {
-        COP_CD    : nowState === undefined ? ''           : nowState.COP_CD,
+        COP_CD    : nowState === undefined ? '10'         : nowState.COP_CD,
         USER_ID   : nowState === undefined ? '1989'       : nowState.USER_ID,
         USER_NAM  : nowState === undefined ? '김경현'      : nowState.USER_NAM,
         LANGUAGE  : nowState === undefined ? 'KOR'        : nowState.LANGUAGE,

@@ -12,7 +12,8 @@ const COMM = (fn, param) => {
     query = 
     ` SELECT *  ` +
     `   FROM zm_ims_code ` +
-    `  WHERE COMM_DTL_CD = '${param.COMM_DTL_CD}'`;
+    `  WHERE COMM_DTL_CD = '${param.COMM_DTL_CD}'` +
+    `  ORDER BY COMM_CD `;
   }else if(fn === 'ZM_IMS_CODE_INSERT_MAIN10'){
     query = 
     ` INSERT INTO zm_ims_code ` +

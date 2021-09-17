@@ -3,12 +3,14 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_getAtt } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_getAtt, gfc_sleep } from '../../../Method/Comm';
 import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_getModyfiedRow, gfg_setSelectRow, gfg_getRowCount } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import Layout from '../../../Component/Layout/Layout';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
 import { Number as columnNumber} from '../../../Component/Grid/Column/Number';
@@ -21,19 +23,20 @@ import Combobox from '../../../Component/Control/Combobox';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 import { getSp_Oracle } from '../../../db/Oracle/Oracle';
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
-class MENU extends Component {
+class AUTH extends Component {
+  selectedTab = 0;
+
   constructor(props){
     super(props)
     
     gfc_initPgm(props.pgm, props.nam, this)
 
     //#region 리듀서
-    const MENU_MAIN = (nowState, action) => {
+    const AUTH_MAIN = (nowState, action) => {
 
-      if(action.reducer !== 'MENU_MAIN') {
+      if(action.reducer !== 'AUTH_MAIN') {
         return {
           BOT_TOTAL    : nowState === undefined ? 0 : nowState.BOT_TOTAL,
         };
@@ -47,7 +50,7 @@ class MENU extends Component {
       }
     }
 
-    gfs_injectAsyncReducer('MENU_MAIN', MENU_MAIN);
+    gfs_injectAsyncReducer('AUTH_MAIN', AUTH_MAIN);
     //#endregion
   }
 
@@ -94,7 +97,14 @@ class MENU extends Component {
   }
 
   Save = async() => {
-    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
+    let mainGrid;
+
+    if(this.selectedTab === 0){
+      mainGrid = gfg_getGrid(this.props.pgm, 'main10');
+    }else{
+      mainGrid = gfg_getGrid(this.props.pgm, 'main20');
+    }
+
     const dtlGrid = gfg_getGrid(this.props.pgm, 'detail10');
 
     if(gfg_getRowCount(mainGrid) === 0){
@@ -118,20 +128,18 @@ class MENU extends Component {
     dtlMod.forEach(e => {
       param.push({
         sp   : `begin 
-                  SP_ZM_IMS_MENU_DETAIL10(
+                  SP_ZM_IMS_AUTH_DETAIL10(
                     :p_COP_CD,
                     :p_RowStatus,
-                    :p_MENU_GRP,
                     :p_MENU_ID,
-                    :p_MENU_NAM,
-                    :p_USE_YN,
-                    :p_PGM_ID,
-                    :p_PGM_ROOT,
-                    :p_MENU_SEQ, 
+                    :p_GRP_USER_ID,
+                    :p_CD_GBN,
+  
                     :p_RETAUT_YN,
                     :p_INSAUT_YN,
                     :p_SAVAUT_YN,
                     :p_DELAUT_YN,
+                    :p_PTZAUT_YN,
                     :p_USER_ID,
                     
                     :p_select,
@@ -143,30 +151,83 @@ class MENU extends Component {
                 end;
                 `,
         data : {
-          p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-          p_RowStatus : e.rowStatus,
-          p_MENU_GRP  : gfg_getRow(mainGrid).MENU_ID,
-          p_MENU_ID   : e.MENU_ID,
-          p_MENU_NAM  : e.MENU_NAM,
-          p_USE_YN    : e.USE_YN,
-          p_PGM_ID    : e.PGM_ID,
-          p_PGM_ROOT  : e.PGM_ROOT,
-          p_MENU_SEQ  : e.MENU_SEQ,
-          p_RETAUT_YN : e.RETAUT_YN,
-          p_INSAUT_YN : e.INSAUT_YN,
-          p_SAVAUT_YN : e.SAVAUT_YN,
-          p_DELAUT_YN : e.DELAUT_YN,
+          p_COP_CD     : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+          p_RowStatus  : e.rowStatus,
+          p_MENU_ID    : e.MENU_ID,
+          p_GRP_USER_ID: gfg_getRow(mainGrid).AUTH_CD,
+          p_CD_GBN     : this.selectedTab === 0 ? 'G' : 'I',
+          p_RETAUT_YN : e.RETAUT_YN === null ? 'N' : e.RETAUT_YN,
+          p_INSAUT_YN : e.INSAUT_YN === null ? 'N' : e.INSAUT_YN,
+          p_SAVAUT_YN : e.SAVAUT_YN === null ? 'N' : e.SAVAUT_YN,
+          p_DELAUT_YN : e.DELAUT_YN === null ? 'N' : e.DELAUT_YN,
+          p_PTZAUT_YN : e.DELAUT_YN === null ? 'N' : e.DELAUT_YN,
           p_USER_ID   : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
         },
         errSeq: e.rowKey
       })
     })
 
+    // dtlMod.forEach(e => {
+    //   param.push({
+    //     sp   : `begin 
+    //               SP_ZM_IMS_AUTH_DETAIL10(
+    //                 :p_COP_CD,
+    //                 :p_RowStatus,
+    //                 :p_MENU_ID,
+    //                 :p_GRP_USER_ID,
+    //                 :p_CD_GBN
+
+    //                 :p_RETAUT_YN,
+    //                 :p_INSAUT_YN,
+    //                 :p_SAVAUT_YN,
+    //                 :p_DELAUT_YN,
+    //                 :p_PTZAUT_YN,
+    //                 :p_USER_ID,
+                    
+    //                 :p_select,
+    //                 :p_SUCCESS,
+    //                 :p_MSG_CODE,
+    //                 :p_MSG_TEXT,
+    //                 :p_COL_NAM
+    //               );
+    //             end;
+    //             `,
+    //     data : {
+    //       p_COP_CD     : '10',
+    //       p_RowStatus  : 'R',
+    //       p_MENU_ID    : '',
+    //       p_GRP_USER_ID: '10',
+    //       p_CD_GBN     : '',
+
+    //       p_RETAUT_YN : '',
+    //       p_INSAUT_YN : '',
+    //       p_SAVAUT_YN : '',
+    //       p_DELAUT_YN : '',
+    //       p_PTZAUT_YN : '',
+    //       p_USER_ID   : '1989'
+
+    //       // p_COP_CD     : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+    //       // p_RowStatus  : e.rowStatus,
+    //       // p_MENU_ID    : e.MENU_ID,
+    //       // p_GRP_USER_ID: gfg_getRow(mainGrid).AUTH_CD,
+    //       // p_CD_GBN     : this.selectedTab === 0 ? 'G' : 'I',
+
+    //       // p_RETAUT_YN : e.RETAUT_YN === null ? 'N' : e.RETAUT_YN,
+    //       // p_INSAUT_YN : e.INSAUT_YN === null ? 'N' : e.INSAUT_YN,
+    //       // p_SAVAUT_YN : e.SAVAUT_YN === null ? 'N' : e.SAVAUT_YN,
+    //       // p_DELAUT_YN : e.DELAUT_YN === null ? 'N' : e.DELAUT_YN,
+    //       // p_PTZAUT_YN : e.PTZAUT_YN === null ? 'N' : e.PTZAUT_YN,
+    //       // p_USER_ID   : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
+    //     },
+    //     errSeq: e.rowKey
+    //   })
+    // })
+
     gfc_showMask();
     
     const result = await getSp_Oracle(param);
     if(result.data.SUCCESS !== 'Y'){
-      alert(gfc_getAtt(result.data.MSG_CODE));
+      alert(gfc_getAtt(result.data.MSG_CODE) + '>' + result.data.MSG_TEXT);
       gfg_setSelectRow(dtlGrid, result.data.COL_NAM, result.data.SEQ);
       gfc_hideMask();
 
@@ -178,46 +239,22 @@ class MENU extends Component {
     }
   }
 
-
-  DtlDelete = async (e) => {
-
-    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
-    const detailGrid = gfg_getGrid(this.props.pgm, 'detail10');
-    const selectRow = gfg_getRow(detailGrid);
-    if(selectRow === null){
-      alert('선택된건이 없습니다.');
-      return;
-    }
-
-    if(selectRow.phantom){
-      detailGrid.removeRow(selectRow['rowKey']);
-      return;
-    }else{
-
-      if(window.confirm('삭제하시겠습니까?') === false){
-        return;
-      }
+  Retrieve = async () => {
+    if(this.selectedTab === 0){
 
       gfc_showMask();
 
+      const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
+      const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
+      mainGrid.clear();
+      dtlGrid.clear();
+  
       let param = [];
       param.push({
         sp   : `begin 
-                  SP_ZM_IMS_MENU_DETAIL10(
+                  SP_ZM_IMS_AUTH_MAIN10(
                     :p_COP_CD,
                     :p_RowStatus,
-                    :p_MENU_GRP,
-                    :p_MENU_ID,
-                    :p_MENU_NAM,
-                    :p_USE_YN,
-                    :p_PGM_ID,
-                    :p_PGM_ROOT,
-                    :p_MENU_SEQ, 
-                    :p_RETAUT_YN,
-                    :p_INSAUT_YN,
-                    :p_SAVAUT_YN,
-                    :p_DELAUT_YN,
-                    :p_USER_ID,
                     
                     :p_select,
                     :p_SUCCESS,
@@ -229,19 +266,7 @@ class MENU extends Component {
                 `,
         data : {
           p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-          p_RowStatus : 'D',
-          p_MENU_GRP  : gfg_getRow(mainGrid).MENU_ID,
-          p_MENU_ID   : gfg_getRow(detailGrid).MENU_ID,
-          p_MENU_NAM  : '',
-          p_USE_YN    : '',
-          p_PGM_ID    : '',
-          p_PGM_ROOT  : '',
-          p_MENU_SEQ  : '',
-          p_RETAUT_YN : '',
-          p_INSAUT_YN : '',
-          p_SAVAUT_YN : '',
-          p_DELAUT_YN : '',
-          p_USER_ID   : ''
+          p_RowStatus : 'R'
         },
         errSeq: 0
       })
@@ -253,71 +278,56 @@ class MENU extends Component {
   
         return;
       }
+
+      mainGrid.resetData(result.data.ROWS);
+      mainGrid.resetOriginData()
+      mainGrid.restore();
+      gfg_setSelectRow(mainGrid);
+    }else{
+
+      gfc_showMask();
+
+      const mainGrid = gfg_getGrid(this.props.pgm, 'main20');
+      const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
+      mainGrid.clear();
+      dtlGrid.clear();
   
-      detailGrid.removeRow(selectRow['rowKey']);
-      gfc_hideMask();
-    }
-  }
+      let param = [];
+      param.push({
+        sp   : `begin 
+                  SP_ZM_IMS_AUTH_MAIN20(
+                    :p_COP_CD,
+                    :p_RowStatus,
+                    
+                    :p_select,
+                    :p_SUCCESS,
+                    :p_MSG_CODE,
+                    :p_MSG_TEXT,
+                    :p_COL_NAM
+                  );
+                end;
+                `,
+        data : {
+          p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+          p_RowStatus : 'R'
+        },
+        errSeq: 0
+      })
+      
+      const result = await getSp_Oracle(param);
+      if(result.data.SUCCESS !== 'Y'){
+        alert(gfc_getAtt(result.data.MSG_CODE));
+        gfc_hideMask();
+  
+        return;
+      }
 
-  DtlInsert = () => {
-    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
-    const dtlGrid = gfg_getGrid(this.props.pgm, 'detail10');
-
-    const mainRow = gfg_getRow(mainGrid);
-    if(mainRow === null){
-      alert('선택된건이 없습니다.');
-      return;
-    }
-
-    gfg_appendRow(dtlGrid, dtlGrid.getRowCount(), { RETAUT_YN:'Y', INSAUT_YN: 'Y', SAVAUT_YN: 'Y', DELAUT_YN: 'Y'}, 'MENU_ID');
-
-  }
-
-  Retrieve = async () => {
-    gfc_showMask();
-
-    const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
-    const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
-    mainGrid.clear();
-    dtlGrid.clear();
-
-    let param = [];
-    param.push({
-      sp   : `begin 
-                SP_ZM_IMS_MENU_MAIN10(
-                  :p_COP_CD,
-                  :p_RowStatus,
-                  
-                  :p_select,
-                  :p_SUCCESS,
-                  :p_MSG_CODE,
-                  :p_MSG_TEXT,
-                  :p_COL_NAM
-                );
-              end;
-              `,
-      data : {
-        p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-        p_RowStatus : 'R'
-      },
-      errSeq: 0
-    })
-    
-    const result = await getSp_Oracle(param);
-    if(result.data.SUCCESS !== 'Y'){
-      alert(gfc_getAtt(result.data.MSG_CODE));
-      gfc_hideMask();
-
-      return;
+      mainGrid.resetData(result.data.ROWS);
+      mainGrid.resetOriginData()
+      mainGrid.restore();
+      gfg_setSelectRow(mainGrid);
     }
 
-    mainGrid.clear();
-
-    mainGrid.resetData(result.data.ROWS);
-    mainGrid.resetOriginData()
-    mainGrid.restore();
-
-    gfg_setSelectRow(mainGrid);
     // gfg_setSelectRow(mainGrid);
 
     gfc_hideMask();
@@ -332,20 +342,18 @@ class MENU extends Component {
     let param = [];
     param.push({
       sp   : `begin 
-                SP_ZM_IMS_MENU_DETAIL10(
+                SP_ZM_IMS_AUTH_DETAIL10(
                   :p_COP_CD,
                   :p_RowStatus,
-                  :p_MENU_GRP,
                   :p_MENU_ID,
-                  :p_MENU_NAM,
-                  :p_USE_YN,
-                  :p_PGM_ID,
-                  :p_PGM_ROOT,
-                  :p_MENU_SEQ, 
+                  :p_GRP_USER_ID,
+                  :p_CD_GBN,
+
                   :p_RETAUT_YN,
                   :p_INSAUT_YN,
                   :p_SAVAUT_YN,
                   :p_DELAUT_YN,
+                  :p_PTZAUT_YN,
                   :p_USER_ID,
                   
                   :p_select,
@@ -357,20 +365,18 @@ class MENU extends Component {
               end;
               `,
       data : {
-        p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-        p_RowStatus : 'R',
-        p_MENU_GRP  : e.MENU_ID,
-        p_MENU_ID   : '',
-        p_MENU_NAM  : '',
-        p_USE_YN    : '',
-        p_PGM_ID    : '',
-        p_PGM_ROOT  : '',
-        p_MENU_SEQ  : 0,
-        p_RETAUT_YN : '',
-        p_INSAUT_YN : '',
-        p_SAVAUT_YN : '',
-        p_DELAUT_YN : '',
-        p_USER_ID   : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
+        p_COP_CD     : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+        p_RowStatus  : 'R',
+        p_MENU_ID    : '',
+        p_GRP_USER_ID: e.AUTH_CD,
+        p_CD_GBN     : '',
+
+        p_RETAUT_YN  : '',
+        p_INSAUT_YN  : '',
+        p_SAVAUT_YN  : '',
+        p_DELAUT_YN  : '',
+        p_PTZAUT_YN  : '',
+        p_USER_ID    : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
       },
       errSeq: 0
     })
@@ -436,39 +442,76 @@ class MENU extends Component {
                           minSize     ={[54]}
                           defaultSize ={'30%'}
                   >
-                    <Grid pgm={this.props.pgm}
-                          id ='main10'
-                          selectionChange={(e) => {
-                            this.onSelectChange(e);
-                          }}
-                          rowHeight={30}
-                          rowHeaders= {[{ type: 'rowNum', width: 40 }]}
-                          columns={[
-                            columnCombobox({
-                              name: 'MENU_ID', 
-                              header: '메뉴그룹',
-                              value   : 'COMM_DTL_CD',
-                              display : 'COMM_DTL_NAM',
-                              width   : 150, 
-                              readOnly: true,
-                              oracleData : getDynamicSql_Oracle(
-                                'COMM/COMM',
-                                'ZM_IMS_CODE_SELECT',
-                                [{COMM_CD: '1'}]),
-                              editor: {
-                                value   : 'COMM_DTL_CD',
-                                display : 'COMM_DTL_NAM'
-                              }
-                            }),
-                            columnInput({
-                              name: 'MENU_NAM',
-                              header: '메뉴그룹명',
-                              width : 250,
-                              readOnly: true,
-                              align : 'left',
-                            })
-                          ]}
-                    />
+                    <Tabs 
+                      onSelect={async e => {
+                        this.selectedTab = e;
+
+                        await gfc_sleep(100);
+
+                        this.Retrieve();
+                      }}
+                    >
+                      <TabList>
+                        <Tab>그룹</Tab>
+                        <Tab>사용자</Tab>
+                      </TabList>
+
+                      <TabPanel
+                        style={{height:'calc(100% - 41px)'}}>
+                        <Grid pgm={this.props.pgm}
+                              id ='main10'
+                              selectionChange={(e) => {
+                                this.onSelectChange(e);
+                              }}
+                              rowHeight={30}
+                              rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                              columns={[
+                                columnInput({
+                                  name: 'AUTH_CD',
+                                  header: '그룹ID',
+                                  width : 100,
+                                  readOnly: true,
+                                  align : 'center',
+                                }),
+                                columnInput({
+                                  name: 'AUTH_NAM',
+                                  header: '그룹명',
+                                  width : 250,
+                                  readOnly: true,
+                                  align : 'left',
+                                })
+                              ]}
+                        />
+                      </TabPanel>
+                      <TabPanel
+                        style={{height:'calc(100% - 41px)'}}
+                      >
+                        <Grid pgm={this.props.pgm}
+                              id ='main20'
+                              selectionChange={(e) => {
+                                this.onSelectChange(e);
+                              }}
+                              rowHeight={30}
+                              rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                              columns={[
+                                columnInput({
+                                  name: 'AUTH_CD',
+                                  header: '사용자ID',
+                                  width : 100,
+                                  readOnly: true,
+                                  align : 'center',
+                                }),
+                                columnInput({
+                                  name: 'AUTH_NAM',
+                                  header: '사용자명',
+                                  width : 250,
+                                  readOnly: true,
+                                  align : 'left',
+                                })
+                              ]}
+                        />
+                      </TabPanel>
+                    </Tabs>
 
                     <Grid pgm={this.props.pgm}
                           id ='detail10'
@@ -503,57 +546,6 @@ class MENU extends Component {
                                 }
                               }
                             }),   
-                            columnInput({
-                              name: 'PGM_ID',
-                              header: '프로그램',
-                              width : 250,
-                              readOnly: false,
-                              align : 'left',
-                              onRender: (value, control, rows) => {
-                                if(rows.phantom){
-                                  control.readOnly = false;
-                                }else{
-                                  control.readOnly = true;
-                                }
-                              }
-                            }),   
-                            columnInput({
-                              name: 'PGM_ROOT',
-                              header: '프로그램경로',
-                              width : 250,
-                              readOnly: false,
-                              align : 'left',
-                              onRender: (value, control, rows) => {
-                                if(rows.phantom){
-                                  control.readOnly = false;
-                                }else{
-                                  control.readOnly = true;
-                                }
-                              }
-                            }),
-                            columnNumber({
-                              name    : 'MENU_SEQ', 
-                              header  : '정렬순서', 
-                              width   : 100, 
-                              readOnly: false
-                            }),
-                            columnCombobox({
-                              name: 'USE_YN', 
-                              header: '사용여부',
-                              readOnly: false,
-                              width   : 130,
-                              data    : [{
-                                'code': 'Y',
-                                'name': 'Yes'
-                              },{
-                                'code': 'N',
-                                'name': 'No'
-                              }],
-                              editor: {
-                                value   : 'code',
-                                display : 'name'
-                              }
-                            }),
                             columnCheckbox({
                               name: 'RETAUT_YN',
                               header: '조회',
@@ -585,7 +577,15 @@ class MENU extends Component {
                               readOnly: true,
                               align : 'center',
                               type: 'checkbox'
-                            })
+                            }),   
+                            columnCheckbox({
+                              name: 'PTZAUT_YN',
+                              header: 'PTZ',
+                              width : 50,
+                              readOnly: true,
+                              align : 'center',
+                              type: 'checkbox'
+                            }),
                           ]}
                     />
                   </Layout>
@@ -599,4 +599,4 @@ class MENU extends Component {
   }
 }
 
-export default MENU;
+export default AUTH;

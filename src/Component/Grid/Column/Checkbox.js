@@ -194,8 +194,12 @@ class CheckboxRenderer {
 
     if(value === true || value === 'true' || value === 'Y' || value === 'y' || value === '1' || value === 1 || value === 'on'){
       this.el.checked = true;
+      this.el.value = 'Y';
     }else{
       this.el.checked = false;
+      if(value === null){
+        this.el.value = 'N';
+      }
     }
 
     let backGround = 'white';

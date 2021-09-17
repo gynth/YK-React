@@ -70,6 +70,9 @@ const SideBarMainListDetail = (props) => {
           MENU_ID : 'MENU',
           MENU_NAM: '프로그램메뉴'
         },{
+          MENU_ID : 'AUTH',
+          MENU_NAM: '권한관리'
+        },{
           MENU_ID : 'CAMR_SETTING',
           MENU_NAM: '카메라세팅'
         }]

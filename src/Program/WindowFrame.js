@@ -125,6 +125,9 @@ const applyWindow = (programId, programNam) => {
   }else if(programId === 'MENU'){
     const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
     return <pgm.default pgm={programId} nam={programNam} />
+  }else if(programId === 'AUTH'){
+    const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+    return <pgm.default pgm={programId} nam={programNam} />
   }else{
     const pgm = require(`../Program/IMS/${programId}/${programId}.js`);
   
