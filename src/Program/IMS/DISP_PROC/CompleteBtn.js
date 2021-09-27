@@ -11,7 +11,7 @@ const CompleteBtn = (props) => {
   const value = useSelector((e) => {
     return e.DISP_PROC_MAIN.CHIT_INFO;
   }, (p, n) => {
-    return p.scaleNumb === n.scaleNumb;
+    return p.chit === n.chit;
   });
 
   //#region 계량표 재등록
@@ -129,7 +129,7 @@ const CompleteBtn = (props) => {
     }
     const detail_rtn = gfo_getCombo(props.pgm, 'detail_rtn'); //반품구분
     const detail_rtn2 = gfo_getCombo(props.pgm, 'detail_rtn2'); //반품구분사유
-    if(detail_rtn !== null && detail_rtn.getValue() !== ''){
+    if(detail_rtn.getValue() !== null && detail_rtn.getValue() !== ''){
       if(detail_rtn2.getValue() === null || detail_rtn2.getValue() === ''){
         alert('필수입력값이 없습니다. > 반품구분사유');
         const chitBtn = document.getElementById(`tab1_${props.pgm}`);
@@ -208,6 +208,11 @@ const CompleteBtn = (props) => {
 
     //#endregion
 
+    alert('저장되었습니다.');
+
+    const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'DISP_PROC');
+    pgm[0].Retrieve();
+    
     gfc_hideMask();
   }
   //#endregion

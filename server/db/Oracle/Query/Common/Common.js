@@ -88,18 +88,18 @@ const Common = (fn, param) => {
     ` INSERT INTO ZM_IMS_CAMERA      ` +
     ` (AREA_TP    ` +
     ` ,CAMERA_IP  ` + 
-    ` ,CAMERA_NAM ` +
+    ` ,CAMERA_NAM ` + 
+    ` ,RTSP_ADDR  ` +
     ` ,SEQ        ` +
-    ` ,START_PORT ` +
-    ` ,MAX_CONNECTION ` +
+    ` ,CAMERA_PORT` +
     ` ,USE_YN     ` +
     `)VALUES      ` +
     ` ('${param.AREA_TP}'` +
     ` ,'${param.CAMERA_IP}'` +
     ` ,'${param.CAMERA_NAM}'` +
+    ` ,'${param.RTSP_ADDR}'` +
     ` ,${param.SEQ}` +
-    ` ,${param.START_PORT}` +
-    ` ,${param.MAX_CONNECTION}` +
+    ` ,${param.CAMERA_PORT}` +
     ` ,'${param.USE_YN}')`;
   }else if(fn === 'ZM_IMS_CAMERA_UPDATE'){
     query = 

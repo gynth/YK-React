@@ -7,7 +7,7 @@ const TabList = (props) => {
   const value = useSelector((e) => {
     return e[props.reducer].CHIT_INFO;
   }, (p, n) => {
-    return p.scaleNumb === n.scaleNumb;
+    return p.chit === n.chit;
   });
 
 
@@ -26,7 +26,8 @@ const TabList = (props) => {
           const btnElement = document.getElementById(btnList[i]);
           if(btnElement !== null) gfc_addClass(btnElement,'on');
 
-          const car_info = document.getElementById('car_info');
+          const car_info = document.getElementById(`car_info_${props.pgm}`);
+
           if(i === 0){
             car_info.style.paddingBottom = '90px';
           }else if(i === 1){

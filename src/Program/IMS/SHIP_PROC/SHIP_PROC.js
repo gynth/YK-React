@@ -401,6 +401,14 @@ class SHIP_PROC extends Component {
                             readOnly: true,
                             align : 'center',
                             fontSize: '18'
+                          }),
+                          columnInput({
+                            name: 'iron_grade',
+                            header: '판정등급',
+                            width : 220,
+                            readOnly: true,
+                            align : 'center',
+                            fontSize: '18'
                           })
                         ]}
                   />
@@ -552,24 +560,25 @@ class SHIP_PROC extends Component {
                           // emptyRow
                     />
                   </li>
-                  {/* <li>
+                  <li>
                     <h5>하차구역</h5>
                     <Combobox pgm     = {this.props.pgm}
                           id      = 'detail_out'
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '하차구역 검색(SECTOR)'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
+                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})}
+                          // data    = ''
+                          // onFocus = {ComboCreate => {
+                          //   YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
+                          //     .then(res => {
+                          //       ComboCreate({data   : res.data.dataSend,
+                          //                   value  : 'itemCode',
+                          //                   display: 'item'});
+                          //     })
+                          // }}
                   />
-                  </li> */}
+                  </li>
                   <li>
                     <h5>차종구분</h5>
                     <Combobox pgm     = {this.props.pgm}

@@ -30,7 +30,7 @@ const CompleteBtn = (props) => {
       const column = gfg_getRow(grid, i);
       if(column.chk === null) continue;
 
-      if(column.chk.toString() === 'true'){
+      if(column.chk.toString() === 'Y'){
         chkCnt += 1;
         break;
       }
@@ -80,12 +80,13 @@ const CompleteBtn = (props) => {
       }
     }
 
-    // const detail_out = gfo_getCombo(props.pgm, 'detail_out'); //하차구역
-    // if(detail_out.getValue() === null){
-    //   alert('필수입력값이 없습니다. > 하차구역');
-    //   gfc_hideMask();
-    //   return;
-    // }
+    const detail_out = gfo_getCombo(props.pgm, 'detail_out'); //차종구분
+    if(detail_out.getValue() === null ||  detail_out.getValue() === ''){
+      alert('필수입력값이 없습니다. > 하차구역');
+
+      gfc_hideMask();
+      return;
+    }
     const detail_car = gfo_getCombo(props.pgm, 'detail_car'); //차종구분
     if(detail_car.getValue() === null ||  detail_car.getValue() === ''){
       alert('필수입력값이 없습니다. > 차종구분');
@@ -95,7 +96,7 @@ const CompleteBtn = (props) => {
     }
     const detail_rtn = gfo_getCombo(props.pgm, 'detail_rtn'); //반품구분
     const detail_rtn2 = gfo_getCombo(props.pgm, 'detail_rtn2'); //반품구분사유
-    if(detail_rtn !== null && detail_rtn.getValue() !== ''){
+    if(detail_rtn.getValue() !== null && detail_rtn.getValue() !== ''){
       if(detail_rtn2.getValue() === null || detail_rtn2.getValue() === ''){
         alert('필수입력값이 없습니다. > 반품구분사유');
   
@@ -114,7 +115,7 @@ const CompleteBtn = (props) => {
       const column = gfg_getRow(grid, i);
       if(column.chk === null) continue;
 
-      if(column.chk.toString() === 'true'){
+      if(column.chk.toString() === 'Y'){
         const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
                     // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
                     `dWorker=1989&` + //검수자(ERP ID)
@@ -125,10 +126,11 @@ const CompleteBtn = (props) => {
                     `dScrapGradeItemCode=${detail_grade2.getValue()}&` + //등급아이템
                     `dTallyHistoryCode=${detail_depr.getValue() === null ? '' : detail_depr.getValue()}&` + //감가내역
                     
-                    `dTallyRatio=${detail_depr2.getValue()}&` + //감가비율???
+                    `dTallyRatio=${detail_depr2.getValue() === null ? '' :detail_depr2.getValue()}&` + //감가비율???
                     
                     // `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
-                    `dScrapAreaCode=E001&` + //하차구역(섹터), 옥내는E001고정
+                    // `dScrapAreaCode=E001&` + //하차구역(섹터), 옥내는E001고정
+                    `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
                     `dReturnDivisionCode=${detail_rtn.getValue() === null ? '' : detail_rtn.getValue()}&` + //반품구분
                     `dReturnHistoryCode=${detail_rtn2.getValue() === null ? '' : detail_rtn2.getValue()}&` + //반품구분사유
                     
@@ -145,6 +147,8 @@ const CompleteBtn = (props) => {
     }
 
     //#endregion
+
+    alert('저장되었습니다.');
 
     const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'SHIP_PROC');
     pgm[0].Retrieve();

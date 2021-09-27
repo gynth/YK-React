@@ -140,6 +140,7 @@
   "scripts": {
     "start": "npm-run-all -p starts:**",
     "starts:client": "node scripts/start.js",
+    "starts:server": "nodemon ./server/webServer.js",
     "build": "set \"GENERATE_SOURCEMAP=false\" && node scripts/build.js"
   },
   "eslintConfig": {

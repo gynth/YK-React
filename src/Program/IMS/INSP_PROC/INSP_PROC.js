@@ -4,7 +4,7 @@ import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
 import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_now } from '../../../Method/Comm';
-import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
+import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
@@ -29,8 +29,9 @@ import RainInfo from './RainInfo';
 
 import GifPlayer from 'react-gif-player';
 
-import { YK_WEB_REQ, YK_WEB_REQ_DIRECT } from '../../../WebReq/WebReq';
+import { YK_WEB_REQ, YK_WEB_REQ_DIRECT, AITEST } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
+import { tsThisType } from '@babel/types';
 //#endregion
 
 class INSP_PROC extends Component {
@@ -75,15 +76,15 @@ class INSP_PROC extends Component {
       }
 
       let ipArr = [];
-      let startPort = [];
-      let maxCon = [];
+      let cameraPort = [];
       let cameraNam = [];
+      let rtspAddr = [];
 
       for(let i = 0; i < data.length; i++){
         ipArr.push(data[i].CAMERA_IP);
-        startPort.push(data[i].START_PORT);
-        maxCon.push(data[i].MAX_CONNECTION);
+        cameraPort.push(data[i].CAMERA_PORT);
         cameraNam.push(data[i].CAMERA_NAM);
+        rtspAddr.push(data[i].RTSP_ADDR);
       }
 
       // let ipArr = ['10.10.136.112', '10.10.136.128'];
@@ -97,9 +98,9 @@ class INSP_PROC extends Component {
           this.infoArr.push({
             camera, 
             ipArr: ipArr[i], 
-            maxCon: maxCon[i], 
-            startPort: startPort[i], 
-            cameraNam: cameraNam[i]
+            cameraPort: cameraPort[i], 
+            cameraNam: cameraNam[i], 
+            rtspAddr: rtspAddr[i]
           }); 
         }
       }
@@ -633,6 +634,7 @@ class INSP_PROC extends Component {
 
   componentDidMount(){
     this.Init();
+    this.Retrieve();
   }
 
   Retrieve = async () => {
@@ -705,17 +707,65 @@ class INSP_PROC extends Component {
 
     const mainData = await YK_WEB_REQ('tally_mstr_wait.jsp');
     const main = mainData.data.dataSend;
+
+    if(main){
+      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
+    }else{
+      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
+    }
+    
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+
+    const data = main.filter(e => {
+      if(search_tp !== null && search_tp !== ''){
+        //계근번호
+        if(search_tp === '1'){
+          if(e.scaleNumb.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //차량번호
+        else if(search_tp === '2'){
+          if(e.carNumb.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //사전등급
+        else if(search_tp === '3'){
+          if(e.itemGrade.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //업체
+        else if(search_tp === '4'){
+          if(e.vendor.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        
+      }else{
+        return true;
+      }
+    })
+
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
-    if(main){
-      grid.resetData(main);
+    if(data.length > 0){
+      grid.resetData(data);
       gfg_setSelectRow(grid);
 
-      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
-      gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+      gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
     }else{
-      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
       gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
 
@@ -810,8 +860,8 @@ class INSP_PROC extends Component {
     }
 
     //배차정보
-    // const chitInfoYn = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 나중에 이형식으로 바꿔야함
-    const dispInfo = await YK_WEB_REQ_DIRECT('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108300001');
+    const dispInfo = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 
+    // const dispInfo = await YK_WEB_REQ_DIRECT('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108300001');
     if(dispInfo.data.dataSend){
       gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
         scaleNumb       : chitInfoYn.data.dataSend[0].scaleNumb,
@@ -834,12 +884,15 @@ class INSP_PROC extends Component {
         empty_front_date    : dispInfo.data.PIC[0].EMPTY_FRONT_DATE,
         empty_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_FRONT}`,
         empty_front_gps_addr: dispInfo.data.PIC[0].EMPTY_FRONT_GPS_ADDR,
+        
         empty_rear_date     : dispInfo.data.PIC[0].EMPTY_REAR_DATE,
         empty_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_REAR}`,
         empty_rear_gps_addr : dispInfo.data.PIC[0].EMPTY_REAR_GPS_ADDR,
+        
         cargo_front_date    : dispInfo.data.PIC[0].CARGO_FRONT_DATE,
         cargo_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_FRONT}`,
         cargo_front_gps_addr: dispInfo.data.PIC[0].CARGO_FRONT_GPS_ADDR,
+        
         cargo_rear_date     : dispInfo.data.PIC[0].CARGO_REAR_DATE,
         cargo_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_REAR}`,
         cargo_rear_gps_addr : dispInfo.data.PIC[0].CARGO_REAR_GPS_ADDR
@@ -873,7 +926,7 @@ class INSP_PROC extends Component {
                               name: '차량번호'
                             },{
                               code: '3',
-                              name: '등급'
+                              name: '사전등급'
                             },{
                               code: '4',
                               name: '업체'
@@ -887,6 +940,11 @@ class INSP_PROC extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
+                       onKeyDown   = {(e) => {
+                        if(e.keyCode === 13){
+                          this.Retrieve()
+                        }
+                       }}
                       //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                         />
                 <button>검색</button>
@@ -941,17 +999,24 @@ class INSP_PROC extends Component {
                           //     display : 'name'
                           //   }
                           // }),
-                          columnTextArea({
-                            name  : 'date',
+                          columnInput({
+                            name: 'date',
                             header: '입차시간',
-                            width : 80,
-                            height: 38,
-                            // paddingTop: ''
+                            width : 150,
                             readOnly: true,
-                            valign:'middle',
-                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
-                            time  : 'HH:mm'
-                          }),
+                            align : 'center'
+                          }),   
+                          // columnTextArea({
+                          //   name  : 'date',
+                          //   header: '입차시간',
+                          //   width : 80,
+                          //   height: 38,
+                          //   // paddingTop: ''
+                          //   readOnly: true,
+                          //   valign:'middle',
+                          //   format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                          //   time  : 'HH:mm'
+                          // }),
                           columnTextArea({
                             name: 'vendor',
                             header: 'Vendor',
@@ -985,8 +1050,36 @@ class INSP_PROC extends Component {
               </ul>
               <ul>
                 <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
-                <li><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
-                <li><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
+                <li onClick={e => {
+                  
+                  //#region 프로그램 리듀서 생성
+                  gfs_PGM_REDUCER('DISP_PROC');
+                  //#endregion
+
+                  gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                    ({
+                      windowZindex: 0,
+                      activeWindow: {programId: 'DISP_PROC',
+                                    programNam: '출차대기'
+                                    }
+                    })
+                  );
+                }}><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
+                <li onClick={e => {
+                  
+                  //#region 프로그램 리듀서 생성
+                  gfs_PGM_REDUCER('ENTR_PROC');
+                  //#endregion
+
+                  gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                    ({
+                      windowZindex: 0,
+                      activeWindow: {programId: 'ENTR_PROC',
+                                    programNam: '입차대기'
+                                    }
+                    })
+                  );
+                }}><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
               </ul>
             </div>
           </div>
@@ -1010,30 +1103,44 @@ class INSP_PROC extends Component {
                   }}>Replay
 
                   </button>
-                    <button onClick={() => 
-                      {
-                        const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-                        this.startRec(this.state.device[0].camera.Guid, 
-                                      this.state.device[0].camera.Name, 
-                                      scaleNumb, 
-                                      1);
-                      }}>on1
-                    </button>
-                    <button onClick={() => 
-                      {
-                        const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-                        this.stopRec(this.state.device[0].camera.Guid, 
-                                     this.state.device[0].camera.Name, 
-                                     this.state.device[0].ipArr,
-                                     scaleNumb, 
-                                     1);
-                      }}>off1
-                    </button>
-                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: true, car: '1234'})}>on2</button>
-                    <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
-                    <button onClick={async () =>{
-                      await this.getRain();
-                    }}>강수량</button>
+                  <button onClick={() => 
+                    {
+                      const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+                      this.startRec(this.state.device[0].camera.Guid, 
+                                    this.state.device[0].camera.Name, 
+                                    scaleNumb, 
+                                    1);
+                    }}>on1
+                  </button>
+                  <button onClick={() => 
+                    {
+                      const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+                      this.stopRec(this.state.device[0].camera.Guid, 
+                                    this.state.device[0].camera.Name, 
+                                    this.state.device[0].ipArr,
+                                    scaleNumb, 
+                                    1);
+                    }}>off1
+                  </button>
+                  <button onClick={() => {
+                    AITEST('2', [{
+                      scaleNumb: 'scale1',
+                      carNumb: 'car1',
+                      date: 'date1',
+                      rcnDt: 'rcnDt1'
+                    },{
+                      scaleNumb: 'scale2',
+                      carNumb: 'car2',
+                      date: 'date2',
+                      rcnDt: 'rcnDt2'
+                    }]).then(e => {
+                      console.log(e)
+                    });
+                  }}>on2</button>
+                  <button onClick={() => gfs_dispatch('INSP_PROC_MAIN', 'DUM_CAM_REC', {rec: false, car: '1234'})}>off2</button>
+                  <button onClick={async () =>{
+                    await this.getRain();
+                  }}>강수량</button>
                 </li>
               </ul> 
             </div>
@@ -1274,8 +1381,8 @@ class INSP_PROC extends Component {
                   seq={1}
                   device={this.state.device[0].camera.Guid} 
                   Name={this.state.device[0].camera.Name}
-                  maxCon={this.state.device[0].maxCon}
-                  startPort={this.state.device[0].startPort}
+                  rtspAddr={this.state.device[0].rtspAddr}
+                  cameraPort={this.state.device[0].cameraPort}
                   cameraNam={this.state.device[0].cameraNam}
                   cam='STD_CAM_OPEN' 
                   focus='STD_CAM_FOCUS' 
@@ -1287,8 +1394,8 @@ class INSP_PROC extends Component {
                   seq={2} 
                   device={this.state.device[1].camera.Guid} 
                   Name={this.state.device[1].camera.Name}
-                  maxCon={this.state.device[1].maxCon}
-                  startPort={this.state.device[1].startPort}
+                  rtspAddr={this.state.device[1].rtspAddr}
+                  cameraPort={this.state.device[1].cameraPort}
                   cameraNam={this.state.device[1].cameraNam}
                   cam='DUM_CAM_OPEN' 
                   focus='DUM_CAM_FOCUS' 
@@ -1304,8 +1411,8 @@ class INSP_PROC extends Component {
                       seq={3} 
                       device={this.state.device[2].camera.Guid} 
                       Name={this.state.device[2].camera.Name}
-                      maxCon={this.state.device[2].maxCon}
-                      startPort={this.state.device[2].startPort}
+                      rtspAddr={this.state.device[2].rtspAddr}
+                      cameraPort={this.state.device[2].cameraPort}
                       cameraNam={this.state.device[2].cameraNam}
                       cam='ETC1_CAM_OPEN' 
                       focus='ETC1_CAM_FOCUS' 
@@ -1313,7 +1420,21 @@ class INSP_PROC extends Component {
                       image='ETC1_CAM_IMG'/> 
                   }
                 </li>
-                <li></li>
+                <li>
+                  {this.state.device[3] !== undefined && 
+                    <RecImage
+                      seq={4} 
+                      device={this.state.device[3].camera.Guid} 
+                      Name={this.state.device[3].camera.Name}
+                      rtspAddr={this.state.device[3].rtspAddr}
+                      cameraPort={this.state.device[3].cameraPort}
+                      cameraNam={this.state.device[3].cameraNam}
+                      cam='ETC2_CAM_OPEN' 
+                      focus='ETC2_CAM_FOCUS' 
+                      rec='ETC2_CAM_REC' 
+                      image='ETC2_CAM_IMG'/> 
+                  }
+                </li>
               </ul>
             </div>
           </div>

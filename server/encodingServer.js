@@ -6,7 +6,6 @@ global.MILESTONE_REPLAY = {};
 
 const oracleQuery = (file, fn, param) => {
   // const host = 'http://211.231.136.182:3001/Oracle/Query';
-  // const host = 'http://10.10.10.136:3001/Oracle/Query';
   const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/Query';
   const option = {
     url   : host,

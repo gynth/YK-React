@@ -22,7 +22,7 @@ const CompleteBtn = (props) => {
       const column = gfg_getRow(grid, i);
       if(column.chk === null) continue;
 
-      if(column.chk.toString() === 'true'){
+      if(column.chk.toString() === 'Y'){
         chkCnt += 1;
         break;
       }
@@ -40,7 +40,7 @@ const CompleteBtn = (props) => {
       const column = gfg_getRow(grid, i);
       if(column.chk === null) continue;
 
-      if(column.chk.toString() === 'true'){
+      if(column.chk.toString() === 'Y'){
         param.push({
           sp   : `begin 
                     apps.emm_inspect_apporve(

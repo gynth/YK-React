@@ -3,12 +3,13 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_now } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
+import moment from 'moment';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 
@@ -313,7 +314,11 @@ class INSP_HIST extends Component {
 
     gfc_showMask();
 
-    const mainData = await YK_WEB_REQ(`tally_process_f2.jsp?carnumb=${carNumb}&ld=20210417&nd=20210617`);
+    const now = await (gfc_now());
+    const fr_dt = moment(now).subtract(2, 'month').format('YYYYMMDD');
+    const to_dt = moment(now).format('YYYYMMDD');
+
+    const mainData = await YK_WEB_REQ(`tally_process_f2.jsp?carnumb=${carNumb}&ld=${fr_dt}&nd=${to_dt}`);
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
@@ -331,7 +336,7 @@ class INSP_HIST extends Component {
           vendor   : e['업체명'],
           carNumb  : e['차량번호'],
           loc      : e['상차주소'],
-          warning  : e['경고'] === 'N' ? '' : '경고'
+          warning  : e['경고'] === 'N' ? 'N' : 'Y'
         })
       })
 

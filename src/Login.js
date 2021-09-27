@@ -11,13 +11,17 @@ import './login.css';
 
 gfs_PGM_REDUCER('login');
 
-const onClick = async(e, user_id, pass_cd) => {
-
+const onLogin = async(e, user_id, pass_cd) => {
   let result = await getDynamicSql_Oracle(
     'Common/Common',
     'LOGIN',
     [{user_id, pass_cd}]
   ); 
+
+  if(result.data.result === false){
+    alert('로그인 정보가 잘못되었습니다.');
+    return;
+  }
 
   if(result.data.rows.length > 0){
     gfo_getInput('login', 'id').setValue('');
@@ -35,6 +39,10 @@ const onClick = async(e, user_id, pass_cd) => {
   }else{
     alert('로그인 정보가 잘못되었습니다.');
   }
+}
+
+const onClick = async(e, user_id, pass_cd) => {
+  onLogin(e, user_id, pass_cd);
 };
 
 const Login = (props) => {
@@ -51,7 +59,14 @@ const Login = (props) => {
         </div>
         <div className='input_line'>
           <label>PASSWORD</label>
-          <Input pgm='login' id='pwd' type='password' />
+          <Input pgm='login' id='pwd' type='password' onKeyDown={e => {
+            if(e.keyCode === 13){
+              const id  = gfo_getInput('login', 'id').getValue();
+              const pwd = gfo_getInput('login', 'pwd').getValue();
+
+              onLogin(e, id, pwd);
+            }
+          }} />
         </div>
         <button type='button' onClick={e => {
           const id  = gfo_getInput('login', 'id').getValue();

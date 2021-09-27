@@ -131,7 +131,7 @@ class Input extends Component{
                  onDoubleClick= {this.props.onDoubleClick}
                  onFocus      = {e => this.onFocusBase(e)}
                  onPaste      = {this.props.onPaste}
-                 onKeyDown    = {this.props.onPaste}
+                 onKeyDown    = {this.props.onKeyDown}
                  onKeyPress   = {this.props.onPaste}
                  onKeyUp      = {this.props.onPaste}
                  onLoad       = {this.props.onPaste}

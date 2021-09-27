@@ -178,15 +178,15 @@ function RecImage(props) {
                 
                       let infoArr = [];
                       let ipArr = [];
-                      let startPort = [];
-                      let maxCon = [];
+                      let cameraPort = [];
                       let cameraNam = [];
+                      let rtspAddr = [];
                 
                       for(let i = 0; i < data.length; i++){
                         ipArr.push(data[i].CAMERA_IP);
-                        startPort.push(data[i].START_PORT);
-                        maxCon.push(data[i].MAX_CONNECTION);
+                        cameraPort.push(data[i].CAMERA_PORT);
                         cameraNam.push(data[i].CAMERA_NAM);
+                        rtspAddr.push(data[i].RTSP_ADDR);
                       }
                 
                       // let ipArr = ['10.10.136.112', '10.10.136.128'];
@@ -199,9 +199,9 @@ function RecImage(props) {
                           infoArr.push({
                             camera, 
                             ipArr: ipArr[i], 
-                            maxCon: maxCon[i], 
-                            startPort: startPort[i], 
-                            cameraNam: cameraNam[i]
+                            cameraPort: cameraPort[i], 
+                            cameraNam: cameraNam[i],
+                            rtspAddr: rtspAddr[i]
                           }); 
                         }
                       }
@@ -229,8 +229,8 @@ function RecImage(props) {
               seq={props.seq}
               device={props.device} 
               Name={props.Name}
-              maxCon={props.maxCon}
-              startPort={props.startPort}
+              cameraPort={props.cameraPort}
+              rtspAddr={props.rtspAddr}
               cameraNam={props.cameraNam}
               cam={props.cam}
               focus={props.focus}

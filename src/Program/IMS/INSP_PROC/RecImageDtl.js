@@ -17,8 +17,6 @@ function RecImageDtl(props) {
   }, (p, n) => {
     return p === n;
   });
-
-  const [port, setPort] = useState(0);
   
   const setModalIsOpen = (open) => {
     
@@ -32,28 +30,6 @@ function RecImageDtl(props) {
       MILESTONE({reqAddr: 'CONNECT',
                  device : props.device})
   }
-
-  // const getPort = async() => {
-  //   // const host = `http://10.10.10.136:3000/getEmptyPort`;
-  //   const host = 'http://ims.yksteel.co.kr:90/WebServer/getEmptyPort';
-  //   const option = {
-  //     url   : host,
-  //     method: 'POST',
-  //     // headers: {
-  //     //   'Access-Control-Allow-Origin': '*'
-  //     // },
-  //     data: {
-  //       device : props.device,
-  //       MAX_CONNECTION: props.maxCon,
-  //       START_PORT: props.startPort
-  //     }
-  //   };
-  
-  //   await gfc_sleep(500);
-
-  //   const result = await axios(option);
-  //   setPort(result.data.port);
-  // }
 
   const style={
     overlay: {
@@ -85,7 +61,7 @@ function RecImageDtl(props) {
   let client = null;
   let canvas = null;
   const setRtsp = () => {
-    client = new WebSocket(`ws://ims.yksteel.co.kr:90/ws/${props.startPort}`);
+    client = new WebSocket(`ws://ims.yksteel.co.kr:90/ws/${props.cameraPort}`);
     canvas = imageRef.current;
     new jsmpeg(client, {
       canvas 
@@ -120,8 +96,9 @@ function RecImageDtl(props) {
 
     RTSP({reqAddr: 'RTSPStart',
           device   : props.device, 
-          streamUrl: `rtsp://admin:admin@10.10.10.136:554/live/${props.device}`,
-          port: props.startPort,
+          // streamUrl: `rtsp://admin:admin@10.10.10.136:554/live/${props.device}`,
+          streamUrl: props.rtspAddr,
+          port: props.cameraPort,
           width: 1920,
           height: 1080,
           fps: 24
@@ -132,12 +109,11 @@ function RecImageDtl(props) {
         })
 
     return() => {
-      setPort(0);
       client.close();
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, port, props.device])
+  }, [isOpen, props.rtspAddr])
 
   // const debounceOnClick = throttle((e, ptz) => {
   //   TOKEN({}).then(e => {

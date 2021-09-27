@@ -6,6 +6,7 @@ import Input from '../../../Component/Control/Input';
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_sleep } from '../../../Method/Comm';
 import { gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
+import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
@@ -47,7 +48,7 @@ class ENTR_PROC extends Component {
   }
 
   componentDidMount(){
-    
+    this.Retrieve();
   }
 
   Retrieve = async () => {
@@ -60,10 +61,58 @@ class ENTR_PROC extends Component {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
-    if(main){
+    if(!main) {
+      gfc_hideMask();
+      return;
+    }
 
-      grid.resetData(main);
-      gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+
+    const data = main.filter(e => {
+      if(search_tp !== null && search_tp !== ''){
+        //계근번호
+        if(search_tp === '1'){
+          if(e.scaleNumb.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //차량번호
+        else if(search_tp === '2'){
+          if(e.carNumb.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //사전등급
+        else if(search_tp === '3'){
+          if(e.itemGrade.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //업체
+        else if(search_tp === '4'){
+          if(e.vendor.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        
+      }else{
+        return true;
+      }
+    })
+
+    if(data.length > 0){
+
+      grid.resetData(data);
+      gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
       
       await gfc_sleep(100);
 
@@ -99,12 +148,9 @@ class ENTR_PROC extends Component {
                               name: '차량번호'
                             },{
                               code: '3',
-                              name: '등급'
-                            },{
-                              code: '4',
                               name: '사전등급'
                             },{
-                              code: '5',
+                              code: '4',
                               name: '업체'
                             }]}
                   />
@@ -116,8 +162,11 @@ class ENTR_PROC extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       readOnly
-                      //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
+                       onKeyDown   = {(e) => {
+                        if(e.keyCode === 13){
+                          this.Retrieve()
+                        }
+                       }}
                 />
               </div>
             </div>

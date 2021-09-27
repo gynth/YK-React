@@ -6,7 +6,7 @@ import TabList from './Component/Menu/tabMenu/TabList';
 import WindowFrame from './Program/WindowFrame';
 
 import './Home.css';
-import { getSessionCookie } from "./Cookies";
+import { getSessionCookie, setSessionCookie } from "./Cookies";
 import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER, gfs_dispatch, gfs_PGM_REDUCER } from './Method/Store';
 import { gfc_sleep } from './Method/Comm';
 
@@ -69,27 +69,27 @@ const onActiveWindow = (e) => {
 
 const defaultOpen = async() => {
 
-    // //검수대기 Open
-    // gfs_PGM_REDUCER('INSP_PROC');
-    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    // ({
-    //   windowZindex: 0,
-    //   activeWindow: {programId: 'INSP_PROC',
-    //                   programNam: '검수진행'
-    //                 }
-    // }));
+    //검수대기 Open
+    gfs_PGM_REDUCER('INSP_PROC');
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 0,
+      activeWindow: {programId: 'INSP_PROC',
+                      programNam: '검수진행'
+                    }
+    }));
 
-    // await gfc_sleep(20);
+    await gfc_sleep(20);
 
-    // //검수이력 Open
-    // gfs_PGM_REDUCER('INSP_HIST');
-    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    // ({
-    //   windowZindex: 1,
-    //   activeWindow: {programId: 'INSP_HIST',
-    //                   programNam: '검수이력'
-    //                 }
-    // }));
+    //검수이력 Open
+    gfs_PGM_REDUCER('INSP_HIST');
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 1,
+      activeWindow: {programId: 'INSP_HIST',
+                      programNam: '검수이력'
+                    }
+    }));
 
     // await gfc_sleep(20);
 
@@ -115,19 +115,32 @@ const defaultOpen = async() => {
     //                 }
     // }));
 
-    // await gfc_sleep(20);
+    await gfc_sleep(20);
 
-    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    // ({
-    //   windowZindex: 0,
-    //   activeWindow: {programId: 'INSP_PROC',
-    //                   programNam: '검수진행'
-    //                 }
-    // }));
+    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    ({
+      windowZindex: 0,
+      activeWindow: {programId: 'INSP_PROC',
+                      programNam: '검수진행'
+                    }
+    }));
 }
 
 const Home = (props) => {  
+  // const session = getSessionCookie("session");
+  // if (session === "SUCCESS")
+  // {
+    isSession = true;
+  // }
+  
   useEffect(e => {
+
+    if(isSession === false){
+      alert('로그인부터 해주세요.');
+  
+      return;
+    }
+
     const MASK_REDUCER = (nowState, action) => {
       if(action.reducer !== 'MASK_REDUCER') {
         return {
@@ -166,9 +179,12 @@ const Home = (props) => {
 
     //화면Open
     defaultOpen();
+
+    // return() => {
+    //   setSessionCookie("session", 'false');
+    // }
   }, [])
 
-  const session = getSessionCookie("session");
   const leftWindow = useSelector((e) => e.SIDEBARMENU_REDUCER.State, (p, n) => {
     return p.open === n.open;
   });
@@ -201,10 +217,7 @@ const Home = (props) => {
 
   let width = 343; 
   if(leftWindow.open) width = 90;
-  // if (session === "SUCCESS")
-  // {
-    isSession = true;
-  // }
+
   return (
     
     <LoadingOverlay
@@ -243,7 +256,7 @@ const Home = (props) => {
           </div>
         </>
         :
-          <div>LOGIN PLZZZ</div>
+          <div style={{textAlign:'center', verticalAlign:'center'}}>로그인부터 해주세요.</div>
         }
         
       </React.Fragment>

@@ -5,8 +5,11 @@ const Oracle = require('./db/Oracle/Oracle');
 const Milestone = require('./Milestone/Milestone');
 const WebReq = require('./WebReq/WebReq');
 const ScreenShot = require('./ScreenShot/ScreenShot');
+const Ai = require('./Ai/ai');
 const cors = require('cors');
 var edge = require('edge-js');
+const fs = require('fs');
+
 // const soap = require('soap'); 
 
 global.MILESTONE_IP = '10.10.10.136';
@@ -32,6 +35,8 @@ app3002.use(express.urlencoded({
 app3001.use(cors());  
 app3002.use(cors());
 
+app3001.use('/Ai', Ai);
+
 //#region YK스틸 웹요청
 app3001.use('/YK', WebReq);
 //#endregion 
@@ -53,6 +58,7 @@ const port3001 = 3001;
 app3001.listen(port3001, () => {
   console.log(`WebServer on port: ${port3001}..`)
 });  
+
 const port3002 = 3002;
 app3002.listen(port3002, () => {
   //서버시작하면 global에 마일스톤 토큰과 디바이스를 세팅한다.
@@ -144,3 +150,41 @@ app3002.post('/Token', (req, res) => {
   res.json({TOKEN: global.MILESTONE_TOKEN, DEVICE: global.MILESTONE_DEVICE});
 });
 //#endregion
+
+
+
+
+var http = require('http');
+var chitImgServer = http.createServer();
+
+chitImgServer.listen(3129, 'localhost', 100, () => {
+  console.log('Mobile Chit Server: 3129')
+})
+
+chitImgServer.on('connection',
+  function (socket) {
+      console.log('클라이언트가 접속');
+  }
+);
+
+chitImgServer.on('request',
+    function (req, res) {
+      const url = req.url.substr(2);
+
+      const folder = url.substring(0, 8);
+      const file = url.substring(0, url.indexOf('.jpg') + 4);
+      console.log(file);
+      fs.readFile(`F:/IMS/Chit/${folder}/${file}`,              //파일 읽기
+        function (err, data)
+        {
+          if(err === null){
+            //http의 헤더정보를 클라이언트쪽으로 출력
+            //image/jpg : jpg 이미지 파일을 전송한다
+            // write 로 보낼 내용을 입력
+            res.writeHead(200, { "Context-Type": "image/jpg" });//보낼 헤더를 만듬
+            res.write(data);   //본문을 만들고
+            res.end();  //클라이언트에게 응답을 전송한다
+          }
+        });
+    }
+);

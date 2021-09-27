@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const soap = require('soap'); 
 const axios = require('axios');
 
 //#region YK스틸 웹요청
@@ -43,29 +42,9 @@ router.post('/DIRECT', (req, res) => {
       // console.log(err);
       res.json(err);
     })
-});
+}); 
 
 router.post('/Rain', (req, res) => {
-  // try{
-
-  //   var url = `http://apis.data.go.kr/6260000/BusanRainfalldepthInfoService_wadl=wadl`;
-  //   soap.createClient(url, (err, client) => {
-  //     console.log(client);
-  //     // client.getRainfallInfo({
-  //     //   serviceKey: 'O%2F9eo84VDzROhcmBNa%2B1zTS2hP8rVKtuKRfa2H93v8n4ot43RLo36CUx4X%2BV8%2B9ciQ4hJoZnTJpeB96XGiGE0Q%3D%3D',
-  //     //   numOfRows : 5,
-  //     //   pageNo    : 1,
-  //     //   resultType: 'json'
-  //     // }, (e, r) => {
-  //     //   res.json('OK');
-  //     // }) 
-  //   })
-  // }catch(e){
-  //   res.json('');
-  // }
-
-  // const host = 'http://10.10.10.136:3001/YK/DIRECT';
-  // const host = 'http://211.231.136.150:3001/YK';
   const host = `http://apis.data.go.kr/6260000/BusanRainfalldepthInfoService/getRainfallInfo?` +
   `serviceKey=O%2F9eo84VDzROhcmBNa%2B1zTS2hP8rVKtuKRfa2H93v8n4ot43RLo36CUx4X%2BV8%2B9ciQ4hJoZnTJpeB96XGiGE0Q%3D%3D&` +
   `numOfRows=50&` +

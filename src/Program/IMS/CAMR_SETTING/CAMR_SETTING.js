@@ -109,9 +109,9 @@ class CAMR_SETTING extends Component {
           AREA_TP: e.AREA_TP,
           CAMERA_IP: e.CAMERA_IP,
           CAMERA_NAM: e.CAMERA_NAM,
+          RTSP_ADDR: e.RTSP_ADDR,
           SEQ: e.SEQ,
-          START_PORT: e.START_PORT,
-          MAX_CONNECTION: e.MAX_CONNECTION,
+          CAMERA_PORT: e.CAMERA_PORT,
           USE_YN : e.USE_YN
         }]
       )
@@ -267,8 +267,24 @@ class CAMR_SETTING extends Component {
                             }
                           }),
                           columnInput({
-                            name: 'SEQ',
-                            header: '구성순서',
+                            name: 'RTSP_ADDR',
+                            header: 'RTSP주소',
+                            width : 250,
+                            readOnly: false,
+                            color : '#0063A9',
+                            align : 'left',
+                            fontSize: '18',
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.readOnly = false;
+                              }else{
+                                control.readOnly = true;
+                              }
+                            }
+                          }),
+                          columnInput({
+                            name: 'CAMERA_PORT',
+                            header: '카메라포트',
                             width : 150,
                             readOnly: true,
                             align : 'right',
@@ -282,24 +298,9 @@ class CAMR_SETTING extends Component {
                             }
                           }),   
                           columnInput({
-                            name: 'START_PORT',
-                            header: '시작Port',
-                            width : 200,
-                            readOnly: true,
-                            align : 'right',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
-                          }),   
-                          columnInput({
-                            name: 'MAX_CONNECTION',
-                            header: '최대접속자',
-                            width : 100,
+                            name: 'SEQ',
+                            header: '구성순서',
+                            width : 150,
                             readOnly: true,
                             align : 'right',
                             fontSize: '18',

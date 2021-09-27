@@ -103,7 +103,7 @@ const CompleteBtn = (props) => {
     }
     const detail_rtn = gfo_getCombo(props.pgm, 'detail_rtn'); //반품구분
     const detail_rtn2 = gfo_getCombo(props.pgm, 'detail_rtn2'); //반품구분사유
-    if(detail_rtn !== null && detail_rtn.getValue() !== ''){
+    if(detail_rtn.getValue() !== null && detail_rtn.getValue() !== ''){
       if(detail_rtn2.getValue() === null || detail_rtn2.getValue() === ''){
         alert('필수입력값이 없습니다. > 반품구분사유');
         const chitBtn = document.getElementById(`tab1_${props.pgm}`);
@@ -166,7 +166,7 @@ const CompleteBtn = (props) => {
                 `dScrapGradeItemCode=${detail_grade2.getValue()}&` + //등급아이템
                 `dTallyHistoryCode=${detail_depr.getValue() === null ? '' : detail_depr.getValue()}&` + //감가내역
                 
-                `dTallyRatio=${detail_depr2.getValue()}&` + //감가비율???
+                `dTallyRatio=${detail_depr2.getValue() === null ? '' : detail_depr2.getValue()}&` + //감가비율???
                 
                 // `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
                 `dScrapAreaCode=E001&` + //하차구역(섹터), 옥내는E001고정

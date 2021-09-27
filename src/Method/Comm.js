@@ -217,8 +217,7 @@ export const gfc_screenshot = (element, filename) => {
 
 export const gfc_screenshot_srv_from_milestone = (device, scaleNo) => {
 
-  // const host = 'http://10.10.10.136:3001/ScreenShot/Milestone';
-  // const host = `http://211.231.136.150:3001/ScreenShot/Milestone`;
+  // const host = `http://211.231.136.182:3001/ScreenShot/Milestone`;
   const host = 'http://ims.yksteel.co.kr:90/WebServer/ScreenShot/Milestone';
   const option = {
     url   : host,
@@ -340,7 +339,7 @@ export const gfc_screenshot_srv_YK = (element, filename) => {
 
 export const gfc_screenshot_del_yk = (filename) => {
   // const host = 'http://10.10.10.136:3001/ScreenShot/YK_Chit_DEL';
-  const host = 'http://ims.yksteel.co.kr:90/WebServer/YK_Chit_DEL';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/ScreenShot/YK_Chit_DEL';
   const option = {
     url   : host,
     method: 'POST',

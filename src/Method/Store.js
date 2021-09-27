@@ -53,7 +53,7 @@ export const gfs_WINDOWFRAME_REDUCER = () => {
           windowState : [...nowState.windowState.filter(e => e.programId !== action.activeWindow['programId']), 
                                                  {'programId'   : action.activeWindow['programId'], 
                                                   'programNam'  : action.activeWindow['programNam'],
-                                                  'makeDttm'    : selJson === undefined ? new Date() : selJson[0]['makeDttm'],
+                                                  'makeDttm'    : selJson === undefined ? new Date().valueOf() : selJson[0]['makeDttm'],
                                                   'windowZindex': selJson === undefined ? maxZindex + 1 : (frontYn ? selJson[0]['windowZindex'] : maxZindex + 1), 
                                                   'beforeWidth' : selJson === undefined ? 700 : selJson[0]['beforeWidth'],
                                                   'beforeHeight': selJson === undefined ? 700 : selJson[0]['beforeHeight'],
