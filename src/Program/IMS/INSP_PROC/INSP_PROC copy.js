@@ -10,6 +10,7 @@ import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 
 import Grid from '../../../Component/Grid/Grid';
+import Layout from '../../../Component/Layout/Layout';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
@@ -31,7 +32,7 @@ import GifPlayer from 'react-gif-player';
 
 import { YK_WEB_REQ, YK_WEB_REQ_DIRECT, AITEST } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
-import { throttle } from 'lodash';
+import { tsThisType } from '@babel/types';
 //#endregion
 
 class INSP_PROC extends Component {
@@ -136,19 +137,19 @@ class INSP_PROC extends Component {
   //#endregion
 
   //#region PTZ
-  debounceKeyDown = throttle((e, device) => {
-    let ptz = '';
-    if(e.keyCode === 37) ptz = 'left';
-    else if(e.keyCode === 38) ptz = 'up';
-    else if(e.keyCode === 39) ptz = 'right';
-    else if(e.keyCode === 40) ptz = 'down';
+  // debounceKeyDown = throttle((e, device) => {
+  //   let ptz = '';
+  //   if(e.keyCode === 37) ptz = 'left';
+  //   else if(e.keyCode === 38) ptz = 'up';
+  //   else if(e.keyCode === 39) ptz = 'right';
+  //   else if(e.keyCode === 40) ptz = 'down';
 
-    if(ptz !== ''){
-      MILESTONE({reqAddr: 'PTZ',
-      device: device.Guid,
-      ptz})
-    }
-  }, 1000);
+  //   if(ptz !== ''){
+  //     MILESTONE({reqAddr: 'PTZ',
+  //     device: device.Guid,
+  //     ptz})
+  //   }
+  // }, 1000);
 
   // debounceMouseWheel = throttle((e, device) => {
   //   let ptz = '';
@@ -168,19 +169,19 @@ class INSP_PROC extends Component {
   // }, 1000);
 
 
-  // debounceKeyDown = (e, device) => {
-  //   let ptz = '';
-  //   if(e.keyCode === 37) ptz = 'left';
-  //   else if(e.keyCode === 38) ptz = 'up';
-  //   else if(e.keyCode === 39) ptz = 'right';
-  //   else if(e.keyCode === 40) ptz = 'down';
+  debounceKeyDown = (e, device) => {
+    let ptz = '';
+    if(e.keyCode === 37) ptz = 'left';
+    else if(e.keyCode === 38) ptz = 'up';
+    else if(e.keyCode === 39) ptz = 'right';
+    else if(e.keyCode === 40) ptz = 'down';
 
-  //   if(ptz !== ''){
-  //     MILESTONE({reqAddr: 'PTZ',
-  //     device: device.Guid,
-  //     ptz})
-  //   }
-  // };
+    if(ptz !== ''){
+      MILESTONE({reqAddr: 'PTZ',
+      device: device.Guid,
+      ptz})
+    }
+  };
 
   debounceMouseWheel = (e, device) => {
     let ptz = '';
@@ -640,7 +641,7 @@ class INSP_PROC extends Component {
 
   componentDidMount(){
     this.Init();
-    this.Retrieve();
+    // this.Retrieve();
   }
 
   Retrieve = async () => {
@@ -922,488 +923,195 @@ class INSP_PROC extends Component {
   render() {
 
     return (
+      <Layout split       ='vertical'
+              minSize     ={[54]}
+              defaultSize ={'30%'}
+      >
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
         <div className='car_manager'>
-          <div className='car_list'>
-            <div className='search_line'>
-              <div className='wp'>
-                <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
-                  <Combobox pgm     = {this.props.pgm}
-                            id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
-                            width   = {124}
-                            height  = {42}
-                            emptyRow
-                            data    = {[{
-                              code: '1',
-                              name: '계근번호'
-                            },{
-                              code: '2',
-                              name: '차량번호'
-                            },{
-                              code: '3',
-                              name: '사전등급'
-                            },{
-                              code: '4',
-                              name: '업체'
-                            }]}
-                  />
-                </div>
-                <Input pgm         = {this.props.pgm}
-                       id          = 'search_txt'
-                       height      = '42'
-                       placeHolder = '검색어를 입력하세요'
-                       paddingLeft = '14'
-                       width       = '100%'
-                       type        = 'textarea'
-                       onKeyDown   = {(e) => {
-                        if(e.keyCode === 13){
-                          this.Retrieve()
-                        }
-                       }}
-                      //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
-                        />
-                <button>검색</button>
-              </div>
-            </div>
-            <div className='grid'>
-              <div className='wp'>
-                <div style={{width:'100%', height:'100%', overflow:'auto'}}>
-                  <Grid pgm={this.props.pgm}
-                        id ='main10'
-                        selectionChange={(e) => this.onSelectChange(e)}
-                        // dblclick={(e) => this.dblclick(e)}
-                        rowHeight={46}
-                        rowHeaders= {[{ type: 'rowNum', width: 40 }]}
-                        columns={[
-                          columnInput({
-                            name: 'scaleNumb',
-                            header: '계근번호',
-                            width : 120,
-                            readOnly: true,
-                            color : '#0063A9',
-                            align : 'center'
-                          }),
-                          columnInput({
-                            name: 'carNumb',
-                            header: '차량번호',
-                            width : 110,
-                            readOnly: true,
-                            align : 'center'
-                          }),   
-                          columnInput({
-                            name: 'itemGrade',
-                            header: '사전등급',
-                            width : 135,
-                            readOnly: true,
-                            align : 'center'
-                          }),   
-                          // columnCombobox({
-                          //   name: 'itemFlag', 
-                          //   header: '구분',
-                          //   readOnly: true,
-                          //   width   : 75,
-                          //   data: [{
-                          //     'code': 'M1KDO0001',
-                          //     'name': '고철'
-                          //   },{
-                          //     'code': 'M1KDO0002',
-                          //     'name': '분철'
-                          //   }],
-                          //   editor: {
-                          //     value   : 'code',
-                          //     display : 'name'
-                          //   }
-                          // }),
-                          columnInput({
-                            name: 'date',
-                            header: '입차시간',
-                            width : 150,
-                            readOnly: true,
-                            align : 'center'
-                          }),   
-                          // columnTextArea({
-                          //   name  : 'date',
-                          //   header: '입차시간',
-                          //   width : 80,
-                          //   height: 38,
-                          //   // paddingTop: ''
-                          //   readOnly: true,
-                          //   valign:'middle',
-                          //   format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
-                          //   time  : 'HH:mm'
-                          // }),
-                          columnTextArea({
-                            name: 'vendor',
-                            header: 'Vendor',
-                            width : 180,
-                            height: 38,
-                            readOnly: true,
-                            align : 'left'
-                          }),
-                          columnImage({
-                            name: 'rec',
-                            header: '녹화중',
-                            width: 70,
-                            imgItem:[
-                              {'code':'0', 'value': ''},
-                              {'code':'1', 'value': <GifPlayer height='30' width='65' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
-                            ]
-                          })
-                        ]}
-                  />
-                </div>
-              </div>
-              <div className='grid_info'>
-                <span className='title'>잔여차량</span><Botspan reducer='INSP_PROC_MAIN' />
-              </div>
-            </div>
-            <div className='total_info'>
-              <ul>
-                <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
-                <li><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
-                <li><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
-              </ul>
-              <ul className="four">
-                <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
-                <li onClick={e => {
-                  
-                  //#region 프로그램 리듀서 생성
-                  gfs_PGM_REDUCER('DISP_PROC');
-                  //#endregion
-
-                  gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                    ({
-                      windowZindex: 0,
-                      activeWindow: {programId: 'DISP_PROC',
-                                    programNam: '출차대기'
-                                    }
-                    })
-                  );
-                }}><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
-                <li onClick={e => {
-                  
-                  //#region 프로그램 리듀서 생성
-                  gfs_PGM_REDUCER('ENTR_PROC');
-                  //#endregion
-
-                  gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                    ({
-                      windowZindex: 0,
-                      activeWindow: {programId: 'ENTR_PROC',
-                                    programNam: '입차대기'
-                                    }
-                    })
-                  );
-                }}><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
-                <li><span className='title'>운송대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={7} /></li>
-              </ul>
-            </div>
-          </div>
-          <div className='car_info' id='car_info'>
-            <div className='title'><span>계근번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
-
-            <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_PROC_MAIN'/>
-
-            <div className='tab_content' id='tabMain'>
-              <div className='input_list on' id={`content1_${this.props.pgm}`}>
-                <ul>
-                  <li>
-                    <h5>사전등급</h5>
-                      <Input pgm     = {this.props.pgm}
-                             id      = 'detail_pre_grade'
-                             width   = '100%'
-                             disabled
-                      />
-                  </li>
-                  <li>
-                    <h5>등급책정</h5>
-                    <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                                id      = 'detail_grade1'
-                                value   = 'itemCode'
-                                display = 'item'
-                                placeholder = '고철등급 검색'
-                                height  = {42}
-                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
-                                onChange = {async (e) => {
-                                  const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
-                                  combo.setValue(null);
-
-                                  if(e !== undefined && e.value !== ''){
-                                    await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
-                                    combo.setDisabled(false);
-                                  }else{
-                                    combo.setDisabled(true);
-                                  }
-                                }}
-                      />
-                    </div>
-                    <Combobox pgm     = {this.props.pgm}
-                              id      = 'detail_grade2'
-                              value   = 'itemCode'
-                              display = 'item'
-                              isDisabled
-                    />
-                  </li>
-                  <li>
-                    <h5>감량중량</h5>
-                    <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_subt'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '감량중량 검색(KG)'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
-                            onChange = {async (e) => {
-                              const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
-                              combo.setValue(null);
-
-                              if(e === undefined) return;
-
-                              if(e.value === '0'){
-                                combo.setDisabled(true);
-                              }else{
-                                await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
-                                combo.setDisabled(false);
-                              }
-                            }}
-                      />
-                    </div>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_subt_leg'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감량사유 검색'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
-                          isDisabled
-                    /> 
-                  </li>
-                  <li>
-                    <h5>감가내역</h5>
-                    <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_depr'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '감가내역 검색'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
-                            emptyRow
-                            onChange = {async (e) => {
-                              const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
-                              combo.setValue(null);
-
-                              if(e === undefined) return;
-
-                              if(e !== undefined && e.value !== ''){
-                                combo.setDisabled(false);
-                              }else{
-                                combo.setDisabled(true);
-                              }
-                            }}
-                      />
-                    </div>
-                    <Combobox pgm = {this.props.pgm}
-                          id      = 'detail_depr2'
+        <div className='car_list'>
+          <div className='search_line'>
+            <div className='wp'>
+              <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
+                <Combobox pgm     = {this.props.pgm}
+                          id      = 'search_tp'
                           value   = 'code'
                           display = 'name'
-                          placeholder = '감가비율'
-                          isDisabled
+                          width   = {124}
+                          height  = {42}
+                          emptyRow
                           data    = {[{
-                            'code': '10',
-                            'name': '10%'
+                            code: '1',
+                            name: '계근번호'
                           },{
-                            'code': '20',
-                            'name': '20%'
+                            code: '2',
+                            name: '차량번호'
                           },{
-                            'code': '30',
-                            'name': '30%'
+                            code: '3',
+                            name: '사전등급'
                           },{
-                            'code': '40',
-                            'name': '40%'
-                          },{
-                            'code': '50',
-                            'name': '50%'
-                          },{
-                            'code': '60',
-                            'name': '60%'
-                          },{
-                            'code': '70',
-                            'name': '70%'
-                          },{
-                            'code': '80',
-                            'name': '80%'
-                          },{
-                            'code': '90',
-                            'name': '90%'
-                          },{
-                            'code': '100',
-                            'name': '100%'
+                            code: '4',
+                            name: '업체'
                           }]}
-                          // emptyRow
-                    />
-                  </li>
-                  {/* <li>
-                    <h5>하차구역</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_out'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '하차구역 검색(SECTOR)'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                  />
-                  </li> */}
-                  <li>
-                    <h5>차종구분</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_car'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '차종선택'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
-                  />
-                  </li>
-                  <li>
-                    <h5>반품구분</h5>
-                    <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '일부,전량 선택'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
-                            emptyRow
-                            onChange = {e => {
-                              const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
-                              combo.setValue(null);
-
-                              if(e === undefined) return;
-
-                              if(e.value === ''){
-                                combo.setDisabled(true);
-                              }else{
-                                combo.setDisabled(false);
-                              }
-                              // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
-                            }}
-                    />
-                  </div>
-                  <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn2'
-                            value   = 'itemCode'
-                            display = 'item'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
-                            isDisabled
-                    />
-                  </li>
-                  <li>
-                    <h5>경고</h5>
-                    <Checkbox pgm   = {this.props.pgm}
-                              id    = 'detail_warning'
-                              width = '30px'
-                              height= '30px'
-
-                    />
-                  </li>
-                </ul>
+                />
               </div>
-              
-              <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_PROC_MAIN'/>
-              
-              <div className='input_list' id={`content3_${this.props.pgm}`}>
-                <DispInfo pgm={this.props.pgm} />
-              </div>
-
-              <div className='input_list' id={`content4_${this.props.pgm}`}>
-                <DispImg pgm={this.props.pgm} />
-              </div>
+              <Input pgm         = {this.props.pgm}
+                    id          = 'search_txt'
+                    height      = '42'
+                    placeHolder = '검색어를 입력하세요'
+                    paddingLeft = '14'
+                    width       = '100%'
+                    type        = 'textarea'
+                    onKeyDown   = {(e) => {
+                      if(e.keyCode === 13){
+                        this.Retrieve()
+                      }
+                    }}
+                    //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
+              />
+              <button>검색</button>
             </div>
-            
-            <CompleteBtn pgm={this.props.pgm}/>
           </div>
-          <div className='cctv_viewer'>
-            <h4>실시간 CCTV</h4>
-            <div className="manual_record">
-              <h5>수동녹화</h5>
-              <button type="button" className="record">녹화</button>
-              <button type="button" className="stop on">정지</button>
+          <div className='grid'>
+            <div className='wp'>
+              <div style={{width:'100%', height:'100%', overflow:'auto'}}>
+                <Grid pgm={this.props.pgm}
+                      id ='main10'
+                      selectionChange={(e) => this.onSelectChange(e)}
+                      // dblclick={(e) => this.dblclick(e)}
+                      rowHeight={46}
+                      rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                      columns={[
+                        columnInput({
+                          name: 'scaleNumb',
+                          header: '계근번호',
+                          width : 120,
+                          readOnly: true,
+                          color : '#0063A9',
+                          align : 'center'
+                        }),
+                        columnInput({
+                          name: 'carNumb',
+                          header: '차량번호',
+                          width : 110,
+                          readOnly: true,
+                          align : 'center'
+                        }),   
+                        columnInput({
+                          name: 'itemGrade',
+                          header: '사전등급',
+                          width : 135,
+                          readOnly: true,
+                          align : 'center'
+                        }),   
+                        // columnCombobox({
+                        //   name: 'itemFlag', 
+                        //   header: '구분',
+                        //   readOnly: true,
+                        //   width   : 75,
+                        //   data: [{
+                        //     'code': 'M1KDO0001',
+                        //     'name': '고철'
+                        //   },{
+                        //     'code': 'M1KDO0002',
+                        //     'name': '분철'
+                        //   }],
+                        //   editor: {
+                        //     value   : 'code',
+                        //     display : 'name'
+                        //   }
+                        // }),
+                        columnInput({
+                          name: 'date',
+                          header: '입차시간',
+                          width : 150,
+                          readOnly: true,
+                          align : 'center'
+                        }),   
+                        // columnTextArea({
+                        //   name  : 'date',
+                        //   header: '입차시간',
+                        //   width : 80,
+                        //   height: 38,
+                        //   // paddingTop: ''
+                        //   readOnly: true,
+                        //   valign:'middle',
+                        //   format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                        //   time  : 'HH:mm'
+                        // }),
+                        columnTextArea({
+                          name: 'vendor',
+                          header: 'Vendor',
+                          width : 180,
+                          height: 38,
+                          readOnly: true,
+                          align : 'left'
+                        }),
+                        columnImage({
+                          name: 'rec',
+                          header: '녹화중',
+                          width: 70,
+                          imgItem:[
+                            {'code':'0', 'value': ''},
+                            {'code':'1', 'value': <GifPlayer height='30' width='65' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
+                          ]
+                        })
+                      ]}
+                />
+              </div>
             </div>
-            <RainInfo />
-            <div className='cctv_list' 
-            >
-              {this.state.device[0] !== undefined && 
-                <RecImage 
-                  seq={1}
-                  device={this.state.device[0].camera.Guid} 
-                  Name={this.state.device[0].camera.Name}
-                  rtspAddr={this.state.device[0].rtspAddr}
-                  cameraPort={this.state.device[0].cameraPort}
-                  cameraNam={this.state.device[0].cameraNam}
-                  cam='STD_CAM_OPEN' 
-                  focus='STD_CAM_FOCUS' 
-                  rec='STD_CAM_REC' 
-                  image='STD_CAM_IMG'/> 
-              }
-              {this.state.device[1] !== undefined && 
-                <RecImage
-                  seq={2} 
-                  device={this.state.device[1].camera.Guid} 
-                  Name={this.state.device[1].camera.Name}
-                  rtspAddr={this.state.device[1].rtspAddr}
-                  cameraPort={this.state.device[1].cameraPort}
-                  cameraNam={this.state.device[1].cameraNam}
-                  cam='DUM_CAM_OPEN' 
-                  focus='DUM_CAM_FOCUS' 
-                  rec='DUM_CAM_REC' 
-                  image='DUM_CAM_IMG'/> 
-              }
+            <div className='grid_info'>
+              <span className='title'>잔여차량</span><Botspan reducer='INSP_PROC_MAIN' />
             </div>
-            <div className="cctv_other_list">
-              <ul>
-                <li>
-                  {this.state.device[2] !== undefined && 
-                    <RecImage
-                      seq={3} 
-                      device={this.state.device[2].camera.Guid} 
-                      Name={this.state.device[2].camera.Name}
-                      rtspAddr={this.state.device[2].rtspAddr}
-                      cameraPort={this.state.device[2].cameraPort}
-                      cameraNam={this.state.device[2].cameraNam}
-                      cam='ETC1_CAM_OPEN' 
-                      focus='ETC1_CAM_FOCUS' 
-                      rec='ETC1_CAM_REC' 
-                      image='ETC1_CAM_IMG'/> 
-                  }
-                </li>
-                <li>
-                  {this.state.device[3] !== undefined && 
-                    <RecImage
-                      seq={4} 
-                      device={this.state.device[3].camera.Guid} 
-                      Name={this.state.device[3].camera.Name}
-                      rtspAddr={this.state.device[3].rtspAddr}
-                      cameraPort={this.state.device[3].cameraPort}
-                      cameraNam={this.state.device[3].cameraNam}
-                      cam='ETC2_CAM_OPEN' 
-                      focus='ETC2_CAM_FOCUS' 
-                      rec='ETC2_CAM_REC' 
-                      image='ETC2_CAM_IMG'/> 
-                  }
-                </li>
-              </ul>
-            </div>
+          </div>
+          <div className='total_info'>
+            <ul>
+              <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
+              <li><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
+              <li><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
+            </ul>
+            <ul className="four">
+              <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
+              <li onClick={e => {
+                
+                //#region 프로그램 리듀서 생성
+                gfs_PGM_REDUCER('DISP_PROC');
+                //#endregion
+
+                gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                  ({
+                    windowZindex: 0,
+                    activeWindow: {programId: 'DISP_PROC',
+                                  programNam: '출차대기'
+                                  }
+                  })
+                );
+              }}><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
+              <li onClick={e => {
+                
+                //#region 프로그램 리듀서 생성
+                gfs_PGM_REDUCER('ENTR_PROC');
+                //#endregion
+
+                gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                  ({
+                    windowZindex: 0,
+                    activeWindow: {programId: 'ENTR_PROC',
+                                  programNam: '입차대기'
+                                  }
+                  })
+                );
+              }}><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
+              <li><span className='title'>운송대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={7} /></li>
+            </ul>
           </div>
         </div>
+        </div>
       </div>
+
+      {/* 두번째 */}
+      
+      </Layout>
     );
   }
 }

@@ -262,8 +262,8 @@ const CompleteBtn = (props) => {
 
   return (
     <div className='complete_btn'>
-      <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>등록완료</span></button>
-      <button type='button' id={`btn2_${props.pgm}`} onClick={e => {value.chit !== 'N' ? onChitProcess() : onProcess()} }><span>{value.chit !== 'N' ? '계량표삭제' : '등록완료'}</span></button>
+      <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>수정완료</span></button>
+      <button type='button' id={`btn2_${props.pgm}`} onClick={e => {value.chit !== 'N' ? onChitProcess() : onProcess()} }><span>{value.chit !== 'N' ? '계량표삭제' : '수정완료'}</span></button>
     </div>
   );
 }

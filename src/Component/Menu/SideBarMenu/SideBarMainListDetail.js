@@ -75,6 +75,9 @@ const SideBarMainListDetail = (props) => {
         },{
           MENU_ID : 'CAMR_SETTING',
           MENU_NAM: '카메라세팅'
+        },{
+          MENU_ID : 'USER',
+          MENU_NAM: '사용자관리'
         }]
       )
     }

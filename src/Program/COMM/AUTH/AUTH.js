@@ -5,7 +5,7 @@ import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_getAtt, gfc_sleep } from '../../../Method/Comm';
 import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
-import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_getModyfiedRow, gfg_setSelectRow, gfg_getRowCount } from '../../../Method/Grid';
+import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_setValue, gfg_getModyfiedRow, gfg_setSelectRow, gfg_getRowCount } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import Layout from '../../../Component/Layout/Layout';
@@ -135,6 +135,7 @@ class AUTH extends Component {
                     :p_GRP_USER_ID,
                     :p_CD_GBN,
   
+                    :p_PGMAUT_YN,
                     :p_RETAUT_YN,
                     :p_INSAUT_YN,
                     :p_SAVAUT_YN,
@@ -156,6 +157,7 @@ class AUTH extends Component {
           p_MENU_ID    : e.MENU_ID,
           p_GRP_USER_ID: gfg_getRow(mainGrid).AUTH_CD,
           p_CD_GBN     : this.selectedTab === 0 ? 'G' : 'I',
+          p_PGMAUT_YN : e.PGMAUT_YN === null ? 'N' : e.PGMAUT_YN,
           p_RETAUT_YN : e.RETAUT_YN === null ? 'N' : e.RETAUT_YN,
           p_INSAUT_YN : e.INSAUT_YN === null ? 'N' : e.INSAUT_YN,
           p_SAVAUT_YN : e.SAVAUT_YN === null ? 'N' : e.SAVAUT_YN,
@@ -349,6 +351,7 @@ class AUTH extends Component {
                   :p_GRP_USER_ID,
                   :p_CD_GBN,
 
+                  :p_PGMAUT_YN,
                   :p_RETAUT_YN,
                   :p_INSAUT_YN,
                   :p_SAVAUT_YN,
@@ -371,6 +374,7 @@ class AUTH extends Component {
         p_GRP_USER_ID: e.AUTH_CD,
         p_CD_GBN     : '',
 
+        p_PGMAUT_YN  : '',
         p_RETAUT_YN  : '',
         p_INSAUT_YN  : '',
         p_SAVAUT_YN  : '',
@@ -517,6 +521,23 @@ class AUTH extends Component {
                           id ='detail10'
                           rowHeight={30}
                           rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                          headerClick={(e) => {
+                            const column = e.columnName;
+                            if(column !== 'chk' && column !== 'MENU_ID' && column !== 'MENU_NAM'){
+                              const grid = gfg_getGrid(this.props.pgm, 'detail10');
+                              if(grid.gridEl.dataset[column] === undefined){
+                                grid.gridEl.dataset[column] = 'Y';
+                              }else if(grid.gridEl.dataset[column] === 'Y'){
+                                grid.gridEl.dataset[column] = 'N';
+                              }else{
+                                grid.gridEl.dataset[column] = 'Y';
+                              }
+      
+                              for(let i = 0; i < grid.getRowCount(); i++){
+                                gfg_setValue(grid, column, grid.gridEl.dataset[column], i);
+                              }
+                            }
+                          }}
                           columns={[
                             columnInput({
                               name: 'MENU_ID',
@@ -546,6 +567,14 @@ class AUTH extends Component {
                                 }
                               }
                             }),   
+                            columnCheckbox({
+                              name: 'PGMAUT_YN',
+                              header: '사용',
+                              width : 50,
+                              readOnly: true,
+                              align : 'center',
+                              type: 'checkbox'
+                            }), 
                             columnCheckbox({
                               name: 'RETAUT_YN',
                               header: '조회',

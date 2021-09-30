@@ -21,46 +21,46 @@ html,body {height:100%;}
 .sidebarmenu .left_menu .fixed_menu h1 {position:absolute; left:17px; top:14px;}
 .sidebarmenu .left_menu .fixed_menu h1 img {width:45px; height:37px}
 .sidebarmenu .left_menu .fixed_menu .hmenu {position:absolute; left:25px; top:108px; width:24px; height:20px; background:url('../../Image/openmenu@2x.png') no-repeat 0 0; background-size:24px 20px; cursor:pointer; overflow:hidden; border:none; text-indent:-9999px}
-.sidebarmenu .left_menu .fixed_menu ul {position:absolute; top:50%; margin-top:-200px; padding:0 16px;}
-.sidebarmenu .left_menu .fixed_menu ul li {width:42px; height:42px; overflow:hidden; border-radius:21px; margin-bottom:46px; background:#ffffff;
+.sidebarmenu .left_menu .fixed_menu>ul {position:absolute; top:50%; margin-top:-200px; padding:0 16px;}
+.sidebarmenu .left_menu .fixed_menu>ul li {width:42px; height:42px; overflow:hidden; border-radius:21px; margin-bottom:46px; background:#ffffff;
 	-webkit-transition: all 0.2s ease-in-out;
 	-moz-transition: all 0.2s ease-in-out;
 	-o-transition: all 0.2s ease-in-out;
 	transition: all 0.2s ease-in-out;
 }
-.sidebarmenu .left_menu .fixed_menu ul li:last-child {margin-bottom:0;}
-.sidebarmenu .left_menu .fixed_menu ul li span {display:block; height:100%; text-indent:-9999px; overflow:hidden;
+.sidebarmenu .left_menu .fixed_menu>ul li:last-child {margin-bottom:0;}
+.sidebarmenu .left_menu .fixed_menu>ul li span {display:block; height:100%; text-indent:-9999px; overflow:hidden;
 	-webkit-transition: all 0.2s ease-in-out;
 	-moz-transition: all 0.2s ease-in-out;
 	-o-transition: all 0.2s ease-in-out;
 	transition: all 0.2s ease-in-out;
 }
-.sidebarmenu .left_menu .fixed_menu ul li.m0 span{background: url('../../Image/menu1.png') 50% -26px no-repeat; }
-.sidebarmenu .left_menu .fixed_menu ul li.m1 span{background: url('../../Image/menu2.png') 50% -31px no-repeat; }
-.sidebarmenu .left_menu .fixed_menu ul li.m2 span{background: url('../../Image/menu3.png') 50% -28px no-repeat; }
-.sidebarmenu .left_menu .fixed_menu ul li.m3 span{background: url('../../Image/menu4.png') 50% -32px no-repeat; }
-.sidebarmenu .left_menu .fixed_menu ul li.m4 span{background: url('../../Image/menu5@2x.png') 10px 10px no-repeat; background-size:21px 62px}
-.sidebarmenu .left_menu .fixed_menu ul li.m5 span{background: url('../../Image/setting_icon.png') 50% -32px no-repeat; }
-.sidebarmenu .left_menu .fixed_menu ul li:hover {background:#E3EBF3; cursor:pointer; }
-.sidebarmenu .left_menu .fixed_menu ul li.m0:hover span{background-position:50% 13px}
-.sidebarmenu .left_menu .fixed_menu ul li.m1:hover span{background-position:50% 9px}
-.sidebarmenu .left_menu .fixed_menu ul li.m2:hover span{background-position:50% 12px}
-.sidebarmenu .left_menu .fixed_menu ul li.m3:hover span{background-position:50% 10px}
-.sidebarmenu .left_menu .fixed_menu ul li.m4:hover span{background-position:10px -32px}
-.sidebarmenu .left_menu .fixed_menu ul li.m5:hover span{background-position:50% 10px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m0 span{background: url('../../Image/menu1.png') 50% -26px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu>ul li.m1 span{background: url('../../Image/menu2.png') 50% -31px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu>ul li.m2 span{background: url('../../Image/menu3.png') 50% -28px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu>ul li.m3 span{background: url('../../Image/menu4.png') 50% -32px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu>ul li.m4 span{background: url('../../Image/menu5@2x.png') 10px 10px no-repeat; background-size:21px 62px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m5 span{background: url('../../Image/setting_icon.png') 50% -32px no-repeat; }
+.sidebarmenu .left_menu .fixed_menu>ul li:hover {background:#E3EBF3; cursor:pointer; }
+.sidebarmenu .left_menu .fixed_menu>ul li.m0:hover span{background-position:50% 13px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m1:hover span{background-position:50% 9px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m2:hover span{background-position:50% 12px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m3:hover span{background-position:50% 10px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m4:hover span{background-position:10px -32px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m5:hover span{background-position:50% 10px}
 
-.sidebarmenu .left_menu .fixed_menu ul li.on {background:#E3EBF3;}
-.sidebarmenu .left_menu .fixed_menu ul li.m0.on span{background-position:50% 13px}
-.sidebarmenu .left_menu .fixed_menu ul li.m1.on span{background-position:50% 9px}
-.sidebarmenu .left_menu .fixed_menu ul li.m2.on span{background-position:50% 12px}
-.sidebarmenu .left_menu .fixed_menu ul li.m3.on span{background-position:50% 10px}
-.sidebarmenu .left_menu .fixed_menu ul li.m4.on span{background-position:10px -32px}
+.sidebarmenu .left_menu .fixed_menu>ul li.on {background:#E3EBF3;}
+.sidebarmenu .left_menu .fixed_menu>ul li.m0.on span{background-position:50% 13px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m1.on span{background-position:50% 9px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m2.on span{background-position:50% 12px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m3.on span{background-position:50% 10px}
+.sidebarmenu .left_menu .fixed_menu>ul li.m4.on span{background-position:10px -32px}
 
 .sidebarmenu .left_menu .fixed_menu .footer_menu {position:absolute; bottom:0; left:0;}
-.sidebarmenu .left_menu .fixed_menu .footer_menu .user {display:block; position:absolute; left:16px; bottom:79px; width:42px; height:42px; background:url('../../Image/user_pic@2x.png') no-repeat 0 0; background-size:42px 42px; cursor:pointer; overflow:hidden; border:none; text-indent:-9999px}
-.sidebarmenu .left_menu .fixed_menu .footer_menu .setting {display:block; position:absolute; left:16px; bottom:23px; width:42px; height:42px; background:#E4EAF1; border-radius:21px; background-size:42px 42px; cursor:pointer; overflow:hidden; border:none; text-indent:-9999px}
-.sidebarmenu .left_menu .fixed_menu .footer_menu .setting span {background:url('../../Image/setting_icon@2x.png') no-repeat 50% 11px; display:block; height:100%; background-size:21px 62px}
-.sidebarmenu .left_menu .fixed_menu .footer_menu .setting span:hover {background-position:50% -31px}
+.sidebarmenu .left_menu .fixed_menu .footer_menu .user {display:block; position:absolute; left:16px; bottom:79px; width:42px; height:42px; background:#4079B1; border-radius:21px; text-align:center; color:#ffffff; line-height:42px; /*background:url(../../img/user_pic@2x.png) no-repeat 0 0; background-size:42px 42px; cursor:pointer;  text-indent:-9999px */overflow:hidden; border:none;}
+.sidebarmenu .left_menu .fixed_menu .footer_menu .m5 {display:block; position:absolute; left:16px; bottom:23px; width:42px; height:42px; background:#E4EAF1; border-radius:21px; background-size:42px 42px; cursor:pointer; overflow:hidden; border:none; text-indent:-9999px}
+.sidebarmenu .left_menu .fixed_menu .footer_menu .m5 span {background:url('../../Image/setting_icon@2x.png') no-repeat 50% 11px; display:block; height:100%; background-size:21px 62px}
+.sidebarmenu .left_menu .fixed_menu .footer_menu .m5 span:hover {background-position:50% -31px}
 .sidebarmenu .left_menu .move_menu {position:absolute; left:74px; height:100vh; width:253px; padding:35px 30px; box-sizing:border-box; background:#335580;
 	-webkit-transition: all 0.2s ease-in-out;
 	-moz-transition: all 0.2s ease-in-out;

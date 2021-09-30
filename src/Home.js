@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-
+import { Link } from 'react-router-dom'
 import SideBarMenuMain from './Component/Menu/SideBarMenu/SideBarMenuMain';
 import TabList from './Component/Menu/tabMenu/TabList';
 import WindowFrame from './Program/WindowFrame';
-
+import { getDynamicSql_Oracle } from './db/Oracle/Oracle';
 import './Home.css';
-import { getSessionCookie, setSessionCookie } from "./Cookies";
-import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER, gfs_dispatch, gfs_PGM_REDUCER } from './Method/Store';
+import { getSessionCookie, setSessionCookie } from './Cookies';
+import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER, gfs_dispatch, gfs_PGM_REDUCER, gfs_getStoreValue } from './Method/Store';
 import { gfc_sleep } from './Method/Comm';
 
 import GifPlayer from 'react-gif-player';
@@ -15,42 +15,71 @@ import LoadingOverlay from 'react-loading-overlay';
 
 let isSession = false;
 
-const defaultData = async() => {
+const defaultData = async(user_id) => {
+
   const userReducer = (nowState, action) => {
     if(action.reducer !== 'USER_REDUCER') {
       return {
         COP_CD    : nowState === undefined ? '10'         : nowState.COP_CD,
         USER_ID   : nowState === undefined ? '1989'       : nowState.USER_ID,
         USER_NAM  : nowState === undefined ? '김경현'      : nowState.USER_NAM,
-        LANGUAGE  : nowState === undefined ? 'KOR'        : nowState.LANGUAGE,
+        DEPT_NAM  : nowState === undefined ? '검수'        : nowState.DEPT_NAM,
         YMD_FORMAT: nowState === undefined ? 'yyyy-MM-DD' : nowState.YMD_FORMAT,
         // YMD_FORMAT: nowState === undefined ? 'MM-DD-yyyy' : nowState.YMD_FORMAT,
         YM_FORMAT : nowState === undefined ? 'yyyy-MM'    : nowState.YM_FORMAT,
         NUM_FORMAT: nowState === undefined ? '0,0'        : nowState.NUM_FORMAT,
-        NUM_ROUND : nowState === undefined ? '2R'         : nowState.NUM_ROUND
+        NUM_ROUND : nowState === undefined ? '2R'         : nowState.NUM_ROUND,
+        ERP_ID    : nowState === undefined ? ''           : nowState.ERP_ID,
+        AREA_TP   : nowState === undefined ? ''           : nowState.AREA_TP
       };
     }
 
-    if(action.type === 'USERID_FOCUS'){
+    if(action.type === 'USER'){
       return Object.assign({}, nowState, {
-        userIdFocus  : action.userIdFocus
-      });
-    }else if(action.type === 'PWD_FOCUS'){
-      return Object.assign({}, nowState, {
-        pwdFocus  : action.pwdFocus
-      });
-    }else if(action.type === 'USERID_CHANGE'){
-      return Object.assign({}, nowState, {
-        userIdText   : action.userIdText
-      });
-    }else if(action.type === 'PWD_CHANGE'){
-      return Object.assign({}, nowState, {
-        pwdText   : action.pwdText
+        COP_CD     : action.COP_CD,
+        USER_ID    : action.USER_ID,
+        USER_NAM   : action.USER_NAM,
+        DEPT_NAM   : action.DEPT_NAM,
+        YMD_FORMAT : action.YMD_FORMAT,
+        YM_FORMAT  : action.YM_FORMAT,
+        NUM_FORMAT : action.NUM_FORMAT,
+        NUM_ROUND  : action.NUM_ROUND,
+        ERP_ID     : action.ERP_ID,
+        AREA_TP    : action.AREA_TP
       });
     }
   };
 
   gfs_injectAsyncReducer('USER_REDUCER', userReducer);
+
+  let result = await getDynamicSql_Oracle(
+    'Common/Common',
+    'LOGIN_SESSION',
+    [{user_id}]
+  ); 
+
+  let data = [];
+  for(let i = 0; i < result.data.rows.length; i++){
+
+    let col = {};
+    for(let j = 0; j < result.data.rows[i].length; j++){
+      col[result.data.metaData[j].name] = result.data.rows[i][j];
+    }
+    data.push(col);
+  }
+
+  gfs_dispatch('USER_REDUCER', 'USER', {
+    COP_CD    : '10',
+    USER_ID   : data[0].USER_ID,
+    USER_NAM  : data[0].USER_NAM,
+    DEPT_NAM  : data[0].DEPT_NAM,
+    YMD_FORMAT: 'yyyy-MM-DD',
+    YM_FORMAT : 'yyyy-MM',
+    NUM_FORMAT: '0,0',
+    NUM_ROUND: '2R',
+    ERP_ID    : data[0].ERP_ID,
+    AREA_TP   : data[0].AREA_TP
+  });
 }
 
 const onActiveWindow = (e) => {
@@ -127,17 +156,21 @@ const defaultOpen = async() => {
 }
 
 const Home = (props) => {  
-  // const session = getSessionCookie("session");
-  // if (session === "SUCCESS")
+  const user_id = getSessionCookie('login');
+
+
+  // const session = getSessionCookie('session');
+  // if (session === 'SUCCESS')
   // {
-    isSession = true;
+    // isSession = true;
   // }
   
   useEffect(e => {
 
-    if(isSession === false){
+    if(user_id === ''){
       alert('로그인부터 해주세요.');
-  
+      // window.location.replace('http://ims.yksteel.co.kr:90');
+      window.location.replace('http://localhost:4000');
       return;
     }
 
@@ -175,13 +208,14 @@ const Home = (props) => {
     gfs_WINDOWFRAME_REDUCER();
     //#endregion
 
-    defaultData();
+    defaultData(user_id);
 
     //화면Open
     defaultOpen();
 
     // return() => {
-    //   setSessionCookie("session", 'false');
+    //   setSessionCookie('login', '');
+    //   console.log('Tmy')
     // }
   }, [])
 
@@ -230,36 +264,27 @@ const Home = (props) => {
         })
       }}
     >
-      <React.Fragment>      
-        {isSession ?
-        <>
-
-          <div style={{display:'inline-block', height:'100%'}} >
-            <SideBarMenuMain />
+      <div style={{display:'inline-block', height:'100%'}} >
+        <SideBarMenuMain />
+      </div>
+      
+      <div style={{display:'inline-block', paddingRight:'17px', transition:'all 0.2s ease-in-out', position:'absolute', left:width, right:0, height:'100%'}}>
+        <div style={{display:'flex', flexDirection:'column', height:'100vh'}}>
+          <div style={{height:80}}>
+            <TabList />
           </div>
-          
-          <div style={{display:'inline-block', paddingRight:'17px', transition:'all 0.2s ease-in-out', position:'absolute', left:width, right:0, height:'100%'}}>
-            <div style={{display:'flex', flexDirection:'column', height:'100vh'}}>
-              <div style={{height:80}}>
-                <TabList />
-              </div>
-              <div style={{flex:1, display:'flex'}}> 
-                <div style={{float:'left', width:'100%', position:'relative', zIndex:0, overflow:'hidden'}}>
-                  {windowState != null &&
-                    windowState.map(e => 
-                      <WindowFrame key={e.programId} programId={e.programId} programNam={e.programNam}/>
-                    )
-                  }
-                </div>
-              </div>
+          <div style={{flex:1, display:'flex'}}> 
+            <div style={{float:'left', width:'100%', position:'relative', zIndex:0, overflow:'hidden'}}>
+              {windowState != null &&
+                windowState.map(e => 
+                  <WindowFrame key={e.programId} programId={e.programId} programNam={e.programNam}/>
+                )
+              }
             </div>
           </div>
-        </>
-        :
-          <div style={{textAlign:'center', verticalAlign:'center'}}>로그인부터 해주세요.</div>
-        }
+        </div>
+      </div>
         
-      </React.Fragment>
     </LoadingOverlay>
   );
 };

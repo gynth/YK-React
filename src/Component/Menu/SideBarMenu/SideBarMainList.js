@@ -9,76 +9,28 @@ const SideBarMainList = (props) => {
     return p.MENU_ID === n.MENU_ID;
   });
 
-  const MENU_ID = SideBarMenuState.MENU_ID;
+  const MENU = SideBarMenuState;
 
   const [list, setList] = useState([]);
 
+
   useEffect(() => {
-    // if(MENU_ID !== ''){
-
-    //   getDynamicSql_Mysql(
-    //     'Common/Common.js',
-    //     'ch_menu2',
-    //     [{
-    //       pr_menu: MENU_ID
-    //     }]
-    //   ).then(
-    //     e => {setList(e.data.data)}
-    //   )
-    // }
-    setList([]);
-
-    if(MENU_ID === 'INSP'){
-      setList(
-        [{
-          MENU_ID,
-          MENU_NAM: '검수'
-        }]
+    if(MENU.MENU_ID !== ''){
+      let menu = [];
+      menu.push(
+        <React.Fragment key={MENU.MENU_ID}>
+          <h3><span><span>{MENU.MENU_NAM}</span></span></h3>
+          <SideBarMainListDetail MENU_ID={MENU.MENU_ID} MENU_NAM={MENU.MENU_NAM}/>
+        </React.Fragment>
       )
+  
+      setList(menu)
     }
-    else if(MENU_ID === 'DISP'){
-      setList(
-        [{
-          MENU_ID,
-          MENU_NAM: '출차'
-        }]
-      )
-    }
-    else if(MENU_ID === 'ENTR'){
-      setList(
-        [{
-          MENU_ID,
-          MENU_NAM: '입차'
-        }]
-      )
-    }
-    else if(MENU_ID === 'CFRM'){
-      setList(
-        [{
-          MENU_ID,
-          MENU_NAM: '확정'
-        }]
-      )
-    }
-    else if(MENU_ID === 'COMM'){
-      setList(
-        [{
-          MENU_ID,
-          MENU_NAM: '설정'
-        }]
-      )
-    }
-  }, [MENU_ID])
+  }, [MENU])
 
   return (
     <>
-        {
-          list.map((e) => 
-            <React.Fragment key={e.MENU_ID}>
-              <h3><span><span>{e.MENU_NAM}</span></span></h3>
-              <SideBarMainListDetail MENU_ID={e.MENU_ID} MENU_NAM={e.MENU_NAM}/>
-            </React.Fragment>       
-          )
+        {list
         }
     </>
   );

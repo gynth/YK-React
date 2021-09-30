@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_sleep } from '../../../Method/Comm';
-import { gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
+import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import { gfo_getCombo } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow, gfg_setValue } from '../../../Method/Grid';
 
@@ -347,11 +347,11 @@ class SHIP_PROC extends Component {
                           if(e.columnName === 'chk'){
                             const grid = gfg_getGrid(this.props.pgm, 'main10');
                             if(grid.gridEl.dataset.checked === undefined){
-                              grid.gridEl.dataset.checked = true;
-                            }else if(grid.gridEl.dataset.checked === 'true'){
-                              grid.gridEl.dataset.checked = false;
+                              grid.gridEl.dataset.checked = 'Y';
+                            }else if(grid.gridEl.dataset.checked === 'Y'){
+                              grid.gridEl.dataset.checked = 'N';
                             }else{
-                              grid.gridEl.dataset.checked = true;
+                              grid.gridEl.dataset.checked = 'Y';
                             }
     
                             for(let i = 0; i < grid.getRowCount(); i++){
@@ -373,42 +373,65 @@ class SHIP_PROC extends Component {
                           columnInput({
                             name: 'scaleNumb',
                             header: '계근번호',
-                            width : 150,
+                            width : 120,
                             readOnly: true,
                             color : '#0063A9',
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'center'
                           }),
                           columnInput({
                             name: 'vendorname',
                             header: '업체명',
-                            width : 300,
+                            width : 250,
                             readOnly: true,
-                            align : 'left',
-                            fontSize: '18'
+                            align : 'left'
+                          }),
+                          columnInput({
+                            name: 'cars_no',
+                            header: '차량번호',
+                            width : 150,
+                            readOnly: true,
+                            align : 'left'
                           }),
                           columnNumber({
                             name    : 'netweight', 
                             header  : '무게(KG)', 
-                            width   : 150, 
-                            readOnly: false,
-                            fontSize: '18'
+                            width   : 130, 
+                            readOnly: false
                           }),
                           columnInput({
                             name: 'deliverydate',
                             header: '입차일자',
-                            width : 220,
+                            width : 180,
                             readOnly: true,
                             align : 'center',
-                            fontSize: '18'
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT')
+                          }),
+                          columnInput({
+                            name: 'empty_time',
+                            header: '공차계량시간',
+                            width : 180,
+                            readOnly: true,
+                            align : 'center'
+                          }),
+                          columnNumber({
+                            name    : 'empty_wgt', 
+                            header  : '공차계량값', 
+                            width   : 130, 
+                            readOnly: false
                           }),
                           columnInput({
                             name: 'iron_grade',
                             header: '판정등급',
-                            width : 220,
+                            width : 180,
                             readOnly: true,
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'center'
+                          }),
+                          columnInput({
+                            name: 'inspect_user',
+                            header: '판정(검수)',
+                            width : 180,
+                            readOnly: true,
+                            align : 'center'
                           })
                         ]}
                   />
@@ -421,14 +444,6 @@ class SHIP_PROC extends Component {
           </div>
           <div style={{paddingBottom:'90px', paddingTop:'160px'}} className='car_info'>
             <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='SHIP_PROC_MAIN'/></div>
-            <div className='detail'>
-              <ul>
-                <li><span className='t'>Vender</span><Detailspan flag={2}  reducer='SHIP_PROC_MAIN'/></li>
-                <li><span className='t'>무게(KG)</span><Detailspan flag={3} reducer='SHIP_PROC_MAIN' /></li>
-                <li><span className='t'>입차시간</span><Detailspan flag={4}  reducer='SHIP_PROC_MAIN'/></li> 
-              </ul>
-            </div>
-
 
             <div className='tab_content' id='tabMain'>
               <div className='input_list on' id={`content1_${this.props.pgm}`}>

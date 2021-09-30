@@ -17,7 +17,7 @@ import Combobox from '../../../Component/Control/Combobox';
 import Botspan from '../Common/Botspan';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
+import { TOKEN, YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
 class CAMR_SETTING extends Component {
@@ -112,7 +112,11 @@ class CAMR_SETTING extends Component {
           RTSP_ADDR: e.RTSP_ADDR,
           SEQ: e.SEQ,
           CAMERA_PORT: e.CAMERA_PORT,
-          USE_YN : e.USE_YN
+          CAMERA_NUMBER: e.CAMERA_NUMBER,
+          REC_YN : e.REC_YN,
+          USE_YN : e.USE_YN,
+          MILESTONE_GUID: e.MILESTONE_GUID,
+          MILESTONE_NAME: e.MILESTONE_NAME
         }]
       )
     });
@@ -193,16 +197,18 @@ class CAMR_SETTING extends Component {
                             }]}
                   />
                 </div>
-                <Input pgm         = {this.props.pgm}
-                       id          = 'search_txt'
-                       height      = '42'
-                       placeHolder = '검색어를 입력하세요'
-                       paddingLeft = '14'
-                       width       = '100%'
-                       type        = 'textarea'
-                       readOnly
-                      //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
-                />
+                <div>
+                  <Input pgm         = {this.props.pgm}
+                        id          = 'search_txt'
+                        height      = '42'
+                        placeHolder = '검색어를 입력하세요'
+                        paddingLeft = '14'
+                        width       = '90%'
+                        type        = 'textarea'
+                        readOnly
+                        //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
+                  />
+                </div>
               </div>
             </div>
             <div className='grid'>
@@ -253,7 +259,7 @@ class CAMR_SETTING extends Component {
                           columnInput({
                             name: 'CAMERA_NAM',
                             header: '카메라이름',
-                            width : 250,
+                            width : 230,
                             readOnly: false,
                             color : '#0063A9',
                             align : 'left',
@@ -285,7 +291,22 @@ class CAMR_SETTING extends Component {
                           columnInput({
                             name: 'CAMERA_PORT',
                             header: '카메라포트',
-                            width : 150,
+                            width : 130,
+                            readOnly: true,
+                            align : 'right',
+                            fontSize: '18',
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.readOnly = false;
+                              }else{
+                                control.readOnly = true;
+                              }
+                            }
+                          }),   
+                          columnInput({
+                            name: 'CAMERA_NUMBER',
+                            header: '카메라위치',
+                            width : 100,
                             readOnly: true,
                             align : 'right',
                             fontSize: '18',
@@ -300,17 +321,10 @@ class CAMR_SETTING extends Component {
                           columnInput({
                             name: 'SEQ',
                             header: '구성순서',
-                            width : 150,
-                            readOnly: true,
+                            width : 120,
+                            readOnly: false,
                             align : 'right',
-                            fontSize: '18',
-                            onRender: (value, control, rows) => {
-                              if(rows.phantom){
-                                control.readOnly = false;
-                              }else{
-                                control.readOnly = true;
-                              }
-                            }
+                            fontSize: '18'
                           }),   
                           columnCombobox({
                             name: 'USE_YN', 
@@ -329,6 +343,56 @@ class CAMR_SETTING extends Component {
                               value   : 'code',
                               display : 'name'
                             }
+                          }),   
+                          columnCombobox({
+                            name: 'REC_YN', 
+                            header: '녹화여부',
+                            readOnly: false,
+                            fontSize: '18',
+                            width   : 130,
+                            data    : [{
+                              'code': 'Y',
+                              'name': 'Yes'
+                            },{
+                              'code': 'N',
+                              'name': 'No'
+                            }],
+                            editor: {
+                              value   : 'code',
+                              display : 'name'
+                            }
+                          }),
+                          columnInput({
+                            name: 'MILESTONE_GUID',
+                            header: '마일스톤Guid',
+                            width : 250,
+                            readOnly: false,
+                            color : '#0063A9',
+                            align : 'left',
+                            fontSize: '18',
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.readOnly = false;
+                              }else{
+                                control.readOnly = true;
+                              }
+                            }
+                          }),
+                          columnInput({
+                            name: 'MILESTONE_NAME',
+                            header: '마일스톤Name',
+                            width : 250,
+                            readOnly: false,
+                            color : '#0063A9',
+                            align : 'left',
+                            fontSize: '18',
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.readOnly = false;
+                              }else{
+                                control.readOnly = true;
+                              }
+                            }
                           })
                         ]}
                   />
@@ -336,6 +400,23 @@ class CAMR_SETTING extends Component {
               </div>
               <div className='grid_info'>
                 <span className='title'>전체</span><Botspan reducer='CAMR_SETTING_MAIN' />
+                <input 
+                  style={{display:'block', height: 30, float:'right', marginTop:'8', marginRight:'20'}} 
+                  type='button' 
+                  value='디바이스'
+                  onClick={async e => {
+                    const milestone = await TOKEN({});
+                    const device = milestone.data.DEVICE;
+
+                    let msg = '';
+
+                    for(let i = 0; i < device.length; i++){
+                      msg += `Start ----- Guid: ${device[i].Guid},`;
+                      msg += `Name: ${device[i].Name} ----- End   `;
+                    }
+
+                    alert(msg);
+                  }}></input>
               </div>
             </div>
           </div>

@@ -128,6 +128,9 @@ const applyWindow = (programId, programNam) => {
   }else if(programId === 'AUTH'){
     const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
     return <pgm.default pgm={programId} nam={programNam} />
+  }else if(programId === 'USER'){
+    const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+    return <pgm.default pgm={programId} nam={programNam} />
   }else{
     const pgm = require(`../Program/IMS/${programId}/${programId}.js`);
   
@@ -191,7 +194,8 @@ const WindowFrame = (props) => {
         minWidth={60}
         minHeight={60}
         bounds='parent'
-        enableResizing= {windowWidth === '100%' ? false : true}
+        // enableResizing= {windowWidth === '100%' ? false : true}
+        enableResizing={false}
         dragHandleClassName='win_header'
         onResize={() => onResize(props.programId, props.programNam)}
         onResizeStop= {(e, dir, ref, delta, position) => onResizeStop(delta.width, delta.height, position.x, position.y, props.programId, props.programNam)}
@@ -205,19 +209,19 @@ const WindowFrame = (props) => {
              onMouseUp={(e) => onWindowClick(props.programId, props.programNam)}>
         
           <div className='win_header' style={{cursor:'move'}}
-               onDoubleClick={(e) => onResizeClick(windowWidth === '100%' ? 'MINIMIZEWINDOW' : 'MAXIMIZEWINDOW', props.programId, props.programNam)}
+              //  onDoubleClick={(e) => onResizeClick(windowWidth === '100%' ? 'MINIMIZEWINDOW' : 'MAXIMIZEWINDOW', props.programId, props.programNam)}
                >
             <h4>[{props.programId}] {props.programNam}</h4>
             
             <div className='win_controller'>
-              <button type='button' className='min'
+              {/* <button type='button' className='min'
                       onMouseDown={e => e.stopPropagation()}>
               </button>
               
               <button type='button' className='max'
                       onClick={() => onResizeClick(windowWidth === '100%' ? 'MINIMIZEWINDOW' : 'MAXIMIZEWINDOW', props.programId, props.programNam)}  
                       onMouseDown={e => e.stopPropagation()}>
-              </button>
+              </button> */}
 
               <button type='button' className='close' 
                       onClick={() => onWindowCloseClick(props.programId)}

@@ -9,7 +9,7 @@ const executeSPYK = async(connection, query, data) => {
 }
 
 const executeSP = async(RowStatus, connection, query, data) => {
-  console.log(data);
+  
   const queryResult = await connection.execute(query, data);
   let result = {};
   
@@ -19,7 +19,7 @@ const executeSP = async(RowStatus, connection, query, data) => {
   let MSG_TEXT = queryResult.outBinds['p_MSG_TEXT'];
   let COL_NAM  = queryResult.outBinds['p_COL_NAM'];
 
-  if(RowStatus === 'R'){
+  if(RowStatus.indexOf('R') >= 0){
     ROWS = await fetchRowsFromRS(queryResult);
 
     if(ROWS.length === 0){
@@ -29,6 +29,10 @@ const executeSP = async(RowStatus, connection, query, data) => {
       MSG_TEXT = 'MSG01';
       COL_NAM  = '';
     }
+  }else{
+    if(SUCCESS !== 'Y'){
+      console.log(result);
+    }
   }
 
   result.ROWS     = ROWS;
@@ -36,8 +40,6 @@ const executeSP = async(RowStatus, connection, query, data) => {
   result.MSG_CODE = MSG_CODE;
   result.MSG_TEXT = MSG_TEXT;
   result.COL_NAM  = COL_NAM;
-  
-  // console.log(result);
 
   return result;
 }
@@ -163,6 +165,11 @@ router.post('/SPYK', (req, res) => {
         return;
       }
     }
+
+    doRelease(connection);
+    res.json({scaleNumb: '',
+              seq      : 0,
+              result   : 'OK'});
   }) 
 });
  

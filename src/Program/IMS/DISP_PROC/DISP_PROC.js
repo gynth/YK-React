@@ -429,7 +429,8 @@ class DISP_PROC extends Component {
     }else{
       gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
         itemFlag : e.preItemGrade,
-        chit     : chitYn.data
+        chit     : chitYn.data,
+        scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb
       });
     }
   }
@@ -507,10 +508,17 @@ class DISP_PROC extends Component {
                           columnInput({
                             name: 'preItemGrade',
                             header: '사전등급',
-                            width : 135,
+                            width : 120,
                             readOnly: true,
                             align : 'center'
-                          }),   
+                          }),     
+                          columnInput({
+                            name: 'itemGrade',
+                            header: '판정등급',
+                            width : 120,
+                            readOnly: true,
+                            align : 'center'
+                          }), 
                           // columnCombobox({
                           //   name: 'itemFlag', 
                           //   header: '구분',
@@ -540,6 +548,17 @@ class DISP_PROC extends Component {
                             time  : 'HH:mm'
                           }),
                           columnTextArea({
+                            name  : 'lastDate',
+                            header: '검수시간',
+                            width : 80,
+                            height: 38,
+                            // paddingTop: ''
+                            readOnly: true,
+                            valign:'middle',
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                            time  : 'HH:mm'
+                          }),
+                          columnTextArea({
                             name: 'vendor',
                             header: 'Vendor',
                             width : 200,
@@ -558,13 +577,7 @@ class DISP_PROC extends Component {
           </div>
           <div id={`car_info_${this.props.pgm}`} className='car_info'>
             <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='DISP_PROC_MAIN'/></div>
-            <div className='detail'>
-              <ul>
-                <li><span className='t'>차량번호</span><Detailspan flag={2}  reducer='DISP_PROC_MAIN'/></li>
-                <li><span className='t'>총중량(KG)</span><Detailspan flag={3} reducer='DISP_PROC_MAIN' /></li>
-                <li><span className='t'>입차시간</span><Detailspan flag={4}  reducer='DISP_PROC_MAIN'/></li> 
-              </ul>
-            </div>
+
 
 
             <TabList pgm={this.props.pgm} id={this.props.id} reducer='DISP_PROC_MAIN'/>

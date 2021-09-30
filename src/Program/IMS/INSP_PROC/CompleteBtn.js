@@ -17,17 +17,21 @@ const CompleteBtn = (props) => {
 
   const getRain = async() => {
     const result = await YK_WEB_REQ_RAIN();
-    const rain = result.data.getRainfallInfo.item.filter(e => {
-      if(e.clientId === '1010'){
-        return true;
-      }else{
-        return false;
-      }
-    });
+    let value = 0;
 
-    gfs_dispatch('INSP_PROC_MAIN', 'RAIN_INFO', {RAIN_INFO: rain[0].accRain});
-
-    return rain[0].accRain;
+    if(result){
+      const rain = result.data.getRainfallInfo.item.filter(e => {
+        if(e.clientId === '1010'){
+          return true;
+        }else{
+          return false;
+        }
+      });
+      gfs_dispatch('INSP_PROC_MAIN', 'RAIN_INFO', {RAIN_INFO: rain[0].accRain});
+      value = rain[0].accRain;
+    }
+    
+    return value;
   }
 
   //#region 검수등록
@@ -86,12 +90,6 @@ const CompleteBtn = (props) => {
       }
     }
 
-    // const detail_out = gfo_getCombo(props.pgm, 'detail_out'); //하차구역
-    // if(detail_out.getValue() === null){
-    //   alert('필수입력값이 없습니다. > 하차구역');
-    //   gfc_hideMask();
-    //   return;
-    // }
     const detail_car = gfo_getCombo(props.pgm, 'detail_car'); //차종구분
     if(detail_car.getValue() === null ||  detail_car.getValue() === ''){
       alert('필수입력값이 없습니다. > 차종구분');
@@ -101,6 +99,7 @@ const CompleteBtn = (props) => {
       gfc_hideMask();
       return;
     }
+    
     const detail_rtn = gfo_getCombo(props.pgm, 'detail_rtn'); //반품구분
     const detail_rtn2 = gfo_getCombo(props.pgm, 'detail_rtn2'); //반품구분사유
     if(detail_rtn.getValue() !== null && detail_rtn.getValue() !== ''){
@@ -122,16 +121,21 @@ const CompleteBtn = (props) => {
     const chitYn = await gfc_chit_yn_YK(scaleNumb);
     const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
     if(chitYn.data === 'N'){
-      document.getElementById(`tab2_${props.pgm}`).click(2);
-
-      await gfc_sleep(200);
 
       if(memo.length === 0){
-        if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
-          gfc_hideMask();
-          return;
-        }
+        // if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
+        //   gfc_hideMask();
+        //   return;
+        // }
+        document.getElementById(`tab2_${props.pgm}`).click(2);
+        await gfc_sleep(100);
+        alert('계량표의 내용이 없습니다.');
+        gfc_hideMask();
+        return;
       }
+
+      document.getElementById(`tab2_${props.pgm}`).click(2);
+      await gfc_sleep(100);
 
       const img = document.getElementById(`content2_${props.pgm}`);
       const result = await gfc_screenshot_srv_YK(img, scaleNumb);
@@ -193,9 +197,14 @@ const CompleteBtn = (props) => {
     getRain();
 
     //5분에 한번씩 강수량 체크한다.
-    setInterval(() => {
+    const interval = setInterval(() => {
       getRain();
     }, 60000 * 5);
+
+    return() => {
+      clearInterval(interval);
+    }
+
   }, [])
   //#endregion
 

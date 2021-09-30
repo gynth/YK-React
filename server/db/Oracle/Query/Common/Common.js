@@ -92,7 +92,11 @@ const Common = (fn, param) => {
     ` ,RTSP_ADDR  ` +
     ` ,SEQ        ` +
     ` ,CAMERA_PORT` +
+    ` ,CAMERA_NUMBER` +
+    ` ,REC_YN` +
     ` ,USE_YN     ` +
+    ` ,MILESTONE_GUID     ` +
+    ` ,MILESTONE_NAME     ` +
     `)VALUES      ` +
     ` ('${param.AREA_TP}'` +
     ` ,'${param.CAMERA_IP}'` +
@@ -100,12 +104,23 @@ const Common = (fn, param) => {
     ` ,'${param.RTSP_ADDR}'` +
     ` ,${param.SEQ}` +
     ` ,${param.CAMERA_PORT}` +
-    ` ,'${param.USE_YN}')`;
+    ` ,${param.CAMERA_NUMBER}` +
+    ` ,'${param.REC_YN}'` +
+    ` ,'${param.USE_YN}'` +
+    ` ,'${param.MILESTONE_GUID}'` +
+    ` ,'${param.MILESTONE_NAME}')`;
   }else if(fn === 'ZM_IMS_CAMERA_UPDATE'){
     query = 
     ` UPDATE ZM_IMS_CAMERA      ` +
     `    SET USE_YN   = '${param.USE_YN}'` +
+    `       ,REC_YN   = '${param.REC_YN}'` +
+    `       ,CAMERA_NUMBER = ${param.CAMERA_NUMBER}` +
     `       ,SEQ      = ${param.SEQ}` +
+    `  WHERE CAMERA_IP = '${param.CAMERA_IP}'` ;
+  }else if(fn === 'ZM_IMS_CAMERA_UPDATE2'){
+    query = 
+    ` UPDATE ZM_IMS_CAMERA      ` +
+    `    SET SEQ      = ${param.SEQ}` +
     `  WHERE CAMERA_IP = '${param.CAMERA_IP}'` ;
   }else if(fn === 'ZM_IMS_CAMERA_DELETE'){
     query = 
@@ -128,6 +143,18 @@ const Common = (fn, param) => {
     `   FROM zm_ims_user ` + 
     `  WHERE USER_ID = '${param.user_id}'  `+ 
     `    AND USER_PWD = '${param.pass_cd}'  ` ;
+  }else if(fn === 'LOGIN_SESSION'){
+    query = 
+    ` SELECT * ` +
+    `   FROM zm_ims_user ` + 
+    `  WHERE USER_ID = '${param.user_id}'  `;
+  }else if(fn === 'MENU_1'){
+    query = 
+    ` SELECT * ` +
+    `   FROM zm_ims_code ` +
+    `  WHERE comm_cd = 1 ` +
+    `    AND use_yn  = 'Y' ` +
+    `    AND comm_dtl_cd != '*' `;
   }
 
   return query;

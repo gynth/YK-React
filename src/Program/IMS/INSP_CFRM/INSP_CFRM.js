@@ -352,7 +352,7 @@ class INSP_CFRM extends Component {
 
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
-        <div className='car_manager' >
+        <div className='car_manager type4' >
           <div style={{paddingBottom:'0'}} className='car_list'>
             <div className='search_line'>
               <div className='wp' >
@@ -518,17 +518,6 @@ class INSP_CFRM extends Component {
           </div>
           <div className='car_info'>
             <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='INSP_CFRM_MAIN'/></div>
-            <div className='detail'>
-              <ul>
-                <li><span className='t'>차량번호</span><Detailspan flag={2}  reducer='INSP_CFRM_MAIN'/></li>
-                <li><span className='t'>총중량(KG)</span><Detailspan flag={3} reducer='INSP_CFRM_MAIN' /></li>
-                <li><span className='t'>출차시간</span><Detailspan flag={4}  reducer='INSP_CFRM_MAIN'/></li> 
-              </ul>
-            </div>
-
-            <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_CFRM_MAIN'/>
-
-            <div className='tab_content' id='tabMain'>
               <div className='input_list on' id={`content1_${this.props.pgm}`}>
                 <ul>
                   <li>
@@ -608,13 +597,26 @@ class INSP_CFRM extends Component {
                   </li>
                 </ul>
               </div>
-              
-              <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_CFRM_MAIN'/>
-              
-            </div>
-            <CompleteBtn pgm={this.props.pgm}/>
+              <div className="complete_btn edit">
+									<button type="button" style={{display:'block'}}><span>검수수정</span></button>
+								</div>
           </div>
-            <div className='cctv_viewer'>
+
+
+
+
+          <div className='car_info'>
+            <div className="top_btns">
+              <button type="button" className="record"><span>녹화영상</span></button>
+              <button type="button" className="shot"><span>스냅샷</span></button>
+            </div>
+            <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_CFRM_MAIN'/>
+              
+            <div className="complete_btn">
+									<button type="button" style={{display:'block'}}><span>검수확정</span></button>
+								</div>
+          </div>
+            {/* <div className='cctv_viewer'>
               <h4>녹화영상</h4>
               <div className='cctv_list'>
                 <RecImage 
@@ -632,7 +634,7 @@ class INSP_CFRM extends Component {
                   rec   = 'DUM_CAM_REC' 
                   image = 'DUM_CAM_IMG'/> 
               </div>
-            </div>
+            </div> */}
         </div>
       </div>
     );

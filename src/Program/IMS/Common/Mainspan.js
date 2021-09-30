@@ -16,6 +16,8 @@ function Mainspan(props) {
       return e[props.reducer].DEPT_WAIT;
     }else if(props.flag === 6){
       return e[props.reducer].ENTR_WAIT;
+    }else if(props.flag === 7){
+      return e[props.reducer].DRIV_WAIT;
     }
   }, (p, n) => {
     return p === n;

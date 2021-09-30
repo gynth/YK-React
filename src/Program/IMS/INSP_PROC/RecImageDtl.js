@@ -64,7 +64,8 @@ function RecImageDtl(props) {
     client = new WebSocket(`ws://ims.yksteel.co.kr:90/ws/${props.cameraPort}`);
     canvas = imageRef.current;
     new jsmpeg(client, {
-      canvas 
+      canvas
+      // pauseWhenHidden: false 
     });
   }
 
@@ -109,7 +110,8 @@ function RecImageDtl(props) {
         })
 
     return() => {
-      client.close();
+      if(client !== null && client !== undefined)
+        client.close();
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -227,6 +229,7 @@ function RecImageDtl(props) {
                         // zIndex: 100,
                         overflow:'hidden'
                       }}
+                      enableResizing={false}
                       onDragStop={(e, data) => {
                         dragRef.current.updatePosition({x:0, y:0});
                       }}

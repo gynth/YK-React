@@ -118,9 +118,8 @@ function RecImage(props) {
                       //1. 큰 화면의 SEQ업데이트
                       const targetResult = await callOracle(
                         'Common/Common',
-                        'ZM_IMS_CAMERA_UPDATE',
+                        'ZM_IMS_CAMERA_UPDATE2',
                         [{
-                          USE_YN: 'Y',
                           SEQ   : source,
                           CAMERA_IP: DEVICE[target].ipArr
                         }]
@@ -136,9 +135,8 @@ function RecImage(props) {
                       //2. 작은 화면의 SEQ업데이트
                       const sourceResult = await callOracle(
                         'Common/Common',
-                        'ZM_IMS_CAMERA_UPDATE',
+                        'ZM_IMS_CAMERA_UPDATE2',
                         [{
-                          USE_YN: 'Y',
                           SEQ   : target,
                           CAMERA_IP: DEVICE[source].ipArr
                         }]

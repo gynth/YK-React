@@ -29,11 +29,11 @@ const onLogin = async(e, user_id, pass_cd) => {
 
     const width = window.screen.availWidth;
     const height = window.screen.availHeight;
+    setSessionCookie('login', user_id);
 
     const winProperties = 'fullscreen=yes, location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
 
     e.preventDefault(); 
-    setSessionCookie('session', 'SUCCESS', 1/1440);   
     let win = window.open('Home', 'YK', winProperties);
     win.moveTo(0, 0);
   }else{
