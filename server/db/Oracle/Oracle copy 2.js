@@ -68,6 +68,7 @@ router.post('/SP', (req, res) => {
     connectString: dbConfig.connectString
   },
   async (err, connection) => {
+    try{
       if(err){
         console.log(err.message);
         res.json({
@@ -97,7 +98,7 @@ router.post('/SP', (req, res) => {
             if(err !== null)
               console.log('rollback Error: ' + err);
           })
-          doRelease(connection);
+  
           res.json({
             ROWS    : result.ROWS,
             SUCCESS : result.SUCCESS,
@@ -115,7 +116,7 @@ router.post('/SP', (req, res) => {
               if(err !== null)
                 console.log('Commit Error: ' + err);
             })
-            doRelease(connection);
+            
             res.json({
               ROWS    : result.ROWS,
               SUCCESS : result.SUCCESS,
@@ -127,7 +128,11 @@ router.post('/SP', (req, res) => {
           }
         }
       }
-    
+    }catch(e){
+
+    }finally{
+      doRelease(connection);
+    }
   }) 
 });
 
@@ -138,6 +143,7 @@ router.post('/SPYK', (req, res) => {
     connectString: dbConfig.connectString
   },
   async (err, connection) => {
+    try{
       if(err){
         console.log(err.message);
         return;
@@ -165,11 +171,15 @@ router.post('/SPYK', (req, res) => {
           return;
         }
       }
-      doRelease(connection);
+  
       res.json({scaleNumb: '',
                 seq      : 0,
                 result   : 'OK'});
-    
+    }catch(e){
+
+    }finally{
+      doRelease(connection);
+    }
   }) 
 });
  
@@ -180,6 +190,7 @@ router.post('/Query', (req, res) => {
     connectString: dbConfig.connectString
   },
   (err, connection) => {
+    try{
       if(err){
         console.log(err.message);
         return;
@@ -195,7 +206,6 @@ router.post('/Query', (req, res) => {
   
       if(typeof(Common) !== 'function'){
         console.log('Wrong file location');
-        doRelease(connection);
         res.send({
           result  : false,
           data    : null,
@@ -218,7 +228,7 @@ router.post('/Query', (req, res) => {
             if(err !== null)
               console.log('rollback Error: ' + err);
           })
-          doRelease(connection);
+  
           res.send({
             result  : false,
             data    : null,
@@ -233,13 +243,18 @@ router.post('/Query', (req, res) => {
             if(err !== null)
               console.log('Commit Error: ' + err);
           })
-          doRelease(connection);
         }
   
         // console.log(result);
         res.send(result);
       })
-    
+    }catch(e){
+
+    }finally{
+      doRelease(connection);
+    }
+
+
   })
 });
 
@@ -250,6 +265,7 @@ router.post('/QueryTran', (req, res) => {
     connectString: dbConfig.connectString
   },
   (err, connection) => {
+  try{
     if(err){
       console.log(err.message);
       return;
@@ -272,7 +288,6 @@ router.post('/QueryTran', (req, res) => {
   
       if(typeof(Common) !== 'function'){
         console.log('Wrong file location');
-        doRelease(connection);
         res.send({
           result  : false,
           grid    : null,
@@ -305,7 +320,6 @@ router.post('/QueryTran', (req, res) => {
             }
           }
 
-          doRelease(connection);
           res.send({
             result  : false,
             grid    : reqGrid[i],
@@ -328,7 +342,6 @@ router.post('/QueryTran', (req, res) => {
               if(result.rowsAffected === 0){
                 msg = 'MSG02'; // '해당건이 없습니다. 다시조회후 처리해주세요.
             
-                doRelease(connection);
                 res.send({
                   result  : false,
                   grid    : reqGrid[i],
@@ -346,8 +359,7 @@ router.post('/QueryTran', (req, res) => {
               if(err !== null)
                 console.log('Commit Error: ' + err);
             })
-            
-            doRelease(connection);
+
             res.send({
               result  : msg === '' ? true : false,
               grid    : reqGrid[i],
@@ -360,11 +372,16 @@ router.post('/QueryTran', (req, res) => {
         }
       })
     }
+    }catch(e){
+
+    }finally{
+      doRelease(connection);
+    }
   })
 });
 
 const doRelease = (connection) => {
-  connection.release(err => {
+  connection.close(err => {
     if(err){
       console.log(err.message);
     }

@@ -13,11 +13,15 @@
 .car_manager .car_list {position:relative; padding-top:67px; padding-bottom:161px; float:left; width:820px; height:100%; box-sizing:border-box; border-right:1px solid #E1E7EF}
 .car_list .search_line {position:absolute; left:0; top:0; width:100%; box-sizing:border-box; padding:8px;}
 .car_list .search_line .wp {position:relative; padding-left:124px; padding-right:60px; border-bottom:1px solid #415294; padding-bottom:8px}
+.car_list .search_line .wp.type2 {padding-left:494px;}
 .car_list .search_line select{position:absolute; left:0; top:0; width:124px; height:42px; font-size:16px; padding-left:10px;}
 .car_list .search_line input{height:40px; width:calc(100% - 20px); padding-bottom:2px; padding-left:14px; border:none; font-size:22px; }
 .car_list .search_line input::placeholder {color:#A0ABB4}
 .car_list .search_line button {cursor:pointer; position:absolute; right:0; top:0; width:60px; height:42px; background:url(../Image/carsearch_bu@2x.png) no-repeat 50% 50%; background-size:28px 28px; border:none; text-indent:-9999px; }
 
+.car_list .search_line .wp.type2 .tui-datepicker-input {height: 42px; border-radius: 5px; box-sizing: border-box;}
+.car_list .search_line .wp.type2>div>.item {position: absolute; left: 360px;}
+.car_list .search_line .wp.type2>div>div>.item {float:left; margin-right:10px}
 
 
 .car_list .grid {position:relative; padding:0 0 40px; height:100%; box-sizing:border-box;}
@@ -101,7 +105,7 @@
 .car_info .data_list .memo {border:1px solid #000; border-top:none;}
 .car_info .data_list .memo h5 {font-size:16px; font-weight:bold; padding:10px 0; text-align:center;}
 /* .car_info .data_list .memo textarea {padding:5px; width: calc(100% - 10px); border:none; border-radius:5px; height:170px;} */
-.car_info .data_list .memo textarea {resize: none; padding:5px; border:none; border-radius:5px; height:151px; width: calc(100% - 10px); }
+.car_info .data_list .memo textarea {resize: none; padding:5px; border:none; border-radius:5px; height:151px; width: calc(100% - 1px); }
 .car_info .complete_btn {position:absolute; bottom:0; left:0; height:90px; width:100%; padding:0 17px; box-sizing:border-box; }
 .car_info .complete_btn button {display:none; cursor:pointer; width:100%; height:62px; border-radius:5px; border:none; margin-top:10px; background:#0C1D33; color:#ffffff; font-size:22px;}
 .car_info .complete_btn button.on {display:block}
@@ -164,6 +168,8 @@
 .cctv .viewer {background:#000000; width:100%; height:100%; cursor:pointer; box-sizing:border-box;}
 .cctv .viewer.on {border:2px solid #2D7ADE}
 
+.cctv.rec {height:calc(50% - 8px);}
+.cctv.rec:last-child {height:calc(50% - 8px); margin-top:16px;}
 
 .cctv .controller {position:absolute; right:10px; bottom:20px;}
 .cctv .controller button {cursor:pointer; opacity:0.7; width:42px; height:42px; border-radius:30px; text-indent:-9999px; overflow:hidden; border:none; float:left; margin-right:5px}

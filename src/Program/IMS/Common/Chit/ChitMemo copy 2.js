@@ -7,7 +7,8 @@ import { gfo_getTextarea } from '../../../../Method/Component';
 function ChitMemo(props) {
   const [focus, setFocus] = useState(false);
   const textAreaRef = useRef();
-  const canvasRef = useRef();
+
+  let memoText;
   
   const value = useSelector((e) => {
     return e[props.reducer].DETAIL_SCALE;
@@ -19,16 +20,13 @@ function ChitMemo(props) {
     // if(props.reducer !== 'INSP_PROC_MAIN') return;
 
     // if(value.chit === 'N'){
-      gfo_getTextarea(props.pgm, 'chit_memo').setValue('');
-      let ctx = canvasRef.current.getContext("2d");
-      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      ctx.beginPath();
+      // gfo_getTextarea(props.pgm, 'chit_memo').setValue(''); 김경현
     // }
   }, [props.pgm, value])
 
   const changeMemo = (e) => {
     gfs_dispatch(props.reducer, 'CHIT_MEMO', {CHIT_MEMO: e.target.value});
-    drawTextBox(e.target.value, 4, 10, 305, 1.3)
+    memoText = e.target.value;
   }
 
   const limitLine = (e) => {
@@ -38,7 +36,6 @@ function ChitMemo(props) {
     for (var i = 0; i < lines.length; i++) 
     {
       if (lines[i].length <= spaces) continue;
-
       var j = 0;
 
       var space = spaces;
@@ -53,67 +50,38 @@ function ChitMemo(props) {
     }
 
     if(lines.length > maxRows){
-      e.target.style.color = 'black';
+      e.target.style.color = 'red';
       setTimeout(function(){
-        e.target.style.color = 'red';
+        e.target.style.color = '';
       },200);
     }    
 
     e.target.value = lines.slice(0, maxRows).join("\n");
-    drawTextBox(e.target.value, 4, 10, 305, 1.2)
-  }
-  
-  function drawTextBox(text, x, y, fieldWidth, spacing) {
-    let ctx = canvasRef.current.getContext("2d");
-    ctx.fillStyle = "red";  //<======= here
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    ctx.beginPath();
-    ctx.font = '17px sans serif';
-    var line = "";
-    var currentY = y;
-    ctx.textBaseline = "top";
-    for(var i=0; i<text.length; i++) {
-      var tempLine = line + text[i];
-      var tempWidth = ctx.measureText(tempLine).width;
-   
-      if (tempWidth < fieldWidth && text[i] !== '\n') {
-        line = tempLine;
-      }
-      else {
-        ctx.fillText(line, x, currentY);
-        if(text[i] !== '\n') line = text[i];
-        else line = "";
-        currentY += 17 * spacing;
-      }
-    }
-    ctx.fillText(line, x, currentY);
-    // ctx.rect(x, y, fieldWidth, currentY-y+fontSize*spacing);
-    ctx.stroke();
   }
 
   return (
     <>
+      {focus === true ? 
         <TextArea 
           ref={textAreaRef}
           pgm={props.pgm} 
           id={props.id} 
-          style={{display: focus === true ? 'block' : 'none', color:'red', fontSize:'18px'}}
-          rows={5} 
-          cols={30}
+          rows={7} 
+          cols={39}
           wrap='soft' 
           defaultValue='' 
           onChange={e => changeMemo(e)} 
-          // onKeyUp={e => limitLine(e)}
+          onKeyUp={e => limitLine(e)}
           onBlur={e => {
             setFocus(false)
           }}
         >
-        </TextArea> 
+        </TextArea> :
         <canvas 
-          ref={canvasRef}
-          style={{width:'100%', height: '156px', display: focus === true ? 'none' : 'block'}}
-          onClick={e => setFocus(true)}>
+          onClick={e => setFocus(true)}
+          style={{width:'100%', height: '156px'}}>
         </canvas> 
+      }
     </>
 
 

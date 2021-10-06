@@ -4,7 +4,7 @@ import ReactImageDtl from './RecImageDtl';
 function RecImage(props) { 
 
   return (
-    <div id={props.rec} className='cctv'>
+    <div id={props.rec} className='cctv rec'>
       <div className='viewer'>
         <div style={{width:'100%', height:'100%'}}>
           <ReactImageDtl 

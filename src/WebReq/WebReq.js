@@ -25,6 +25,54 @@ export function AITEST(Count, Result){
     })
 };
 
+export function ReRec(scaleNumb){
+  // const host = 'http://211.231.136.182:3001/YK';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/ReRec';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+    data: {
+      scaleNumb
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+};
+
+export function RecodingList(){
+  // const host = 'http://211.231.136.182:3001/YK';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/RecodingList';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
+    data: {
+      
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+};
+
 export function YK_WEB_REQ(addr){
   // const host = 'http://211.231.136.182:3001/YK';
   const host = 'http://ims.yksteel.co.kr:90/WebServer/YK';

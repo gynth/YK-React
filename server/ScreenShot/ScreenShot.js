@@ -84,8 +84,8 @@ router.post('/YK_Chit_YN', (req, res) => {
   const scaleNo = req.body.scaleNo;
   const folder = scaleNo.substring(0, 8);
 
-  if(fs.existsSync(`F:/IMS/Chit/${folder}/${scaleNo}.jpg`)){
-    // const readFile = fs.readFileSync(`F:/IMS/Chit/${folder}/${scaleNo}.jpg`);
+  if(fs.existsSync(`F:/IMS/scaleChit/${folder}/${scaleNo}.jpg`)){
+    // const readFile = fs.readFileSync(`F:/IMS/scaleChit/${folder}/${scaleNo}.jpg`);
     // const encode = Buffer.from(readFile).toString('base64');
     // res.end(encode);
     res.json('Y');
@@ -101,7 +101,7 @@ router.post('/YK_Chit_file_yn', (req, res) => {
   const filename = req.body.filename;
   const folder = filename.substring(0, 8);
 
-  if(!fs.existsSync(`F:/IMS/Chit/${folder}/${filename}`)){
+  if(!fs.existsSync(`F:/IMS/scaleChit/${folder}/${filename}`)){
     res.json('N');
   }else{
     res.json('Y');
@@ -121,14 +121,14 @@ router.post('/YK_Chit_Mobile', (req, res) => {
   if(!fs.existsSync(`F:/IMS`)){
     fs.mkdirSync(`F:/IMS`);
   }
-  if(!fs.existsSync(`F:/IMS/Chit`)){
-    fs.mkdirSync(`F:/IMS/Chit`);
+  if(!fs.existsSync(`F:/IMS/scaleChit`)){
+    fs.mkdirSync(`F:/IMS/scaleChit`);
   }
-  if(!fs.existsSync(`F:/IMS/Chit/${folder}`)){
-    fs.mkdirSync(`F:/IMS/Chit/${folder}`);
+  if(!fs.existsSync(`F:/IMS/scaleChit/${folder}`)){
+    fs.mkdirSync(`F:/IMS/scaleChit/${folder}`);
   }
 
-  if(!fs.existsSync(`F:/IMS/Chit/${folder}/${filename}`)){
+  if(!fs.existsSync(`F:/IMS/scaleChit/${folder}/${filename}`)){
     makeImgMobile(img, folder, filename).then(e => {
       res.json(e);
     });
@@ -146,11 +146,11 @@ router.post('/YK_Chit', (req, res) => {
   if(!fs.existsSync(`F:/IMS`)){
     fs.mkdirSync(`F:/IMS`);
   }
-  if(!fs.existsSync(`F:/IMS/Chit`)){
-    fs.mkdirSync(`F:/IMS/Chit`);
+  if(!fs.existsSync(`F:/IMS/scaleChit`)){
+    fs.mkdirSync(`F:/IMS/scaleChit`);
   }
-  if(!fs.existsSync(`F:/IMS/Chit/${folder}`)){
-    fs.mkdirSync(`F:/IMS/Chit/${folder}`);
+  if(!fs.existsSync(`F:/IMS/scaleChit/${folder}`)){
+    fs.mkdirSync(`F:/IMS/scaleChit/${folder}`);
   }
 
   // const root4 = `F:/Project/01.YK/Screenshot/20210805/test.png`;
@@ -162,10 +162,10 @@ router.post('/YK_Chit', (req, res) => {
 
 const makeImg = async(img, folder, filename) => {
 
-  const root = `F:/IMS/Chit/${folder}/${filename}_temp1.png`;
-  const root1 = `F:/IMS/Chit/${folder}/${filename}_temp2.png`;
-  const root2 = `F:/IMS/Chit/${folder}/${filename}_temp3.png`;
-  const root3 = `F:/IMS/Chit/${folder}/${filename}.jpg`;
+  const root = `F:/IMS/scaleChit/${folder}/${filename}_temp1.png`;
+  const root1 = `F:/IMS/scaleChit/${folder}/${filename}_temp2.png`;
+  const root2 = `F:/IMS/scaleChit/${folder}/${filename}_temp3.png`;
+  const root3 = `F:/IMS/scaleChit/${folder}/${filename}.jpg`;
 
   try{
     //1. temp1 생성
@@ -233,7 +233,7 @@ const makeImg = async(img, folder, filename) => {
 
 const makeImgMobile = async(img, folder, filename) => {
 
-  const root = `F:/IMS/Chit/${folder}/${filename}`;
+  const root = `F:/IMS/scaleChit/${folder}/${filename}`;
 
   try{
 
@@ -283,14 +283,21 @@ const makeImgMobile = async(img, folder, filename) => {
 router.post('/YK_Chit_DEL', (req, res) => {
   const filename = req.body.filename;
   const folder = filename.substring(0, 8);
+  const root = fs.readdirSync(`F:/IMS/scaleChit/${folder}`);
+  const fileCnt = root.filter(e => e.toString().indexOf(`${filename}_`) >= 0);
+  console.log(`F:/IMS/scaleChit/${folder}/${filename}.jpg`)
+  console.log(`F:/IMS/scaleChit/${folder}/${filename}_${fileCnt.length + 1}.jpg`)
+  fsPromises.rename(`F:/IMS/scaleChit/${folder}/${filename}.jpg`, `F:/IMS/scaleChit/${folder}/${filename}_${fileCnt.length + 1}.jpg`);
 
-  delImg(folder, filename).then(e => {
-    res.json(e);
-  });
+  res.json('Y');
+
+  // delImg(folder, filename).then(e => {
+  //   res.json(e);
+  // });
 }); 
 
 const delImg = async(folder, filename) => {
-  const root = `F:/IMS/Chit/${folder}/${filename}.jpg`;
+  const root = `F:/IMS/scaleChit/${folder}/${filename}.jpg`;
   try{
     await fsPromises.unlink(root);
 

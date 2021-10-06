@@ -9,8 +9,6 @@ function SideBarUserName(props) {
       return e['USER_REDUCER'].USER_NAM;
     }
   }, shallowEqual);
-  
-  console.log(user_nam)
 
   return (
     <span className="user">{user_nam}</span>

@@ -17,6 +17,7 @@ global.MILESTONE_TOKEN = '';
 global.MILESTONE_DEVICE = {};
 global.MILESTONE_TOKEN_TIME = '';
 global.MILESTONE_DATA = {};
+global.REC_SCALENUMB = [];
 
 app3001.use(express.json({
   limit: '100mb'
@@ -174,7 +175,7 @@ chitImgServer.on('request',
       const folder = url.substring(0, 8);
       const file = url.substring(0, url.indexOf('.jpg') + 4);
       console.log(file);
-      fs.readFile(`F:/IMS/Chit/${folder}/${file}`,              //파일 읽기
+      fs.readFile(`F:/IMS/scaleChit/${folder}/${file}`,              //파일 읽기
         function (err, data)
         {
           if(err === null){

@@ -11,16 +11,20 @@ export const gfg_getGrid = (pgm, gridId) => {
   }
 }
 
-export const gfg_appendRow = (grid, row, value, focus) => {
+export const gfg_appendRow = (grid, row, value, focusColumn, focus) => {
   if(grid === undefined || grid === null) return;
   if(row < 0) return;
 
-  grid.appendRow(value, {at: row, focus: true})
-
-  if(focus === undefined || focus === null || focus === '')
-    grid.focusAt(row, 0, true)
-  else
-    grid.focus(row, focus, true);
+  if(focus){
+    grid.appendRow(value, {at: row, focus: true})
+  
+    if(focusColumn === undefined || focusColumn === null || focusColumn === '')
+      grid.focusAt(row, 0, true)
+    else
+      grid.focus(row, focusColumn, true);
+  }else{
+    grid.appendRow(value, {at: row})
+  }
 }
 
 export const gfg_getModyfiedRow = (grid) => {

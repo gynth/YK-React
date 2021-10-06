@@ -10,7 +10,6 @@ import { gfg_appendRow, gfg_getGrid, gfg_setSelectRow } from '../../../Method/Gr
 import { getDynamicSql_Oracle, getSp_Oracle } from '../../../db/Oracle/Oracle';
 
 import Grid from '../../../Component/Grid/Grid';
-import Layout from '../../../Component/Layout/Layout';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
@@ -30,10 +29,9 @@ import RainInfo from './RainInfo';
 
 import GifPlayer from 'react-gif-player';
 
-import { YK_WEB_REQ, ReRec, RecodingList } from '../../../WebReq/WebReq';
+import { YK_WEB_REQ, YK_WEB_REQ_DIRECT, ReRec } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import { throttle } from 'lodash';
-import { setSessionCookie } from '../../../Cookies';
 //#endregion
 
 class INSP_PROC extends Component {
@@ -57,8 +55,7 @@ class INSP_PROC extends Component {
     }else if(this.device === ''){
       alert('마일스톤 서버에 접속할 수 없습니다.');
     }else{
-      const areaTp = gfs_getStoreValue('USER_REDUCER', 'AREA_TP');
-      const select = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT_EACH', [{AREA_TP:areaTp}]);
+      const select = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT_EACH', [{AREA_TP:'E001'}]);
       if(select.data === undefined){
         alert('설정된 카메라가 없습니다.');
         return;
@@ -226,16 +223,12 @@ class INSP_PROC extends Component {
   //#endregion
 
   //#region 녹화제어
-  startRec = async () => {
+  startRec = async (Guid, Name, scaleNo, seq) => {
     
     const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-    const camera_no = gfs_getStoreValue('USER_REDUCER', 'CAMERA_NO');
+
     if(scaleNumb === ''){
       alert('선택된 계근번호가 없습니다.');
-      return;
-    }
-    if(camera_no === '' || camera_no === null){
-      alert('설정된 차량인식 카메라가 없습니다.');
       return;
     }
 
@@ -276,224 +269,75 @@ class INSP_PROC extends Component {
     if(result.data.SUCCESS === 'N'){
       if(result.data.MSG_CODE === '1'){
         if(window.confirm(result.data.MSG_TEXT) === true){
-          const recYn = await ReRec(scaleNumb);
-          //0. 파일명은 변경된 상태
-          if(recYn.data.Response === 'OK'){
-            //1. DB에 녹화시작으로 저장
-            let param = [];
-            param.push({
-              sp   : `begin 
-                        SP_ZM_IMS_REC(
-                          :p_RowStatus,
-                          :p_scaleNumb,
-                          :p_seq,
-                          :p_cameraNo,
-                          :p_cameraDevice,
-                          :p_cameraName,
-                          :p_UserId,
-                          
-                          :p_select,
-                          :p_SUCCESS,
-                          :p_MSG_CODE,
-                          :p_MSG_TEXT,
-                          :p_COL_NAM
-                        );
-                      end;
-                      `,
-              data : {
-                p_RowStatus    : 'I2',
-                p_scaleNumb    : scaleNumb,
-                p_seq          : 0,
-                p_cameraNo     : camera_no,
-                p_cameraDevice : '',
-                p_cameraName   : '',
-                p_UserId       : ''
-              },
-              errSeq: 0
-            })
-            
-            const result = await getSp_Oracle(param);
-
-            if(result.data.SUCCESS === 'N'){
-              alert('수동녹화 시작에 실패했습니다.');
-            }
-          }
+          ReRec(scaleNumb).then(e => {
+            console.log(e)
+          })
         }else{
           return;
         }
       }else{
-        if(window.confirm(result.data.MSG_TEXT) === true){
-          //1. DB에 녹화시작으로 저장
-          let param = [];
-          param.push({
-            sp   : `begin 
-                      SP_ZM_IMS_REC(
-                        :p_RowStatus,
-                        :p_scaleNumb,
-                        :p_seq,
-                        :p_cameraNo,
-                        :p_cameraDevice,
-                        :p_cameraName,
-                        :p_UserId,
-                        
-                        :p_select,
-                        :p_SUCCESS,
-                        :p_MSG_CODE,
-                        :p_MSG_TEXT,
-                        :p_COL_NAM
-                      );
-                    end;
-                    `,
-            data : {
-              p_RowStatus    : 'I3',
-              p_scaleNumb    : scaleNumb,
-              p_seq          : 0,
-              p_cameraNo     : camera_no,
-              p_cameraDevice : '',
-              p_cameraName   : '',
-              p_UserId       : ''
-            },
-            errSeq: 0
-          })
-          
-          const result = await getSp_Oracle(param);
 
-          if(result.data.SUCCESS === 'N'){
-            alert('수동녹화 시작에 실패했습니다.');
-          }
-        }else{
-          return;
-        }
       }
-    }else{
-        //1. DB에 녹화시작으로 저장
-        let param = [];
-        param.push({
-          sp   : `begin 
-                    SP_ZM_IMS_REC(
-                      :p_RowStatus,
-                      :p_scaleNumb,
-                      :p_seq,
-                      :p_cameraNo,
-                      :p_cameraDevice,
-                      :p_cameraName,
-                      :p_UserId,
-                      
-                      :p_select,
-                      :p_SUCCESS,
-                      :p_MSG_CODE,
-                      :p_MSG_TEXT,
-                      :p_COL_NAM
-                    );
-                  end;
-                  `,
-          data : {
-            p_RowStatus    : 'I2',
-            p_scaleNumb    : scaleNumb,
-            p_seq          : 0,
-            p_cameraNo     : camera_no,
-            p_cameraDevice : '',
-            p_cameraName   : '',
-            p_UserId       : ''
-          },
-          errSeq: 0
-        })
-        
-        const result = await getSp_Oracle(param);
-
-        if(result.data.SUCCESS === 'N'){
-          alert('수동녹화 시작에 실패했습니다.');
-        }
     }
+
+    // //녹화중인 내용이 있는지 확인.
+    
+    // const grid = gfg_getGrid(this.props.pgm, 'main10');
+    // const gridData = grid.getData().find(e => e.scaleNumb === scaleNumb);
+    // const rowKey = gridData.rowKey;
+
+    // grid.setValue(rowKey, 'rec', '1');
+
+    // const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{
+    //   scaleNumb:scaleNo,
+    //   seq
+    // }]);
+    // if(select.data.rows.length === 0){
+
+    //   const insert = await this.callOracle('Common/Common', 'ZM_IMS_REC_INSERT', [{
+    //     scaleNumb: scaleNo,
+    //     seq,
+    //     Guid,
+    //     Name
+    //   }]);
+
+    //   if(insert.data.rowsAffected === 0){
+    //     alert('녹화시작에 실패 했습니다.');
+    //   }
+    // }else{
+    //   console.log('이미 녹화중 입니다.');
+    // }
   }
 
-  stopRec = async () => {
-    const scaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-    const camera_no = gfs_getStoreValue('USER_REDUCER', 'CAMERA_NO');
-    if(scaleNumb === ''){
-      alert('선택된 계근번호가 없습니다.');
-      return;
-    }
-    if(camera_no === '' || camera_no === null){
-      alert('설정된 차량인식 카메라가 없습니다.');
-      return;
-    }
+  stopRec = async (Guid, Name, camera_ip, scaleNo, seq) => {
+    const now = await gfc_now();
+    const select = await this.callOracle('Common/Common', 'ZM_IMS_REC_SELECT', [{
+      scaleNumb:scaleNo,
+      seq
+    }]);
 
-    //기존저장된 파일있는지 확인.
-    let param = [];
-    param.push({
-      sp   : `begin 
-                SP_ZM_IMS_REC(
-                  :p_RowStatus,
-                  :p_scaleNumb,
-                  :p_seq,
-                  :p_cameraNo,
-                  :p_cameraDevice,
-                  :p_cameraName,
-                  :p_UserId,
-                  
-                  :p_select,
-                  :p_SUCCESS,
-                  :p_MSG_CODE,
-                  :p_MSG_TEXT,
-                  :p_COL_NAM
-                );
-              end;
-              `,
-      data : {
-        p_RowStatus    : 'R4',
-        p_scaleNumb    : scaleNumb,
-        p_seq          : 0,
-        p_cameraNo     : '',
-        p_cameraDevice : '',
-        p_cameraName   : '',
-        p_UserId       : ''
-      },
-      errSeq: 0
-    })
-    
-    const result = await getSp_Oracle(param);
-    if(result.data.SUCCESS === 'N'){
-      alert('녹화중인 계량번호가 아닙니다.');
-      return;
-    }else{
+    if(select.data.rows.length > 0){
+      const insert = await this.callOracle('Common/Common', 'ZM_IMS_VIDEO_INSERT', [{
+        scaleNumb: scaleNo,
+        seq,
+        rec_fr_dttm: select.data.rows[0][2],
+        camera_ip,
+        Guid,
+        Name
+      }]);
 
-      let param = [];
-      param.push({
-        sp   : `begin 
-                  SP_ZM_IMS_REC(
-                    :p_RowStatus,
-                    :p_scaleNumb,
-                    :p_seq,
-                    :p_cameraNo,
-                    :p_cameraDevice,
-                    :p_cameraName,
-                    :p_UserId,
-                    
-                    :p_select,
-                    :p_SUCCESS,
-                    :p_MSG_CODE,
-                    :p_MSG_TEXT,
-                    :p_COL_NAM
-                  );
-                end;
-                `,
-        data : {
-          p_RowStatus    : 'D3',
-          p_scaleNumb    : scaleNumb,
-          p_seq          : 0,
-          p_cameraNo     : '',
-          p_cameraDevice : '',
-          p_cameraName   : '',
-          p_UserId       : ''
-        },
-        errSeq: 0
-      })
-      
-      const result = await getSp_Oracle(param);
+      if(insert.data.rowsAffected === 0){
+        alert('녹화저장에 실패 했습니다. insert');
+      }
 
-      if(result.data.SUCCESS === 'N'){
-        alert('수동녹화 중지에 실패했습니다.');
+      const update = await this.callOracle('Common/Common', 'ZM_IMS_REC_UPDATE', [{
+        scaleNumb: scaleNo,
+        seq,
+        rec_to_dttm: now
+      }]);
+
+      if(update.data.rowsAffected === 0){
+        alert('녹화저장에 실패 했습니다. update');
       }
     }
   }
@@ -863,21 +707,13 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_header.jsp').then(e => {
       const header = e.data.dataSend;
       if(header){
-        if(header[0].rCar !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
-
-        if(header[0].eCar !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
-
-        if(header[0].eKg !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
       }
     })
   }
@@ -887,11 +723,9 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_pass.jsp').then(e => {
       const header2 = e.data.dataSend;
       if(header2){
-        if(header2.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
+        gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
       }
     })
 
@@ -899,11 +733,9 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_drive.jsp').then(e => {
       const header3 = e.data.dataSend;
       if(header3){
-        if(header3.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
+        gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
       }
     })
 
@@ -911,11 +743,9 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_drive_wait.jsp').then(e => {
       const header4 = e.data.dataSend;
       if(header4){
-        if(header4.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: header4.length});
+        gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: header4.length});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: 0});
       }
     })
   }
@@ -924,56 +754,80 @@ class INSP_PROC extends Component {
 
     const grid = gfg_getGrid(this.props.pgm, 'main10');
 
-    YK_WEB_REQ('tally_mstr_wait.jsp').then(e => {
+    YK_WEB_REQ_DIRECT('http://tally.yksteel.co.kr/tally_mstr_wait.jsp').then(e => {
+
+    // YK_WEB_REQ('tally_mstr_wait.jsp').then(e => {
       const main = e.data.dataSend;
 
-      if(main){
-        if(main.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
+      //김경현
+      if(true){
+        // gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length}); 김경현
   
         const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
         const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     
-        let data = main.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
+        //김경현
+        // let data = main.filter(e => {
+        //   if(search_tp !== null && search_tp !== ''){
+        //     //계근번호
+        //     if(search_tp === '1'){
+        //       if(e.scaleNumb.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
+        //     //차량번호
+        //     else if(search_tp === '2'){
+        //       if(e.carNumb.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
+        //     //사전등급
+        //     else if(search_tp === '3'){
+        //       if(e.itemGrade.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
+        //     //업체
+        //     else if(search_tp === '4'){
+        //       if(e.vendor.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
             
-          }else{
-            return true;
-          }
-        })
+        //   }else{
+        //     return true;
+        //   }
+        // })
 
+        //김경현
+        let data = [{
+          scaleNumb: '202110010091',
+          carNumb  : '차차차',
+          itemGrade: '사전등급',
+          date     : '2021-10-01 09:00:00',
+          vendor   : '우남철제'
+        },{
+          scaleNumb: '202110010095',
+          carNumb  : '차차차',
+          itemGrade: '사전등급',
+          date     : '2021-10-01 09:00:00',
+          vendor   : '우남철제'
+        },{
+          scaleNumb: '202110010080',
+          carNumb  : '차차차',
+          itemGrade: '사전등급',
+          date     : '2021-10-01 09:00:00',
+          vendor   : '우남철제'
+        }]
+      
         if(data.length > 0){
           
           //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
@@ -982,7 +836,6 @@ class INSP_PROC extends Component {
 
             const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
             if(!oldData){
-              console.log('추가됨')
               gfg_appendRow(grid, grid.getRowCount(), {
                 scaleNumb,
                 carNumb: data[i].carNumb,
@@ -991,6 +844,8 @@ class INSP_PROC extends Component {
                 vendor: data[i].vendor,
                 rec: '0'
               }, 'scaleNumb', false);
+
+              grid.resetOriginData()
             }
           }
 
@@ -1012,41 +867,15 @@ class INSP_PROC extends Component {
               }
             }
           }
-
-          RecodingList().then(recScaleNumb => {
-            for(let i = 0; i < recScaleNumb.data.Response.length; i++){
-
-              const data = grid.getData().find(e => e.scaleNumb === recScaleNumb.data.Response[i])
-              if(data){
-                //녹화 on만 설정
-                grid.setValue(data.rowKey, 'rec', '1');
-              }
-            }
-
-            const recGrid = grid.getData().filter(e => e.rec === '1');
-            for(let i = 0; i < recGrid.length; i++){
-              const data = recScaleNumb.data.Response.find(e => e === recGrid[i].scaleNumb);
-              if(!data){
-                //녹화 off만 설정
-                grid.setValue(recGrid[i].rowKey, 'rec', '0');
-              }
-            }
-          })
     
-          if(data.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
-            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+          gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
         }else{
           grid.clear();
-          if(gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL') !== 0)
-            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+          gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
         }
-        
-        grid.resetOriginData();
-        grid.restore();
       }else{
         grid.clear();
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
       }
     })
   }
@@ -1276,7 +1105,6 @@ class INSP_PROC extends Component {
     gfo_getInput(this.props.pgm, 'disp_load_area_addr').setValue('');   //주소
 
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
-    setSessionCookie('DETAIL_SCALE', e.scaleNumb);
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
@@ -1358,8 +1186,6 @@ class INSP_PROC extends Component {
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
         <div className='car_manager'>
-
-          
           <div className='car_list'>
             <div className='search_line'>
               <div className='wp'>
@@ -1738,8 +1564,6 @@ class INSP_PROC extends Component {
             
             <CompleteBtn pgm={this.props.pgm}/>
           </div>
-
-          
           <div className='cctv_viewer'>
             <h4>실시간 CCTV</h4>
             <div className='manual_record'>
@@ -1749,11 +1573,7 @@ class INSP_PROC extends Component {
                 className='record'
                 onClick={e => this.startRec()}
               >녹화</button>
-              <button 
-                type='button' 
-                className='stop on'
-                onClick={e => this.stopRec()}
-              >정지</button>
+              <button type='button' className='stop on'>정지</button>
             </div>
             <RainInfo />
             <div className='cctv_list' 

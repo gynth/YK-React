@@ -248,12 +248,13 @@ class COMM extends Component {
       const grid = gfg_getGrid(this.props.pgm, result.data.grid);
       gfg_setSelectRow(grid, result.data.grid === 'main10' ? 'COMM_CD' : 'COMM_DTL_CD', result.data.applyRow);
 
-      gfc_hideMask();
+    
+      this.Retrieve();
 
       return;
+    }else{
+      this.Retrieve();
     }
-    
-    this.Retrieve();
   }
 
   Insert = () => {

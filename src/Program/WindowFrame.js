@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
 import { useSelector } from 'react-redux';
 import { gfs_getStoreValue, gfs_dispatch } from '../Method/Store';
 import PropTypes from 'prop-types';
 import './WindowFrame.css';
 import { jsonMaxValue, jsonRtn } from '../JSON/jsonControl';
+import { getDynamicSql_Oracle } from '../db/Oracle/Oracle';
+import { gfc_set_oracle_column } from '../Method/Comm';
+
 //#region 이벤트 정의
 const onWindowClick = (programId, programNam) => {
   
@@ -114,33 +117,62 @@ const onDragStop = (x, y, width, programId, programNam) => {
 };
 //#endregion
 
-const applyWindow = (programId, programNam) => {
+const getMenu = async(programId, programNam) => {
+  
+}
+
+const applyWindow = async (programId, programNam) => {
   // if(programId === 'ED000') return <PgmTest pgm={programId} nam={programNam}/>
   // else if (programId === 'ED010') return <PgmTest2 pgm={programId} nam={programNam}/>
   // else if (programId === 'ED050') return <Menu pgm={programId} nam={programNam}/>
 
-  if(programId === 'COMM'){
-    const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
-    return <pgm.default pgm={programId} nam={programNam} />
-  }else if(programId === 'MENU'){
-    const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
-    return <pgm.default pgm={programId} nam={programNam} />
-  }else if(programId === 'AUTH'){
-    const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
-    return <pgm.default pgm={programId} nam={programNam} />
-  }else if(programId === 'USER'){
-    const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+  let result = await getDynamicSql_Oracle(
+    'Common/Common',
+    'MENU_AUTH',
+    [{programId}]
+  ); 
+
+  let data = gfc_set_oracle_column(result);
+  if(data.length > 0){
+    const pgm = require(`../Program/${data[0].PGM_ROOT}`);
     return <pgm.default pgm={programId} nam={programNam} />
   }else{
-    const pgm = require(`../Program/IMS/${programId}/${programId}.js`);
-  
-    return <pgm.default pgm={programId} nam={programNam} />
+    return null;
   }
+  
+
+  // if(programId === 'COMM'){
+  //   const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+  //   return <pgm.default pgm={programId} nam={programNam} />
+  // }else if(programId === 'MENU'){
+  //   const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+  //   return <pgm.default pgm={programId} nam={programNam} />
+  // }else if(programId === 'AUTH'){
+  //   const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+  //   return <pgm.default pgm={programId} nam={programNam} />
+  // }else if(programId === 'USER'){
+  //   const pgm = require(`../Program/COMM/${programId}/${programId}.js`);
+  //   return <pgm.default pgm={programId} nam={programNam} />
+  // }else{
+  //   const pgm = require(`../Program/IMS/${programId}/${programId}.js`);
+  
+  //   return <pgm.default pgm={programId} nam={programNam} />
+  // }
 }
 
 const WindowFrame = (props) => {
-  const window = useMemo(() => applyWindow(props.programId, props.programNam), [props.programId, props.programNam])
+  const [window, setWindow] = useState(null);
+  // const window = useMemo(() => applyWindow(props.programId, props.programNam), [props.programId, props.programNam])
 
+  useEffect(() => {
+    applyWindow(props.programId, props.programNam).then(e => {
+      setWindow(e);
+    })
+  }, [props.programId, props.programNam])
+
+  if(window !== null){
+    
+  }
   const windowState = useSelector((e) => e.WINDOWFRAME_REDUCER.windowState, (p, n) => {
     // return JSON.stringify(p) === JSON.stringify(n);
     const before = jsonRtn(n, 'programId', props.programId);
@@ -159,12 +191,14 @@ const WindowFrame = (props) => {
 
     return result
   });
+
   const activeWindow = useSelector((e) => e.WINDOWFRAME_REDUCER.activeWindow, (p, n) => {
     return p.programId === n.programId;
   });
+  
   const thisValue = jsonRtn(windowState, 'programId', props.programId);
 
-  if(thisValue !== undefined){
+  if(thisValue !== undefined && window !== null){
     const windowWidth  = thisValue[0]['windowWidth'];
     const windowHeight = thisValue[0]['windowHeight'];
     const x  = thisValue[0]['X'];
@@ -233,7 +267,7 @@ const WindowFrame = (props) => {
           {/* <div className='win_body' style={{position:'relative', display: ((resizing || dragging) && windowWidth !== '100%') && 'none'}}> */}
           <div className='win_body' style={{display: ((resizing || dragging) && windowWidth !== '100%') && 'none'}}>
             {/* <PgmTest pgm={props.programId} nam={props.programNam}/> */}
-            {window}
+            {window !== null && window}
           </div>
         </div>
         

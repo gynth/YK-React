@@ -83,10 +83,9 @@ const CompleteBtn = (props) => {
   }
   //#endregion
 
-  return (
-    <div className='complete_btn'>
-      <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>검수확정</span></button>
-      <button type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>검수확정</span></button>
+  return (            
+    <div className="complete_btn">
+      <button onClick={() => onProcess()} type="button" style={{display:'block'}}><span>검수확정</span></button>
     </div>
   );
 }

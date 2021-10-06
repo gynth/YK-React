@@ -511,6 +511,23 @@ class AUTH extends Component {
                                   width : 250,
                                   readOnly: true,
                                   align : 'left',
+                                }),   
+                                columnCombobox({
+                                  name: 'AUT_TP', 
+                                  header: '권한그룹',
+                                  value   : 'COMM_DTL_CD',
+                                  display : 'COMM_DTL_NAM',
+                                  width   : 150, 
+                                  readOnly: false,
+                                  oracleData : getDynamicSql_Oracle(
+                                    'COMM/COMM',
+                                    'ZM_IMS_CODE_SELECT',
+                                    [{COMM_CD: '2'}]),
+                                  editor: {
+                                    value   : 'COMM_DTL_CD',
+                                    display : 'COMM_DTL_NAM',
+                                    emptyRow: true
+                                  }
                                 })
                               ]}
                         />
@@ -607,14 +624,14 @@ class AUTH extends Component {
                               align : 'center',
                               type: 'checkbox'
                             }),   
-                            columnCheckbox({
-                              name: 'PTZAUT_YN',
-                              header: 'PTZ',
-                              width : 50,
-                              readOnly: true,
-                              align : 'center',
-                              type: 'checkbox'
-                            }),
+                            // columnCheckbox({
+                            //   name: 'PTZAUT_YN',
+                            //   header: 'PTZ',
+                            //   width : 50,
+                            //   readOnly: true,
+                            //   align : 'center',
+                            //   type: 'checkbox'
+                            // }),
                           ]}
                     />
                   </Layout>

@@ -929,7 +929,7 @@ class INSP_PROC extends Component {
       >
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
         <div className='car_manager'>
-        <div className='car_list'>
+        <div className='car_list' style={{width:'100%'}}>
           <div className='search_line'>
             <div className='wp'>
               <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>

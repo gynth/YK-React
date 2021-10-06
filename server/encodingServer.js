@@ -121,7 +121,6 @@ const OracleServerSP = (param) => {
     })
 }
 
-
 setInterval(async() => {
   let param = [];
   param.push({
@@ -160,12 +159,13 @@ setInterval(async() => {
     const ROWS = select.data.ROWS;
     for(let i = 0; i < ROWS.length; i++){
       const scaleNumb   = ROWS[i].SCALENUMB;
+
       const seq         = ROWS[i].SEQ;
       const rec_fr_dttm = moment(ROWS[i].REC_FR_DTTM).format('yyyy-MM-DD HH:mm:ss');
       const rec_to_dttm = moment(ROWS[i].REC_TO_DTTM).format('yyyy-MM-DD HH:mm:ss');
       const Guid        = ROWS[i].CAMERA_GUID;
       const Name        = ROWS[i].CAMERA_NAME;
- 
+  
       //설정된 메서드가 없으면 생성.
       if(global.MILESTONE_REPLAY[Guid] === undefined){
         let Connect = edge.func({
@@ -221,18 +221,138 @@ setInterval(async() => {
           OracleServerSP(param2)
             .then(e => {
               console.log(`${scaleNumb} : 영상녹화 저장에 성공했습니다.`);
-              global.MILESTONE_REPLAY[Guid].recYn = 'N';
             }).catch(err => {
               console.log('영상녹화 데이터 삭제에 실패했습니다.');
             })
         }else {
           console.log('영상녹화 파일생성에 실패 했습니다.');
+
+          let param2 = [];
+          param2.push({
+            sp   : `begin 
+                      SP_ZM_IMS_REC(
+                        :p_RowStatus,
+                        :p_scaleNumb,
+                        :p_seq,
+                        :p_cameraNo,
+                        :p_cameraDevice,
+                        :p_cameraName,
+                        :p_UserId,
+                        
+                        :p_select,
+                        :p_SUCCESS,
+                        :p_MSG_CODE,
+                        :p_MSG_TEXT,
+                        :p_COL_NAM
+                      );
+                    end;
+                    `,
+            data : {
+              p_RowStatus    : 'D2',
+              p_scaleNumb    : scaleNumb,
+              p_seq          : seq,
+              p_cameraNo     : '',
+              p_cameraDevice : '',
+              p_cameraName   : '',
+              p_UserId       : 'Encoding'
+            },
+            errSeq: 0
+          })
+        
+          OracleServerSP(param2)
+            .then(e => {
+              console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
+            }).catch(err => {
+              console.log('영상녹화실패 삭제에 실패했습니다.');
+            })
         }
       })
     }
   }
 }, 5000);
 
+
+let REC_SCALENUMB = [];
+setInterval(async() => {
+  let param = [];
+  param.push({
+    sp   : `begin 
+              SP_ZM_IMS_REC(
+                :p_RowStatus,
+                :p_scaleNumb,
+                :p_seq,
+                :p_cameraNo,
+                :p_cameraDevice,
+                :p_cameraName,
+                :p_UserId,
+                
+                :p_select,
+                :p_SUCCESS,
+                :p_MSG_CODE,
+                :p_MSG_TEXT,
+                :p_COL_NAM
+              );
+            end;
+            `,
+    data : {
+      p_RowStatus    : 'R3',
+      p_scaleNumb    : '',
+      p_seq          : 0,
+      p_cameraNo     : '',
+      p_cameraDevice : '',
+      p_cameraName   : '',
+      p_UserId       : 'Encoding'
+    },
+    errSeq: 0
+  })
+
+  const select = await OracleServerSP(param);
+  if(select.data.SUCCESS === 'Y'){
+    
+    const ROWS = select.data.ROWS;
+    for(let i = 0; i < ROWS.length; i++){
+      const scaleNumb = ROWS[i].SCALENUMB;
+      const oldData = REC_SCALENUMB.find(e => e === scaleNumb);
+      if(!oldData){
+        REC_SCALENUMB.push(scaleNumb);
+      }
+    }
+
+    for(let i = 0; i < REC_SCALENUMB.length; i++){
+      const scaleNumb = REC_SCALENUMB[i];
+      const newData = ROWS.find(e => e.SCALENUMB === scaleNumb);
+
+      if(!newData){
+        REC_SCALENUMB = REC_SCALENUMB.filter(e => e !== scaleNumb);
+      }
+    }
+  }else{
+    REC_SCALENUMB = [];
+  }
+
+  const host = 'http://10.10.10.136:3001/Ai/GetRecodingList';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      REC_SCALENUMB
+    } ,
+    timeout: 10000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}, 5000);
 
 console.log('Encoding Server Start');
 

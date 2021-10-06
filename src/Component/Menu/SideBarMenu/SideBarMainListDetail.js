@@ -1,13 +1,42 @@
 import React, { useEffect, useState } from 'react';
 // import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql.js';
+import { gfc_set_oracle_column } from '../../../Method/Comm';
+import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 
 import Component from './SideBarMainListDetailComponent';
+import { gfs_getStoreValue } from '../../../Method/Store';
 
 const SideBarMainListDetail = (props) => {
+  const [mainMenu, setMainMenu] = useState([]);
 
   const MENU_ID = props.MENU_ID;
-  const [list, setList] = useState([]);
   
+  const MENU_2 = async() => {
+    let result = await getDynamicSql_Oracle(
+      'Common/Common',
+      'MENU_2',
+      [{menu_grp: MENU_ID}]
+    ); 
+
+    let menu = [];
+    let data = gfc_set_oracle_column(result);
+    let auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+
+    for(let i = 0; i < data.length; i++){
+      const eachAuth = auth.find(e => e.MENU_ID === data[i].MENU_ID)
+      if(eachAuth.PGMAUT_YN === 'Y'){
+        menu.push(
+          <Component key={data[i].MENU_ID} 
+                      MENU_ID={data[i].MENU_ID} 
+                      MENU_NAM={data[i].MENU_NAM}>
+          </Component>
+        )
+      }
+    }
+
+    setMainMenu(menu);
+  }
+
   useEffect(() => {
     // if(MENU_ID !== ''){
     //   getDynamicSql_Mysql(
@@ -20,76 +49,18 @@ const SideBarMainListDetail = (props) => {
     //     e => {setList(e.data.data)}
     //   )
     // }
-    if(MENU_ID === 'INSP'){
-      setList(
-        [{
-          MENU_ID : 'INSP_PROC',
-          MENU_NAM: '검수진행'
-        },{
-          MENU_ID : 'INSP_HIST',
-          MENU_NAM: '검수이력'
-        },{
-          MENU_ID : 'SHIP_PROC',
-          MENU_NAM: '해상운송건'
-        }]
-      )
-    }
-    else if(MENU_ID === 'DISP'){
-      setList(
-        [{
-          MENU_ID : 'DISP_PROC',
-          MENU_NAM: '출차대기'
-        }]
-      )
-    }
-    else if(MENU_ID === 'ENTR'){
-      setList(
-        [{
-          MENU_ID : 'ENTR_PROC',
-          MENU_NAM: '입차대기'
-        }]
-      )
-    }
-    else if(MENU_ID === 'CFRM'){
-      setList(
-        [{
-          MENU_ID : 'INSP_CFRM',
-          MENU_NAM: '검수확정'
-        },{
-          MENU_ID : 'INSP_CANC',
-          MENU_NAM: '검수취소'
-        }]
-      )
-    }
-    else if(MENU_ID === 'COMM'){
-      setList(
-        [{
-          MENU_ID : 'COMM',
-          MENU_NAM: '공통코드'
-        },{
-          MENU_ID : 'MENU',
-          MENU_NAM: '프로그램메뉴'
-        },{
-          MENU_ID : 'AUTH',
-          MENU_NAM: '권한관리'
-        },{
-          MENU_ID : 'CAMR_SETTING',
-          MENU_NAM: '카메라세팅'
-        },{
-          MENU_ID : 'USER',
-          MENU_NAM: '사용자관리'
-        }]
-      )
-    }
+    MENU_2();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [MENU_ID])
 
   return (
     <ul>
-      {
+      { mainMenu }
+      {/* {
         list.map((e) => <Component key={e.MENU_ID} 
                                    MENU_ID={e.MENU_ID} 
                                    MENU_NAM={e.MENU_NAM}></Component>)
-      }
+      } */}
     </ul>
   );
 };

@@ -863,21 +863,13 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_header.jsp').then(e => {
       const header = e.data.dataSend;
       if(header){
-        if(header[0].rCar !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
-
-        if(header[0].eCar !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
-
-        if(header[0].eKg !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
       }
     })
   }
@@ -887,11 +879,9 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_pass.jsp').then(e => {
       const header2 = e.data.dataSend;
       if(header2){
-        if(header2.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
+        gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
       }
     })
 
@@ -899,11 +889,9 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_drive.jsp').then(e => {
       const header3 = e.data.dataSend;
       if(header3){
-        if(header3.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
+        gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
       }
     })
 
@@ -911,11 +899,9 @@ class INSP_PROC extends Component {
     YK_WEB_REQ('tally_mstr_drive_wait.jsp').then(e => {
       const header4 = e.data.dataSend;
       if(header4){
-        if(header4.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: header4.length});
+        gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: header4.length});
       }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: 0});
+        gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: 0});
       }
     })
   }
@@ -925,54 +911,77 @@ class INSP_PROC extends Component {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
 
     YK_WEB_REQ('tally_mstr_wait.jsp').then(e => {
-      const main = e.data.dataSend;
+      // const main = e.data.dataSend;//김경현
 
-      if(main){
-        if(main.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
+      // if(main){ //김경현
+        // gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});//김경현
   
         const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
         const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     
-        let data = main.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
+        //김경현
+        // let data = main.filter(e => {
+        //   if(search_tp !== null && search_tp !== ''){
+        //     //계근번호
+        //     if(search_tp === '1'){
+        //       if(e.scaleNumb.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
+        //     //차량번호
+        //     else if(search_tp === '2'){
+        //       if(e.carNumb.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
+        //     //사전등급
+        //     else if(search_tp === '3'){
+        //       if(e.itemGrade.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
+        //     //업체
+        //     else if(search_tp === '4'){
+        //       if(e.vendor.indexOf(search_txt) >= 0){
+        //         return true;
+        //       }else{
+        //         return false;
+        //       }
+        //     }
             
-          }else{
-            return true;
-          }
-        })
+        //   }else{
+        //     return true;
+        //   }
+        // })
+
+        const data = [{
+          scaleNumb: '202109010001',
+          carNumb: '68무6308',
+          itemGrade: '등1',
+          date: '2021-09-01 09:00:00',
+          vendor: '양산',
+          rec: '0'
+        },{
+          scaleNumb: '202109010002',
+          carNumb: '68무6308',
+          itemGrade: '등1',
+          date: '2021-09-01 09:00:00',
+          vendor: '양산',
+          rec: '0'
+        },{
+          scaleNumb: '202109010003',
+          carNumb: '68무6308',
+          itemGrade: '등1',
+          date: '2021-09-01 09:00:00',
+          vendor: '양산',
+          rec: '0'
+        }]
 
         if(data.length > 0){
           
@@ -982,7 +991,6 @@ class INSP_PROC extends Component {
 
             const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
             if(!oldData){
-              console.log('추가됨')
               gfg_appendRow(grid, grid.getRowCount(), {
                 scaleNumb,
                 carNumb: data[i].carNumb,
@@ -991,6 +999,8 @@ class INSP_PROC extends Component {
                 vendor: data[i].vendor,
                 rec: '0'
               }, 'scaleNumb', false);
+
+              grid.resetOriginData()
             }
           }
 
@@ -1033,21 +1043,16 @@ class INSP_PROC extends Component {
             }
           })
     
-          if(data.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
-            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+          gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
         }else{
           grid.clear();
-          if(gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL') !== 0)
-            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+          gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
         }
-        
-        grid.resetOriginData();
-        grid.restore();
-      }else{
-        grid.clear();
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
-      }
+        //김경현
+      // }else{
+      //   grid.clear();
+      //   gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
+      // }
     })
   }
   //#endregion

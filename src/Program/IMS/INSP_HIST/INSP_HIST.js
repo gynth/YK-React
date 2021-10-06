@@ -496,16 +496,8 @@ class INSP_HIST extends Component {
               </div>
             </div>
           </div>
-          <div style={{paddingBottom:'10px', paddingTop:'200px'}} className='car_info'>
+          <div style={{paddingBottom:'10px', paddingTop:'60px'}} className='car_info'>
             <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='INSP_HIST_MAIN'/></div>
-            <div style={{height:'130px'}} className='detail'>
-              <ul>
-                <li><span className='t'>차량번호</span><Detailspan flag={2}  reducer='INSP_HIST_MAIN'/></li>
-                <li><span className='t'>총중량(KG)</span><Detailspan flag={3} reducer='INSP_HIST_MAIN' /></li>
-                <li><span className='t'>입차시간</span><Detailspan flag={4}  reducer='INSP_HIST_MAIN'/></li> 
-              </ul>
-            </div>
-
             <Chit pgm={this.props.pgm} id={'chit_memo'}  reducer='INSP_HIST_MAIN'/>
           </div>
             <div className='cctv_viewer'>

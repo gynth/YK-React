@@ -39,6 +39,11 @@ class TextArea extends Component{
     );
   }
 
+  onBlurBase = (e) => {
+    if(this.props.onBlur !== undefined)
+      this.props.onBlur(e);
+  }
+
   onChangeBase = (e) => {
     this.setState({
       defaultValue: e.target.value
@@ -82,9 +87,11 @@ class TextArea extends Component{
                  id        = {this.props.id}
                  value     = {this.state.defaultValue || ''}
 
+                 style     = {this.props.style}
                  onChange  = {e => this.onChangeBase(e)}
                  onKeyDown = {e => this.onKeyDownBase(e)}
                  onKeyUp   = {e => this.onKeyUpBase(e)}
+                 onBlur    = {e => this.onBlurBase(e)}
 
                  ref={this.textareaRef}
                  autoComplete = 'off'

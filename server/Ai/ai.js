@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const fs = require('fs');
 
 const OracleServerSP = (param) => {
   for(let j = 0; j < param.length; j++){
@@ -36,6 +37,41 @@ const OracleServerSP = (param) => {
       return err;
     })
 }
+
+router.post('/ReRec', async(req, res) => {
+  const scaleNumb = req.body.scaleNumb;
+  const folder = scaleNumb.substring(0, 8);
+
+  if(fs.existsSync(`F:/IMS/Replay/${folder}/${scaleNumb}`)){
+    const root = fs.readdirSync(`F:/IMS/Replay/${folder}`);
+    const fileCnt = root.filter(e => e.toString().indexOf(`${scaleNumb}_`) >= 0);
+  
+    fs.rename(`F:/IMS/Replay/${folder}/${scaleNumb}`, `F:/IMS/Replay/${folder}/${scaleNumb}_${fileCnt.length + 1}`).then(e => {
+      res.json({
+        Response: 'OK'
+      });
+    })
+  }else{
+    res.json({
+      Response: 'OK'
+    });
+  }
+});
+
+router.post('/RecodingList', async(req, res) => {
+  res.json({
+    Response: global.REC_SCALENUMB
+  });
+});
+
+router.post('/GetRecodingList', async(req, res) => {
+  const REC_SCALENUMB = req.body.REC_SCALENUMB;
+  global.REC_SCALENUMB = REC_SCALENUMB;
+
+  res.json({
+    Response: 'OK'
+  });
+});
 
 router.post('/Result', async(req, res) => {
   const Count = req.body.Count;

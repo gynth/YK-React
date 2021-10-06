@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_sleep } from '../../../Method/Comm';
-import { gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
-import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
+import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import { gfg_getGrid, gfg_setSelectRow, gfg_appendRow } from '../../../Method/Grid';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 
 import Grid from '../../../Component/Grid/Grid';
@@ -47,8 +47,114 @@ class ENTR_PROC extends Component {
     //#endregion
   }
 
+  
+  mainGrid = () => {
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+
+    YK_WEB_REQ(`tally_mstr_drive.jsp`).then(e => {
+      const main = e.data.dataSend;
+
+      if(main){
+        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+    
+        const data = main.filter(e => {
+          if(search_tp !== null && search_tp !== ''){
+            //계근번호
+            if(search_tp === '1'){
+              if(e.scaleNumb.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //차량번호
+            else if(search_tp === '2'){
+              if(e.carNumb.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //사전등급
+            else if(search_tp === '3'){
+              if(e.itemGrade.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //업체
+            else if(search_tp === '4'){
+              if(e.vendor.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+          }else{
+            return true;
+          }
+        })
+
+        if(data.length > 0){
+          
+          //기존 그리드에서 dispatchNumb기준으로 데이터가 없으면 추가한다.
+          for(let i = 0; i < data.length; i++){
+            const dispatchNumb = data[i].dispatchNumb;
+
+            const oldData = grid.getData().find(e => e.dispatchNumb === dispatchNumb);
+            if(!oldData){
+              gfg_appendRow(grid, grid.getRowCount(), {
+                dispatchNumb,
+                carNumb: data[i].carNumb,
+                preItemGrade: data[i].preItemGrade,
+                itemGrade: data[i].itemGrade,
+                itemFlag: data[i].itemFlag,
+                vendor: data[i].vendor,
+                loadaddr: data[i].loadaddr,
+                addr: data[i].addr
+              }, 'scaleNumb', false);
+
+              grid.resetOriginData()
+            }
+          }
+
+          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
+          for(let i = 0; i < grid.getData().length; i++){
+            const dispatchNumb =  grid.getData()[i].dispatchNumb;
+
+            const newData = data.find(e => e.dispatchNumb === dispatchNumb)
+            if(!newData){
+              grid.removeRow(i);
+            }
+          }
+
+          if(gfs_getStoreValue('ENTR_PROC_MAIN', 'BOT_TOTAL') !== data.length)
+            gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+        }else{
+          grid.clear();
+          if(gfs_getStoreValue('ENTR_PROC_MAIN', 'BOT_TOTAL') !== 0)
+            gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        }
+      }else{
+        grid.clear();
+        if(gfs_getStoreValue('ENTR_PROC_MAIN', 'BOT_TOTAL') !== 0)
+          gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      }
+    })
+  }
+
   componentDidMount(){
-    this.Retrieve();
+    // this.Retrieve();
+    
+    this.mainGridInterval = setInterval(e => {
+      this.mainGrid();
+    }, 2000)
+  }
+
+  componentWillUnmount(){
+    clearInterval(this.mainGridInterval);
   }
 
   Retrieve = async () => {
@@ -202,24 +308,6 @@ class ENTR_PROC extends Component {
                             readOnly: true,
                             align : 'left',
                             fontSize: '18'
-                          }),
-                          columnCombobox({
-                            name: 'itemFlag', 
-                            header: '등급',
-                            readOnly: true,
-                            fontSize: '18',
-                            width   : 130,
-                            data: [{
-                              'code': 'M1KDO0001',
-                              'name': '고철'
-                            },{
-                              'code': 'M1KDO0002',
-                              'name': '분철'
-                            }],
-                            editor: {
-                              value   : 'code',
-                              display : 'name'
-                            }
                           }),
                           columnInput({
                             name: 'vendor',

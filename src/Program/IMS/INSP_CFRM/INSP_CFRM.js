@@ -6,7 +6,7 @@ import Input from '../../../Component/Control/Input';
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
-import { gfg_getGrid, gfg_setSelectRow, gfg_setValue } from '../../../Method/Grid';
+import { gfg_getGrid, gfg_setSelectRow, gfg_setValue, gfg_appendRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
@@ -19,9 +19,10 @@ import Combobox from '../../../Component/Control/Combobox';
 import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
 import Chit from '../Common/Chit/Chit';
-import CompleteBtn from './CompleteBtn';
 import TabList from './TabList';
 import RecImage from '../Common/RecImage';
+import CompleteBtn from './CompleteBtn';
+import CompleteBtnModify from './CompleteBtnModify';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
@@ -275,8 +276,125 @@ class INSP_CFRM extends Component {
     //#endregion
   }
 
-  componentDidMount(){
+  mainGrid = () => {
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+
+    YK_WEB_REQ('tally_approve_wait.jsp').then(e => {
+      const main = e.data.dataSend;
+
+      if(main){
+
+        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     
+        const data = main.filter(e => {
+          if(search_tp !== null && search_tp !== ''){
+            //계근번호
+            if(search_tp === '1'){
+              if(e.scaleNumb.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //차량번호
+            else if(search_tp === '2'){
+              if(e.carNumb.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //사전등급
+            else if(search_tp === '3'){
+              if(e.itemGrade.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //업체
+            else if(search_tp === '4'){
+              if(e.vendor.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            
+          }else{
+            return true;
+          }
+        })
+    
+        if(data.length > 0){
+          
+          //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
+          for(let i = 0; i < data.length; i++){
+            const scaleNumb = data[i].scaleNumb;
+
+            const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
+            if(!oldData){
+              gfg_appendRow(grid, grid.getRowCount(), {
+                scaleNumb,
+                vehicle_no: data[i].vehicle_no,
+                pre_item_grade: data[i].pre_item_grade,
+                itemGrade: data[i].itemGrade,
+                iron_grade: data[i].iron_grade,
+                iron_grade_item_name	: data[i].iron_grade_item_name,
+                reduce_name: data[i].reduce_name,
+                reduce_wgt: data[i].reduce_wgt,
+                return_gubun_name: data[i].return_gubun_name,
+                inspector: data[i].inspector,
+                delivery_date: data[i].delivery_date,
+                vendor_name: data[i].vendor_name
+              }, 'scaleNumb', false);
+
+              grid.resetOriginData()
+            }
+          }
+
+          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
+          for(let i = 0; i < grid.getData().length; i++){
+            const scaleNumb =  grid.getData()[i].scaleNumb;
+
+            const newData = data.find(e => e.scaleNumb === scaleNumb)
+            if(!newData){
+              grid.removeRow(i);
+
+              //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
+              const selectScaleNumb = gfs_getStoreValue('INSP_CFRM_MAIN', 'DETAIL_SCALE');
+              if(scaleNumb === selectScaleNumb){
+                gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+                gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+                gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
+                gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+              }
+            }
+          }
+
+          gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+        }else{
+          grid.clear();
+          gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        }
+      }else{
+        grid.clear();
+        gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      }
+    })
+  }
+
+  componentDidMount(){
+    // this.Retrieve();
+    
+    this.mainGridInterval = setInterval(e => {
+      this.mainGrid();
+    }, 2000)
+  }
+
+  componentWillUnmount(){
+    clearInterval(this.mainGridInterval);
   }
 
   Retrieve = async () => {
@@ -597,9 +715,7 @@ class INSP_CFRM extends Component {
                   </li>
                 </ul>
               </div>
-              <div className="complete_btn edit">
-									<button type="button" style={{display:'block'}}><span>검수수정</span></button>
-								</div>
+              <CompleteBtnModify pgm='INSP_CFRM' />
           </div>
 
 
@@ -612,9 +728,7 @@ class INSP_CFRM extends Component {
             </div>
             <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_CFRM_MAIN'/>
               
-            <div className="complete_btn">
-									<button type="button" style={{display:'block'}}><span>검수확정</span></button>
-								</div>
+            <CompleteBtn pgm='INSP_CFRM' />
           </div>
             {/* <div className='cctv_viewer'>
               <h4>녹화영상</h4>

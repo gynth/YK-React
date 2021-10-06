@@ -1,8 +1,8 @@
 import numeral from 'numeral';
 import moment from 'moment';
 import { gfs_dispatch } from '../Method/Store';
-// import html2canvas from 'html2canvas';
-import html2canvas from 'html2canvas-render-offscreen'
+import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas-render-offscreen'
 import axios from 'axios';
 import { getDynamicSql_Oracle } from '../db/Oracle/Oracle';
 
@@ -197,7 +197,6 @@ export const gfc_hasClass = (element, className) => {
 
 export const gfc_screenshot = (element, filename) => {
   html2canvas(element, {
-    height: 1000,
     scale: 3
   }).then(canvas => {
     const img = canvas.toDataURL('image/png');
@@ -389,6 +388,11 @@ export const gfc_test = (element, filename, root) => {
 
 export const gfc_set_oracle_column = (result) => {
   let data = [];
+
+  if(result.data === undefined) return data;
+  if(result.data === null) return data;
+  if(result.data.rows === undefined) return data;
+  if(result.data.rows === null) return data;
 
   for(let i = 0; i < result.data.rows.length; i++){
   

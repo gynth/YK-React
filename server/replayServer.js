@@ -30,11 +30,7 @@ const server = app3003.listen(port3003, function(){
 new hls(server, {
   provider: {
     exists: (req, cb) => {
-      // const ext = req.url.split('.').pop();
-
-      // if(ext !== 'm3u8' && ext !== 'ts'){
-      //   return cb(null, true);
-      // }
+      console.log(decodeURIComponent(req.url));
 
       fs.access('F:/IMS/Replay' + decodeURIComponent(req.url), fs.constants.F_OK, (err) => {
         if(err){

@@ -161,7 +161,7 @@ class DateTime extends Component{
             {`${this.props.label}\u00A0`}
           </label>
         }
-        <div className="tui-datepicker-input tui-datetime-input tui-has-focus">
+        <div className='tui-datepicker-input tui-datetime-input tui-has-focus'>
           <input type='text' 
                  value       = {this.state.defaultValue || ''} 
                  placeholder = {this.props.placeHolder}
@@ -195,7 +195,7 @@ class DateTime extends Component{
                  ref         = {this.inputRef} 
                  aria-label  = 'Date-Time' 
           />
-          <span className="tui-ico-date"></span>
+          <span className='tui-ico-date'></span>
         </div>
         <div ref={this.dateTimeRef} style={{marginTop: '-1px'}}></div>
       </div>

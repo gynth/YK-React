@@ -37,7 +37,7 @@ function RecImageDtl(props) {
       //   'Access-Control-Allow-Origin': '*'
       // },
       data: {
-        scaleNumb: value,
+        scaleNumb: value.toString(),
         Name     : props.Name
       },
       responseType: 'blob'
@@ -50,7 +50,7 @@ function RecImageDtl(props) {
               .createObjectURL(new Blob([res.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `${value}.mp4`);
+        link.setAttribute('download', `${value.toString()}.mp4`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -65,19 +65,19 @@ function RecImageDtl(props) {
   const [cameraName, setCameraName] = useState('');
 
   useEffect(() => { 
-    if(value !== ''){
+    if(value.toString() !== ''){
       callOracle(
         'Common/Common',
         'ZM_IMS_VIDEO_SELECT',
         [{
-          scaleNumb: value,
+          scaleNumb: value.toString(),
           seq      : props.seq
         }]
       ).then(e => {
         if(e.data.rows.length > 0){
           setCameraName(e.data.rows[0][5]);
-          // setPlayUrl(`http://10.10.10.136:3003/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
-          setPlayUrl(`http://ims.yksteel.co.kr:90/WebServer/Replay/${value}/${encodeURIComponent(cameraName)}/${value}.m3u8`);
+          // setPlayUrl(`http://10.10.10.136:3003/${value.toString()}/${encodeURIComponent(cameraName)}/${value.toString()}.m3u8`);
+          setPlayUrl(`http://ims.yksteel.co.kr:90/WebServer/Replay/${value.toString().substring(0, 8)}/${value.toString()}/${encodeURIComponent(cameraName)}/${value.toString()}.m3u8`);
         }else{
           setPlayUrl('');
         }
@@ -88,12 +88,12 @@ function RecImageDtl(props) {
   }, [cameraName, props.seq, value])
 
   const onActiveWindow = () => {
-    const isActive = gfs_getStoreValue('MASK_REDUCER', 'ON_ACTIVE');
-    
     if(movieRef.current === undefined) return; 
-    if(value === '') return;
+    if(value.toString() === '') return;
     if(playUrl === '') return;
     
+    const isActive = gfs_getStoreValue('MASK_REDUCER', 'ON_ACTIVE');
+
     const isPlay = movieRef.current.paused;
 
     if(isActive.active){
@@ -114,7 +114,7 @@ function RecImageDtl(props) {
 
   return (
     <>
-    {(value !== '' && playUrl !== '') &&
+    {(value.toString() !== '' && playUrl.toString() !== '') &&
       <>
         <div 
           style={{width:'100%', height:'100%'}} 
@@ -131,7 +131,8 @@ function RecImageDtl(props) {
               hlsConfig={{
                 autoStartLoad: true,
                 startPosition: -1,
-                debug: false
+                debug: false,
+                lowLatencyMode: true
               }}
             />
         </div>

@@ -64,8 +64,8 @@ function RecImageDtl(props) {
     client = new WebSocket(`ws://ims.yksteel.co.kr:90/ws/${props.cameraPort}`);
     canvas = imageRef.current;
     new jsmpeg(client, {
-      canvas
-      // pauseWhenHidden: false 
+      canvas,
+      pauseWhenHidden: false 
     });
   }
 
@@ -150,7 +150,9 @@ function RecImageDtl(props) {
                         height:'100%'
                       }}
                       onDoubleClick={e => {
-                        setModalIsOpen(true);
+                        // setModalIsOpen(true);
+                        const areaTp = gfs_getStoreValue('USER_REDUCER', 'AREA_TP');
+                        window.open(`RtspFullScreen?areaTp=${areaTp}`, `RTSP`, 'width=1920, height=1080, toolbar=no, menubar=no, scrollbars=no, resizable=yes' ); 
                       }}
                     />
                     <div className='picture_save' onClick={e => {
@@ -173,7 +175,7 @@ function RecImageDtl(props) {
                     }}>
                     </div>
                     
-                    <div className="direction">
+                    <div className='direction'>
                       <button 
                         type='' 
                         className='left' 

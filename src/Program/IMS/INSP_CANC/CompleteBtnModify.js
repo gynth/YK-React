@@ -6,7 +6,7 @@ import { gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 import { getSp_Oracle_YK } from '../../../db/Oracle/Oracle';
 
-const CompleteBtn = (props) => {
+const CompleteBtnModify = (props) => {
 
   //#region 검수등록
   const onProcess = async() => {
@@ -102,10 +102,10 @@ const CompleteBtn = (props) => {
   //#endregion
 
   return (
-    <div className="complete_btn">
-      <button onClick={() => onProcess()} type="button" style={{display:'block'}}><span>검수취소</span></button>
+    <div className="complete_btn edit">
+      <button type="button" style={{display:'block'}}><span>검수수정</span></button>
     </div>
   );
 }
 
-export default CompleteBtn;
+export default CompleteBtnModify;

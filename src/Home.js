@@ -8,7 +8,7 @@ import { getDynamicSql_Oracle } from './db/Oracle/Oracle';
 import './Home.css';
 import { getSessionCookie, setSessionCookie } from './Cookies';
 import { gfs_injectAsyncReducer, gfs_WINDOWFRAME_REDUCER, gfs_dispatch, gfs_PGM_REDUCER, gfs_getStoreValue } from './Method/Store';
-import { gfc_sleep } from './Method/Comm';
+import { gfc_sleep, gfc_set_oracle_column } from './Method/Comm';
 
 import GifPlayer from 'react-gif-player';
 import LoadingOverlay from 'react-loading-overlay';
@@ -20,17 +20,18 @@ const defaultData = async(user_id) => {
   const userReducer = (nowState, action) => {
     if(action.reducer !== 'USER_REDUCER') {
       return {
-        COP_CD    : nowState === undefined ? '10'         : nowState.COP_CD,
-        USER_ID   : nowState === undefined ? '1989'       : nowState.USER_ID,
-        USER_NAM  : nowState === undefined ? '김경현'      : nowState.USER_NAM,
-        DEPT_NAM  : nowState === undefined ? '검수'        : nowState.DEPT_NAM,
-        YMD_FORMAT: nowState === undefined ? 'yyyy-MM-DD' : nowState.YMD_FORMAT,
-        // YMD_FORMAT: nowState === undefined ? 'MM-DD-yyyy' : nowState.YMD_FORMAT,
-        YM_FORMAT : nowState === undefined ? 'yyyy-MM'    : nowState.YM_FORMAT,
-        NUM_FORMAT: nowState === undefined ? '0,0'        : nowState.NUM_FORMAT,
-        NUM_ROUND : nowState === undefined ? '2R'         : nowState.NUM_ROUND,
-        ERP_ID    : nowState === undefined ? ''           : nowState.ERP_ID,
-        AREA_TP   : nowState === undefined ? ''           : nowState.AREA_TP
+        COP_CD    : nowState === undefined ? '' : nowState.COP_CD,
+        USER_ID   : nowState === undefined ? '' : nowState.USER_ID,
+        USER_NAM  : nowState === undefined ? '' : nowState.USER_NAM,
+        DEPT_NAM  : nowState === undefined ? '' : nowState.DEPT_NAM,
+        YMD_FORMAT: nowState === undefined ? '' : nowState.YMD_FORMAT,
+        YM_FORMAT : nowState === undefined ? '' : nowState.YM_FORMAT,
+        NUM_FORMAT: nowState === undefined ? '' : nowState.NUM_FORMAT,
+        NUM_ROUND : nowState === undefined ? '' : nowState.NUM_ROUND,
+        ERP_ID    : nowState === undefined ? '' : nowState.ERP_ID,
+        AREA_TP   : nowState === undefined ? '' : nowState.AREA_TP,
+        AUTH      : nowState === undefined ? {} : nowState.AUTH,
+        CAMERA_NO : nowState === undefined ? '' : nowState.CAMERA_NO
       };
     }
 
@@ -45,7 +46,24 @@ const defaultData = async(user_id) => {
         NUM_FORMAT : action.NUM_FORMAT,
         NUM_ROUND  : action.NUM_ROUND,
         ERP_ID     : action.ERP_ID,
-        AREA_TP    : action.AREA_TP
+        AREA_TP    : action.AREA_TP,
+        AUTH       : nowState.AUTH,
+        CAMERA_NO  : action.CAMERA_NO
+      });
+    }else if(action.type === 'AUTH'){
+      return Object.assign({}, nowState, {
+        COP_CD     : nowState.COP_CD,
+        USER_ID    : nowState.USER_ID,
+        USER_NAM   : nowState.USER_NAM,
+        DEPT_NAM   : nowState.DEPT_NAM,
+        YMD_FORMAT : nowState.YMD_FORMAT,
+        YM_FORMAT  : nowState.YM_FORMAT,
+        NUM_FORMAT : nowState.NUM_FORMAT,
+        NUM_ROUND  : nowState.NUM_ROUND,
+        ERP_ID     : nowState.ERP_ID,
+        AREA_TP    : nowState.AREA_TP,
+        AUTH       : action.AUTH,
+        CAMERA_NO  : nowState.CAMERA_NO
       });
     }
   };
@@ -58,15 +76,7 @@ const defaultData = async(user_id) => {
     [{user_id}]
   ); 
 
-  let data = [];
-  for(let i = 0; i < result.data.rows.length; i++){
-
-    let col = {};
-    for(let j = 0; j < result.data.rows[i].length; j++){
-      col[result.data.metaData[j].name] = result.data.rows[i][j];
-    }
-    data.push(col);
-  }
+  let data = gfc_set_oracle_column(result);
 
   gfs_dispatch('USER_REDUCER', 'USER', {
     COP_CD    : '10',
@@ -76,10 +86,27 @@ const defaultData = async(user_id) => {
     YMD_FORMAT: 'yyyy-MM-DD',
     YM_FORMAT : 'yyyy-MM',
     NUM_FORMAT: '0,0',
-    NUM_ROUND: '2R',
+    NUM_ROUND : '2R',
     ERP_ID    : data[0].ERP_ID,
-    AREA_TP   : data[0].AREA_TP
+    AREA_TP   : data[0].AREA_TP,
+    AUTH      : {},
+    CAMERA_NO : data[0].CAMERA_NO
   });
+
+  let result2 = await getDynamicSql_Oracle(
+    'Common/Common',
+    'AUTH_TOTAL',
+    [{COP_CD: '10',
+      user_id
+    }]
+  ); 
+
+  let data2 = gfc_set_oracle_column(result2);
+  gfs_dispatch('USER_REDUCER', 'AUTH', {
+    AUTH      : data2
+  });
+
+  defaultOpen();
 }
 
 const onActiveWindow = (e) => {
@@ -97,62 +124,90 @@ const onActiveWindow = (e) => {
 }
 
 const defaultOpen = async() => {
+  
+    const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+    if(auth.length === undefined || auth.length === 0) return;
 
-    //검수대기 Open
-    gfs_PGM_REDUCER('INSP_PROC');
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 0,
-      activeWindow: {programId: 'INSP_PROC',
-                      programNam: '검수진행'
-                    }
-    }));
+    const inspProc = auth.find(e => e.MENU_ID === 'INSP_PROC');
+    if(inspProc !== null){
+      if(inspProc.PGMAUT_YN === 'Y'){
+        //검수대기 Open
+        gfs_PGM_REDUCER('INSP_PROC');
+        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+        ({
+          windowZindex: 0,
+          activeWindow: {programId: 'INSP_PROC',
+                          programNam: '검수진행'
+                        }
+        }));
+      }
+    }
 
-    await gfc_sleep(20);
+    await gfc_sleep(500);
 
-    //검수이력 Open
-    gfs_PGM_REDUCER('INSP_HIST');
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 1,
-      activeWindow: {programId: 'INSP_HIST',
-                      programNam: '검수이력'
-                    }
-    }));
+    const inspHist = auth.find(e => e.MENU_ID === 'INSP_HIST');
+    if(inspHist !== null){
+      if(inspHist.PGMAUT_YN === 'Y'){
+        //검수이력 Open
+        gfs_PGM_REDUCER('INSP_HIST');
+        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+        ({
+          windowZindex: 1,
+          activeWindow: {programId: 'INSP_HIST',
+                          programNam: '검수이력'
+                        }
+        }));
+      }
+    }
 
-    // await gfc_sleep(20);
+    await gfc_sleep(500);
 
-    // //출차대기 Open
-    // gfs_PGM_REDUCER('DISP_PROC');
-    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    // ({
-    //   windowZindex: 2,
-    //   activeWindow: {programId: 'DISP_PROC',
-    //                   programNam: '출차대기'
-    //                 }
-    // }));
+    const dispProc = auth.find(e => e.MENU_ID === 'DISP_PROC');
+    if(dispProc !== null){
+      if(dispProc.PGMAUT_YN === 'Y'){
+        //출차대기 Open
+        gfs_PGM_REDUCER('DISP_PROC');
+        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+        ({
+          windowZindex: 2,
+          activeWindow: {programId: 'DISP_PROC',
+                          programNam: '출차대기'
+                        }
+        }));
+      }
+    }
 
-    // await gfc_sleep(20);
+    await gfc_sleep(500);
 
-    // //입차대기 Open
-    // gfs_PGM_REDUCER('ENTR_PROC');
-    // gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    // ({
-    //   windowZindex: 3,
-    //   activeWindow: {programId: 'ENTR_PROC',
-    //                   programNam: '입차대기'
-    //                 }
-    // }));
+    const entrProc = auth.find(e => e.MENU_ID === 'ENTR_PROC');
+    if(entrProc !== null){
+      if(entrProc.PGMAUT_YN === 'Y'){
+        //입차대기 Open
+        gfs_PGM_REDUCER('ENTR_PROC');
+        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+        ({
+          windowZindex: 3,
+          activeWindow: {programId: 'ENTR_PROC',
+                          programNam: '입차대기'
+                        }
+        }));
+      }
+    }
 
-    await gfc_sleep(20);
+    await gfc_sleep(500);
 
-    gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-    ({
-      windowZindex: 0,
-      activeWindow: {programId: 'INSP_PROC',
-                      programNam: '검수진행'
-                    }
-    }));
+    if(inspProc !== null){
+      if(inspProc.PGMAUT_YN === 'Y'){
+
+        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+        ({
+          windowZindex: 0,
+          activeWindow: {programId: 'INSP_PROC',
+                          programNam: '검수진행'
+                        }
+        }));
+      }
+    }
 }
 
 const Home = (props) => {  
@@ -169,7 +224,7 @@ const Home = (props) => {
 
     if(user_id === ''){
       alert('로그인부터 해주세요.');
-      // window.location.replace('http://ims.yksteel.co.kr:90');
+      // window.location.replace('http://ims.yksteel.co.kr:90'); 김경현
       window.location.replace('http://localhost:4000');
       return;
     }
@@ -210,8 +265,6 @@ const Home = (props) => {
 
     defaultData(user_id);
 
-    //화면Open
-    defaultOpen();
 
     // return() => {
     //   setSessionCookie('login', '');
