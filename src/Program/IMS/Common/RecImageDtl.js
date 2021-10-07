@@ -38,7 +38,7 @@ function RecImageDtl(props) {
       // },
       data: {
         scaleNumb: value.toString(),
-        Name     : props.Name
+        Name     : name
       },
       responseType: 'blob'
     };
@@ -62,7 +62,7 @@ function RecImageDtl(props) {
   }
 
   const [playUrl, setPlayUrl] = useState('');
-  const [cameraName, setCameraName] = useState('');
+  const [name, setName] = useState('');
 
   useEffect(() => { 
     if(value.toString() !== ''){
@@ -75,17 +75,17 @@ function RecImageDtl(props) {
         }]
       ).then(e => {
         if(e.data.rows.length > 0){
-          setCameraName(e.data.rows[0][5]);
-          // setPlayUrl(`http://10.10.10.136:3003/${value.toString()}/${encodeURIComponent(cameraName)}/${value.toString()}.m3u8`);
-          setPlayUrl(`http://ims.yksteel.co.kr:90/WebServer/Replay/${value.toString().substring(0, 8)}/${value.toString()}/${encodeURIComponent(cameraName)}/${value.toString()}.m3u8`);
+          setName(e.data.rows[0][5]);
+          setPlayUrl(`http://ims.yksteel.co.kr:90/WebServer/Replay/${value.toString().substring(0, 8)}/${value.toString()}/${encodeURIComponent(e.data.rows[0][5])}/${value.toString()}.m3u8`);
         }else{
+          setName('');
           setPlayUrl('');
         }
       }).catch(e => {
         console.log('DISP_PROC>' + e);
       })
     }
-  }, [cameraName, props.seq, value])
+  }, [props.seq, value])
 
   const onActiveWindow = () => {
     if(movieRef.current === undefined) return; 

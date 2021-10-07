@@ -135,6 +135,13 @@ export const gfc_unNumberFormat = (value) => {
   return numeral(value)._value;
 }
 
+export const gfc_getParameter = (props, name) => {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+      results = regex.exec(props.location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
 export const gfc_lpad = (str, padLen, padStr) => { 
   if (padStr.length > padLen) {
       console.log("LENGTH ERROR");
@@ -277,12 +284,74 @@ export const gfc_screenshot_srv = (element, filename, height, root) => {
   });
 }
 
-export const gfc_chit_yn_YK = (scaleNo) => {
+export const gfc_chit_yn_YK_Tally = (scaleNumb) => {
   // const host = 'http://10.10.10.136:3001/ScreenShot/YK_Chit_YN';
-  const host = 'http://ims.yksteel.co.kr:90/WebServer/ScreenShot/YK_Chit_YN';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/ScreenShot/YK_Chit_YN_Tally';
+  // const host = `http://tally.yksteel.co.kr/Images/scaleChit/${scaleNumb.substring(0, 8)}/${scaleNumb}.jpg`;
+  
+  // console.log(host);
+
+  const option = {
+    url   : host,
+    method: 'GET',
+    headers: {
+      // 'Access-Control-Allow-Origin': '*',
+      // 'Content-Type': 'application/json',
+      // 'Accept': 'application/json'
+    },
+    data: {
+      scaleNumb
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
+export const gfc_ftp_file_yn_YK = (scaleNumb) => {
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/ScreenShot/Ftp_File_Yn';
+  
+  // console.log(host);
+
   const option = {
     url   : host,
     method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+      scaleNumb
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
+export const gfc_chit_yn_YK = (scaleNo) => {
+  // const host = 'http://10.10.10.136:3001/ScreenShot/YK_Chit_YN';
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/ScreenShot/YK_Chit_YN';
+  // const host = `http://tally.yksteel.co.kr/Images/scaleChit/${scaleNo.substring(0, 8)}/${scaleNo}.jpg`;
+  
+  // console.log(host);
+
+  const option = {
+    url   : host,
+    method: 'GET',
     // headers: {
     //   'Access-Control-Allow-Origin': '*'
     // },

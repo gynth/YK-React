@@ -20,16 +20,16 @@ import Botspan from '../Common/Botspan';
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
-class ENTR_PROC extends Component {
+class ENTR_WAIT extends Component {
   constructor(props){
     super(props)
     
     gfc_initPgm(props.pgm, props.nam, this)
 
     //#region 리듀서
-    const ENTR_PROC_MAIN = (nowState, action) => {
+    const ENTR_WAIR_MAIN = (nowState, action) => {
 
-      if(action.reducer !== 'ENTR_PROC_MAIN') {
+      if(action.reducer !== 'ENTR_WAIR_MAIN') {
         return {
           BOT_TOTAL    : nowState === undefined ? 0 : nowState.BOT_TOTAL,
         };
@@ -43,7 +43,7 @@ class ENTR_PROC extends Component {
       }
     }
 
-    gfs_injectAsyncReducer('ENTR_PROC_MAIN', ENTR_PROC_MAIN);
+    gfs_injectAsyncReducer('ENTR_WAIR_MAIN', ENTR_WAIR_MAIN);
     //#endregion
   }
 
@@ -51,7 +51,7 @@ class ENTR_PROC extends Component {
   mainGrid = () => {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
 
-    YK_WEB_REQ(`tally_mstr_drive.jsp`).then(e => {
+    YK_WEB_REQ(`tally_mstr_drive_wait.jsp`).then(e => {
       const main = e.data.dataSend;
 
       if(main){
@@ -99,49 +99,46 @@ class ENTR_PROC extends Component {
 
         if(data.length > 0){
           
-          //기존 그리드에서 dispatchNumb기준으로 데이터가 없으면 추가한다.
+          //기존 그리드에서 SCRP_ORD_NO기준으로 데이터가 없으면 추가한다.
           for(let i = 0; i < data.length; i++){
-            const dispatchNumb = data[i].dispatchNumb;
+            const SCRP_ORD_NO = data[i].SCRP_ORD_NO;
 
-            const oldData = grid.getData().find(e => e.dispatchNumb === dispatchNumb);
+            const oldData = grid.getData().find(e => e.SCRP_ORD_NO === SCRP_ORD_NO);
             if(!oldData){
               gfg_appendRow(grid, grid.getRowCount(), {
-                dispatchNumb,
-                carNumb: data[i].carNumb,
-                preItemGrade: data[i].preItemGrade,
-                itemGrade: data[i].itemGrade,
-                itemFlag: data[i].itemFlag,
-                vendor: data[i].vendor,
-                loadaddr: data[i].loadaddr,
-                addr: data[i].addr
-              }, 'scaleNumb', false);
+                SCRP_ORD_NO,
+                VENDOR: data[i].VENDOR,
+                LOAD_AREA_ADDR: data[i].LOAD_AREA_ADDR,
+                VEHL_NO: data[i].VEHL_NO,
+                DRIVER_NM: data[i].DRIVER_NM,
+                DRIVER_CELL_NO: data[i].DRIVER_CELL_NO
+              }, 'SCRP_ORD_NO', false);
 
               grid.resetOriginData()
-              grid.restore();
             }
           }
 
           //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
           for(let i = 0; i < grid.getData().length; i++){
-            const dispatchNumb =  grid.getData()[i].dispatchNumb;
+            const SCRP_ORD_NO =  grid.getData()[i].SCRP_ORD_NO;
 
-            const newData = data.find(e => e.dispatchNumb === dispatchNumb)
+            const newData = data.find(e => e.SCRP_ORD_NO === SCRP_ORD_NO)
             if(!newData){
               grid.removeRow(i);
             }
           }
 
-          if(gfs_getStoreValue('ENTR_PROC_MAIN', 'BOT_TOTAL') !== data.length)
-            gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+          if(gfs_getStoreValue('ENTR_WAIR_MAIN', 'BOT_TOTAL') !== data.length)
+            gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
         }else{
           grid.clear();
-          if(gfs_getStoreValue('ENTR_PROC_MAIN', 'BOT_TOTAL') !== 0)
-            gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+          if(gfs_getStoreValue('ENTR_WAIR_MAIN', 'BOT_TOTAL') !== 0)
+            gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
         }
       }else{
         grid.clear();
-        if(gfs_getStoreValue('ENTR_PROC_MAIN', 'BOT_TOTAL') !== 0)
-          gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        if(gfs_getStoreValue('ENTR_WAIR_MAIN', 'BOT_TOTAL') !== 0)
+          gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
       }
     })
   }
@@ -161,9 +158,9 @@ class ENTR_PROC extends Component {
   Retrieve = async () => {
 
     gfc_showMask();
-    gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+    gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
 
-    const mainData = await YK_WEB_REQ(`tally_mstr_drive.jsp`);
+    const mainData = await YK_WEB_REQ(`tally_mstr_drive_wait.jsp`);
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
@@ -219,13 +216,13 @@ class ENTR_PROC extends Component {
     if(data.length > 0){
 
       grid.resetData(data);
-      gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+      gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
       
       await gfc_sleep(100);
 
       gfg_setSelectRow(grid);
     }else{
-      gfs_dispatch('ENTR_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
 
     gfc_hideMask();
@@ -286,60 +283,54 @@ class ENTR_PROC extends Component {
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
                           columnInput({
-                            name: 'dispatchNumb',
+                            name: 'SCRP_ORD_NO',
                             header: '배차번호',
                             width : 160,
                             readOnly: true,
                             color : '#0063A9',
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'center'
                           }),
                           columnInput({
-                            name: 'carNumb',
-                            header: '차량번호',
-                            width : 160,
+                            name: 'VENDOR',
+                            header: '공급사/실공급사',
+                            width : 250,
                             readOnly: true,
-                            align : 'center',
-                            fontSize: '18'
+                            align : 'left'
                           }),   
                           columnInput({
-                            name: 'preItemGrade',
-                            header: '사전등급',
-                            width : 130,
+                            name: 'LOAD_AREA_ADDR',
+                            header: '실상차지주소',
+                            width : 250,
                             readOnly: true,
-                            align : 'left',
-                            fontSize: '18'
+                            align : 'left'
                           }),
                           columnInput({
-                            name: 'vendor',
-                            header: '업체명',
+                            name: 'VEHL_NO',
+                            header: '차량번호',
                             width : 300,
                             readOnly: true,
-                            align : 'left',
-                            fontSize: '18'
+                            align : 'center'
                           }),
                           columnInput({
-                            name: 'loadaddr',
-                            header: '상차주소',
-                            width : 420,
+                            name: 'DRIVER_NM',
+                            header: '운전자명',
+                            width : 120,
                             readOnly: true,
-                            align : 'left',
-                            fontSize: '18'
+                            align : 'center'
                           }),
                           columnInput({
-                            name: 'addr',
-                            header: '주소',
-                            width : 200,
+                            name: 'DRIVER_CELL_NO',
+                            header: '운전자휴대폰번호',
+                            width : 150,
                             readOnly: true,
-                            align : 'left',
-                            fontSize: '18'
+                            align : 'center'
                           }),
                         ]}
                   />
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>전체차량</span><Botspan reducer='ENTR_PROC_MAIN' />
+                <span className='title'>전체차량</span><Botspan reducer='ENTR_WAIR_MAIN' />
               </div>
             </div>
           </div>
@@ -349,4 +340,4 @@ class ENTR_PROC extends Component {
   }
 }
 
-export default ENTR_PROC;
+export default ENTR_WAIT;

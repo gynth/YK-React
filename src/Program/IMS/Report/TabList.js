@@ -22,17 +22,11 @@ const TabList = (props) => {
         if(gfc_hasClass(document.getElementById(tabList[i]),'on') === false){
           gfc_addClass(document.getElementById(tabList[i]),'on');
           gfc_addClass(document.getElementById(contentList[i]),'on');
-
-          const btnElement = document.getElementById(btnList[i]);
-          if(btnElement !== null) gfc_addClass(btnElement,'on');
         }
       }
       else{
         gfc_removeClass(document.getElementById(tabList[i]),'on');
         gfc_removeClass(document.getElementById(contentList[i]),'on');
-        
-        const btnElement = document.getElementById(btnList[i]);
-          if(btnElement !== null) gfc_removeClass(btnElement,'on');
       }
     }
   }

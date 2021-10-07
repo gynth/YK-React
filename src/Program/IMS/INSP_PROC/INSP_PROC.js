@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_now } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_ftp_file_yn_YK } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_appendRow, gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -982,7 +982,6 @@ class INSP_PROC extends Component {
 
             const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
             if(!oldData){
-              console.log('추가됨')
               gfg_appendRow(grid, grid.getRowCount(), {
                 scaleNumb,
                 carNumb: data[i].carNumb,
@@ -1056,23 +1055,23 @@ class INSP_PROC extends Component {
     this.Init();
     // this.Retrieve();
 
-    this.mainHeaderInterval = setInterval(e => {
-      this.mainHeader();
-    }, 2000)
+    // this.mainHeaderInterval = setInterval(e => {
+    //   this.mainHeader();
+    // }, 2000)
 
-    this.mainHeaderInterval2 = setInterval(e => {
-      this.mainHeader2();
-    }, 2000)
+    // this.mainHeaderInterval2 = setInterval(e => {
+    //   this.mainHeader2();
+    // }, 2000)
 
-    this.mainGridInterval = setInterval(e => {
-      this.mainGrid();
-    }, 2000)
+    // this.mainGridInterval = setInterval(e => {
+    //   this.mainGrid();
+    // }, 2000)
   }
 
   componentWillUnmount(){
-    clearInterval(this.mainHeaderInterval);
-    clearInterval(this.mainHeaderInterval2);
-    clearInterval(this.mainGridInterval);
+    // clearInterval(this.mainHeaderInterval);
+    // clearInterval(this.mainHeaderInterval2);
+    // clearInterval(this.mainGridInterval);
   }
 
   Retrieve = async () => {
@@ -1101,7 +1100,7 @@ class INSP_PROC extends Component {
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
     gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
-      chit     : 'N'
+      chit     : false
     });
 
     gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
@@ -1280,6 +1279,9 @@ class INSP_PROC extends Component {
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.totalWgt});
     gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
+    gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+      chit     : false
+    });
 
     //계량증명서 정보여부
     const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
@@ -1290,8 +1292,9 @@ class INSP_PROC extends Component {
     }
 
     //계량증명서 여부 확인.
-    const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
-    if(chitYn.data === 'N'){
+    const chitYn = await gfc_ftp_file_yn_YK(e.scaleNumb);
+    
+    // if(chitYn.data === 'N'){
       gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
         date     : chitInfoYn.data.dataSend[0].date,
         scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
@@ -1301,14 +1304,14 @@ class INSP_PROC extends Component {
         Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
         loc      : chitInfoYn.data.dataSend[0].area,
         user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-        chit     : 'N'
+        chit     : chitYn.data
       });
-    }else{
-      gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
-        chit     : chitYn.data,
-        scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb
-      });
-    }
+    // }else{
+    //   gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+    //     chit     : chitYn.data,
+    //     scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb
+    //   });
+    // }
 
     //배차정보
     const dispInfo = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 
@@ -1470,40 +1473,100 @@ class INSP_PROC extends Component {
             <div className='total_info'>
               <ul>
                 <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
-                <li><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
-                <li><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
+
+                  const openAuth = auth.find(e => e.MENU_ID === 'DAILY_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('DAILY_PROC');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'DAILY_PROC',
+                                        programNam: '검수일계표'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
+
+                  const openAuth = auth.find(e => e.MENU_ID === 'DAILY_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('DAILY_PROC');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'DAILY_PROC',
+                                        programNam: '검수일계표'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
               </ul>
               <ul className='four'>
                 <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
                 <li onClick={e => {
-                  
-                  //#region 프로그램 리듀서 생성
-                  gfs_PGM_REDUCER('DISP_PROC');
-                  //#endregion
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
 
-                  gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                    ({
-                      windowZindex: 0,
-                      activeWindow: {programId: 'DISP_PROC',
-                                    programNam: '출차대기'
-                                    }
-                    })
-                  );
+                  const openAuth = auth.find(e => e.MENU_ID === 'DISP_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('DISP_PROC');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'DISP_PROC',
+                                        programNam: '출차대기'
+                                        }
+                        })
+                      );
+                    }
+                  }
                 }}><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
                 <li onClick={e => {
-                  
-                  //#region 프로그램 리듀서 생성
-                  gfs_PGM_REDUCER('ENTR_PROC');
-                  //#endregion
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
 
-                  gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                    ({
-                      windowZindex: 0,
-                      activeWindow: {programId: 'ENTR_PROC',
-                                    programNam: '입차대기'
-                                    }
-                    })
-                  );
+                  const openAuth = auth.find(e => e.MENU_ID === 'ENTR_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+                  
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('ENTR_PROC');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'ENTR_PROC',
+                                        programNam: '입차대기'
+                                        }
+                        })
+                      );
+                    }
+                  }
                 }}><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
                 <li><span className='title'>운송대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={7} /></li>
               </ul>

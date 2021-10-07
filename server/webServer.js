@@ -17,7 +17,7 @@ global.MILESTONE_TOKEN = '';
 global.MILESTONE_DEVICE = {};
 global.MILESTONE_TOKEN_TIME = '';
 global.MILESTONE_DATA = {};
-global.REC_SCALENUMB = [];
+global.REC_SCALENUMB = null;
 
 app3001.use(express.json({
   limit: '100mb'
@@ -172,10 +172,13 @@ chitImgServer.on('request',
     function (req, res) {
       const url = req.url.substr(2);
 
-      const folder = url.substring(0, 8);
+      // const folder1 = url.substring(0, url.indexOf('/'));
+      // const folder2 = url.substring(url.indexOf('/'), url.indexOf('/') + 1 + 8);
       const file = url.substring(0, url.indexOf('.jpg') + 4);
-      console.log(file);
-      fs.readFile(`F:/IMS/scaleChit/${folder}/${file}`,              //파일 읽기
+
+      console.log(file)
+
+      fs.readFile(`F:/IMS/${file}`,              //파일 읽기
         function (err, data)
         {
           if(err === null){

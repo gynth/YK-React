@@ -5,7 +5,7 @@ const fsPromises = fs.promises;
 const soap = require('soap'); 
 const sharp = require('sharp');
 const axios = require('axios');
-const ftp = require("basic-ftp")
+
 
 router.post('/Milestone', (req, res) => {
   let device = req.body.device;
@@ -174,31 +174,7 @@ router.post('/YK_Chit_Mobile', (req, res) => {
   }
 })
 
-router.post('/Ftp_File_Yn', async(req, res) => {
-  const scaleNumb = req.body.scaleNumb;
-  let Client = require('ssh2-sftp-client');
-  let sftp = new Client();
-  
-  sftp.connect({
-    host: '10.10.10.139',
-    port: 22,
-    username: 'ims',
-    password: 'wjdqhykims'
-  }).then((e) => {
-    return sftp.exists(`/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${scaleNumb.substring(0, 8)}/${scaleNumb}.jpg`);
-  })
-  .then(data => {
-    res.json(data);
-  })
-  .then(() => {
-    sftp.end();
-  })
-  .catch(err => {
-    console.error(err.message);
-  });
-})
-
-router.post('/YK_Chit', async (req, res) => {
+router.post('/YK_Chit', (req, res) => {
 
   const img = req.body.img.replace('data:image/png;base64,', '');
   const filename = req.body.filename;
@@ -216,34 +192,9 @@ router.post('/YK_Chit', async (req, res) => {
 
   // const root4 = `F:/Project/01.YK/Screenshot/20210805/test.png`;
   // const root5 = `F:/Project/01.YK/Screenshot/20210805/test2.png`;
-  const result = await makeImg(img, folder, filename)
-  if(result === 'Y'){
-
-    let from = fs.createReadStream(`F:/IMS/scaleChit/${folder}/${filename}.jpg`);
-    let to = `/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}/${filename}.jpg`;
-
-    let Client = require('ssh2-sftp-client');
-    let sftp = new Client();
-    
-    sftp.connect({
-      host: '10.10.10.139',
-      port: 22,
-      username: 'ims',
-      password: 'wjdqhykims'
-    }).then((e) => {
-      return sftp.put(from, to);
-    })
-    .then(data => {
-      console.log(data);          // will be false or d, -, l (dir, file or link)
-      res.json(data);
-    })
-    .then(() => {
-      sftp.end();
-    })
-    .catch(err => {
-      console.error(err.message);
-    });
-  }
+  makeImg(img, folder, filename).then(e => {
+    res.json(e);
+  });
 }); 
 
 const makeImg = async(img, folder, filename) => {
@@ -268,35 +219,27 @@ const makeImg = async(img, folder, filename) => {
 
     const buf = Buffer.from(img, 'base64');
 
-    const result1 = await fsPromises.writeFile(root, buf, 'base64');
-    const result2 = await sharp(root).resize({width:1080, height:1650, position:'left top'}).toFile(root1);
-    const result3 = await fsPromises.rename(root1, root3);
-    const result4 = await fsPromises.unlink(root);
-
-
-
-
-    // fs.writeFile(root, buf, 'base64', (err) => {
-    //   if(err){
-    //     return 'N';
-    //   }else{
-    //     sharp(root).resize({width:1080, height:1650, position:'left top'}).toFile(root1).then(e => {
-    //       fs.rename(root1, root3, (err) => {
-    //         if(err){
-    //           return 'N';
-    //         }else{
-    //           fs.unlink(root, (err) => {
-    //             if(err){
-    //               return 'N';
-    //             }else{
-    //               return 'Y';
-    //             }
-    //           })
-    //         }
-    //       })
-    //     })
-    //   }
-    // })
+    fs.writeFile(root, buf, 'base64', (err) => {
+      if(err){
+        return 'N';
+      }else{
+        sharp(root).resize({width:1080, height:1650, position:'left top'}).toFile(root1).then(e => {
+          fs.rename(root1, root3, (err) => {
+            if(err){
+              return 'N';
+            }else{
+              fs.unlink(root, (err) => {
+                if(err){
+                  return 'N';
+                }else{
+                  return 'Y';
+                }
+              })
+            }
+          })
+        })
+      }
+    })
   
   
     // await fsPromises.rename(root1, root3);

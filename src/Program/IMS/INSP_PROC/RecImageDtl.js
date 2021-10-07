@@ -65,7 +65,7 @@ function RecImageDtl(props) {
     canvas = imageRef.current;
     new jsmpeg(client, {
       canvas,
-      pauseWhenHidden: false 
+      // pauseWhenHidden: false 
     });
   }
 
@@ -110,8 +110,9 @@ function RecImageDtl(props) {
         })
 
     return() => {
-      if(client !== null && client !== undefined)
+      if(client !== null && client !== undefined){
         client.close();
+      }
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

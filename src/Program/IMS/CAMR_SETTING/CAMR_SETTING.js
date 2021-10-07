@@ -124,7 +124,7 @@ class CAMR_SETTING extends Component {
     grid.resetOriginData()
     grid.restore();
     
-    this.Retrieve();
+    // this.Retrieve();
   }
 
   Insert = () => {

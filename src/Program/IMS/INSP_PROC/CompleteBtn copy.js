@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
-import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_ftp_file_yn_YK, gfc_sleep } from '../../../Method/Comm';
+import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfo_getCombo, gfo_getCheckbox } from '../../../Method/Component';
 
 import { YK_WEB_REQ, YK_WEB_REQ_RAIN } from '../../../WebReq/WebReq';
@@ -118,9 +118,9 @@ const CompleteBtn = (props) => {
     //#endregion
     
     //#region 계량표저장
-    const chitYn = await gfc_ftp_file_yn_YK(scaleNumb);
+    const chitYn = await gfc_chit_yn_YK(scaleNumb);
     const memo = gfs_getStoreValue('INSP_PROC_MAIN', 'CHIT_MEMO').trim();
-    if(chitYn.data === false){
+    if(chitYn.data === 'N'){
 
       if(memo.length === 0){
         // if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
@@ -141,10 +141,9 @@ const CompleteBtn = (props) => {
       const result = await gfc_screenshot_srv_YK(img, scaleNumb);
       
       if(result.data === 'Y'){
-        // const chitYn = await gfc_chit_yn_YK(scaleNumb);
+        const chitYn = await gfc_chit_yn_YK(scaleNumb);
         gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
-          scaleNumb,
-          chit     : 'Y'
+          chit     : chitYn.data
         });
       }else{
         alert('계량표 저장에 실패 했습니다.');
@@ -256,7 +255,7 @@ const CompleteBtn = (props) => {
     <div className='complete_btn'>
       <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>등록완료</span></button>
       {/* <button type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button> */}
-      <button style={{display: value.chit !== false && 'none' }} type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button>
+      <button style={{display: value.chit !== 'N' && 'none' }} type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button>
       <button style={{display:'none'}} id={`btn3_${props.pgm}`}></button>
       <button style={{display:'none'}} id={`btn4_${props.pgm}`}></button>
     </div>

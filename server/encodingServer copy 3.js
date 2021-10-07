@@ -2,9 +2,17 @@ const axios = require('axios');
 const moment = require('moment');
 var edge = require('edge-js');
 var oracleDb = require('oracledb');
-var dbConfig = require('./db/Oracle/dbConfig');
 
-global.MILESTONE_REPLAY = {};
+(async() => {
+  await oracleDb.createPool({
+    user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
+    password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
+    connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
+    poolAlias: 'aipool',
+    poolMax       : 20,
+    poolMin       : 0
+  });
+})()
 
 
 const executeSP = async(RowStatus, connection, query, data) => {
@@ -60,6 +68,8 @@ const fetchRowsFromRS = async(result) => {
   return data;
 }
 
+global.MILESTONE_REPLAY = {};
+
 const OracleServerSP = async(param) => {
   for(let j = 0; j < param.length; j++){
     let keys = Object.keys(param[j].data);
@@ -70,31 +80,16 @@ const OracleServerSP = async(param) => {
     }
   }
 
-  let rtnResult = {
-    ROWS: [],
-    SUCCESS: false,
-    MSG_CODE: '',
-    MSG_TEXT: '',
-    COL_NAM: ''
-  };
+  let rtn = {
+    SUCCESS: 1
+  }
 
-  oracleDb.getConnection({
-    user         : dbConfig.user,
-    password     : dbConfig.password,
-    connectString: dbConfig.connectString
-  },
-  async (err, connection) => {
+  await oracleDb.getConnection('aipool', async(err, connection) => {
     if(err){
       console.log(err.message);
-      
-      rtnResult.SUCCESS = false;
-      rtnResult.MSG_CODE = err.message;
-      rtnResult.MSG_TEXT = err.message;
-      rtnResult.COL_NAM  = '';
-        
-      return rtnResult;
+      return;
     }
-    
+
     for(let i = 0; i < param.length; i++){
       let query = param[i].sp;
       let data  = param[i].data;
@@ -107,23 +102,15 @@ const OracleServerSP = async(param) => {
       data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
     
       const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
-
+      // console.log(result)
       if(result.SUCCESS === 'N'){
         connection.rollback((err) => {
           if(err !== null)
             console.log('rollback Error: ' + err);
         })
-
         doRelease(connection);
-        return new Promise(function(resolve, reject) {
-          
-          rtnResult.ROWS = result.ROWS;
-          rtnResult.SUCCESS = result.SUCCESS;
-          rtnResult.MSG_CODE = result.MSG_CODE;
-          rtnResult.MSG_TEXT = result.MSG_TEXT;
-          rtnResult.COL_NAM  = result.COL_NAM;
-          resolve(rtnResult);
-        });
+
+        rtn.SUCCESS = result.SUCCESS;
         
       }else{
         if(i === param.length - 1){
@@ -131,45 +118,16 @@ const OracleServerSP = async(param) => {
             if(err !== null)
               console.log('Commit Error: ' + err);
           })
-          
+
           doRelease(connection);
-          return new Promise(function(resolve, reject) {
-            
-            rtnResult.ROWS = result.ROWS;
-            rtnResult.SUCCESS = result.SUCCESS;
-            rtnResult.MSG_CODE = result.MSG_CODE;
-            rtnResult.MSG_TEXT = result.MSG_TEXT;
-            rtnResult.COL_NAM  = result.COL_NAM;
-            resolve(rtnResult);
-          });
+
+          rtn.SUCCESS = result.SUCCESS;
         }
       }
     }
   }) 
 
-  // // const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/SP';
-  // const host = 'http://10.10.10.136:3001/Oracle/SP';
-  // const option = {
-  //   url   : host,
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     'Accept': 'application/json'
-  //   },
-  //   data: {
-  //     param
-  //   } ,
-  //   timeout: 10000
-  // };
-
-  // return axios(option)
-  //   .then(res => {
-  //     return res
-  //   })
-  //   .catch(err => {
-  //     console.log(err)
-  //     return err;
-  //   })
+  return rtn;
 }
 
 setInterval(async() => {
@@ -205,12 +163,9 @@ setInterval(async() => {
     errSeq: 0
   })
 
-  // console.log(await OracleServerSP(param))
-  OracleServerSP(param).then(e => {
-    console.log(e)
-  })
+  OracleServerSP(param).then(e => console.log(e))
 
-  // const select = await OracleServerSP(param);
+  // const select = OracleServerSP(param);
   // console.log(select)
   // if(select.data.SUCCESS === 'Y'){
   //   const ROWS = select.data.ROWS;
@@ -329,94 +284,96 @@ setInterval(async() => {
 }, 5000);
 
 
-// let REC_SCALENUMB = [];
-// setInterval(async() => {
-//   let param = [];
-//   param.push({
-//     sp   : `begin 
-//               SP_ZM_IMS_REC(
-//                 :p_RowStatus,
-//                 :p_scaleNumb,
-//                 :p_seq,
-//                 :p_cameraNo,
-//                 :p_cameraDevice,
-//                 :p_cameraName,
-//                 :p_UserId,
+let REC_SCALENUMB = [];
+setInterval(async() => {
+  let param = [];
+  param.push({
+    sp   : `begin 
+              SP_ZM_IMS_REC(
+                :p_RowStatus,
+                :p_scaleNumb,
+                :p_seq,
+                :p_cameraNo,
+                :p_cameraDevice,
+                :p_cameraName,
+                :p_UserId,
                 
-//                 :p_select,
-//                 :p_SUCCESS,
-//                 :p_MSG_CODE,
-//                 :p_MSG_TEXT,
-//                 :p_COL_NAM
-//               );
-//             end;
-//             `,
-//     data : {
-//       p_RowStatus    : 'R3',
-//       p_scaleNumb    : '',
-//       p_seq          : 0,
-//       p_cameraNo     : '',
-//       p_cameraDevice : '',
-//       p_cameraName   : '',
-//       p_UserId       : 'Encoding'
-//     },
-//     errSeq: 0
-//   })
+                :p_select,
+                :p_SUCCESS,
+                :p_MSG_CODE,
+                :p_MSG_TEXT,
+                :p_COL_NAM
+              );
+            end;
+            `,
+    data : {
+      p_RowStatus    : 'R3',
+      p_scaleNumb    : '',
+      p_seq          : 0,
+      p_cameraNo     : '',
+      p_cameraDevice : '',
+      p_cameraName   : '',
+      p_UserId       : 'Encoding'
+    },
+    errSeq: 0
+  })
 
-//   const select = await OracleServerSP(param);
-//   if(select.data.SUCCESS === 'Y'){
+  const select = await OracleServerSP(param);
+  // if(select.data.SUCCESS === 'Y'){
     
-//     const ROWS = select.data.ROWS;
-//     for(let i = 0; i < ROWS.length; i++){
-//       const scaleNumb = ROWS[i].SCALENUMB;
-//       const oldData = REC_SCALENUMB.find(e => e === scaleNumb);
-//       if(!oldData){
-//         REC_SCALENUMB.push(scaleNumb);
-//       }
-//     }
+  //   const ROWS = select.data.ROWS;
+  //   for(let i = 0; i < ROWS.length; i++){
+  //     const scaleNumb = ROWS[i].SCALENUMB;
+  //     const oldData = REC_SCALENUMB.find(e => e === scaleNumb);
+  //     if(!oldData){
+  //       REC_SCALENUMB.push(scaleNumb);
+  //     }
+  //   }
 
-//     for(let i = 0; i < REC_SCALENUMB.length; i++){
-//       const scaleNumb = REC_SCALENUMB[i];
-//       const newData = ROWS.find(e => e.SCALENUMB === scaleNumb);
+  //   for(let i = 0; i < REC_SCALENUMB.length; i++){
+  //     const scaleNumb = REC_SCALENUMB[i];
+  //     const newData = ROWS.find(e => e.SCALENUMB === scaleNumb);
 
-//       if(!newData){
-//         REC_SCALENUMB = REC_SCALENUMB.filter(e => e !== scaleNumb);
-//       }
-//     }
-//   }else{
-//     REC_SCALENUMB = [];
-//   }
+  //     if(!newData){
+  //       REC_SCALENUMB = REC_SCALENUMB.filter(e => e !== scaleNumb);
+  //     }
+  //   }
+  // }else{
+  //   REC_SCALENUMB = [];
+  // }
 
-//   const host = 'http://10.10.10.136:3001/Ai/GetRecodingList';
-//   const option = {
-//     url   : host,
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Accept': 'application/json'
-//     },
-//     data: {
-//       REC_SCALENUMB
-//     } ,
-//     timeout: 10000
-//   };
+  // const host = 'http://10.10.10.136:3001/Ai/GetRecodingList';
+  // const option = {
+  //   url   : host,
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     'Accept': 'application/json'
+  //   },
+  //   data: {
+  //     REC_SCALENUMB
+  //   } ,
+  //   timeout: 10000
+  // };
 
-//   return axios(option)
-//     .then(res => {
-//       return res
-//     })
-//     .catch(err => {
-//       console.log(err)
-//       return err;
-//     })
-// }, 5000);
+  // return axios(option)
+  //   .then(res => {
+  //     return res
+  //   })
+  //   .catch(err => {
+  //     console.log(err)
+  //     return err;
+  //   })
+}, 5000);
 
-const doRelease = (connection) => {
-  connection.close(err => {
+
+const doRelease = async (connection) => {
+  await connection.release(err => {
     if(err){
       console.log(err.message);
     }
   })
 } 
+
 console.log('Encoding Server Start');
 

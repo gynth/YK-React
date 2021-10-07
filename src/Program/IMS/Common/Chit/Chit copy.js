@@ -31,7 +31,7 @@ function Chit(props) {
   return (
     <>
       {
-        value.chit === false && (props.reducer === 'INSP_PROC_MAIN' || props.reducer === 'DISP_PROC_MAIN') ?
+        value.chit === 'N' && (props.reducer === 'INSP_PROC_MAIN' || props.reducer === 'DISP_PROC_MAIN') ?
         <div className='data_list' id={`content2_${props.pgm}`}>
           <div className='doc'>
             <h5>계 량 증 명 서</h5>
@@ -78,7 +78,7 @@ function Chit(props) {
       :
       
       <div className='data_list' style={{paddingLeft:0, paddingRight: 0}} id={`content2_${props.pgm}`}>
-        {value.chit !== false && <img src={`http://tally.yksteel.co.kr/Images/scaleChit/${value.scaleNumb.substring(0, 8)}/${value.scaleNumb}.jpg`} style={{width:'100%', height:600}} alt='chit' />}
+        {value.chit !== 'N' && <img src={`http://tally.yksteel.co.kr/Images/scaleChit/${value.scaleNumb.substring(0, 8)}/${value.scaleNumb.substring(0, 8)}.jpg`} style={{width:'100%', height:600}} alt='chit' />}
         {/* {value.chit !== 'N' && <img src={`http://ims.yksteel.co.kr:90/WebServer/MobileChitImg/scaleChit/${value.scaleNumb.substring(0, 8)}/${value.scaleNumb}.jpg?time=${new Date()}`} style={{width:'100%', height:600}} alt='chit' />} */}
       </div>
       }

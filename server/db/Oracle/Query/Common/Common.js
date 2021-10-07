@@ -38,7 +38,8 @@ const Common = (fn, param) => {
     `       ,CAMERA_NAME ` +
     `   FROM ZM_IMS_VIDEO      ` +
     `  WHERE SCALENUMB = '${param.scaleNumb}' `+
-    `    AND SEQ       = '${param.seq}' `;
+    `    AND last_yn   = 'Y' ` + 
+    `    AND ROWNUM    = ${param.seq} `;
   }else if(fn === 'ZM_IMS_REC_UPDATE'){
     query = 
     ` UPDATE ZM_IMS_REC              ` +

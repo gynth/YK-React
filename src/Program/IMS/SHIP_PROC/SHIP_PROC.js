@@ -320,7 +320,8 @@ class SHIP_PROC extends Component {
               grid.setValue(oldData.rowKey, 'iron_grade', data[i].iron_grade);
             }
 
-            grid.resetOriginData()
+            grid.resetOriginData();
+            grid.restore();
           }
 
           //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.

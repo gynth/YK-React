@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { TOKEN, RTSP, MILESTONE } from './WebReq/WebReq';
 import { getDynamicSql_Oracle } from './db/Oracle/Oracle';
-import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone } from './Method/Comm';
+import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_from_milestone, gfc_getParameter } from './Method/Comm';
 import { getSessionCookie } from './Cookies';
 
 const jsmpeg = require('jsmpeg');
@@ -25,8 +25,8 @@ class RtspFullScreen extends Component {
     }else if(this.device === ''){
       alert('마일스톤 서버에 접속할 수 없습니다.');
     }else{
-      const areaTp = this.getParameter('areaTp');
-      this.scaleNumb = this.getParameter('scaleNumb');
+      const areaTp = gfc_getParameter(this.props, 'areaTp');
+      this.scaleNumb = gfc_getParameter(this.props, 'scaleNumb');
 
       const select = await getDynamicSql_Oracle('Common/Common', 'ZM_IMS_CAMERA_SELECT_EACH', [{AREA_TP:areaTp}]);
       if(select.data === undefined){
@@ -81,12 +81,12 @@ class RtspFullScreen extends Component {
     }
   }
 
-  getParameter(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(this.props.location.search);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
+  // getParameter(name) {
+  //   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  //   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+  //       results = regex.exec(this.props.location.search);
+  //   return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  // }
 
   constructor(props) {
     super(props);

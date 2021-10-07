@@ -125,89 +125,89 @@ const onActiveWindow = (e) => {
 
 const defaultOpen = async() => {
   
-    const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
-    if(auth.length === undefined || auth.length === 0) return;
+    // const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+    // if(auth.length === undefined || auth.length === 0) return;
 
-    const inspProc = auth.find(e => e.MENU_ID === 'INSP_PROC');
-    if(inspProc !== null){
-      if(inspProc.PGMAUT_YN === 'Y'){
-        //검수대기 Open
-        gfs_PGM_REDUCER('INSP_PROC');
-        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-        ({
-          windowZindex: 0,
-          activeWindow: {programId: 'INSP_PROC',
-                          programNam: '검수진행'
-                        }
-        }));
-      }
-    }
+    // const inspProc = auth.find(e => e.MENU_ID === 'INSP_PROC');
+    // if(inspProc !== null){
+    //   if(inspProc.PGMAUT_YN === 'Y'){
+    //     //검수대기 Open
+    //     gfs_PGM_REDUCER('INSP_PROC');
+    //     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    //     ({
+    //       windowZindex: 0,
+    //       activeWindow: {programId: 'INSP_PROC',
+    //                       programNam: '검수진행'
+    //                     }
+    //     }));
+    //   }
+    // }
 
-    await gfc_sleep(500);
+    // await gfc_sleep(500);
 
-    const inspHist = auth.find(e => e.MENU_ID === 'INSP_HIST');
-    if(inspHist !== null){
-      if(inspHist.PGMAUT_YN === 'Y'){
-        //검수이력 Open
-        gfs_PGM_REDUCER('INSP_HIST');
-        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-        ({
-          windowZindex: 1,
-          activeWindow: {programId: 'INSP_HIST',
-                          programNam: '검수이력'
-                        }
-        }));
-      }
-    }
+    // const inspHist = auth.find(e => e.MENU_ID === 'INSP_HIST');
+    // if(inspHist !== null){
+    //   if(inspHist.PGMAUT_YN === 'Y'){
+    //     //검수이력 Open
+    //     gfs_PGM_REDUCER('INSP_HIST');
+    //     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    //     ({
+    //       windowZindex: 1,
+    //       activeWindow: {programId: 'INSP_HIST',
+    //                       programNam: '검수이력'
+    //                     }
+    //     }));
+    //   }
+    // }
 
-    await gfc_sleep(500);
+    // await gfc_sleep(500);
 
-    const dispProc = auth.find(e => e.MENU_ID === 'DISP_PROC');
-    if(dispProc !== null){
-      if(dispProc.PGMAUT_YN === 'Y'){
-        //출차대기 Open
-        gfs_PGM_REDUCER('DISP_PROC');
-        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-        ({
-          windowZindex: 2,
-          activeWindow: {programId: 'DISP_PROC',
-                          programNam: '출차대기'
-                        }
-        }));
-      }
-    }
+    // const dispProc = auth.find(e => e.MENU_ID === 'DISP_PROC');
+    // if(dispProc !== null){
+    //   if(dispProc.PGMAUT_YN === 'Y'){
+    //     //출차대기 Open
+    //     gfs_PGM_REDUCER('DISP_PROC');
+    //     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    //     ({
+    //       windowZindex: 2,
+    //       activeWindow: {programId: 'DISP_PROC',
+    //                       programNam: '출차대기'
+    //                     }
+    //     }));
+    //   }
+    // }
 
-    await gfc_sleep(500);
+    // await gfc_sleep(500);
 
-    const entrProc = auth.find(e => e.MENU_ID === 'ENTR_PROC');
-    if(entrProc !== null){
-      if(entrProc.PGMAUT_YN === 'Y'){
-        //입차대기 Open
-        gfs_PGM_REDUCER('ENTR_PROC');
-        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-        ({
-          windowZindex: 3,
-          activeWindow: {programId: 'ENTR_PROC',
-                          programNam: '입차대기'
-                        }
-        }));
-      }
-    }
+    // const entrProc = auth.find(e => e.MENU_ID === 'ENTR_PROC');
+    // if(entrProc !== null){
+    //   if(entrProc.PGMAUT_YN === 'Y'){
+    //     //입차대기 Open
+    //     gfs_PGM_REDUCER('ENTR_PROC');
+    //     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    //     ({
+    //       windowZindex: 3,
+    //       activeWindow: {programId: 'ENTR_PROC',
+    //                       programNam: '입차대기'
+    //                     }
+    //     }));
+    //   }
+    // }
 
-    await gfc_sleep(500);
+    // await gfc_sleep(500);
 
-    if(inspProc !== null){
-      if(inspProc.PGMAUT_YN === 'Y'){
+    // if(inspProc !== null){
+    //   if(inspProc.PGMAUT_YN === 'Y'){
 
-        gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-        ({
-          windowZindex: 0,
-          activeWindow: {programId: 'INSP_PROC',
-                          programNam: '검수진행'
-                        }
-        }));
-      }
-    }
+    //     gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+    //     ({
+    //       windowZindex: 0,
+    //       activeWindow: {programId: 'INSP_PROC',
+    //                       programNam: '검수진행'
+    //                     }
+    //     }));
+    //   }
+    // }
 }
 
 const Home = (props) => {  
@@ -224,8 +224,8 @@ const Home = (props) => {
 
     if(user_id === ''){
       alert('로그인부터 해주세요.');
-      // window.location.replace('http://ims.yksteel.co.kr:90'); 김경현
-      window.location.replace('http://localhost:4000');
+      window.location.replace('http://ims.yksteel.co.kr:90');
+      // window.location.replace('http://localhost:4000');
       return;
     }
 

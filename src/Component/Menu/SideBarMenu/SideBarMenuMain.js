@@ -96,7 +96,7 @@ const SideBarMenu = (props) => {
         )
       }else{
         menu.push(
-          <Li key={data[i].COMM_DTL_CD} MENU_ID={data[i].COMM_DTL_CD} index={data[i].SORT_SEQ} nam={data[i].COMM_DTL_NAM} />
+          <Li key={data[i].COMM_DTL_CD} MENU_ID={data[i].COMM_DTL_CD} index={data[i].SORT_SEQ - 1} nam={data[i].COMM_DTL_NAM} />
         )
       }
     }

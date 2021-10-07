@@ -11,8 +11,9 @@ app3003.use(cors());
 app3003.post('/',  (req, res) => {
   let scaleNumb = req.body.scaleNumb;
   let Name = req.body.Name;
-  let resourcePath = `F:/IMS/Replay/${scaleNumb}/${Name}/${scaleNumb}.mp4`;
-  
+  let resourcePath = `F:/IMS/Replay/${scaleNumb.substring(0,8)}/${scaleNumb}/${Name}/${scaleNumb}.mp4`;
+
+  // console.log(resourcePath);
   let stream = fs.createReadStream(resourcePath);
  
   stream.pipe(res);
@@ -30,7 +31,7 @@ const server = app3003.listen(port3003, function(){
 new hls(server, {
   provider: {
     exists: (req, cb) => {
-      console.log(decodeURIComponent(req.url));
+      // console.log(decodeURIComponent(req.url));
 
       fs.access('F:/IMS/Replay' + decodeURIComponent(req.url), fs.constants.F_OK, (err) => {
         if(err){
