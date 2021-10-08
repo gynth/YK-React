@@ -277,147 +277,25 @@ class INSP_CANC extends Component {
     gfs_subscribe(this.onActiveWindow);
     //#endregion
   }
-  
-  mainGrid = () => {
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    
-    YK_WEB_REQ('tally_approve_cancel.jsp').then(e => {
-      const main = e.data.dataSend;
-
-      if(main){
-
-        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-    
-        const data = main.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            
-          }else{
-            return true;
-          }
-        })
-    
-        if(data.length > 0){
-          
-          //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
-          for(let i = 0; i < data.length; i++){
-            const scaleNumb = data[i].scaleNumb;
-
-            const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
-            if(!oldData){
-              gfg_appendRow(grid, grid.getRowCount(), {
-                scaleNumb,
-                vehicle_no: data[i].vehicle_no,
-                pre_item_grade: data[i].pre_item_grade,
-                iron_grade_item_name: data[i].iron_grade_item_name,
-                reduce_name: data[i].reduce_name,
-                reduce_wgt: data[i].reduce_wgt,
-                return_gubun_name: data[i].return_gubun_name,
-                inspector: data[i].inspector,
-                delivery_date: data[i].delivery_date,
-                vendor_name: data[i].vendor_name
-              }, 'scaleNumb', false);
-
-              grid.resetOriginData();
-              grid.restore();
-            }
-          }
-
-          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
-          for(let i = 0; i < grid.getData().length; i++){
-            const scaleNumb =  grid.getData()[i].scaleNumb;
-
-            const newData = data.find(e => e.scaleNumb === scaleNumb)
-            if(!newData){
-              grid.removeRow(i);
-
-              //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
-              const selectScaleNumb = gfs_getStoreValue('INSP_CANC_MAIN', 'DETAIL_SCALE');
-              if(scaleNumb === selectScaleNumb){
-                gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-                gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-                gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
-                gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-              }
-            }
-          }
-
-          gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-        }else{
-          grid.clear();
-          gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-        }
-      }else{
-        grid.clear();
-        gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-      }
-    })
-  }
-
-  componentDidMount(){
-    // this.Retrieve();
-    
-    this.mainGridInterval = setInterval(e => {
-      this.mainGrid();
-    }, 2000)
-  }
-
-  componentWillUnmount(){
-    clearInterval(this.mainGridInterval);
-  }
 
   Retrieve = async () => {
 
     gfc_showMask();
 
-    const mainData = await YK_WEB_REQ('tally_approve_cancle.jsp');
+    const mainData = await YK_WEB_REQ('tally_approve_cancel.jsp');
     const main = mainData.data.dataSend;
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
-    
-    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
-    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
-    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
-    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
-    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
+
+    gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(''); //사전등급
+    gfo_getInput(this.props.pgm, 'iron_grade').setValue('');   //고철등급
+    gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue('');   //상세고철등급
+    gfo_getInput(this.props.pgm, 'reduce_wgt').setValue('');     //감량중량
+    gfo_getInput(this.props.pgm, 'reduce_name').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'return_code').setValue('');      //반품구분
+    gfo_getInput(this.props.pgm, 'return_gubun_name').setValue('');     //반품구분사유
+    gfo_getCombo(this.props.pgm, 'return_reason').setValue('');      //취소사유
+    gfo_getInput(this.props.pgm, 'return_reason_desc').setValue('');     //취소사유
 
     gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
     gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
@@ -445,30 +323,16 @@ class INSP_CANC extends Component {
     gfc_hideMask();
   }
 
-
   onSelectChange = async (e) => {
     if(e === null) return;
-    
-    //기존 등록된 정보
-    const dtlInfo = await YK_WEB_REQ(`tally_process_f_sel.jsp?scaleNumb=${e.scaleNumb}`);
-    if(!dtlInfo.data.dataSend){
-      alert('검수정보를 불러올수 없습니다.');
-      return;
-    }
 
-    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.pre_item_grade); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.dataSend[0].IRON_GRADE);   //고철등급
-    const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2');
-    await detail_grade2.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${dtlInfo.data.dataSend[0].IRON_GRADE}`, {})});
-    detail_grade2.setValue(dtlInfo.data.dataSend[0].IRON_GRADE_ITEM);   //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT);     //감량중량
-    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT_REASON_CODE); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);     //감가내역
-    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.dataSend[0].DISCOUNT_RATE);    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.dataSend[0].CAR_TYPE);      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.dataSend[0].RETURN_CODE);      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.dataSend[0].RETURN_GUBUN);     //반품구분사유
-    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.dataSend[0].WARNING);  //경고
+    gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(e.pre_item_grade); //사전등급
+    gfo_getInput(this.props.pgm, 'iron_grade').setValue(e.iron_grade);   //고철등급
+    gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue(e.iron_grade_item_name);   //상세고철등급
+    gfo_getInput(this.props.pgm, 'reduce_wgt').setValue(e.reduce_wgt);     //감량중량
+    gfo_getInput(this.props.pgm, 'reduce_name').setValue(e.reduce_name); //감량사유
+    gfo_getCombo(this.props.pgm, 'return_code').setValue(e.return_gubun);      //반품구분
+    gfo_getInput(this.props.pgm, 'return_gubun_name').setValue(e.return_gubun_name);     //반품구분사유
 
     gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vehicle_no});
@@ -478,7 +342,6 @@ class INSP_CANC extends Component {
     gfs_dispatch('INSP_CANC_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
 
     //계량증명서 여부 확인.
-    // const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
     gfs_dispatch('INSP_CANC_MAIN', 'CHIT_INFO', {
       scaleNumb: e.scaleNumb
     });
@@ -656,140 +519,63 @@ class INSP_CANC extends Component {
             <div className='title'><span>계근번호</span><Detailspan flag={1}  reducer='INSP_CANC_MAIN'/></div>
 
             <div className='input_list on' id={`content1_${this.props.pgm}`}>
-                <ul>
+            <ul>
+                  <li>
+                    <h5>취소사유</h5>
+                    <div style={{marginBottom:'5px'}}>
+                      <div style={{marginBottom:'5px'}}>
+                        <Combobox pgm     = {this.props.pgm}
+                              id      = 'return_reason'
+                              value   = 'CODEID'
+                              display = 'KORFNM'
+                              oracleData = {getDynamicSql_Oracle(
+                                 'Common/Common',
+                                 'INSP_CANC_REASON',
+                                 {}, {})}
+                        />
+                      </div>
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'return_reason_desc'
+                             width   = '100%'
+                      />
+                    </div>
+                  </li>
                   <li>
                     <h5>사전등급</h5>
                       <Input pgm     = {this.props.pgm}
-                             id      = 'detail_pre_grade'
+                             id      = 'pre_item_grade'
                              width   = '100%'
                              disabled
                       />
                   </li>
                   <li>
-                    <h5>등급책정</h5>
+                    <h5>등급</h5>
                     <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                                id      = 'detail_grade1'
-                                value   = 'itemCode'
-                                display = 'item'
-                                placeholder = '고철등급 검색'
-                                height  = {42}
-                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
-                                onChange = {async (e) => {
-                                  const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
-                                  combo.setValue(null);
-
-                                  if(e !== undefined && e.value !== ''){
-                                    await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
-                                    combo.setDisabled(false);
-                                  }else{
-                                    combo.setDisabled(true);
-                                  }
-                                }}
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'iron_grade'
+                             width   = '100%'
+                             disabled
                       />
                     </div>
-                    <Combobox pgm     = {this.props.pgm}
-                              id      = 'detail_grade2'
-                              value   = 'itemCode'
-                              display = 'item'
-                              isDisabled
+                    <Input pgm     = {this.props.pgm}
+                            id      = 'iron_grade_item_name'
+                            width   = '100%'
+                            disabled
                     />
                   </li>
                   <li>
                     <h5>감량중량</h5>
                     <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_subt'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '감량중량 검색(KG)'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
-                            onChange = {async (e) => {
-                              if(e === undefined) return;
-
-                              const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
-                              
-                              if(e.value === '0'){
-                                combo.setValue(null);
-                                combo.setDisabled(true);
-                              }else{
-                                // await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
-                                combo.setDisabled(false);
-                              }
-                            }}
+                      <Input pgm     = {this.props.pgm}
+                              id      = 'reduce_wgt'
+                              width   = '100%'
+                              disabled
                       />
                     </div>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_subt_leg'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '감량사유 검색'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
-                          isDisabled
-                    /> 
-                  </li>
-                  <li>
-                    <h5>감가내역</h5>
-                    <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_depr'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '감가내역 검색'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
-                            emptyRow
-                            onChange = {async (e) => {
-                              const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
-
-                              if(e === undefined) return;
-
-                              if(e !== undefined && e.value !== ''){
-                                combo.setValue(null);
-                                combo.setDisabled(false);
-                              }else{
-                                combo.setDisabled(true);
-                              }
-                            }}
-                      />
-                    </div>
-                    <Combobox pgm = {this.props.pgm}
-                          id      = 'detail_depr2'
-                          value   = 'code'
-                          display = 'name'
-                          placeholder = '감가비율'
-                          isDisabled
-                          data    = {[{
-                            'code': '10',
-                            'name': '10%'
-                          },{
-                            'code': '20',
-                            'name': '20%'
-                          },{
-                            'code': '30',
-                            'name': '30%'
-                          },{
-                            'code': '40',
-                            'name': '40%'
-                          },{
-                            'code': '50',
-                            'name': '50%'
-                          },{
-                            'code': '60',
-                            'name': '60%'
-                          },{
-                            'code': '70',
-                            'name': '70%'
-                          },{
-                            'code': '80',
-                            'name': '80%'
-                          },{
-                            'code': '90',
-                            'name': '90%'
-                          },{
-                            'code': '100',
-                            'name': '100%'
-                          }]}
-                          // emptyRow
+                    <Input pgm     = {this.props.pgm}
+                            id      = 'reduce_name'
+                            width   = '100%'
+                            disabled
                     />
                   </li>
                   {/* <li>
@@ -811,56 +597,23 @@ class INSP_CANC extends Component {
                   />
                   </li> */}
                   <li>
-                    <h5>차종구분</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_car'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '차종선택'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
-                  />
-                  </li>
-                  <li>
-                    <h5>반품구분</h5>
+                    <h5>반품내용</h5>
                     <div style={{marginBottom:'5px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '일부,전량 선택'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
-                            emptyRow
-                            onChange = {e => {
-                              const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
-                              combo.setValue(null);
-
-                              if(e === undefined) return;
-
-                              if(e.value === ''){
-                                combo.setDisabled(true);
-                              }else{
-                                combo.setDisabled(false);
-                              }
-                              // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
-                            }}
-                    />
-                  </div>
-                  <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_rtn2'
-                            value   = 'itemCode'
-                            display = 'item'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
-                            isDisabled
-                    />
-                  </li>
-                  <li>
-                    <h5>경고</h5>
-                    <Checkbox pgm   = {this.props.pgm}
-                              id    = 'detail_warning'
-                              width = '30px'
-                              height= '30px'
-
-                    />
+                      <div style={{marginBottom:'5px'}}>
+                        <Combobox pgm     = {this.props.pgm}
+                              id      = 'return_code'
+                              value   = 'itemCode'
+                              display = 'item'
+                              isDisabled
+                              etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                        />
+                      </div>
+                      <Input pgm     = {this.props.pgm}
+                              id      = 'return_gubun_name'
+                              width   = '100%'
+                              disabled
+                      />
+                    </div>
                   </li>
                 </ul>
               </div>

@@ -323,6 +323,9 @@ class INSP_HIST extends Component {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
+    gfs_dispatch('INSP_HIST_MAIN', 'CHIT_INFO', {
+      scaleNumb: ''
+    });
     if(main){
 
       const dataMod = [];
@@ -360,9 +363,9 @@ class INSP_HIST extends Component {
     gfs_dispatch('INSP_HIST_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
 
     //계량증명서 여부 확인.
-    const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
+    // const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
     gfs_dispatch('INSP_HIST_MAIN', 'CHIT_INFO', {
-      chit     : chitYn.data
+      scaleNumb: e.scaleNumb
     });
   }
 

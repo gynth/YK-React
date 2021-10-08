@@ -140,7 +140,7 @@ const CompleteBtn = (props) => {
       const img = document.getElementById(`content2_${props.pgm}`);
       const result = await gfc_screenshot_srv_YK(img, scaleNumb);
       
-      if(result.data === 'Y'){
+      if(result.data.substring(0, 8) === 'Uploaded'){
         // const chitYn = await gfc_chit_yn_YK(scaleNumb);
         gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
           scaleNumb,
@@ -159,7 +159,7 @@ const CompleteBtn = (props) => {
       }
     }
 
-    const rain = await getRain();
+    // const rain = await getRain();
 
     const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
                 // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
@@ -182,7 +182,8 @@ const CompleteBtn = (props) => {
 
                 `dCarTypeCode=${detail_car.getValue()}&` +
                 `dWarning=${detail_warning.getValue() === true ? 'Y' : 'N'}&` +
-                `dRain=${rain}`;
+                // `dRain=${rain}`;
+                `dRain=0`;
     const Data = await YK_WEB_REQ(`tally_process_erp_procedure.jsp?${msg}`);
     console.log(Data);
 

@@ -53,8 +53,8 @@ const CompleteBtn = (props) => {
                   `,
           data : {
             p_delivery_id : column.scaleNumb,
-            p_approve_name: 'bjkim2',
-            p_erp_id      : 1989
+            p_approve_name: gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+            p_erp_id      : gfs_getStoreValue('USER_REDUCER', 'ERP_ID')
           },
           errSeq: i
         })

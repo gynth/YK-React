@@ -16,7 +16,10 @@ const yk_req = (request, URL) => {
   return response;
 }
 
+let cnt = 0;
 router.post('/', (req, res) => {
+  cnt++;
+  console.log(`${cnt}: http://tally.yksteel.co.kr/ims/${req.body.addr}`)
   let URL = encodeURI(`http://tally.yksteel.co.kr/ims/${req.body.addr}`);
   // let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
   

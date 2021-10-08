@@ -1052,26 +1052,27 @@ class INSP_PROC extends Component {
   //#endregion
 
   componentDidMount(){
+    console.log('didMount');
     this.Init();
-    // this.Retrieve();
+    this.Retrieve();
 
-    // this.mainHeaderInterval = setInterval(e => {
-    //   this.mainHeader();
-    // }, 2000)
+    this.mainHeaderInterval = setInterval(e => {
+      this.mainHeader();
+    }, 5000)
 
-    // this.mainHeaderInterval2 = setInterval(e => {
-    //   this.mainHeader2();
-    // }, 2000)
+    this.mainHeaderInterval2 = setInterval(e => {
+      this.mainHeader2();
+    }, 5000)
 
-    // this.mainGridInterval = setInterval(e => {
-    //   this.mainGrid();
-    // }, 2000)
+    this.mainGridInterval = setInterval(e => {
+      this.mainGrid();
+    }, 3000)
   }
 
   componentWillUnmount(){
-    // clearInterval(this.mainHeaderInterval);
-    // clearInterval(this.mainHeaderInterval2);
-    // clearInterval(this.mainGridInterval);
+    clearInterval(this.mainHeaderInterval);
+    clearInterval(this.mainHeaderInterval2);
+    clearInterval(this.mainGridInterval);
   }
 
   Retrieve = async () => {
@@ -1568,7 +1569,29 @@ class INSP_PROC extends Component {
                     }
                   }
                 }}><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
-                <li><span className='title'>운송대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={7} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
+
+                  const openAuth = auth.find(e => e.MENU_ID === 'ENTR_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+                  
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('ENTR_WAIT');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'ENTR_WAIT',
+                                        programNam: '운송대기'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>운송대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={7} /></li>
               </ul>
             </div>
           </div>

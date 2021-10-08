@@ -143,17 +143,17 @@ class ENTR_WAIT extends Component {
     })
   }
 
-  componentDidMount(){
-    // this.Retrieve();
+  // componentDidMount(){
+  //   // this.Retrieve();
     
-    this.mainGridInterval = setInterval(e => {
-      this.mainGrid();
-    }, 2000)
-  }
+  //   this.mainGridInterval = setInterval(e => {
+  //     this.mainGrid();
+  //   }, 2000)
+  // }
 
-  componentWillUnmount(){
-    clearInterval(this.mainGridInterval);
-  }
+  // componentWillUnmount(){
+  //   clearInterval(this.mainGridInterval);
+  // }
 
   Retrieve = async () => {
 

@@ -5,7 +5,6 @@ const Oracle = require('./db/Oracle/Oracle');
 const Milestone = require('./Milestone/Milestone');
 const WebReq = require('./WebReq/WebReq');
 const ScreenShot = require('./ScreenShot/ScreenShot');
-const Ai = require('./Ai/ai');
 const cors = require('cors');
 var edge = require('edge-js');
 const fs = require('fs');
@@ -36,7 +35,7 @@ app3002.use(express.urlencoded({
 app3001.use(cors());  
 app3002.use(cors());
 
-app3001.use('/Ai', Ai);
+// app3001.use('/Ai', Ai);
 
 //#region YK스틸 웹요청
 app3001.use('/YK', WebReq);

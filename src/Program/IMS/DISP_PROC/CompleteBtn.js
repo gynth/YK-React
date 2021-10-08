@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
-import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_chit_yn_YK, gfc_sleep, gfc_screenshot_del_yk } from '../../../Method/Comm';
+import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_ftp_file_yn_YK, gfc_sleep, gfc_screenshot_del_yk } from '../../../Method/Comm';
 import { gfo_getCombo, gfo_getCheckbox } from '../../../Method/Component';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
@@ -30,13 +30,13 @@ const CompleteBtn = (props) => {
       return;
     }
 
-    if(value.chit !== 'N'){
+    if(value.chit !== false){
       if(window.confirm('계량표를 초기화 하시겠습니까?') === false){
         return;
       }
 
       const result = await gfc_screenshot_del_yk(scaleNumb);
-      if(result.data !== 'Y'){
+      if(result.data.substring(0, 12) !== 'Successfully'){
         alert('계량표 삭제에 실패했습니다.');
       }else{
         const itemFlag = gfs_getStoreValue('DISP_PROC_MAIN', 'CHIT_INFO').itemFlag;
@@ -49,7 +49,7 @@ const CompleteBtn = (props) => {
           Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
           loc      : chitInfoYn.data.dataSend[0].area,
           user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-          chit     : 'N'
+          chit     : false
         });
       }
     }
@@ -145,27 +145,34 @@ const CompleteBtn = (props) => {
     //#endregion
     
     //#region 계량표저장
-    const chitYn = await gfc_chit_yn_YK(scaleNumb);
+    const chitYn = await gfc_ftp_file_yn_YK(scaleNumb);
     const memo = gfs_getStoreValue('DISP_PROC_MAIN', 'CHIT_MEMO').trim();
-    if(chitYn.data === 'N'){
-      document.getElementById(`tab2_${props.pgm}`).click(2);
-
-      await gfc_sleep(200);
+    if(chitYn.data === false){
 
       if(memo.length === 0){
-        if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
-          gfc_hideMask();
-          return;
-        }
+        // if(window.confirm('계량표의 내용이 없습니다. 저장하시겠습니까?') === false){
+        //   gfc_hideMask();
+        //   return;
+        // }
+        document.getElementById(`tab2_${props.pgm}`).click(2);
+        await gfc_sleep(100);
+        alert('계량표의 내용이 없습니다.');
+        gfc_hideMask();
+        return;
       }
+
+      document.getElementById(`tab2_${props.pgm}`).click(2);
+      await gfc_sleep(100);
 
       const img = document.getElementById(`content2_${props.pgm}`);
       const result = await gfc_screenshot_srv_YK(img, scaleNumb);
+
+      console.log(result);
       
-      if(result.data === 'Y'){
-        const chitYn = await gfc_chit_yn_YK(scaleNumb);
+      if(result.data.substring(0, 8) === 'Uploaded'){
         gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-          chit     : chitYn.data
+          scaleNumb,
+          chit     : 'Y'
         });
       }else{
         alert('계량표 저장에 실패 했습니다.');
@@ -263,7 +270,7 @@ const CompleteBtn = (props) => {
   return (
     <div className='complete_btn'>
       <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>수정완료</span></button>
-      <button type='button' id={`btn2_${props.pgm}`} onClick={e => {value.chit !== 'N' ? onChitProcess() : onProcess()} }><span>{value.chit !== 'N' ? '계량표삭제' : '수정완료'}</span></button>
+      <button type='button' id={`btn2_${props.pgm}`} onClick={e => {value.chit !== false ? onChitProcess() : onProcess()} }><span>{value.chit !== false ? '계량표삭제' : '수정완료'}</span></button>
     </div>
   );
 }

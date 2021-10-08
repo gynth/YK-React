@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK_Tally, gfc_sleep } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_ftp_file_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow, gfg_appendRow } from '../../../Method/Grid';
@@ -386,66 +386,6 @@ class DISP_PROC extends Component {
     clearInterval(this.mainGridInterval);
   }
 
-  Retrieve = async () => {
-
-    gfc_showMask();
-
-    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
-    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
-    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
-    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
-    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
-
-    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
-    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-
-    gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-      itemFlag : '',
-      chit     : 'N',
-      scaleNumb: ''
-    });
-
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    const data = [{
-      scaleNumb: '202110070001',
-      carNumb  : '68무6308',
-      preItemGrade: '사전등급',
-      itemGrade   : '검수등급',
-      date        : new Date(),
-      lastDate    : new Date(),
-      vendor      : '벤더'
-    },{
-      scaleNumb: '202110070002',
-      carNumb  : '68무6308',
-      preItemGrade: '사전등급',
-      itemGrade   : '검수등급',
-      date        : new Date(),
-      lastDate    : new Date(),
-      vendor      : '벤더'
-    }]
-
-    if(data.length > 0){
-      grid.resetData(data);
-      gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-      
-      await gfc_sleep(100);
-
-      gfg_setSelectRow(grid);
-    }else{
-      gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-    }
-
-    gfc_hideMask();
-  }
-
   // Retrieve = async () => {
 
   //   gfc_showMask();
@@ -468,63 +408,28 @@ class DISP_PROC extends Component {
   //   gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
 
   //   gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-  //     itemFlag : '',
-  //     chit     : 'N',
+  //     chit     : false,
   //     scaleNumb: ''
   //   });
 
-  //   const mainData = await YK_WEB_REQ('tally_mstr_pass.jsp');
-  //   const main = mainData.data.dataSend;
   //   const grid = gfg_getGrid(this.props.pgm, 'main10');
-  //   grid.clear();
-    
-  //   if(!main) {
-  //     gfc_hideMask();
-  //     return;
-  //   }
-
-  //   const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-  //   const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-
-  //   const data = main.filter(e => {
-  //     if(search_tp !== null && search_tp !== ''){
-  //       //계근번호
-  //       if(search_tp === '1'){
-  //         if(e.scaleNumb.indexOf(search_txt) >= 0){
-  //           return true;
-  //         }else{
-  //           return false;
-  //         }
-  //       }
-  //       //차량번호
-  //       else if(search_tp === '2'){
-  //         if(e.carNumb.indexOf(search_txt) >= 0){
-  //           return true;
-  //         }else{
-  //           return false;
-  //         }
-  //       }
-  //       //사전등급
-  //       else if(search_tp === '3'){
-  //         if(e.itemGrade.indexOf(search_txt) >= 0){
-  //           return true;
-  //         }else{
-  //           return false;
-  //         }
-  //       }
-  //       //업체
-  //       else if(search_tp === '4'){
-  //         if(e.vendor.indexOf(search_txt) >= 0){
-  //           return true;
-  //         }else{
-  //           return false;
-  //         }
-  //       }
-        
-  //     }else{
-  //       return true;
-  //     }
-  //   })
+  //   const data = [{
+  //     scaleNumb: '202110070001',
+  //     carNumb  : '68무6308',
+  //     preItemGrade: '사전등급',
+  //     itemGrade   : '검수등급',
+  //     date        : new Date(),
+  //     lastDate    : new Date(),
+  //     vendor      : '벤더'
+  //   },{
+  //     scaleNumb: '202110070002',
+  //     carNumb  : '68무6308',
+  //     preItemGrade: '사전등급',
+  //     itemGrade   : '검수등급',
+  //     date        : new Date(),
+  //     lastDate    : new Date(),
+  //     vendor      : '벤더'
+  //   }]
 
   //   if(data.length > 0){
   //     grid.resetData(data);
@@ -539,6 +444,99 @@ class DISP_PROC extends Component {
 
   //   gfc_hideMask();
   // }
+
+  Retrieve = async () => {
+
+    gfc_showMask();
+
+    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
+
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
+    gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+
+    gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
+      chit     : false,
+      scaleNumb: ''
+    });
+
+    const mainData = await YK_WEB_REQ('tally_mstr_pass.jsp');
+    const main = mainData.data.dataSend;
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+    grid.clear();
+    
+    if(!main) {
+      gfc_hideMask();
+      return;
+    }
+
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+
+    const data = main.filter(e => {
+      if(search_tp !== null && search_tp !== ''){
+        //계근번호
+        if(search_tp === '1'){
+          if(e.scaleNumb.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //차량번호
+        else if(search_tp === '2'){
+          if(e.carNumb.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //사전등급
+        else if(search_tp === '3'){
+          if(e.itemGrade.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //업체
+        else if(search_tp === '4'){
+          if(e.vendor.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        
+      }else{
+        return true;
+      }
+    })
+
+    if(data.length > 0){
+      grid.resetData(data);
+      gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+      
+      await gfc_sleep(100);
+
+      gfg_setSelectRow(grid);
+    }else{
+      gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+    }
+
+    gfc_hideMask();
+  }
 
 
   onSelectChange = async (e) => {
@@ -580,6 +578,8 @@ class DISP_PROC extends Component {
     gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.date});
 
     //계량증명서 여부 확인.
+    const chitYn = await gfc_ftp_file_yn_YK(e.scaleNumb);
+
     gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
       date     : chitInfoYn.data.dataSend[0].date,
       scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
@@ -588,28 +588,9 @@ class DISP_PROC extends Component {
       itemFlag : e.preItemGrade,
       Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
       loc      : chitInfoYn.data.dataSend[0].area,
-      user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM')
+      user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+      chit     : chitYn.data
     });
-    return;
-    // if(chitYn.data === 'N'){
-    //   gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-    //     date     : chitInfoYn.data.dataSend[0].date,
-    //     scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
-    //     carNumb  : chitInfoYn.data.dataSend[0].carNumb,
-    //     vender   : chitInfoYn.data.dataSend[0].vendor,
-    //     itemFlag : e.preItemGrade,
-    //     Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
-    //     loc      : chitInfoYn.data.dataSend[0].area,
-    //     user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-    //     chit     : 'N'
-    //   });
-    // }else{
-    //   gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-    //     itemFlag : e.preItemGrade,
-    //     chit     : chitYn.data,
-    //     scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb
-    //   });
-    // }
   }
 
   render() {

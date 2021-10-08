@@ -62,7 +62,7 @@ const TabList = (props) => {
       <div className='tab_list'>
         <button type='button' id={`tab1_${props.pgm}`} className='tab on' onClick={() => tabButton(0, props.pgm)}>검수입력</button>
         <button type='button' id={`tab2_${props.pgm}`} className='tab' onClick={() => tabButton(1, props.pgm)}>
-          {value.chit !== 'N' && <span className='doc'>메모있음</span> } 
+          {value.chit !== false && <span className='doc'>메모있음</span> } 
           계량표
         </button>
         <button type='button' id={`tab3_${props.pgm}`} className='tab' onClick={() => tabButton(2, props.pgm)}>배차정보</button>

@@ -5,7 +5,7 @@ const fsPromises = fs.promises;
 const soap = require('soap'); 
 const sharp = require('sharp');
 const axios = require('axios');
-const ftp = require("basic-ftp")
+const ftp = require("basic-ftp");
 
 router.post('/Milestone', (req, res) => {
   let device = req.body.device;
@@ -238,6 +238,7 @@ router.post('/YK_Chit', async (req, res) => {
       res.json(data);
     })
     .then(() => {
+      console.log('22');
       sftp.end();
     })
     .catch(err => {
@@ -385,17 +386,49 @@ router.post('/YK_SnapshotList', (req, res) => {
 router.post('/YK_Chit_DEL', (req, res) => {
   const filename = req.body.filename;
   const folder = filename.substring(0, 8);
-  const root = fs.readdirSync(`F:/IMS/scaleChit/${folder}`);
-  const fileCnt = root.filter(e => e.toString().indexOf(`${filename}_`) >= 0);
-  console.log(`F:/IMS/scaleChit/${folder}/${filename}.jpg`)
-  console.log(`F:/IMS/scaleChit/${folder}/${filename}_${fileCnt.length + 1}.jpg`)
-  fsPromises.rename(`F:/IMS/scaleChit/${folder}/${filename}.jpg`, `F:/IMS/scaleChit/${folder}/${filename}_${fileCnt.length + 1}.jpg`);
 
-  res.json('Y');
+  let Client = require('ssh2-sftp-client');
+  let sftp = new Client();
+  
+  sftp.connect({
+    host: '10.10.10.139',
+    port: 22,
+    username: 'ims',
+    password: 'wjdqhykims'
+  }).then((e) => {
+    return sftp.list(`/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}`);
+  })
+  .then(data => {
+    const copyList = data.filter(e => e.name.indexOf(`${filename}_`) >= 0);
+    const from = `/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}/${filename}.jpg`;
+    const to   = `/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}/${filename}_${copyList.length + 1}.jpg`;
+    
+    return sftp.rename(from, to);
+  })
+  .then((data) => {
+    console.log(data);
+    res.json(data);
+  })
+  .then(() => {
+    sftp.end();
+  })
+  .catch(err => {
+    console.error(err.message);
+  });
 
-  // delImg(folder, filename).then(e => {
-  //   res.json(e);
-  // });
+
+
+  // const root = fs.readdirSync(`F:/IMS/scaleChit/${folder}`);
+  // const fileCnt = root.filter(e => e.toString().indexOf(`${filename}_`) >= 0);
+  // console.log(`F:/IMS/scaleChit/${folder}/${filename}.jpg`)
+  // console.log(`F:/IMS/scaleChit/${folder}/${filename}_${fileCnt.length + 1}.jpg`)
+  // fsPromises.rename(`F:/IMS/scaleChit/${folder}/${filename}.jpg`, `F:/IMS/scaleChit/${folder}/${filename}_${fileCnt.length + 1}.jpg`);
+
+  // res.json('Y');
+
+  // // delImg(folder, filename).then(e => {
+  // //   res.json(e);
+  // // });
 }); 
 
 const delImg = async(folder, filename) => {

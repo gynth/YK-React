@@ -265,7 +265,7 @@ const Common = (fn, param) => {
     `WHERE  H.DELIVERY_ID = L.DELIVERY_ID ` +
     `AND    H.VENDOR_ID = PV.VENDOR_ID ` +
     `AND    H.DELIVERY_DATE BETWEEN to_date('${param.fr_dt}','YYYYMMDD') AND to_date('${param.to_dt}','YYYYMMDD') ` +
-    `AND    H.VEHICLE_NO LIKE NVL(null,H.VEHICLE_NO)||'${param.car_no}'  ` +
+    `AND    H.VEHICLE_NO LIKE NVL(null,H.VEHICLE_NO)||'%${param.car_no}%'  ` +
     `AND   PV.VENDOR_NAME LIKE '%%' ` +
     
     `AND     NVL(H.ATTRIBUTE2,'N') = 'Y' ` +

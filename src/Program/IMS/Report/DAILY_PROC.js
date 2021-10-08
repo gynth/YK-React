@@ -354,7 +354,7 @@ class DAILY_PROC extends Component {
       return;
     }
 
-    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.preItemGrade); //사전등급
+    gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.PRE_IRON_GRADE_NAME); //사전등급
     gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.dataSend[0].IRON_GRADE);   //고철등급
     const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2');
     await detail_grade2.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${dtlInfo.data.dataSend[0].IRON_GRADE}`, {})});

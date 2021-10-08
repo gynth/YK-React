@@ -78,7 +78,7 @@ function Chit(props) {
       :
       
       <div className='data_list' style={{paddingLeft:0, paddingRight: 0}} id={`content2_${props.pgm}`}>
-        {value.chit !== false && <img src={`http://tally.yksteel.co.kr/Images/scaleChit/${value.scaleNumb.substring(0, 8)}/${value.scaleNumb}.jpg`} style={{width:'100%', height:600}} alt='chit' />}
+        {value.chit !== false && <img src={`http://tally.yksteel.co.kr/Images/scaleChit/${value.scaleNumb.substring(0, 8)}/${value.scaleNumb}.jpg?date=${new Date()}`} style={{width:'100%', height:600}} alt='chit' />}
         {/* {value.chit !== 'N' && <img src={`http://ims.yksteel.co.kr:90/WebServer/MobileChitImg/scaleChit/${value.scaleNumb.substring(0, 8)}/${value.scaleNumb}.jpg?time=${new Date()}`} style={{width:'100%', height:600}} alt='chit' />} */}
       </div>
       }

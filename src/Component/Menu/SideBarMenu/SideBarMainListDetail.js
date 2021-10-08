@@ -24,13 +24,15 @@ const SideBarMainListDetail = (props) => {
 
     for(let i = 0; i < data.length; i++){
       const eachAuth = auth.find(e => e.MENU_ID === data[i].MENU_ID)
-      if(eachAuth.PGMAUT_YN === 'Y'){
-        menu.push(
-          <Component key={data[i].MENU_ID} 
-                      MENU_ID={data[i].MENU_ID} 
-                      MENU_NAM={data[i].MENU_NAM}>
-          </Component>
-        )
+      if(eachAuth){
+        if(eachAuth.PGMAUT_YN === 'Y'){
+          menu.push(
+            <Component key={data[i].MENU_ID} 
+                        MENU_ID={data[i].MENU_ID} 
+                        MENU_NAM={data[i].MENU_NAM}>
+            </Component>
+          )
+        }
       }
     }
 

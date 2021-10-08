@@ -204,7 +204,7 @@ const CompleteBtn = (props) => {
     <div className='complete_btn'>
       <button type='button' id={`btn1_${props.pgm}`} onClick={e => onProcess()} className='on'><span>등록완료</span></button>
       {/* <button type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button> */}
-      <button style={{display: value.chit !== 'N' && 'none' }} type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button>
+      <button style={{display: value.chit !== false && 'none' }} type='button' id={`btn2_${props.pgm}`} onClick={e => onProcess()}><span>등록완료</span></button>
       <button style={{display:'none'}} id={`btn3_${props.pgm}`}></button>
       <button style={{display:'none'}} id={`btn4_${props.pgm}`}></button>
     </div>
