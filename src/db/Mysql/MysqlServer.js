@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export function MysqlServerQuery(file, fn, param){
-  const host = 'http://211.231.136.182:3001/Mysql/Query';
+export function MysqlServerQuery(scaleNumb, detail_subt){
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/Mysql/Query';
   // const host = 'http://10.10.10.136:3001/Mysql/Query';
   const option = {
     url   : host,
@@ -11,9 +11,8 @@ export function MysqlServerQuery(file, fn, param){
       'Accept': 'application/json'
     },
     data: {
-      file,
-      fn,
-      param
+      scaleNumb,
+      detail_subt
     } 
   };
 
@@ -26,54 +25,3 @@ export function MysqlServerQuery(file, fn, param){
       return err;
     })
 };
-
-export function MysqlServerSP(param, gridInfo, mustValue){
-  const host = 'http://211.231.136.182:3001/Mysql/SP';
-  // const host = 'http://10.10.10.136:3001/Mysql/SP';
-  const option = {
-    url   : host,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    data: {
-      param,
-      gridInfo,
-      mustValue
-    } 
-  };
-
-  return axios(option)
-    .then(res => (res))
-    .catch(err => {
-      console.log(err)
-      return err;
-    })
-};
-
-// export function MysqlServerTemp(call, file, fn, param, query){
-//   const host = 'http://211.231.136.182:8080/mysql/select/';
-//   // const host = 'http://10.10.10.136:8080/mysql/select/';
-//   const option = {
-//     url   : host,
-//     method: 'POST',
-//     headers: {
-//       // 'Content-Type': 'application/json',
-//       // 'Accept': 'application/json'
-//       // 'Content-Type':'application/x-www-form-urlencoded',
-//       'Content-Type':'application/json',
-//       // 'host' : host
-//     },
-//     data: {
-//       qry: query
-//     }
-//   };
-
-//   return axios(option)
-//     .then(res => (res))
-//     .catch(err => {
-//       console.log(err)
-//       return err;
-//     })
-// };

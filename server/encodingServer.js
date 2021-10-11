@@ -3,16 +3,16 @@ const moment = require('moment');
 var edge = require('edge-js');
 var oracleDb = require('oracledb');
 oracleDb.autoCommit = true;
-var dbConfig = require('./db/Oracle/dbConfig');
+// var dbConfig = require('./db/Oracle/dbConfig');
 
-// (async() => {
-//   await oracleDb.createPool({
-//     user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
-//     password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
-//     connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
-//     poolAlias: 'aipool'
-//   });
-// })()
+(async() => {
+  await oracleDb.createPool({
+    user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
+    password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
+    connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
+    poolAlias: 'encPool'
+  });
+})()
  
 
 const executeSP = async(RowStatus, connection, query, data) => {
@@ -80,13 +80,13 @@ const OracleServerSP = async(param) => {
     }
   }
 
-  // const connection = await oracleDb.getConnection('aipool');
+  const connection = await oracleDb.getConnection('encPool');
 
-  const connection = await oracleDb.getConnection({
-    user         : dbConfig.user,
-    password     : dbConfig.password,
-    connectString: dbConfig.connectString
-  });
+  // const connection = await oracleDb.getConnection({
+  //   user         : dbConfig.user,
+  //   password     : dbConfig.password,
+  //   connectString: dbConfig.connectString
+  // });
 
   let query = param[0].sp;
   let data  = param[0].data;
@@ -200,7 +200,7 @@ setInterval(async() => {
                 p_scaleNumb    : scaleNumb,
                 p_seq          : seq,
                 p_cameraNo     : '',
-                p_cameraDevice : '',
+                p_cameraDevice : Guid,
                 p_cameraName   : '',
                 p_UserId       : 'Encoding'
               },
@@ -342,12 +342,12 @@ setInterval(async() => {
     REC_SCALENUMB = [];
   }
   
-}, 3000);
+}, 2000);
 
 
 const doRelease = async (connection) => {
   // await connection.release(err => {
-  await connection.release(err => {
+  await connection.close(err => {
     if(err){
       console.log(err.message);
     }

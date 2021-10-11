@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow, gfg_setValue, gfg_appendRow } from '../../../Method/Grid';
@@ -25,7 +25,6 @@ import RecImage from '../Common/RecImage';
 import CompleteBtn from './CompleteBtn';
 import CompleteBtnModify from './CompleteBtnModify';
 
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
 class INSP_CFRM extends Component {
@@ -281,8 +280,7 @@ class INSP_CFRM extends Component {
 
     gfc_showMask();
 
-    const mainData = await YK_WEB_REQ('tally_approve_wait.jsp');
-    const main = mainData.data.dataSend;
+    const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT');
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
@@ -310,15 +308,38 @@ class INSP_CFRM extends Component {
       scaleNumb: ''
     });
 
-    if(main){
-      grid.resetData(main);
-      gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
-      
-      await gfc_sleep(100);
+    if(mainData.data.SUCCESS === 'Y'){
+      const main = mainData.data.ROWS;
 
-      gfg_setSelectRow(grid);
+      if(main){
+        const dataMod = [];
+        main.forEach(e => {
+          dataMod.push({
+            scaleNumb: e['DELIVERY_ID'],
+            vehicle_no: e['VEHICLE_NO'],
+            pre_item_grade: e['PRE_ITEM_GRADE'],
+            iron_grade: e['IRON_GRADE'],
+            iron_grade_item_name: e['IRON_GRADE_ITEM_NAME'],
+            reduce_name	: e['REDUCE_NAME'],
+            reduce_wgt: e['REDUCE_WGT'],
+            return_gubun_name: e['RETURN_GUBUN_NAME'],
+            inspector: e['INSPECTOR'],
+            delivery_date: e['DELIVERY_DATE'],
+            vendor_name: e['VENDOR_NAME']
+          })
+        })
+
+        grid.resetData(dataMod);
+        gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+        
+        await gfc_sleep(100);
+  
+        gfg_setSelectRow(grid);
+      }else{
+        gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      }
     }else{
-      gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
 
     gfc_hideMask();
@@ -329,25 +350,30 @@ class INSP_CFRM extends Component {
     if(e === null) return;
     
     //기존 등록된 정보
-    const dtlInfo = await YK_WEB_REQ(`tally_process_f_sel.jsp?scaleNumb=${e.scaleNumb}`);
-    if(!dtlInfo.data.dataSend){
+    const dtlInfo = await gfc_yk_call_sp('SP_ZM_PROCESS_F_SEL', {
+      P_SCALENUMB: e.scaleNumb
+    });
+    
+    if(dtlInfo.data.SUCCESS === 'N'){
       alert('검수정보를 불러올수 없습니다.');
       return;
     }
 
     gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.pre_item_grade); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.dataSend[0].IRON_GRADE);   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.ROWS[0].IRON_GRADE);   //고철등급
     const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2');
-    await detail_grade2.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${dtlInfo.data.dataSend[0].IRON_GRADE}`, {})});
-    detail_grade2.setValue(dtlInfo.data.dataSend[0].IRON_GRADE_ITEM);   //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT);     //감량중량
-    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT_REASON_CODE); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);     //감가내역
-    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.dataSend[0].DISCOUNT_RATE);    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.dataSend[0].CAR_TYPE);      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.dataSend[0].RETURN_CODE);      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.dataSend[0].RETURN_GUBUN);     //반품구분사유
-    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.dataSend[0].WARNING);  //경고
+    await detail_grade2.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+      p_division    : dtlInfo.data.ROWS[0].IRON_GRADE
+    })});
+    detail_grade2.setValue(dtlInfo.data.ROWS[0].IRON_GRADE_ITEM);   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT);     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT_REASON_CODE); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_RATE);    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
 
     gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vehicle_no});
@@ -359,7 +385,7 @@ class INSP_CFRM extends Component {
     //계량증명서 여부 확인.
     // const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
     gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
-      scaleNumb: e.scaleNumb
+      scaleNumb: e.scaleNumb.toString()
     });
   }
 
@@ -552,13 +578,18 @@ class INSP_CFRM extends Component {
                                 display = 'item'
                                 placeholder = '고철등급 검색'
                                 height  = {42}
-                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
+                                oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : 'P005'
+                                })}
                                 onChange = {async (e) => {
                                   const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
                                   combo.setValue(null);
+                                  combo.setDisabled(true);
 
                                   if(e !== undefined && e.value !== ''){
-                                    await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                                    await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                      p_division    : e.value
+                                    })});
                                     combo.setDisabled(false);
                                   }else{
                                     combo.setDisabled(true);
@@ -581,17 +612,20 @@ class INSP_CFRM extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감량중량 검색(KG)'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P535'
+                            })}
                             onChange = {async (e) => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
+                              combo.setValue(null);
+                              combo.setDisabled(true);
+
                               if(e === undefined) return;
 
-                              const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
-                              
-                              if(e.value === '0'){
-                                combo.setValue(null);
-                                combo.setDisabled(true);
-                              }else{
-                                // await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                              if(e.value !== '0'){
+                                await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : e.value
+                                })});
                                 combo.setDisabled(false);
                               }
                             }}
@@ -602,7 +636,9 @@ class INSP_CFRM extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량사유 검색'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P620'
+                          })}
                           isDisabled
                     /> 
                   </li>
@@ -614,15 +650,17 @@ class INSP_CFRM extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감가내역 검색'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P130'
+                            })}
                             emptyRow
                             onChange = {async (e) => {
                               const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
+                              combo.setValue(null);
 
                               if(e === undefined) return;
 
                               if(e !== undefined && e.value !== ''){
-                                combo.setValue(null);
                                 combo.setDisabled(false);
                               }else{
                                 combo.setDisabled(true);
@@ -632,62 +670,44 @@ class INSP_CFRM extends Component {
                     </div>
                     <Combobox pgm = {this.props.pgm}
                           id      = 'detail_depr2'
-                          value   = 'code'
-                          display = 'name'
+                          value   = 'CODE'
+                          display = 'NAME'
                           placeholder = '감가비율'
                           isDisabled
                           data    = {[{
-                            'code': '10',
-                            'name': '10%'
+                            'CODE': '10',
+                            'NAME': '10%'
                           },{
-                            'code': '20',
-                            'name': '20%'
+                            'CODE': '20',
+                            'NAME': '20%'
                           },{
-                            'code': '30',
-                            'name': '30%'
+                            'CODE': '30',
+                            'NAME': '30%'
                           },{
-                            'code': '40',
-                            'name': '40%'
+                            'CODE': '40',
+                            'NAME': '40%'
                           },{
-                            'code': '50',
-                            'name': '50%'
+                            'CODE': '50',
+                            'NAME': '50%'
                           },{
-                            'code': '60',
-                            'name': '60%'
+                            'CODE': '60',
+                            'NAME': '60%'
                           },{
-                            'code': '70',
-                            'name': '70%'
+                            'CODE': '70',
+                            'NAME': '70%'
                           },{
-                            'code': '80',
-                            'name': '80%'
+                            'CODE': '80',
+                            'NAME': '80%'
                           },{
-                            'code': '90',
-                            'name': '90%'
+                            'CODE': '90',
+                            'NAME': '90%'
                           },{
-                            'code': '100',
-                            'name': '100%'
+                            'CODE': '100',
+                            'NAME': '100%'
                           }]}
                           // emptyRow
                     />
                   </li>
-                  {/* <li>
-                    <h5>하차구역</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_out'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '하차구역 검색(SECTOR)'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                  />
-                  </li> */}
                   <li>
                     <h5>차종구분</h5>
                     <Combobox pgm     = {this.props.pgm}
@@ -695,7 +715,9 @@ class INSP_CFRM extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '차종선택'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P700'
+                          })}
                   />
                   </li>
                   <li>
@@ -706,7 +728,9 @@ class INSP_CFRM extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '일부,전량 선택'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P110'
+                            })}
                             emptyRow
                             onChange = {e => {
                               const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
@@ -719,7 +743,6 @@ class INSP_CFRM extends Component {
                               }else{
                                 combo.setDisabled(false);
                               }
-                              // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
                             }}
                     />
                   </div>
@@ -727,7 +750,9 @@ class INSP_CFRM extends Component {
                             id      = 'detail_rtn2'
                             value   = 'itemCode'
                             display = 'item'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P120'
+                            })}
                             isDisabled
                     />
                   </li>

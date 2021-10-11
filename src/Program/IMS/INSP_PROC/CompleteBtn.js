@@ -6,6 +6,8 @@ import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_ftp_file_yn_YK, 
 import { gfo_getCombo, gfo_getCheckbox } from '../../../Method/Component';
 
 import { YK_WEB_REQ, YK_WEB_REQ_RAIN } from '../../../WebReq/WebReq';
+import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
+import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
 
 const CompleteBtn = (props) => {
   const value = useSelector((e) => {
@@ -20,15 +22,8 @@ const CompleteBtn = (props) => {
     let value = 0;
 
     if(result){
-      const rain = result.data.getRainfallInfo.item.filter(e => {
-        if(e.clientId === '1010'){
-          return true;
-        }else{
-          return false;
-        }
-      });
-      gfs_dispatch('INSP_PROC_MAIN', 'RAIN_INFO', {RAIN_INFO: rain[0].accRain});
-      value = rain[0].accRain;
+      gfs_dispatch('INSP_PROC_MAIN', 'RAIN_INFO', {RAIN_INFO: result.data});
+      value = result.data;
     }
     
     return value;
@@ -161,47 +156,76 @@ const CompleteBtn = (props) => {
 
     // const rain = await getRain();
 
-    const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
-                // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
-                `dWorker=1989&` + //검수자(ERP ID)
-                `dWorkerName=${gfs_getStoreValue('USER_REDUCER', 'USER_NAM')}&` + //검수자 이름
-                `dOutageReasonCode=${detail_subt_leg.getValue() === null ? '' : detail_subt_leg.getValue()}&` + //감량사유
-                `dOutageWeightCode=${detail_subt.getValue() === null ? '' : detail_subt.getValue()}&` + //감량중량
-                `dScrapGradeCode=${detail_grade1.getValue()}&` + //등급코드
-                `dScrapGradeItemCode=${detail_grade2.getValue()}&` + //등급아이템
-                `dTallyHistoryCode=${detail_depr.getValue() === null ? '' : detail_depr.getValue()}&` + //감가내역
+    // const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
+    //             // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
+    //             `dWorker=1989&` + //검수자(ERP ID)
+    //             `dWorkerName=${gfs_getStoreValue('USER_REDUCER', 'USER_NAM')}&` + //검수자 이름
+    //             `dOutageReasonCode=${detail_subt_leg.getValue() === null ? '' : detail_subt_leg.getValue()}&` + //감량사유
+    //             `dOutageWeightCode=${detail_subt.getValue() === null ? '' : detail_subt.getValue()}&` + //감량중량
+    //             `dScrapGradeCode=${detail_grade1.getValue()}&` + //등급코드
+    //             `dScrapGradeItemCode=${detail_grade2.getValue()}&` + //등급아이템
+    //             `dTallyHistoryCode=${detail_depr.getValue() === null ? '' : detail_depr.getValue()}&` + //감가내역
                 
-                `dTallyRatio=${detail_depr2.getValue() === null ? '' : detail_depr2.getValue()}&` + //감가비율???
+    //             `dTallyRatio=${detail_depr2.getValue() === null ? '' : detail_depr2.getValue()}&` + //감가비율???
                 
-                // `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
-                `dScrapAreaCode=E001&` + //하차구역(섹터), 옥내는E001고정
-                `dReturnDivisionCode=${detail_rtn.getValue() === null ? '' : detail_rtn.getValue()}&` + //반품구분
-                `dReturnHistoryCode=${detail_rtn2.getValue() === null ? '' : detail_rtn2.getValue()}&` + //반품구분사유
+    //             // `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
+    //             `dScrapAreaCode=E001&` + //하차구역(섹터), 옥내는E001고정
+    //             `dReturnDivisionCode=${detail_rtn.getValue() === null ? '' : detail_rtn.getValue()}&` + //반품구분
+    //             `dReturnHistoryCode=${detail_rtn2.getValue() === null ? '' : detail_rtn2.getValue()}&` + //반품구분사유
                 
-                `dOutageReasonEtcEdit=&` + //기타의견???
+    //             `dOutageReasonEtcEdit=&` + //기타의견???
 
-                `dCarTypeCode=${detail_car.getValue()}&` +
-                `dWarning=${detail_warning.getValue() === true ? 'Y' : 'N'}&` +
-                // `dRain=${rain}`;
-                `dRain=0`;
-    const Data = await YK_WEB_REQ(`tally_process_erp_procedure.jsp?${msg}`);
-    console.log(Data);
+    //             `dCarTypeCode=${detail_car.getValue()}&` +
+    //             `dWarning=${detail_warning.getValue() === true ? 'Y' : 'N'}&` +
+    //             // `dRain=${rain}`;
+    //             `dRain=0`;
+    // const Data = await YK_WEB_REQ(`tally_process_erp_procedure.jsp?${msg}`);
+    // console.log(Data);
+
+    getDynamicSql_Oracle(
+      'Common/Common',
+      'EMM_INSPECT_MOBILEY',
+      [{strScaleNumb          : scaleNumb,
+        strErpId              : gfs_getStoreValue('USER_REDUCER', 'ERP_ID'),
+        strWorker             : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+        strOutageReasonCode   : detail_subt_leg.getValue() === null ? '' : detail_subt_leg.getValue(),
+        strOutageWeightCode   : detail_subt.getValue() === null ? '' : detail_subt.getValue(),
+        strScrapGradeCode     : detail_grade1.getValue(),
+        strScrapGradeItemCode : detail_grade2.getValue(),
+        strTallyHistoryCode   : detail_depr.getValue() === null ? '' : detail_depr.getValue(),
+        strTallyRatio         : detail_depr2.getValue() === null ? '' : detail_depr2.getValue(),
+        strScrapAreaCode      : 'E001',
+        strReturnDivisionCode : detail_rtn.getValue() === null ? '' : detail_rtn.getValue(),
+        strReturnHistoryCode  : detail_rtn2.getValue() === null ? '' : detail_rtn2.getValue(),
+        strOutageReasonEtcEdit: '',
+        strCarType            : detail_car.getValue(),
+        strWarning            : detail_warning.getValue() === true ? 'Y' : 'N',
+        strRain               : '0'
+      }]
+    ).then(e => {
+      console.log(e);
+      
+      getDynamicSql_Mysql(scaleNumb, detail_subt.getValue() === null ? '' : detail_subt.getValue()).then(e => {
+        console.log(e)
+        
+        const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_PROC');
+        pgm[0].Retrieve();
+    
+        gfc_hideMask();
+      });
+
+    })
 
     //#endregion
-
-    const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_PROC');
-    pgm[0].Retrieve();
-
-    gfc_hideMask();
   }
 
   useEffect(() => {
     getRain();
 
-    //5분에 한번씩 강수량 체크한다.
+    //1분에 한번씩 강수량 체크한다.
     const interval = setInterval(() => {
       getRain();
-    }, 60000 * 5);
+    }, 60000 * 1);
 
     return() => {
       clearInterval(interval);

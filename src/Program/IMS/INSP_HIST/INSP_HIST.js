@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_now } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_yk_call_sp, gfc_sleep, gfc_now } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -20,8 +20,6 @@ import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
 import Chit from '../Common/Chit/Chit';
 import RecImage from '../Common/RecImage';
-
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
 class INSP_HIST extends Component {
@@ -304,6 +302,7 @@ class INSP_HIST extends Component {
 
   componentDidMount(){
     gfo_getCombo(this.props.pgm, 'search_tp').setValue('1');
+    this.Retrieve();
   }
 
   Retrieve = async () => {
@@ -318,28 +317,32 @@ class INSP_HIST extends Component {
     const fr_dt = moment(now).subtract(2, 'month').format('YYYYMMDD');
     const to_dt = moment(now).format('YYYYMMDD');
 
-    const mainData = await YK_WEB_REQ(`tally_process_f2.jsp?carnumb=${carNumb}&ld=${fr_dt}&nd=${to_dt}`);
-    const main = mainData.data.dataSend;
+    const mainData = await gfc_yk_call_sp(`SP_ZM_PROCESS_F2`, {
+      P_CAR_NO: carNumb
+    });
+    
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
     gfs_dispatch('INSP_HIST_MAIN', 'CHIT_INFO', {
       scaleNumb: ''
     });
-    if(main){
+
+    if(mainData.data.SUCCESS === 'Y'){
+      const main = mainData.data.ROWS;
 
       const dataMod = [];
       main.forEach(e => {
         dataMod.push({
-          totalWgt : e['감량'],
-          grade    : e['검수등급'],
-          scaleNumb: e['계근번호'],
-          date     : e['계근일자'],
-          rtn      : e['반품구분'] === '010' ? '일부반품' : e['반품구분'] === '020' ? '전량반품' : '',
-          vendor   : e['업체명'],
-          carNumb  : e['차량번호'],
-          loc      : e['상차주소'],
-          warning  : e['경고'] === 'N' ? 'N' : 'Y'
+          totalWgt : e['WGT'],
+          grade    : e['IRON_GRADE'],
+          scaleNumb: e['SCALE_NUMB'].toString(),
+          date     : e['WGHT_DATE'],
+          rtn      : e['RETURN_GUBUN'] === '010' ? '일부반품' : e['RETURN_GUBUN'] === '020' ? '전량반품' : '',
+          vendor   : e['VENDER_NAME'],
+          carNumb  : e['VEHL_NO'],
+          loc      : e['LOAD_AREA_ADDR'],
+          warning  : e['WARNING'] === 'N' ? 'N' : 'Y'
         })
       })
 
@@ -401,7 +404,7 @@ class INSP_HIST extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       readOnly
+                      //  readOnly
                       //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                 />
               </div>

@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_sleep } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_sleep, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import { gfg_getGrid, gfg_setSelectRow, gfg_appendRow } from '../../../Method/Grid';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
@@ -17,7 +17,6 @@ import Combobox from '../../../Component/Control/Combobox';
 // import Mainspan from './Mainspan';
 import Botspan from '../Common/Botspan';
 
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
 class ENTR_WAIT extends Component {
@@ -27,9 +26,9 @@ class ENTR_WAIT extends Component {
     gfc_initPgm(props.pgm, props.nam, this)
 
     //#region 리듀서
-    const ENTR_WAIR_MAIN = (nowState, action) => {
+    const ENTR_WAIT_MAIN = (nowState, action) => {
 
-      if(action.reducer !== 'ENTR_WAIR_MAIN') {
+      if(action.reducer !== 'ENTR_WAIT_MAIN') {
         return {
           BOT_TOTAL    : nowState === undefined ? 0 : nowState.BOT_TOTAL,
         };
@@ -43,113 +42,15 @@ class ENTR_WAIT extends Component {
       }
     }
 
-    gfs_injectAsyncReducer('ENTR_WAIR_MAIN', ENTR_WAIR_MAIN);
+    gfs_injectAsyncReducer('ENTR_WAIT_MAIN', ENTR_WAIT_MAIN);
     //#endregion
   }
 
   
-  mainGrid = () => {
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
 
-    YK_WEB_REQ(`tally_mstr_drive_wait.jsp`).then(e => {
-      const main = e.data.dataSend;
-
-      if(main){
-        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-    
-        const data = main.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-          }else{
-            return true;
-          }
-        })
-
-        if(data.length > 0){
-          
-          //기존 그리드에서 SCRP_ORD_NO기준으로 데이터가 없으면 추가한다.
-          for(let i = 0; i < data.length; i++){
-            const SCRP_ORD_NO = data[i].SCRP_ORD_NO;
-
-            const oldData = grid.getData().find(e => e.SCRP_ORD_NO === SCRP_ORD_NO);
-            if(!oldData){
-              gfg_appendRow(grid, grid.getRowCount(), {
-                SCRP_ORD_NO,
-                VENDOR: data[i].VENDOR,
-                LOAD_AREA_ADDR: data[i].LOAD_AREA_ADDR,
-                VEHL_NO: data[i].VEHL_NO,
-                DRIVER_NM: data[i].DRIVER_NM,
-                DRIVER_CELL_NO: data[i].DRIVER_CELL_NO
-              }, 'SCRP_ORD_NO', false);
-
-              grid.resetOriginData()
-            }
-          }
-
-          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
-          for(let i = 0; i < grid.getData().length; i++){
-            const SCRP_ORD_NO =  grid.getData()[i].SCRP_ORD_NO;
-
-            const newData = data.find(e => e.SCRP_ORD_NO === SCRP_ORD_NO)
-            if(!newData){
-              grid.removeRow(i);
-            }
-          }
-
-          if(gfs_getStoreValue('ENTR_WAIR_MAIN', 'BOT_TOTAL') !== data.length)
-            gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-        }else{
-          grid.clear();
-          if(gfs_getStoreValue('ENTR_WAIR_MAIN', 'BOT_TOTAL') !== 0)
-            gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-        }
-      }else{
-        grid.clear();
-        if(gfs_getStoreValue('ENTR_WAIR_MAIN', 'BOT_TOTAL') !== 0)
-          gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-      }
-    })
+  componentDidMount(){
+    this.Retrieve();
   }
-
-  // componentDidMount(){
-  //   // this.Retrieve();
-    
-  //   this.mainGridInterval = setInterval(e => {
-  //     this.mainGrid();
-  //   }, 2000)
-  // }
 
   // componentWillUnmount(){
   //   clearInterval(this.mainGridInterval);
@@ -158,74 +59,80 @@ class ENTR_WAIT extends Component {
   Retrieve = async () => {
 
     gfc_showMask();
-    gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+    gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
 
-    const mainData = await YK_WEB_REQ(`tally_mstr_drive_wait.jsp`);
-    const main = mainData.data.dataSend;
+    const mainData = await gfc_yk_call_sp(`SP_ZM_MSTR_DRIVE_WAIT`);
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
-    
-    if(!main) {
-      gfc_hideMask();
-      return;
-    }
 
-    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-
-    const data = main.filter(e => {
-      if(search_tp !== null && search_tp !== ''){
-        //계근번호
-        if(search_tp === '1'){
-          if(e.scaleNumb.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //차량번호
-        else if(search_tp === '2'){
-          if(e.carNumb.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //사전등급
-        else if(search_tp === '3'){
-          if(e.itemGrade.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //업체
-        else if(search_tp === '4'){
-          if(e.vendor.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        
-      }else{
-        return true;
-      }
-    })
-
-    if(data.length > 0){
-
-      grid.resetData(data);
-      gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+    if(mainData.data.SUCCESS === 'Y'){
+      const main = mainData.data.ROWS;
       
-      await gfc_sleep(100);
+      if(!main) {
+        gfc_hideMask();
+        return;
+      }
 
-      gfg_setSelectRow(grid);
+      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+  
+      const data = main.filter(e => {
+        if(search_tp !== null && search_tp !== ''){
+          //계근번호
+          if(search_tp === '1'){
+            if(e.scaleNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //차량번호
+          else if(search_tp === '2'){
+            if(e.carNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //사전등급
+          else if(search_tp === '3'){
+            if(e.itemGrade.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //업체
+          else if(search_tp === '4'){
+            if(e.vendor.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          
+        }else{
+          return true;
+        }
+      })
+  
+      if(data.length > 0){
+  
+        grid.resetData(data);
+        gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+        
+        await gfc_sleep(100);
+  
+        gfg_setSelectRow(grid);
+      }else{
+        gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      }
+  
+      gfc_hideMask();
     }else{
-      gfs_dispatch('ENTR_WAIR_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      gfc_hideMask();
     }
-
-    gfc_hideMask();
   }
 
   render() {
@@ -330,7 +237,7 @@ class ENTR_WAIT extends Component {
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>전체차량</span><Botspan reducer='ENTR_WAIR_MAIN' />
+                <span className='title'>전체차량</span><Botspan reducer='ENTR_WAIT_MAIN' />
               </div>
             </div>
           </div>

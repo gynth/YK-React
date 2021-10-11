@@ -1,12 +1,11 @@
 var mysql = require('mysql');
 const dbPool = mysql.createPool({
     connectionLimit: 50,
-    //기본10초 connectTimeout 
-    host : '211.231.139.242',
-    port : 33006,
-    user : 'team2',
-    password : 'dk1234',
-    database : '2crm_data',
+    host : '10.10.30.11',
+    port : 3306,
+    user : 'scale',
+    password : 'yk',
+    database : 'SCALE',
     multipleStatements: true,
     // acquireTimeout: 1000000,
     connectTimeout: 5000, //5초

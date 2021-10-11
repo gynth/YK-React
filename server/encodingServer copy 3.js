@@ -368,7 +368,8 @@ setInterval(async() => {
 
 
 const doRelease = async (connection) => {
-  await connection.release(err => {
+  // await connection.release(err => {
+  await connection.close(err => {
     if(err){
       console.log(err.message);
     }

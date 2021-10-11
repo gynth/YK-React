@@ -7,14 +7,14 @@ var dbConfig = require('../db/Oracle/dbConfig');
 var oracleDb = require('oracledb');
 oracleDb.autoCommit = true;
 
-// (async() => {
-//   await oracleDb.createPool({
-//     user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
-//     password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
-//     connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
-//     poolAlias: 'airesultpool'
-//   });
-// })()
+(async() => {
+  await oracleDb.createPool({
+    user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
+    password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
+    connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
+    poolAlias: 'aiPool'
+  });
+})()
 
 const executeSP = async(RowStatus, connection, query, data) => {
   
@@ -79,13 +79,13 @@ const OracleServerSP = async (param) => {
     }
   }
 
-  // const connection = await oracleDb.getConnection('airesultpool');
+  const connection = await oracleDb.getConnection('aiPool');
   // for(let i = 0; i < param.length; i++){
-  const connection = await oracleDb.getConnection({
-    user         : dbConfig.user,
-    password     : dbConfig.password,
-    connectString: dbConfig.connectString
-  });    
+  // const connection = await oracleDb.getConnection({
+  //   user         : dbConfig.user,
+  //   password     : dbConfig.password,
+  //   connectString: dbConfig.connectString
+  // });    
   let query = param[0].sp;
   let data  = param[0].data;
   let errSeq = param[0].errSeq;
@@ -156,15 +156,12 @@ router.post('/Result', async(req, res) => {
   const Count = req.body.Count;
   const Result = req.body.Result;
   const CameraNo = 1;
-
-  console.log(`Count: ${Count}`);
-  console.log(Result)
   // if(Count !== undefined){
   //   console.log(`Count: ${Count}`);
   // }
 
   if(Result !== undefined){
-      console.log(Result.length)
+
     for(let i = 0; i < Result.length; i++){
       if(Result[i].procYn === 'Y'){
 
@@ -207,89 +204,16 @@ router.post('/Result', async(req, res) => {
         }
       }
     }
-
-    //global.REC_SCALENUMB 에서 넘어온 REC_SCALEMNUMB가 빠졌으면 녹화 종료 한다.
-    // if(global.REC_SCALENUMB !== null){
-    //   for(let i = 0; i < global.REC_SCALENUMB.length; i++){
-    //     const findScale = Result.find(e => e.scaleNumb === global.REC_SCALENUMB[i]);
-        
-    //     if(findScale === undefined){
-    //       console.log(global.REC_SCALENUMB[i]);
-
-    //       let param = [];
-    //       param.push({
-    //         sp   : `begin 
-    //                   SP_ZM_IMS_REC(
-    //                     :p_RowStatus,
-    //                     :p_scaleNumb,
-    //                     :p_seq,
-    //                     :p_cameraNo,
-    //                     :p_cameraDevice,
-    //                     :p_cameraName,
-    //                     :p_UserId,
-                        
-    //                     :p_select,
-    //                     :p_SUCCESS,
-    //                     :p_MSG_CODE,
-    //                     :p_MSG_TEXT,
-    //                     :p_COL_NAM
-    //                   );
-    //                 end;
-    //                 `,
-    //         data : {
-    //           p_RowStatus    : 'I4',
-    //           p_scaleNumb    : global.REC_SCALENUMB[i],
-    //           p_seq          : 0,
-    //           p_cameraNo     : '',
-    //           p_cameraDevice : '',
-    //           p_cameraName   : '',
-    //           p_UserId       : 'Ai'
-    //         },
-    //         errSeq: 0
-    //       })
-        
-    //       const select2 = await OracleServerSP(param);
-          
-    //       if(select2.SUCCESS !== 'Y'){
-    //         console.log('Ai 녹화종료 실패');
-    //       }
-    //     }
-    //   }
-    // }
   }
 
   res.json({
     Response: 'OK'
   });
-
-  // const img = req.body.img.replace('data:image/png;base64,', '');
-  // let filename = req.body.filename;
-  // let root = req.body.root;
-
-  // if(root === undefined){
-  //   if(!fs.existsSync('../screenshot')){
-  //     fs.mkdirSync('../screenshot');
-  //   }
-
-  //   root = `../screenshot/${getToday()}`;
-
-  //   if(!fs.existsSync(root)){
-  //     fs.mkdirSync(root);
-  //   }
-  // }
-
-  // if(filename === undefined){
-  //   filename = `${getCurrentDate()}.png`;
-  // }
-
-  // fs.writeFile(`${root}\\${filename}`, img, 'base64', function(err) {
-  //   res.json(err);
-  // });
 });
 
 const doRelease = async (connection) => {
   // await connection.release(err => {
-  await connection.release(err => {
+  await connection.close(err => {
     if(err){
       console.log(err.message);
     }

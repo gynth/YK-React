@@ -17,8 +17,6 @@ import { gfc_getMultiLang, gfc_getAtt, gfc_sleep } from '../../Method/Comm';
 import { gfg_getGrid } from '../../Method/Grid';
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import { getCallSP_Mysql } from '../../db/Mysql/Mysql';
 //#endregion
 
 const RtnGrid = (props) => {
@@ -270,99 +268,99 @@ const RtnGrid = (props) => {
   //#region 그리드초기화
   const resetGrid = (parent) => {
 
-    const contextInit = document.createElement('li');
-    contextInit.innerHTML = gfc_getAtt('설정초기화');
-    contextInit.onclick = () =>{
+    // const contextInit = document.createElement('li');
+    // contextInit.innerHTML = gfc_getAtt('설정초기화');
+    // contextInit.onclick = () =>{
 
-      const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
-      const PGM_ID    = props.pgm;
-      const GRID_ID   = props.id;
+    //   const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
+    //   const PGM_ID    = props.pgm;
+    //   const GRID_ID   = props.id;
 
-      getCallSP_Mysql(
-        [{SP           : 'SP_PGM_GRID',
-          ROWSTATUS    : 'D',
-          PGM_ID,
-          GRID_ID,
-          GRID_COL_NAM : '',
-          HIDE_YN      : '',
-          LOCK_YN      : '',
-          WIDTH        : 0,
-          SEQ          : 0,
-          CRTCHR_NO
-        }]
-      ).then(
-        e => {
-          gridRef.current.getInstance().setColumns(props.columns);
-          gridRef.current.getInstance().setFrozenColumnCount(props.frozenCount);
+    //   getCallSP_Mysql(
+    //     [{SP           : 'SP_PGM_GRID',
+    //       ROWSTATUS    : 'D',
+    //       PGM_ID,
+    //       GRID_ID,
+    //       GRID_COL_NAM : '',
+    //       HIDE_YN      : '',
+    //       LOCK_YN      : '',
+    //       WIDTH        : 0,
+    //       SEQ          : 0,
+    //       CRTCHR_NO
+    //     }]
+    //   ).then(
+    //     e => {
+    //       gridRef.current.getInstance().setColumns(props.columns);
+    //       gridRef.current.getInstance().setFrozenColumnCount(props.frozenCount);
 
-          if(e.data.result){
+    //       if(e.data.result){
   
-          }else{
-            if(e.data.MSG_CODE !== 'NO')
-              gfc_getMultiLang('dup', '그리드 설정시 오류가 발생했습니다. > ' + props.pgm + ', ' + props.id);
-          }
-        }
-      )
-    };
+    //       }else{
+    //         if(e.data.MSG_CODE !== 'NO')
+    //           gfc_getMultiLang('dup', '그리드 설정시 오류가 발생했습니다. > ' + props.pgm + ', ' + props.id);
+    //       }
+    //     }
+    //   )
+    // };
 
-    parent.appendChild(contextInit);
+    // parent.appendChild(contextInit);
   }
   //#endregion
 
   //#region 그리드 설정저장
   const saveGrid = (parent) => {
 
-    const contextSave = document.createElement('li');
-    contextSave.innerHTML = gfc_getAtt('설정저장');
-    contextSave.style = 'margin-top: 5px;';
+    // const contextSave = document.createElement('li');
+    // contextSave.innerHTML = gfc_getAtt('설정저장');
+    // contextSave.style = 'margin-top: 5px;';
 
-    contextSave.onclick = () =>{
+    // contextSave.onclick = () =>{
 
-      const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
-      const PGM_ID    = props.pgm;
-      const GRID_ID   = props.id;
+    //   const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
+    //   const PGM_ID    = props.pgm;
+    //   const GRID_ID   = props.id;
       
-      let seq = 1;
-      const param = [];
-      columns.forEach(e => {
-        const GRID_COL_NAM = e.name;
-        const HIDE_YN      = e.hidden ? 'Y' : 'N';
-        const LOCK_YN      = frozenCount >= seq ? 'Y' : 'N';
-        const WIDTH        = e.width;
+    //   let seq = 1;
+    //   const param = [];
+    //   columns.forEach(e => {
+    //     const GRID_COL_NAM = e.name;
+    //     const HIDE_YN      = e.hidden ? 'Y' : 'N';
+    //     const LOCK_YN      = frozenCount >= seq ? 'Y' : 'N';
+    //     const WIDTH        = e.width;
         
-        param[seq - 1] = {SP           : 'SP_PGM_GRID',
-                          ROWSTATUS    : 'I',
-                          PGM_ID,
-                          GRID_ID,
-                          GRID_COL_NAM,
-                          HIDE_YN,
-                          LOCK_YN,
-                          WIDTH,
-                          SEQ          : seq,
-                          CRTCHR_NO
-                        }
+    //     param[seq - 1] = {SP           : 'SP_PGM_GRID',
+    //                       ROWSTATUS    : 'I',
+    //                       PGM_ID,
+    //                       GRID_ID,
+    //                       GRID_COL_NAM,
+    //                       HIDE_YN,
+    //                       LOCK_YN,
+    //                       WIDTH,
+    //                       SEQ          : seq,
+    //                       CRTCHR_NO
+    //                     }
 
-        seq = seq + 1;
-      })
+    //     seq = seq + 1;
+    //   })
 
-      getCallSP_Mysql(
-        param
-      ).then(
-        e => {
-          // console.log(e)
-          // gridRef.current.getInstance().setColumns(props.columns);
-          // gridRef.current.getInstance().setFrozenColumnCount(props.frozenCount);
+    //   getCallSP_Mysql(
+    //     param
+    //   ).then(
+    //     e => {
+    //       // console.log(e)
+    //       // gridRef.current.getInstance().setColumns(props.columns);
+    //       // gridRef.current.getInstance().setFrozenColumnCount(props.frozenCount);
 
-          if(e.data.result){
-            gfc_getMultiLang('OK', '저장되었습니다. > ' + props.pgm + ', ' + props.id);
-          }else{
-            gfc_getMultiLang('dup', '그리드 설정시 오류가 발생했습니다. > ' + props.pgm + ', ' + props.id);
-          }
-        }
-      )
-    };
+    //       if(e.data.result){
+    //         gfc_getMultiLang('OK', '저장되었습니다. > ' + props.pgm + ', ' + props.id);
+    //       }else{
+    //         gfc_getMultiLang('dup', '그리드 설정시 오류가 발생했습니다. > ' + props.pgm + ', ' + props.id);
+    //       }
+    //     }
+    //   )
+    // };
 
-    parent.appendChild(contextSave);
+    // parent.appendChild(contextSave);
   }
   //#endregion
 

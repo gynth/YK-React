@@ -16,6 +16,7 @@ class Combobox extends Component{
     data: this.props.data,
     etcData: this.props.etcData,
     oracleData: this.props.oracleData,
+    oracleSpData: this.props.oracleSpData,
     isDisabled: this.props.isDisabled
   }
 
@@ -45,8 +46,22 @@ class Combobox extends Component{
     
           let col = {};
           for(let j = 0; j < result.data.rows[i].length; j++){
-            col[result.data.metaData[j].name] = result.data.rows[i][j];
+            col[result.data.metaData[j].name.toUpperCase()] = result.data.rows[i][j];
           }
+          data.push(col);
+        }
+
+        result.data.data = data;
+      }
+    }else if(this.state.oracleSpData !== undefined){
+      result = await this.state.oracleSpData;
+      if(result.data.SUCCESS === 'Y'){
+        result.data.result = true;
+        let data = [];
+        for(let i = 0; i < result.data.ROWS.length; i++){
+    
+          let col = {};
+          col = result.data.ROWS[i];
           data.push(col);
         }
 
@@ -67,7 +82,7 @@ class Combobox extends Component{
           let canvas = document.createElement("canvas");
           let context = canvas.getContext("2d");
           context.font = props.fontSize + "px bold";
-          let metrics = context.measureText(result.data.data[idx][props.value]);
+          let metrics = context.measureText(result.data.data[idx][props.value.toUpperCase()]);
 
           if(this.width < metrics.width + 10) {
             if(props.fontSize >= 9)
@@ -80,10 +95,10 @@ class Combobox extends Component{
         for(let idx in result.data.data){
           let arrValue = {};
 
-          const value = result.data.data[idx][props.value];
+          const value = result.data.data[idx][props.value.toUpperCase()];
           arrValue['value'] = value;
 
-          const text = result.data.data[idx][props.display];
+          const text = result.data.data[idx][props.display.toUpperCase()];
           // arrValue['labelText'] = setCode(value, maxCode) + text;
           
           arrValue['label'] = text;

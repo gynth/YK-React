@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const moment = require('moment');
 
 //#region YK스틸 웹요청
 const yk_req = (request, URL) => {
@@ -16,10 +17,7 @@ const yk_req = (request, URL) => {
   return response;
 }
 
-let cnt = 0;
 router.post('/', (req, res) => {
-  cnt++;
-  console.log(`${cnt}: http://tally.yksteel.co.kr/ims/${req.body.addr}`)
   let URL = encodeURI(`http://tally.yksteel.co.kr/ims/${req.body.addr}`);
   // let URL = `http://tally.yksteel.co.kr/${req.body.addr}`;
   
@@ -47,12 +45,40 @@ router.post('/DIRECT', (req, res) => {
     })
 }); 
 
-router.post('/Rain', (req, res) => {
-  const host = `http://apis.data.go.kr/6260000/BusanRainfalldepthInfoService/getRainfallInfo?` +
+var parser = require('fast-xml-parser');
+var he = require('he'); 
+var options = { 
+  attributeNamePrefix : "@_", 
+  attrNodeName: "attr", 
+  textNodeName : "#text", 
+  ignoreAttributes : true, 
+  ignoreNameSpace : false, 
+  allowBooleanAttributes : false, 
+  parseNodeValue : true, 
+  parseAttributeValue : false, 
+  trimValues: true, 
+  cdataTagName: "__cdata", 
+  cdataPositionChar: "\\c", 
+  parseTrueNumberOnly: false, 
+  arrayMode: false, 
+  attrValueProcessor: (val, attrName) => 
+    he.decode(val, {isAttributeValue: true}),
+    tagValueProcessor : (val, tagName) => he.decode(val), 
+    stopNodes: ["parse-me-as-string"] 
+  };
+
+let dt = new Date();
+setInterval(e => {
+  const date = moment(dt).format('YYYYMMDDHHmm');
+  const time = date.substr(8, 4);
+
+  const host = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?` +
   `serviceKey=O%2F9eo84VDzROhcmBNa%2B1zTS2hP8rVKtuKRfa2H93v8n4ot43RLo36CUx4X%2BV8%2B9ciQ4hJoZnTJpeB96XGiGE0Q%3D%3D&` +
-  `numOfRows=50&` +
   `pageNo=1&` +
-  `resultType=json`;
+  `numOfRows=10&` +
+  `base_date=${date.substring(0, 8)}&` +
+  `base_time=${time}&` +
+  `nx=96&ny=73`;
   const option = {
     url   : host,
     method: 'GET',
@@ -66,11 +92,21 @@ router.post('/Rain', (req, res) => {
 
   axios(option)
     .then(result => {
-      res.json(result.data)
+      const xml = result.data;
+
+      if( parser.validate(xml) === true) { 
+        var jsonObj = parser.parse(xml,options); 
+        const rain = jsonObj.response.body.items.item.filter(e => e.category === 'RN1');
+        global.RAIN = rain[0].obsrValue;
+      }
     })
     .catch(err => {
-      res.json(err)
+      // console.log(err)
     })
+}, 10000)
+
+router.post('/Rain', (req, res) => {
+    res.json(global.RAIN)
 })
 
 module.exports = router;       

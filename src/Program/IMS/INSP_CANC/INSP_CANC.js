@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow, gfg_setValue, gfg_appendRow } from '../../../Method/Grid';
@@ -25,8 +25,6 @@ import TabList from './TabList';
 import RecImage from './RecImage';
 import CompleteBtn from './CompleteBtn';
 import CompleteBtnModify from './CompleteBtnModify';
-
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
 class INSP_CANC extends Component {
@@ -282,8 +280,8 @@ class INSP_CANC extends Component {
 
     gfc_showMask();
 
-    const mainData = await YK_WEB_REQ('tally_approve_cancel.jsp');
-    const main = mainData.data.dataSend;
+    const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_CANCEL');
+    
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
 
@@ -309,16 +307,22 @@ class INSP_CANC extends Component {
       scaleNumb: ''
     });
 
-    if(main){
-      grid.resetData(main);
-      gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
-      
-      await gfc_sleep(100);
-
-      gfg_setSelectRow(grid);
+    if(mainData.data.SUCCESS === 'Y'){
+      const main = mainData.data.ROWS;
+      if(main){
+        grid.resetData(main);
+        gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+        
+        await gfc_sleep(100);
+  
+        gfg_setSelectRow(grid);
+      }else{
+        gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      }
     }else{
       gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
+
 
     gfc_hideMask();
   }
@@ -605,7 +609,9 @@ class INSP_CANC extends Component {
                               value   = 'itemCode'
                               display = 'item'
                               isDisabled
-                              etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                              oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                p_division    : 'P110'
+                              })}
                         />
                       </div>
                       <Input pgm     = {this.props.pgm}

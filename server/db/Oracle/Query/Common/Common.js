@@ -30,16 +30,17 @@ const Common = (fn, param) => {
     ` ,'${param.Name}')                ` ;
   }else if(fn === 'ZM_IMS_VIDEO_SELECT'){
     query = 
-    ` SELECT SCALENUMB   ` +
-    `       ,SEQ         ` +
-    `       ,TO_CHAR(REC_FR_DTTM, 'YYYY-MM-DD HH24:MI:SS') REC_FR_DTTM ` +
-    `       ,TO_CHAR(REC_TO_DTTM, 'YYYY-MM-DD HH24:MI:SS') REC_TO_DTTM ` +
-    `       ,CAMERA_GUID ` +
-    `       ,CAMERA_NAME ` +
-    `   FROM ZM_IMS_VIDEO      ` +
-    `  WHERE SCALENUMB = '${param.scaleNumb}' `+
-    `    AND last_yn   = 'Y' ` + 
-    `    AND ROWNUM    = ${param.seq} `;
+    ` SELECT *                                                                   ` +
+    `   FROM (SELECT SCALENUMB                                                   ` +
+    `               ,ROWNUM     AS rowno                                         ` +
+    `               ,TO_CHAR(REC_FR_DTTM, 'YYYY-MM-DD HH24:MI:SS') REC_FR_DTTM   ` +
+    `               ,TO_CHAR(REC_TO_DTTM, 'YYYY-MM-DD HH24:MI:SS') REC_TO_DTTM   ` +
+    `               ,CAMERA_GUID                                                 ` +
+    `               ,CAMERA_NAME                                                 ` +
+    `           FROM ZM_IMS_VIDEO                                                ` +
+    `          WHERE SCALENUMB = '${param.scaleNumb}'                                ` +
+    `            AND last_yn   = 'Y')` +
+    `  WHERE rowno = ${param.seq}` ;
   }else if(fn === 'ZM_IMS_REC_UPDATE'){
     query = 
     ` UPDATE ZM_IMS_REC              ` +
@@ -176,6 +177,26 @@ const Common = (fn, param) => {
     ` SELECT * ` +
     `   FROM zm_ims_menu ` +
     `  WHERE menu_id = '${param.programId}'` ;
+  }else if(fn === 'EMM_INSPECT_MOBILEY'){
+    query = 
+    ` CALL EMM_INSPECT_MOBILEY ( ` +
+    `  '${param.strScaleNumb}',     ` +
+    `  '${param.strErpId}',     ` +
+    `  '${param.strWorker}',     ` +
+    `  '${param.strOutageReasonCode}',     ` +
+    `  '${param.strOutageWeightCode}',     ` +
+    `  '${param.strScrapGradeCode}',     ` +
+    `  '${param.strScrapGradeItemCode}',     ` +
+    `  '${param.strTallyHistoryCode}',     ` +
+    `  '${param.strTallyRatio}',     ` +
+    `  '${param.strScrapAreaCode}',     ` +
+    `  '${param.strReturnDivisionCode}',     ` +
+    `  '${param.strReturnHistoryCode}',     ` +
+    `  '${param.strOutageReasonEtcEdit}',     ` +
+    `  '${param.strCarType}',     ` +
+    `  '${param.strWarning}',     ` +
+    `  '${param.strRain}'      ` +
+    ` )                          ` ;
   }else if(fn === 'AUTH_TOTAL'){
     query =
     ` SELECT MENU_ID                                                        ` +

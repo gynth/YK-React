@@ -4,7 +4,7 @@ import { gfs_dispatch } from '../Method/Store';
 import html2canvas from 'html2canvas';
 // import html2canvas from 'html2canvas-render-offscreen'
 import axios from 'axios';
-import { getDynamicSql_Oracle } from '../db/Oracle/Oracle';
+import { getDynamicSql_Oracle, getSp_Oracle } from '../db/Oracle/Oracle';
 
 export const gfc_now = async () => {
   const result = await getDynamicSql_Oracle('Common/Common', 'SYSDATE', null);
@@ -48,6 +48,39 @@ export const gfc_oracleRetrieve = (result) => {
   }
 
   return data;
+}
+
+export const gfc_yk_call_sp = async(sp, parameter) => {
+  let param = '';
+  if(parameter === undefined){
+    parameter = {};
+  }else{
+    for(let i = 0; i < Object.keys(parameter).length; i++){
+      param += `:${Object.keys(parameter)[i]},`;
+    }
+  }
+  
+  let SP = [];
+  SP.push({
+    sp   : `begin 
+              ${sp}(
+                ${param}
+                :p_select,
+                :p_SUCCESS,
+                :p_MSG_CODE,
+                :p_MSG_TEXT,
+                :p_COL_NAM
+              );
+            end;
+            `,
+    data : parameter,
+    // data: {},
+    errSeq: 0
+  })
+
+  // const select = await getSp_Oracle(param);
+  const select = await getSp_Oracle(SP);
+  return select;
 }
 
 export const gfc_getAtt = (code) => { 

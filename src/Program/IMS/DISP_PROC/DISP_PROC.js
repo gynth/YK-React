@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_ftp_file_yn_YK, gfc_sleep } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_yk_call_sp, gfc_showMask, gfc_hideMask, gfc_ftp_file_yn_YK, gfc_sleep } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow, gfg_appendRow } from '../../../Method/Grid';
@@ -23,16 +23,13 @@ import Chit from '../Common/Chit/Chit';
 import CompleteBtn from './CompleteBtn';
 import TabList from './TabList';
 import RecImage from '../Common/RecImage';
-
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
 class DISP_PROC extends Component {
 
   state = {
     wait_list: [],
-    scaleNumb: '',
-    detail_grade2: YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})
+    scaleNumb: ''
   }
 
   //#endregion
@@ -266,120 +263,117 @@ class DISP_PROC extends Component {
   }
 
   
-  mainGrid = () => {
+  mainGrid = async() => {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
 
-    YK_WEB_REQ('tally_mstr_pass.jsp').then(e => {
-      const main = e.data.dataSend;
+    const select = await gfc_yk_call_sp('SP_ZM_MSTR_PASS');
 
-      if(main){
+    if(select.data.SUCCESS === 'Y'){
+      const main = select.data.ROWS;
 
-        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-    
-        const data = main.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            
-          }else{
-            return true;
-          }
-        })
-    
-        if(data.length > 0){
-          
-          //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
-          for(let i = 0; i < data.length; i++){
-            const scaleNumb = data[i].scaleNumb;
-
-            const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
-            if(!oldData){
-              gfg_appendRow(grid, grid.getRowCount(), {
-                scaleNumb,
-                carNumb: data[i].carNumb,
-                preItemGrade: data[i].preItemGrade,
-                itemGrade: data[i].itemGrade,
-                date: data[i].date,
-                lastDate: data[i].lastDate,
-                vendor: data[i].vendor
-              }, 'scaleNumb', false);
-
-              grid.resetOriginData();
-              grid.restore();
+      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+  
+      const data = main.filter(e => {
+        if(search_tp !== null && search_tp !== ''){
+          //계근번호
+          if(search_tp === '1'){
+            if(e.scaleNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
             }
           }
-
-          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
-          for(let i = 0; i < grid.getData().length; i++){
-            const scaleNumb =  grid.getData()[i].scaleNumb;
-
-            const newData = data.find(e => e.scaleNumb === scaleNumb)
-            if(!newData){
-              grid.removeRow(i);
-
-              //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
-              const selectScaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
-              if(scaleNumb === selectScaleNumb){
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-              }
+          //차량번호
+          else if(search_tp === '2'){
+            if(e.carNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //사전등급
+          else if(search_tp === '3'){
+            if(e.itemGrade.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //업체
+          else if(search_tp === '4'){
+            if(e.vendor.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
             }
           }
           
-          if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== data.length)
-            gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
         }else{
-          grid.clear();
-          if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
-            gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+          return true;
         }
+      })
+  
+      if(data.length > 0){
+        
+        //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
+        for(let i = 0; i < data.length; i++){
+          const scaleNumb = data[i].scaleNumb;
+
+          const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
+          if(!oldData){
+            gfg_appendRow(grid, grid.getRowCount(), {
+              scaleNumb,
+              carNumb: data[i].carNumb,
+              preItemGrade: data[i].preItemGrade,
+              itemGrade: data[i].itemGrade,
+              date: data[i].date,
+              lastDate: data[i].lastDate,
+              vendor: data[i].vendor
+            }, 'scaleNumb', false);
+
+            await gfc_sleep(100);
+            grid.resetOriginData();
+          }
+        }
+
+        //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
+        for(let i = 0; i < grid.getData().length; i++){
+          const scaleNumb =  grid.getData()[i].scaleNumb;
+
+          const newData = data.find(e => e.scaleNumb === scaleNumb)
+          if(!newData){
+            grid.removeRow(i);
+
+            //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
+            const selectScaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
+            if(scaleNumb === selectScaleNumb){
+              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
+              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+            }
+          }
+        }
+        
+        if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== data.length)
+          gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
       }else{
         grid.clear();
         if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
           gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
       }
-    })
+    }else{
+      grid.clear();
+      if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
+        gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+    }
   }
 
   componentDidMount(){
-
-    //김경현
-    // this.mainGridInterval = setInterval(e => {
-    //   this.mainGrid();
-    // }, 2000)
+    this.mainGridInterval = setInterval(e => {
+      this.mainGrid();
+    }, 2000)
   }
 
   componentWillUnmount(){
@@ -471,69 +465,7 @@ class DISP_PROC extends Component {
       scaleNumb: ''
     });
 
-    const mainData = await YK_WEB_REQ('tally_mstr_pass.jsp');
-    const main = mainData.data.dataSend;
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    grid.clear();
-    
-    if(!main) {
-      gfc_hideMask();
-      return;
-    }
-
-    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-
-    const data = main.filter(e => {
-      if(search_tp !== null && search_tp !== ''){
-        //계근번호
-        if(search_tp === '1'){
-          if(e.scaleNumb.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //차량번호
-        else if(search_tp === '2'){
-          if(e.carNumb.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //사전등급
-        else if(search_tp === '3'){
-          if(e.itemGrade.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //업체
-        else if(search_tp === '4'){
-          if(e.vendor.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        
-      }else{
-        return true;
-      }
-    })
-
-    if(data.length > 0){
-      grid.resetData(data);
-      gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-      
-      await gfc_sleep(100);
-
-      gfg_setSelectRow(grid);
-    }else{
-      gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-    }
+    this.mainGrid();
 
     gfc_hideMask();
   }
@@ -545,32 +477,41 @@ class DISP_PROC extends Component {
     gfs_dispatch('DISP_PROC_MAIN', 'GRID_SCALE', {GRID_SCALE: e.scaleNumb});
 
     //계량증명서 정보여부
-    const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
-    if(!chitInfoYn.data.dataSend){
+    const chitInfoYn = await gfc_yk_call_sp('SP_ZM_CHIT', {
+      P_SCALENUMB: e.scaleNumb
+    });
+
+    if(chitInfoYn.data.SUCCESS === 'N'){
       alert('계량증명서 정보가 없습니다.');
+      gfc_hideMask();
       return;
     }
 
     //기존 등록된 정보
-    const dtlInfo = await YK_WEB_REQ(`tally_process_f_sel.jsp?scaleNumb=${e.scaleNumb}`);
-    if(!dtlInfo.data.dataSend){
+    const dtlInfo = await gfc_yk_call_sp('SP_ZM_PROCESS_F_SEL', {
+      P_SCALENUMB: e.scaleNumb
+    });
+    
+    if(dtlInfo.data.SUCCESS === 'N'){
       alert('검수정보를 불러올수 없습니다.');
       return;
     }
 
     gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.preItemGrade); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.dataSend[0].IRON_GRADE);   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.ROWS[0].IRON_GRADE);   //고철등급
     const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2');
-    await detail_grade2.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${dtlInfo.data.dataSend[0].IRON_GRADE}`, {})});
-    detail_grade2.setValue(dtlInfo.data.dataSend[0].IRON_GRADE_ITEM);   //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT);     //감량중량
-    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT_REASON_CODE); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);     //감가내역
-    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.dataSend[0].CAR_TYPE);      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.dataSend[0].RETURN_CODE);      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.dataSend[0].RETURN_GUBUN);     //반품구분사유
-    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.dataSend[0].WARNING);  //경고
+    await detail_grade2.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+      p_division    : dtlInfo.data.ROWS[0].IRON_GRADE
+    })});
+    detail_grade2.setValue(dtlInfo.data.ROWS[0].IRON_GRADE_ITEM);   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT);     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT_REASON_CODE); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
+    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
 
     gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
@@ -581,13 +522,13 @@ class DISP_PROC extends Component {
     const chitYn = await gfc_ftp_file_yn_YK(e.scaleNumb);
 
     gfs_dispatch('DISP_PROC_MAIN', 'CHIT_INFO', {
-      date     : chitInfoYn.data.dataSend[0].date,
-      scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
-      carNumb  : chitInfoYn.data.dataSend[0].carNumb,
-      vender   : chitInfoYn.data.dataSend[0].vendor,
-      itemFlag : e.preItemGrade,
-      Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
-      loc      : chitInfoYn.data.dataSend[0].area,
+      date     : chitInfoYn.data.ROWS[0].CREATION_DATE,
+      scaleNumb: chitInfoYn.data.ROWS[0].DELIVERY_ID.toString(),
+      carNumb  : chitInfoYn.data.ROWS[0].VEHICLE_NO,
+      vender   : chitInfoYn.data.ROWS[0].VENDOR_NAME,
+      itemFlag : e.itemGrade,
+      Wgt      : chitInfoYn.data.ROWS[0].TOTAL_WEIGHT,
+      loc      : chitInfoYn.data.ROWS[0].AREA,
       user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
       chit     : chitYn.data
     });
@@ -744,13 +685,18 @@ class DISP_PROC extends Component {
                                 display = 'item'
                                 placeholder = '고철등급 검색'
                                 height  = {42}
-                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
+                                oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : 'P005'
+                                })}
                                 onChange = {async (e) => {
                                   const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
                                   combo.setValue(null);
+                                  combo.setDisabled(true);
 
                                   if(e !== undefined && e.value !== ''){
-                                    await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                                    await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                      p_division    : e.value
+                                    })});
                                     combo.setDisabled(false);
                                   }else{
                                     combo.setDisabled(true);
@@ -773,17 +719,20 @@ class DISP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감량중량 검색(KG)'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P535'
+                            })}
                             onChange = {async (e) => {
-                              if(e === undefined) return;
-
                               const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
                               combo.setValue(null);
+                              combo.setDisabled(true);
 
-                              if(e.value === '0'){
-                                combo.setDisabled(true);
-                              }else{
-                                await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                              if(e === undefined) return;
+
+                              if(e.value !== '0'){
+                                await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : e.value
+                                })});
                                 combo.setDisabled(false);
                               }
                             }}
@@ -794,7 +743,9 @@ class DISP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량사유 검색'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P620'
+                          })}
                           isDisabled
                     /> 
                   </li>
@@ -806,7 +757,9 @@ class DISP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감가내역 검색'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P130'
+                            })}
                             emptyRow
                             onChange = {async (e) => {
                               const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
@@ -824,62 +777,44 @@ class DISP_PROC extends Component {
                     </div>
                     <Combobox pgm = {this.props.pgm}
                           id      = 'detail_depr2'
-                          value   = 'code'
-                          display = 'name'
+                          value   = 'CODE'
+                          display = 'NAME'
                           placeholder = '감가비율'
                           isDisabled
                           data    = {[{
-                            'code': '10',
-                            'name': '10%'
+                            'CODE': '10',
+                            'NAME': '10%'
                           },{
-                            'code': '20',
-                            'name': '20%'
+                            'CODE': '20',
+                            'NAME': '20%'
                           },{
-                            'code': '30',
-                            'name': '30%'
+                            'CODE': '30',
+                            'NAME': '30%'
                           },{
-                            'code': '40',
-                            'name': '40%'
+                            'CODE': '40',
+                            'NAME': '40%'
                           },{
-                            'code': '50',
-                            'name': '50%'
+                            'CODE': '50',
+                            'NAME': '50%'
                           },{
-                            'code': '60',
-                            'name': '60%'
+                            'CODE': '60',
+                            'NAME': '60%'
                           },{
-                            'code': '70',
-                            'name': '70%'
+                            'CODE': '70',
+                            'NAME': '70%'
                           },{
-                            'code': '80',
-                            'name': '80%'
+                            'CODE': '80',
+                            'NAME': '80%'
                           },{
-                            'code': '90',
-                            'name': '90%'
+                            'CODE': '90',
+                            'NAME': '90%'
                           },{
-                            'code': '100',
-                            'name': '100%'
+                            'CODE': '100',
+                            'NAME': '100%'
                           }]}
                           // emptyRow
                     />
                   </li>
-                  {/* <li>
-                    <h5>하차구역</h5>
-                    <Combobox pgm     = {this.props.pgm}
-                          id      = 'detail_out'
-                          value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '하차구역 검색(SECTOR)'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
-                  />
-                  </li> */}
                   <li>
                     <h5>차종구분</h5>
                     <Combobox pgm     = {this.props.pgm}
@@ -887,7 +822,9 @@ class DISP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '차종선택'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P700'
+                          })}
                   />
                   </li>
                   <li>
@@ -898,7 +835,9 @@ class DISP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '일부,전량 선택'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P110'
+                            })}
                             emptyRow
                             onChange = {e => {
                               const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
@@ -911,7 +850,6 @@ class DISP_PROC extends Component {
                               }else{
                                 combo.setDisabled(false);
                               }
-                              // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
                             }}
                     />
                   </div>
@@ -919,7 +857,9 @@ class DISP_PROC extends Component {
                             id      = 'detail_rtn2'
                             value   = 'itemCode'
                             display = 'item'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P120'
+                            })}
                             isDisabled
                     />
                   </li>

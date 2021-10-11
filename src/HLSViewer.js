@@ -75,6 +75,33 @@ class HLSViewer extends Component {
       }]
     )
 
+    const result2 = await getDynamicSql_Oracle(
+      'Common/Common',
+      'ZM_IMS_VIDEO_SELECT',
+      [{
+        scaleNumb: scaleNumb,
+        seq      : 2
+      }]
+    )
+
+    const result3 = await getDynamicSql_Oracle(
+      'Common/Common',
+      'ZM_IMS_VIDEO_SELECT',
+      [{
+        scaleNumb: scaleNumb,
+        seq      : 3
+      }]
+    )
+
+    const result4 = await getDynamicSql_Oracle(
+      'Common/Common',
+      'ZM_IMS_VIDEO_SELECT',
+      [{
+        scaleNumb: scaleNumb,
+        seq      : 4
+      }]
+    )
+
     if(result1.data.rows.length > 0){
       hlsList.push(
         <>
@@ -100,6 +127,93 @@ class HLSViewer extends Component {
           </div>
 
           <div className='file_download' onClick={() => this.movieDown(result1.data.rows[0][5])}></div>
+        </>
+      )
+    }
+
+    if(result2.data.rows.length > 0){
+      hlsList.push(
+        <>
+          <div 
+            style={{width:'100%', height:'100%'}} 
+            className='player-wrapper'>
+              <input style={{width: '100%'}} defaultValue={`카메라: ${result2.data.rows[0][5]}`} disabled/>
+              <ReactHlsPlayer
+                src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result2.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
+                autoPlay={false}
+                controls={true}
+                width='100%'
+                height='100%'
+                muted='muted'
+                onLoadedData={e => e.target.play()}
+                hlsConfig={{
+                  autoStartLoad: true,
+                  startPosition: -1,
+                  debug: false,
+                  lowLatencyMode: true
+                }}
+              />
+          </div>
+
+          <div className='file_download' onClick={() => this.movieDown(result2.data.rows[0][5])}></div>
+        </>
+      )
+    }
+
+    if(result3.data.rows.length > 0){
+      hlsList.push(
+        <>
+          <div 
+            style={{width:'100%', height:'100%'}} 
+            className='player-wrapper'>
+              <input style={{width: '100%'}} defaultValue={`카메라: ${result3.data.rows[0][5]}`} disabled/>
+              <ReactHlsPlayer
+                src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result3.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
+                autoPlay={false}
+                controls={true}
+                width='100%'
+                height='100%'
+                muted='muted'
+                onLoadedData={e => e.target.play()}
+                hlsConfig={{
+                  autoStartLoad: true,
+                  startPosition: -1,
+                  debug: false,
+                  lowLatencyMode: true
+                }}
+              />
+          </div>
+
+          <div className='file_download' onClick={() => this.movieDown(result3.data.rows[0][5])}></div>
+        </>
+      )
+    }
+
+    if(result4.data.rows.length > 0){
+      hlsList.push(
+        <>
+          <div 
+            style={{width:'100%', height:'100%'}} 
+            className='player-wrapper'>
+              <input style={{width: '100%'}} defaultValue={`카메라: ${result4.data.rows[0][5]}`} disabled/>
+              <ReactHlsPlayer
+                src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result4.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
+                autoPlay={false}
+                controls={true}
+                width='100%'
+                height='100%'
+                muted='muted'
+                onLoadedData={e => e.target.play()}
+                hlsConfig={{
+                  autoStartLoad: true,
+                  startPosition: -1,
+                  debug: false,
+                  lowLatencyMode: true
+                }}
+              />
+          </div>
+
+          <div className='file_download' onClick={() => this.movieDown(result4.data.rows[0][5])}></div>
         </>
       )
     }

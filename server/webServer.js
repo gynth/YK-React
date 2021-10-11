@@ -2,6 +2,7 @@ const express = require('express');
 const app3001 = express();
 const app3002 = express();
 const Oracle = require('./db/Oracle/Oracle');
+const Mysql = require('./db/Mysql/Mysql')
 const Milestone = require('./Milestone/Milestone');
 const WebReq = require('./WebReq/WebReq');
 const ScreenShot = require('./ScreenShot/ScreenShot');
@@ -17,6 +18,7 @@ global.MILESTONE_DEVICE = {};
 global.MILESTONE_TOKEN_TIME = '';
 global.MILESTONE_DATA = {};
 global.REC_SCALENUMB = null;
+global.RAIN = 0;
 
 app3001.use(express.json({
   limit: '100mb'
@@ -45,6 +47,10 @@ app3001.use('/YK', WebReq);
 app3001.use('/Oracle', Oracle);
 //#endregion
  
+//#region Mysql
+app3001.use('/Mysql', Mysql);
+//#endregion
+
 //#region 화면캡쳐
 app3001.use('/ScreenShot', ScreenShot);
 //#endregion 
