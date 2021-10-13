@@ -10,7 +10,9 @@ oracleDb.autoCommit = true;
     user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
     password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
     connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
-    poolAlias: 'encPool'
+    poolAlias: 'encPool',
+    poolMin      : 1,
+    poolMax      : 2
   });
 })()
  
@@ -98,16 +100,23 @@ const OracleServerSP = async(param) => {
   data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
   data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
 
-  const result = await executeSP(param[0].data.p_RowStatus, connection, query, data);
-  if(result.SUCCESS === 'N'){
-    doRelease(connection);
-    
-  }else{
-
-    doRelease(connection);
+  try{  
+    const result = await executeSP(param[0].data.p_RowStatus, connection, query, data);
+    return result;
+  }catch(e){
+    console.log(e)
+  }finally{
+    await doRelease(connection);
   }
+ 
+  // if(result.SUCCESS === 'N'){
+  //   doRelease(connection);
+    
+  // }else{
 
-  return result;
+  //   doRelease(connection);
+  // }
+
 }
 
 setInterval(async() => {
@@ -147,6 +156,8 @@ setInterval(async() => {
   if(select.SUCCESS === 'Y'){
       const ROWS = select.ROWS;
       for(let i = 0; i < ROWS.length; i++){
+        console.log(ROWS.length, ':', i.toString());
+        
         const scaleNumb   = ROWS[i].SCALENUMB;
 
         const seq         = ROWS[i].SEQ;
@@ -172,7 +183,7 @@ setInterval(async() => {
           })
         }
         
-        global.MILESTONE_REPLAY[Guid].method([Guid, Guid, 'Video', '', scaleNumb, '', Name, '', rec_fr_dttm, rec_to_dttm], async (error, result) => { 
+        await global.MILESTONE_REPLAY[Guid].method([Guid, Guid, 'Video', '', scaleNumb, '', Name, '', rec_fr_dttm, rec_to_dttm], async (error, result) => { 
           if(result === '0') {
 
             let param2 = [];
@@ -211,7 +222,7 @@ setInterval(async() => {
             if(result2.SUCCESS === 'Y')
               console.log(`${scaleNumb} : 영상녹화 저장에 성공했습니다.`);
             else
-              console.log(`${scaleNumb} : 영상녹화 저장에 실패했습니다.`);
+              console.log(`${scaleNumb} : 영상녹화 저장에 실패했습니다. ${Guid}, ${result2.MSG_TEXT}`);
           }else {
             console.log('영상녹화 파일생성에 실패 했습니다.');
 
@@ -348,8 +359,11 @@ setInterval(async() => {
 const doRelease = async (connection) => {
   // await connection.release(err => {
   await connection.close(err => {
+    
     if(err){
       console.log(err.message);
+    }else{
+      
     }
   })
 } 

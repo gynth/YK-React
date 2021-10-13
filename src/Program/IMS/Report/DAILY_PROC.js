@@ -1,11 +1,11 @@
 //#region import
 import React, { Component } from 'react';
-
+import lodash  from 'lodash';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 import DateTime from '../../../Component/Control/DateTime';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_now, gfc_oracleRetrieve } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_now, gfc_oracleRetrieve, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox, gfo_getDateTime } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -20,7 +20,7 @@ import Combobox from '../../../Component/Control/Combobox';
 
 // import Mainspan from './Mainspan';
 import Detailspan from '../Common/Detailspan';
-import Botspan from '../Common/Botspan';
+import Botspan from './Botspan';
 import Chit from './Chit';
 import TabList from './TabList';
 import RecImage from '../Common/RecImage';
@@ -304,7 +304,8 @@ class DAILY_PROC extends Component {
 
     const fr_dt = gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue();
     const to_dt = gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue();
-    const car_no = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
 
     // console.log(fr_dt.replace('-', '').replace('-', ''), to_dt.replace('-', '').replace('-', ''), car_no)
 
@@ -314,15 +315,20 @@ class DAILY_PROC extends Component {
       [{
         fr_dt: fr_dt.replace('-', '').replace('-', ''),
         to_dt: to_dt.replace('-', '').replace('-', ''),
-        car_no: car_no === '' ? '%' : car_no
+        car_no: search_tp === '1' ? search_txt === '' ? '%' : search_txt : '%',
+        vendor: search_tp === '2' ? search_txt === '' ? '%' : search_txt : '%'
       }]
     ).then(e => {
       let data = [];
+      let sum = 0;
       for(let i = 0; i < e.data.rows.length; i++){
   
         let col = {};
         for(let j = 0; j < e.data.rows[i].length; j++){
           col[e.data.metaData[j].name] = e.data.rows[i][j];
+          if(e.data.metaData[j].name === 'NET_WEIGHT'){
+            sum += e.data.rows[i][j] * 1;
+          }
         }
         data.push(col);
       }
@@ -334,7 +340,9 @@ class DAILY_PROC extends Component {
 
       if(data.length > 0){
         grid.resetData(data);
+
         gfs_dispatch('DAILY_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+        gfs_dispatch('DAILY_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: sum})
         
         gfg_setSelectRow(grid);
       }
@@ -348,46 +356,39 @@ class DAILY_PROC extends Component {
     gfs_dispatch('DAILY_PROC_MAIN', 'GRID_SCALE', {GRID_SCALE: e.SCALENUMB});
 
     //기존 등록된 정보
-    const dtlInfo = await YK_WEB_REQ(`tally_process_f_sel.jsp?scaleNumb=${e.SCALENUMB}`);
-    if(!dtlInfo.data.dataSend){
+    // const dtlInfo = await YK_WEB_REQ(`tally_process_f_sel.jsp?scaleNumb=${e.SCALENUMB}`);
+    // if(!dtlInfo.data.dataSend){
+    //   alert('검수정보를 불러올수 없습니다.');
+    //   return;
+    // }
+    
+    const dtlInfo = await gfc_yk_call_sp('SP_ZM_PROCESS_F_SEL', {
+      P_SCALENUMB: e.SCALENUMB
+    });
+    
+    if(dtlInfo.data.SUCCESS === 'N'){
       alert('검수정보를 불러올수 없습니다.');
       return;
     }
 
     gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(e.PRE_IRON_GRADE_NAME); //사전등급
-    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.dataSend[0].IRON_GRADE);   //고철등급
+    gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.ROWS[0].IRON_GRADE);   //고철등급
     const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2');
-    await detail_grade2.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${dtlInfo.data.dataSend[0].IRON_GRADE}`, {})});
-    detail_grade2.setValue(dtlInfo.data.dataSend[0].IRON_GRADE_ITEM);   //상세고철등급
-    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT);     //감량중량
-    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.dataSend[0].REDUCE_WGT_REASON_CODE); //감량사유
-    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);     //감가내역
-    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.dataSend[0].DISCOUNT_CODE);    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.dataSend[0].CAR_TYPE);      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.dataSend[0].RETURN_CODE);      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.dataSend[0].RETURN_GUBUN);     //반품구분사유
-    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.dataSend[0].WARNING);  //경고
+    await detail_grade2.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${dtlInfo.data.ROWS[0].IRON_GRADE}`, {})});
+    detail_grade2.setValue(dtlInfo.data.ROWS[0].IRON_GRADE_ITEM);   //상세고철등급
+    gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT);     //감량중량
+    gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT_REASON_CODE); //감량사유
+    gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
+    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
+    gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
 
-
-    // //계량증명서 여부 확인.
-    // const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
-    // if(chitYn.data === 'N'){
-    //   gfs_dispatch('DAILY_PROC_MAIN', 'CHIT_INFO', {
-    //     date     : chitInfoYn.data.dataSend[0].date,
-    //     scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
-    //     carNumb  : chitInfoYn.data.dataSend[0].carNumb,
-    //     vender   : chitInfoYn.data.dataSend[0].vendor,
-    //     itemFlag : e.preItemGrade,
-    //     Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
-    //     loc      : chitInfoYn.data.dataSend[0].area,
-    //     user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-    //     chit     : 'N'
-    //   });
-    // }else{
-      gfs_dispatch('DAILY_PROC_MAIN', 'CHIT_INFO', {
-        scaleNumb: e.SCALENUMB.toString()
-      });
-    // }
+    gfs_dispatch('DAILY_PROC_MAIN', 'CHIT_INFO', {
+      scaleNumb: e.SCALENUMB.toString(),
+      date     : e.INSPECT_TIME
+    });
   }
 
   render() {
@@ -407,14 +408,17 @@ class DAILY_PROC extends Component {
                   </div>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '차량번호'
+                              CODE: '1',
+                              NAME: '차량번호'
+                            },{
+                              CODE: '2',
+                              NAME: '업체명'
                             }]}
                   />
                 </div>
@@ -651,7 +655,8 @@ class DAILY_PROC extends Component {
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>전체차량</span><Botspan reducer='DAILY_PROC_MAIN' />
+                <span className='title'>전체차량</span><Botspan reducer='DAILY_PROC_MAIN' column='BOT_TOTAL' />
+                <span className='title' style={{paddingLeft:'50px'}}>입고량</span><Botspan reducer='DAILY_PROC_MAIN' column='MAIN_WEIGHT' />
               </div>
             </div>
           </div>
@@ -668,7 +673,7 @@ class DAILY_PROC extends Component {
                       <Input pgm     = {this.props.pgm}
                              id      = 'detail_pre_grade'
                              width   = '100%'
-                             isDisabled
+                             readOnly
                       />
                   </li>
                   <li>
@@ -819,7 +824,7 @@ class DAILY_PROC extends Component {
                               id    = 'detail_warning'
                               width = '30px'
                               height= '30px'
-                              isDisabled
+                              disabled
 
                     />
                   </li>

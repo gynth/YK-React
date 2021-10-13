@@ -289,7 +289,14 @@ class Combobox extends Component{
   }
 
   setValue = (value) => {
-    this.ref.current.select.setValue(this.options.find(e => e.value === value));
+    if(value === null || value === undefined){
+      this.ref.current.select.setValue('');
+    }else{
+      this.ref.current.select.setValue(this.options.find(e => {
+        if(e.value !== undefined)
+          return e.value.toString() === value.toString()
+      }));
+    }
   }
 
   setFilter = (value) => {

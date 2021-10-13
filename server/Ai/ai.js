@@ -12,7 +12,9 @@ oracleDb.autoCommit = true;
     user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
     password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
     connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
-    poolAlias: 'aiPool'
+    poolAlias: 'aiPool',
+    poolMin      : 1,
+    poolMax      : 2
   });
 })()
 
@@ -27,7 +29,18 @@ const executeSP = async(RowStatus, connection, query, data) => {
   let MSG_TEXT = queryResult.outBinds['p_MSG_TEXT'];
   let COL_NAM  = queryResult.outBinds['p_COL_NAM'];
 
-  if(RowStatus.indexOf('R') >= 0){
+  if(RowStatus === undefined){
+    ROWS = await fetchRowsFromRS(queryResult);
+
+    if(ROWS.length === 0){
+      ROWS     = null;
+      SUCCESS  = 'N';
+      MSG_CODE = 'MSG01';
+      MSG_TEXT = 'MSG01';
+      COL_NAM  = '';
+    }
+  }
+  else if(RowStatus.indexOf('R') >= 0){
     ROWS = await fetchRowsFromRS(queryResult);
 
     if(ROWS.length === 0){
@@ -96,24 +109,16 @@ const OracleServerSP = async (param) => {
   data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
   data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
 
-  const result = await executeSP(param[0].data.p_RowStatus, connection, query, data);
-  if(result.SUCCESS === 'N'){
-    // connection.rollback((err) => {
-    //   if(err !== null)
-    //     console.log('rollback Error: ' + err);
-    // })
-    doRelease(connection);
-    
-  }else{
-    // connection.commit((err) => {
-    //   if(err !== null)
-    //     console.log('Commit Error: ' + err);
-    // })
+  try{
+    const result = await executeSP(param[0].data.p_RowStatus, connection, query, data);
 
-    doRelease(connection);
+  
+    return result;
+  }catch(e){
+
+  }finally{
+    await doRelease(connection);
   }
-
-  return result;
 }
 
 router.post('/ReRec', async(req, res) => {
@@ -150,6 +155,31 @@ router.post('/GetRecodingList', async(req, res) => {
   res.json({
     Response: 'OK'
   });
+});
+
+router.post('/MstrWait', async(req, res) => {
+
+  let SP = [];
+  SP.push({
+    sp   : `begin 
+              SP_ZM_MSTR_WAIT(
+                :p_select,
+                :p_SUCCESS,
+                :p_MSG_CODE,
+                :p_MSG_TEXT,
+                :p_COL_NAM
+              );
+            end;
+            `,
+    data: {},
+    errSeq: 0
+  })
+
+  console.log(SP, ' ', new Date())
+
+  const select = await OracleServerSP(SP);
+
+  res.json(select.ROWS);
 });
 
 router.post('/Result', async(req, res) => {

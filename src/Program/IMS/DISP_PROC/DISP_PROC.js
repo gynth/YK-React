@@ -273,8 +273,21 @@ class DISP_PROC extends Component {
 
       const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
       const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-  
-      const data = main.filter(e => {
+      
+      const dataMod = [];
+      main.forEach(e => {
+        dataMod.push({
+          scaleNumb: e['DELIVERY_ID'].toString(),
+          carNumb: e['VEHICLE_NO'],
+          preItemGrade: e['PRE_ITEM_GRADE'],
+          itemGrade: e['ITEM_GRADE'],
+          date: e['CREATION_DATE'],
+          lastDate: e['LASTDATE'],
+          vendor: e['VENDOR_NAME']
+        })
+      })
+
+      const data = dataMod.filter(e => {
         if(search_tp !== null && search_tp !== ''){
           //계근번호
           if(search_tp === '1'){
@@ -331,9 +344,6 @@ class DISP_PROC extends Component {
               lastDate: data[i].lastDate,
               vendor: data[i].vendor
             }, 'scaleNumb', false);
-
-            await gfc_sleep(100);
-            grid.resetOriginData();
           }
         }
 
@@ -355,6 +365,16 @@ class DISP_PROC extends Component {
             }
           }
         }
+
+        grid.resetOriginData()
+        grid.restore();
+        const scaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
+        if(scaleNumb !== ''){
+          const row = grid.getData().find(e => e.scaleNumb === scaleNumb);
+          if(row){
+            gfg_setSelectRow(grid, 'scaleNumb', row.rowKey, true);
+          }
+        }
         
         if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== data.length)
           gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
@@ -371,9 +391,10 @@ class DISP_PROC extends Component {
   }
 
   componentDidMount(){
+    // this.Retrieve();
     this.mainGridInterval = setInterval(e => {
       this.mainGrid();
-    }, 2000)
+    }, 5000)
   }
 
   componentWillUnmount(){
@@ -621,7 +642,7 @@ class DISP_PROC extends Component {
                           columnDateTime({
                             name  : 'date',
                             header: '입차시간',
-                            width : 80,
+                            width : 120,
                             height: 38,
                             // paddingTop: ''
                             readOnly: true,
@@ -629,16 +650,16 @@ class DISP_PROC extends Component {
                             format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
                             time  : 'HH:mm:ss'
                           }),
-                          columnTextArea({
+                          columnDateTime({
                             name  : 'lastDate',
                             header: '검수시간',
-                            width : 80,
+                            width : 120,
                             height: 38,
                             // paddingTop: ''
                             readOnly: true,
                             valign:'middle',
                             format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
-                            time  : 'HH:mm'
+                            time  : 'HH:mm:ss'
                           }),
                           columnTextArea({
                             name: 'vendor',
@@ -730,9 +751,9 @@ class DISP_PROC extends Component {
                               if(e === undefined) return;
 
                               if(e.value !== '0'){
-                                await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                  p_division    : e.value
-                                })});
+                                // await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                //   p_division    : e.value
+                                // })});
                                 combo.setDisabled(false);
                               }
                             }}

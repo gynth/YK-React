@@ -217,8 +217,8 @@ const CompleteBtn = (props) => {
 
     alert('저장되었습니다.');
 
-    const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'DISP_PROC');
-    pgm[0].Retrieve();
+    // const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'DISP_PROC');
+    // pgm[0].Retrieve();
     
     gfc_hideMask();
   }

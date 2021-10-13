@@ -5,8 +5,6 @@ const express = require('express');
 const router = express.Router();
 
 (async() => {
-  console.log('run1')
-  
   await oracleDb.createPool({
     // user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
     // password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
@@ -15,14 +13,14 @@ const router = express.Router();
     password     : 'wjdqhykims',
     connectString: '10.10.10.11:1521/PROD',
     poolAlias    : 'oraclePool',
-    poolMin      : 1,
-    poolMax      : 2
+    poolMin      : 5,
+    poolMax      : 20,
     // events       : false,
     // queueMax     : 1000,
     // stmtCacheSize : 50
   });
 
-  console.log('run2')
+  console.log('run')
 })()
 
 const executeSPYK = async(connection, query, data) => {
@@ -105,35 +103,44 @@ router.post('/SP', (req, res) => {
   // const connection = await oracleDb.getConnection('oraclePool');
   // const connection = await oracleDb.getConnection();
 
-  const param = req.body.param;
-  for(let i = 0; i < param.length; i++){
-    let query = param[i].sp;
-    let data  = param[i].data;
-    let errSeq = param[i].errSeq;
-
-
-    // if(query.toUpperCase().indexOf('TEST') > 0){
-
-
-
-
-      oracleDb.getConnection('oraclePool', async (err, connection) => {
-        try{
-          console.log(`call: ${query}`, new Date())
-          if(err){
-            console.log(err);
-          }else{          
-            data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
-            data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-            data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-            data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-            data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+  oracleDb.getConnection('oraclePool', async (err, connection) => {
+    try{
+      if(err){
+        console.log(err);
+      }else{
+        const param = req.body.param;
+        for(let i = 0; i < param.length; i++){
+          let query = param[i].sp;
+          let data  = param[i].data;
+          let errSeq = param[i].errSeq;
           
-            const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
-            if(result.SUCCESS === 'N'){
-              // console.log('3:', new Date())
-              await doRelease(connection);
+          data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
+          data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+          data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+          data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+          data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+        
+          const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
+          if(result.SUCCESS === 'N'){
+            // console.log('3:', new Date())
+            await doRelease(connection);
+    
+            res.json({
+              ROWS    : result.ROWS,
+              SUCCESS : result.SUCCESS,
+              MSG_CODE: result.MSG_CODE,
+              MSG_TEXT: result.MSG_TEXT,
+              COL_NAM : result.COL_NAM,
+              SEQ     : errSeq
+            });
       
+            return;
+            
+          }else{
+            if(i === param.length - 1){
+              // console.log('2:', new Date())
+              await doRelease(connection);
+              
               res.json({
                 ROWS    : result.ROWS,
                 SUCCESS : result.SUCCESS,
@@ -142,62 +149,86 @@ router.post('/SP', (req, res) => {
                 COL_NAM : result.COL_NAM,
                 SEQ     : errSeq
               });
-        
-              return;
-              
-            }else{
-              if(i === param.length - 1){
-                // console.log('2:', new Date())
-                await doRelease(connection);
-                
-                res.json({
-                  ROWS    : result.ROWS,
-                  SUCCESS : result.SUCCESS,
-                  MSG_CODE: result.MSG_CODE,
-                  MSG_TEXT: result.MSG_TEXT,
-                  COL_NAM : result.COL_NAM,
-                  SEQ     : errSeq
-                });
-              }
             }
           }
-        }catch(e){
-          console.log(e)
-          
-          res.json({
-            ROWS    : [],
-            SUCCESS : 'N',
-            MSG_CODE: e,
-            MSG_TEXT: e,
-            COL_NAM : '',
-            SEQ     : 0
-          });
-        }finally{
-          // await doRelease(connection);
         }
-      })
-
-
-
-
-    // }else{
+      }
+    }catch(e){
+      console.log(e)
       
-    //   res.json({
-    //     ROWS    : [],
-    //     SUCCESS : 'N',
-    //     MSG_CODE: 'e',
-    //     MSG_TEXT: 'e',
-    //     COL_NAM : '',
-    //     SEQ     : 0
-    //   });
-    // }
+      res.json({
+        ROWS    : [],
+        SUCCESS : 'N',
+        MSG_CODE: e,
+        MSG_TEXT: e,
+        COL_NAM : '',
+        SEQ     : 0
+      });
+    }finally{
+      // await doRelease(connection);
+    }
+  })
 
-
-
-
-
+  // try{
+  //   const param = req.body.param;
+  //   for(let i = 0; i < param.length; i++){
+  //     let query = param[i].sp;
+  //     let data  = param[i].data;
+  //     let errSeq = param[i].errSeq;
+      
+  //     data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
+  //     data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+  //     data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+  //     data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+  //     data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
     
-  }
+  //     const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
+      
+  //     if(result.SUCCESS === 'N'){
+  //       // console.log('3:', new Date())
+  //       await doRelease(connection);
+
+  //       res.json({
+  //         ROWS    : result.ROWS,
+  //         SUCCESS : result.SUCCESS,
+  //         MSG_CODE: result.MSG_CODE,
+  //         MSG_TEXT: result.MSG_TEXT,
+  //         COL_NAM : result.COL_NAM,
+  //         SEQ     : errSeq
+  //       });
+  
+  //       return;
+        
+  //     }else{
+  //       if(i === param.length - 1){
+  //         // console.log('2:', new Date())
+  //         await doRelease(connection);
+
+  //         res.json({
+  //           ROWS    : result.ROWS,
+  //           SUCCESS : result.SUCCESS,
+  //           MSG_CODE: result.MSG_CODE,
+  //           MSG_TEXT: result.MSG_TEXT,
+  //           COL_NAM : result.COL_NAM,
+  //           SEQ     : errSeq
+  //         });
+  //       }
+  //     }
+  //   }
+  // }catch(e){
+  //   console.log(e)
+  //   res.json({
+  //     ROWS    : [],
+  //     SUCCESS : 'N',
+  //     MSG_CODE: e,
+  //     MSG_TEXT: e,
+  //     COL_NAM : '',
+  //     SEQ     : 0
+  //   });
+  // }finally{
+  //   // console.log('2:', new Date())
+  //   // await doRelease(connection);
+  // }
 });
 
 router.post('/SPYK', async(req, res) => {

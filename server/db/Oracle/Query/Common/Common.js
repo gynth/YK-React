@@ -271,7 +271,7 @@ const Common = (fn, param) => {
     `       ,L.ITEM_NO ` +
     `       ,H.SECTOR_CODE ` +
     `       ,SC.SCRP_ORD_NO ` +
-    
+    `       , TO_CHAR(L.CREATION_DATE,'YYYY-MM-DD HH24:MI:SS')  AS INSPECT_TIME ` +
     `  FROM  BOL_PO_SCRAP_IRON_DELIVERY H ` +
     `,      BOL_PO_SCRAP_LINE          L ` +
     `,      PO_VENDORS                 PV ` +
@@ -286,8 +286,8 @@ const Common = (fn, param) => {
     `WHERE  H.DELIVERY_ID = L.DELIVERY_ID ` +
     `AND    H.VENDOR_ID = PV.VENDOR_ID ` +
     `AND    H.DELIVERY_DATE BETWEEN to_date('${param.fr_dt}','YYYYMMDD') AND to_date('${param.to_dt}','YYYYMMDD') ` +
-    `AND    H.VEHICLE_NO LIKE NVL(null,H.VEHICLE_NO)||'%${param.car_no}%'  ` +
-    `AND   PV.VENDOR_NAME LIKE '%%' ` +
+    `AND    H.VEHICLE_NO LIKE '%${param.car_no}%'  ` +
+    `AND   PV.VENDOR_NAME LIKE '%${param.vendor}%' ` +
     
     `AND     NVL(H.ATTRIBUTE2,'N') = 'Y' ` +
     `AND    NVL(H.VEHICLE_WEIGHT, 0) <> 0 ` +

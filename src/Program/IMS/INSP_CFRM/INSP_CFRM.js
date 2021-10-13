@@ -13,6 +13,7 @@ import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 import { Checkbox as columnCheckbox } from '../../../Component/Grid/Column/Checkbox';
+import { DateTime as columnDateTime } from '../../../Component/Grid/Column/DateTime';
 
 import Combobox from '../../../Component/Control/Combobox';
 
@@ -325,7 +326,8 @@ class INSP_CFRM extends Component {
             return_gubun_name: e['RETURN_GUBUN_NAME'],
             inspector: e['INSPECTOR'],
             delivery_date: e['DELIVERY_DATE'],
-            vendor_name: e['VENDOR_NAME']
+            vendor_name: e['VENDOR_NAME'],
+            inspect_time: e['INSPECT_TIME']
           })
         })
 
@@ -371,8 +373,8 @@ class INSP_CFRM extends Component {
     gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
     gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_RATE);    //감가비율
     gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);     //반품구분사유
     gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
 
     gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
@@ -385,7 +387,8 @@ class INSP_CFRM extends Component {
     //계량증명서 여부 확인.
     // const chitYn = await gfc_chit_yn_YK(e.scaleNumb);
     gfs_dispatch('INSP_CFRM_MAIN', 'CHIT_INFO', {
-      scaleNumb: e.scaleNumb.toString()
+      scaleNumb: e.scaleNumb.toString(),
+      date     : e.inspect_time
     });
   }
 
@@ -400,23 +403,23 @@ class INSP_CFRM extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '계근번호'
+                              CODE: '1',
+                              NAME: '계근번호'
                             },{
-                              code: '2',
-                              name: '차량번호'
+                              CODE: '2',
+                              NAME: '차량번호'
                             },{
-                              code: '3',
-                              name: '등급'
+                              CODE: '3',
+                              NAME: '등급'
                             },{
-                              code: '4',
-                              name: '업체'
+                              CODE: '4',
+                              NAME: '업체'
                             }]}
                   />
                 </div>
@@ -529,16 +532,15 @@ class INSP_CFRM extends Component {
                             readOnly: true,
                             align : 'center'
                           }),  
-                          columnTextArea({
+                          columnDateTime({
                             name  : 'delivery_date',
-                            header: '출차시간',
-                            width : 80,
+                            header: '입고일자',
+                            width : 120,
                             height: 38,
                             // paddingTop: ''
                             readOnly: true,
                             valign:'middle',
-                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
-                            time  : 'HH:mm'
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT')
                           }),
                           columnTextArea({
                             name: 'vendor_name',
@@ -623,9 +625,9 @@ class INSP_CFRM extends Component {
                               if(e === undefined) return;
 
                               if(e.value !== '0'){
-                                await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                  p_division    : e.value
-                                })});
+                                // await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                //   p_division    : e.value
+                                // })});
                                 combo.setDisabled(false);
                               }
                             }}

@@ -14,6 +14,7 @@ import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
 import { Checkbox as columnCheckbox } from '../../../Component/Grid/Column/Checkbox';
+import { DateTime as columnDateTime } from '../../../Component/Grid/Column/DateTime';
 
 import Combobox from '../../../Component/Control/Combobox';
 
@@ -310,7 +311,26 @@ class INSP_CANC extends Component {
     if(mainData.data.SUCCESS === 'Y'){
       const main = mainData.data.ROWS;
       if(main){
-        grid.resetData(main);
+        const dataMod = [];
+        main.forEach(e => {
+          dataMod.push({
+            scaleNumb: e['DELIVERY_ID'],
+            vehicle_no: e['VEHICLE_NO'],
+            pre_item_grade: e['PRE_ITEM_GRADE'],
+            iron_grade: e['IRON_GRADE'],
+            iron_grade_item_name: e['IRON_GRADE_ITEM_NAME'],
+            reduce_name	: e['REDUCE_NAME'],
+            reduce_wgt: e['REDUCE_WGT'],
+            return_gubun: e['RETURN_GUBUN'],
+            return_gubun_name: e['RETURN_GUBUN_NAME'],
+            inspector: e['INSPECTOR'],
+            delivery_date: e['DELIVERY_DATE'],
+            vendor_name: e['VENDOR_NAME'],
+            inspect_time: e['INSPECT_TIME']
+          })
+        })
+
+        grid.resetData(dataMod);
         gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
         
         await gfc_sleep(100);
@@ -347,7 +367,8 @@ class INSP_CANC extends Component {
 
     //계량증명서 여부 확인.
     gfs_dispatch('INSP_CANC_MAIN', 'CHIT_INFO', {
-      scaleNumb: e.scaleNumb
+      scaleNumb: e.scaleNumb.toString(),
+      date     : e.inspect_time
     });
   }
 
@@ -362,23 +383,23 @@ class INSP_CANC extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '계근번호'
+                              CODE: '1',
+                              NAME: '계근번호'
                             },{
-                              code: '2',
-                              name: '차량번호'
+                              CODE: '2',
+                              NAME: '차량번호'
                             },{
-                              code: '3',
-                              name: '등급'
+                              CODE: '3',
+                              NAME: '등급'
                             },{
-                              code: '4',
-                              name: '업체'
+                              CODE: '4',
+                              NAME: '업체'
                             }]}
                   />
                 </div>
@@ -491,16 +512,15 @@ class INSP_CANC extends Component {
                             readOnly: true,
                             align : 'center'
                           }),  
-                          columnTextArea({
+                          columnDateTime({
                             name  : 'delivery_date',
-                            header: '출차시간',
-                            width : 80,
+                            header: '입고일자',
+                            width : 120,
                             height: 38,
                             // paddingTop: ''
                             readOnly: true,
                             valign:'middle',
-                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
-                            time  : 'HH:mm'
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT')
                           }),
                           columnTextArea({
                             name: 'vendor_name',

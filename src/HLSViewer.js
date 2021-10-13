@@ -111,12 +111,13 @@ class HLSViewer extends Component {
               <input style={{width: '100%'}} defaultValue={`카메라: ${result1.data.rows[0][5]}`} disabled/>
               <ReactHlsPlayer
                 src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result1.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={false}
+                autoPlay={true}
                 controls={true}
                 width='100%'
                 height='100%'
                 muted='muted'
-                onLoadedData={e => e.target.play()}
+                // onLoadedData={e => e.target.play()}
+                // onError={e => console.log(e)}
                 hlsConfig={{
                   autoStartLoad: true,
                   startPosition: -1,
@@ -140,17 +141,22 @@ class HLSViewer extends Component {
               <input style={{width: '100%'}} defaultValue={`카메라: ${result2.data.rows[0][5]}`} disabled/>
               <ReactHlsPlayer
                 src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result2.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={false}
+                autoPlay={true}
                 controls={true}
                 width='100%'
                 height='100%'
                 muted='muted'
-                onLoadedData={e => e.target.play()}
+                // onLoadedData={e => e.target.play()}
+                onError={(e) => console.log(e)}
                 hlsConfig={{
-                  autoStartLoad: true,
-                  startPosition: -1,
-                  debug: false,
-                  lowLatencyMode: true
+                  // appendErrorMaxRetry:100
+                  // nudgeOffset: 2,
+                  // nudgeMaxRetry: 100
+                  // autoStartLoad: true,
+                  // startPosition: 1,
+                  // debug: false,
+                  // lowLatencyMode: true,
+                  // nudgeOffset: 1
                 }}
               />
           </div>
@@ -169,12 +175,12 @@ class HLSViewer extends Component {
               <input style={{width: '100%'}} defaultValue={`카메라: ${result3.data.rows[0][5]}`} disabled/>
               <ReactHlsPlayer
                 src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result3.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={false}
+                autoPlay={true}
                 controls={true}
                 width='100%'
                 height='100%'
                 muted='muted'
-                onLoadedData={e => e.target.play()}
+                // onLoadedData={e => e.target.play()}
                 hlsConfig={{
                   autoStartLoad: true,
                   startPosition: -1,
@@ -198,12 +204,12 @@ class HLSViewer extends Component {
               <input style={{width: '100%'}} defaultValue={`카메라: ${result4.data.rows[0][5]}`} disabled/>
               <ReactHlsPlayer
                 src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result4.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={false}
+                autoPlay={true}
                 controls={true}
                 width='100%'
                 height='100%'
                 muted='muted'
-                onLoadedData={e => e.target.play()}
+                // onLoadedData={e => e.target.play()}
                 hlsConfig={{
                   autoStartLoad: true,
                   startPosition: -1,

@@ -34,6 +34,8 @@ function Chit(props) {
           src={`http://tally.yksteel.co.kr/Images/scaleChit/${value.scaleNumb.substring(0, 8)}/${value.scaleNumb}.jpg?date=${new Date()}`} 
           style={{width:'100%', height:600}} alt='chit' 
           />
+        <input style={{width:'95%', paddingLeft:'15px', height:30, border:'none', fontSize:'18px'}} readOnly defaultValue='검수일자'/>
+        <span style={{width:'100%', paddingLeft:'15px', height:30, fontSize:'18px'}} >{value.date}</span>
       </div>
     }
     </>

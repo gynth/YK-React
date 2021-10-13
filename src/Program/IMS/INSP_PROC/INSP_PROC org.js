@@ -928,7 +928,6 @@ class INSP_PROC extends Component {
 
   mainGrid = async() => {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
-    // await grid.restore();
 
     // const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT');
     const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT');
@@ -1008,6 +1007,7 @@ class INSP_PROC extends Component {
               vendor: data[i].vendor,
               rec: '0'
             }, 'scaleNumb', false);
+            grid.resetOriginData();
           }
         }
 
@@ -1029,8 +1029,6 @@ class INSP_PROC extends Component {
             }
           }
         }
-        await gfc_sleep(1000);
-        grid.resetOriginData();
 
         RecodingList().then(recScaleNumb => {
           for(let i = 0; i < recScaleNumb.data.Response.length; i++){
@@ -1054,9 +1052,6 @@ class INSP_PROC extends Component {
   
         if(data.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
           gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-        
-        // await grid.resetOriginData();
-        // await grid.refreshLayout();
       }
     }else{
       grid.clear();

@@ -6,7 +6,7 @@ const router = express.Router();
 
 (async() => {
   console.log('run1')
-  
+
   await oracleDb.createPool({
     // user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
     // password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
@@ -14,9 +14,9 @@ const router = express.Router();
     user         : 'YK_IMS',
     password     : 'wjdqhykims',
     connectString: '10.10.10.11:1521/PROD',
-    poolAlias    : 'oraclePool',
-    poolMin      : 1,
-    poolMax      : 2
+    poolAlias    : 'oraclePool'
+    // poolMin      : 1,
+    // poolMax      : 2
     // events       : false,
     // queueMax     : 1000,
     // stmtCacheSize : 50
@@ -111,12 +111,6 @@ router.post('/SP', (req, res) => {
     let data  = param[i].data;
     let errSeq = param[i].errSeq;
 
-
-    // if(query.toUpperCase().indexOf('TEST') > 0){
-
-
-
-
       oracleDb.getConnection('oraclePool', async (err, connection) => {
         try{
           console.log(`call: ${query}`, new Date())
@@ -176,27 +170,6 @@ router.post('/SP', (req, res) => {
           // await doRelease(connection);
         }
       })
-
-
-
-
-    // }else{
-      
-    //   res.json({
-    //     ROWS    : [],
-    //     SUCCESS : 'N',
-    //     MSG_CODE: 'e',
-    //     MSG_TEXT: 'e',
-    //     COL_NAM : '',
-    //     SEQ     : 0
-    //   });
-    // }
-
-
-
-
-
-    
   }
 });
 

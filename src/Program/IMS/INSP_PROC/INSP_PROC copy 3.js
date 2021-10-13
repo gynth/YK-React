@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_ftp_file_yn_YK } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_sleep, gfc_showMask, gfc_yk_call_sp, gfc_hideMask, gfc_chit_yn_YK, gfc_ftp_file_yn_YK } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe, gfs_PGM_REDUCER } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_appendRow, gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -14,6 +14,7 @@ import Layout from '../../../Component/Layout/Layout';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Image as columnImage } from '../../../Component/Grid/Column/Image';
 import { TextArea as columnTextArea } from '../../../Component/Grid/Column/TextArea';
+import { DateTime as columnDateTime } from '../../../Component/Grid/Column/DateTime';
 
 import Combobox from '../../../Component/Control/Combobox';
 
@@ -30,10 +31,11 @@ import RainInfo from './RainInfo';
 
 import GifPlayer from 'react-gif-player';
 
-import { YK_WEB_REQ, YK_WEB_REQ_DIRECT2, ReRec, RecodingList } from '../../../WebReq/WebReq';
+import { ReRec, RecodingList } from '../../../WebReq/WebReq';
 import { TOKEN, MILESTONE } from '../../../WebReq/WebReq';
 import { throttle } from 'lodash';
 import { setSessionCookie } from '../../../Cookies';
+import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
 //#endregion
 
 class INSP_PROC extends Component {
@@ -859,218 +861,229 @@ class INSP_PROC extends Component {
   }
 
   //#region 개별조회
-  mainHeader = () => {
-    YK_WEB_REQ('tally_mstr_header.jsp').then(e => {
-      const header = e.data.dataSend;
-      if(header){
-        if(header[0].rCar !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
+  mainHeader = async() => {
+  
+    // const select = await gfc_yk_call_sp('sp_zm_mstr_header');
+    const select = await gfc_yk_call_sp('sp_zm_mstr_header_test');
+    const R_CARSU = select.data.ROWS[0].R_CARSU === null ? 0 : select.data.ROWS[0].R_CARSU;
+    const E_CARSU = select.data.ROWS[0].E_CARSU === null ? 0 : select.data.ROWS[0].E_CARSU;
+    const E_KG = select.data.ROWS[0].E_KG === null ? 0 : select.data.ROWS[0].E_KG;
 
-        if(header[0].eCar !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
+    if(select.data.SUCCESS === 'Y'){
+      if(R_CARSU !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT'))
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: R_CARSU});
 
-        if(header[0].eKg !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
-      }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
-      }
-    })
+      if(E_CARSU !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL'))
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: E_CARSU});
+
+      if(E_KG !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT'))
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: E_KG});
+    }else{
+      if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT') !== 0)
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
+      if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_TOTAL') !== 0)
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
+      if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT') !== 0)
+        gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
+    }
   }
 
-  mainHeader2 = () => {
+  mainHeader2 = async() => {
     //출차대기
-    YK_WEB_REQ('tally_mstr_pass.jsp').then(e => {
-      const header2 = e.data.dataSend;
-      if(header2){
-        if(header2.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
-      }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
-      }
-    })
+    // const select = await gfc_yk_call_sp('sp_zm_mstr_pass');
+    const select = await gfc_yk_call_sp('sp_zm_mstr_pass_test');
+
+    if(select.data.SUCCESS === 'Y'){
+      if(select.data.ROWS.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT'))
+        gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: select.data.ROWS.length});
+    }else{
+      if(gfs_getStoreValue('INSP_PROC_MAIN', 'DEPT_WAIT') !== 0)
+        gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
+    }
 
     //입차대기
-    YK_WEB_REQ('tally_mstr_drive.jsp').then(e => {
-      const header3 = e.data.dataSend;
-      if(header3){
-        if(header3.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
-      }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
-      }
-    })
+    // const select2 = await gfc_yk_call_sp('SP_ZM_MSTR_DRIVE');
+    const select2 = await gfc_yk_call_sp('SP_ZM_MSTR_DRIVE_TEST');
 
-    //운송대기
-    YK_WEB_REQ('tally_mstr_drive_wait.jsp').then(e => {
-      const header4 = e.data.dataSend;
-      if(header4){
-        if(header4.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: header4.length});
-      }else{
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: 0});
-      }
-    })
+    if(select2.data.SUCCESS === 'Y'){
+      if(select2.data.ROWS.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT'))
+        gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: select2.data.ROWS.length});
+    }else{
+      if(gfs_getStoreValue('INSP_PROC_MAIN', 'ENTR_WAIT') !== 0)
+        gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
+    }
+
+    // //운송대기
+    // const select3 = await gfc_yk_call_sp('SP_ZM_MSTR_DRIVE_WAIT');
+    const select3 = await gfc_yk_call_sp('SP_ZM_MSTR_DRIVE_WAIT_TEST');
+
+    if(select3.data.SUCCESS === 'Y'){
+      if(select3.data.ROWS.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT'))
+        gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: select3.data.ROWS.length});
+    }else{
+      if(gfs_getStoreValue('INSP_PROC_MAIN', 'DRIV_WAIT') !== 0)
+        gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: 0});
+    }
   }
 
-  mainGrid = () => {
-
+  mainGrid = async() => {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
 
-    YK_WEB_REQ('tally_mstr_wait.jsp').then(e => {
-      const main = e.data.dataSend;
+    // const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT');
+    const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT_TEST');
+    if(select.data.SUCCESS === 'Y'){
+      const main = select.data.ROWS;
+        
+      if(main.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
+        gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
 
-      if(main){
-        if(main.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
+      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
   
-        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-    
-        let data = main.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
+      const dataMod = [];
+      main.forEach(e => {
+        dataMod.push({
+          scaleNumb: e['DELIVERY_ID'].toString(),
+          carNumb: e['VEHICLE_NO'],
+          itemGrade: e['ITEM_GRADE'],
+          date: e['CREATION_DATE'],
+          vendor: e['VENDOR_NAME']
+        })
+      })
+
+      let data = dataMod.filter(e => {
+        if(search_tp !== null && search_tp !== ''){
+          //계근번호
+          if(search_tp === '1'){
+            if(e.scaleNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
             }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
+          }
+          //차량번호
+          else if(search_tp === '2'){
+            if(e.carNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
             }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
+          }
+          //사전등급
+          else if(search_tp === '3'){
+            if(e.itemGrade.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
             }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
+          }
+          //업체
+          else if(search_tp === '4'){
+            if(e.vendor.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
             }
-            
-          }else{
-            return true;
+          }
+          
+        }else{
+          return true;
+        }
+      })
+
+      if(data.length > 0){
+        
+        //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
+        for(let i = 0; i < data.length; i++){
+          const scaleNumb = data[i].scaleNumb;
+
+          const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
+          if(!oldData){
+            gfg_appendRow(grid, grid.getRowCount(), {
+              scaleNumb,
+              carNumb: data[i].carNumb,
+              itemGrade: data[i].itemGrade,
+              date: data[i].date,
+              vendor: data[i].vendor,
+              rec: '0'
+            }, 'scaleNumb', false);
+            grid.resetOriginData();
+          }
+        }
+
+        //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
+        for(let i = 0; i < grid.getData().length; i++){
+          const scaleNumb =  grid.getData()[i].scaleNumb;
+
+          const newData = data.find(e => e.scaleNumb === scaleNumb)
+          if(!newData){
+            grid.removeRow(i);
+
+            //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
+            const selectScaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+            if(scaleNumb === selectScaleNumb){
+              gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+              gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+              gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
+              gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+            }
+          }
+        }
+
+        RecodingList().then(recScaleNumb => {
+          for(let i = 0; i < recScaleNumb.data.Response.length; i++){
+
+            const data = grid.getData().find(e => e.scaleNumb === recScaleNumb.data.Response[i])
+            if(data){
+              //녹화 on만 설정
+              grid.setValue(data.rowKey, 'rec', '1');
+            }
+          }
+
+          const recGrid = grid.getData().filter(e => e.rec === '1');
+          for(let i = 0; i < recGrid.length; i++){
+            const data = recScaleNumb.data.Response.find(e => e === recGrid[i].scaleNumb);
+            if(!data){
+              //녹화 off만 설정
+              grid.setValue(recGrid[i].rowKey, 'rec', '0');
+            }
           }
         })
-
-        if(data.length > 0){
-          
-          //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
-          for(let i = 0; i < data.length; i++){
-            const scaleNumb = data[i].scaleNumb;
-
-            const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
-            if(!oldData){
-              gfg_appendRow(grid, grid.getRowCount(), {
-                scaleNumb,
-                carNumb: data[i].carNumb,
-                itemGrade: data[i].itemGrade,
-                date: data[i].date,
-                vendor: data[i].vendor,
-                rec: '0'
-              }, 'scaleNumb', false);
-            }
-          }
-
-          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
-          for(let i = 0; i < grid.getData().length; i++){
-            const scaleNumb =  grid.getData()[i].scaleNumb;
-
-            const newData = data.find(e => e.scaleNumb === scaleNumb)
-            if(!newData){
-              grid.removeRow(i);
-
-              //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
-              const selectScaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-              if(scaleNumb === selectScaleNumb){
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-              }
-            }
-          }
-
-          RecodingList().then(recScaleNumb => {
-            for(let i = 0; i < recScaleNumb.data.Response.length; i++){
-
-              const data = grid.getData().find(e => e.scaleNumb === recScaleNumb.data.Response[i])
-              if(data){
-                //녹화 on만 설정
-                grid.setValue(data.rowKey, 'rec', '1');
-              }
-            }
-
-            const recGrid = grid.getData().filter(e => e.rec === '1');
-            for(let i = 0; i < recGrid.length; i++){
-              const data = recScaleNumb.data.Response.find(e => e === recGrid[i].scaleNumb);
-              if(!data){
-                //녹화 off만 설정
-                grid.setValue(recGrid[i].rowKey, 'rec', '0');
-              }
-            }
-          })
-    
-          if(data.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
-            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-        }else{
-          grid.clear();
-          if(gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL') !== 0)
-            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-        }
-        
-        grid.resetOriginData();
-        grid.restore();
-      }else{
-        grid.clear();
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
+  
+        if(data.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
+          gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
       }
-    })
+    }else{
+      grid.clear();
+      if(gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL') !== 0)
+        gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+    }
+
+    await this.mainHeader();
+    await this.mainHeader2();
   }
   //#endregion
 
   componentDidMount(){
     this.Init();
-    this.Retrieve();
+    // this.Retrieve();
 
-    this.mainHeaderInterval = setInterval(e => {
-      this.mainHeader();
-    }, 5000)
+    // this.mainHeaderInterval = setInterval(e => {
+    //   this.mainHeader();
+    // }, 2000)
 
-    this.mainHeaderInterval2 = setInterval(e => {
-      this.mainHeader2();
-    }, 5000)
+    // this.mainHeaderInterval2 = setInterval(e => {
+    //   this.mainHeader2();
+    // }, 5000)
 
     this.mainGridInterval = setInterval(e => {
       this.mainGrid();
-    }, 3000)
+    }, 2000)
   }
 
   componentWillUnmount(){
-    clearInterval(this.mainHeaderInterval);
-    clearInterval(this.mainHeaderInterval2);
+    // clearInterval(this.mainHeaderInterval);
+    // clearInterval(this.mainHeaderInterval2);
     clearInterval(this.mainGridInterval);
   }
 
@@ -1130,109 +1143,9 @@ class INSP_PROC extends Component {
       cargo_rear_gps_addr : ''
     });
 
-    const headData = await YK_WEB_REQ('tally_mstr_header.jsp');
-    const header = headData.data.dataSend;
-    if(header){
-      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: header[0].rCar});
-      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: header[0].eCar});
-      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: header[0].eKg});
-    }else{
-      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
-      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
-      gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
-    }
-
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    grid.clear();
-
-    const mainData = await YK_WEB_REQ('tally_mstr_wait.jsp');
-    const main = mainData.data.dataSend;
-
-    if(main){
-      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
-
-    
-      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-      
-      const data = main.filter(e => {
-        if(search_tp !== null && search_tp !== ''){
-          //계근번호
-          if(search_tp === '1'){
-            if(e.scaleNumb.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
-          }
-          //차량번호
-          else if(search_tp === '2'){
-            if(e.carNumb.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
-          }
-          //사전등급
-          else if(search_tp === '3'){
-            if(e.itemGrade.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
-          }
-          //업체
-          else if(search_tp === '4'){
-            if(e.vendor.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
-          }
-          
-        }else{
-          return true;
-        }
-      })
-    
-      if(data.length > 0){
-        grid.resetData(data);
-        gfg_setSelectRow(grid);
-  
-        gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-      }else{
-        gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-      }
-    }else{
-      gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: 0});
-    }
-
-    //출차대기
-    const headData2 = await YK_WEB_REQ('tally_mstr_pass.jsp');
-    const header2 = headData2.data.dataSend;
-    if(header2){
-      gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: header2.length});
-    }else{
-      gfs_dispatch('INSP_PROC_MAIN', 'DEPT_WAIT', {DEPT_WAIT: 0});
-    }
-
-    //입차대기
-    const headData3 = await YK_WEB_REQ('tally_mstr_drive.jsp');
-    const header3 = headData3.data.dataSend;
-    if(header3){
-      gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: header3.length});
-    }else{
-      gfs_dispatch('INSP_PROC_MAIN', 'ENTR_WAIT', {ENTR_WAIT: 0});
-    }
-
-    //운송대기
-    const headData4 = await YK_WEB_REQ('tally_mstr_drive_wait.jsp');
-    const header4 = headData4.data.dataSend;
-    if(header4){
-      gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: header4.length});
-    }else{
-      gfs_dispatch('INSP_PROC_MAIN', 'DRIV_WAIT', {DRIV_WAIT: 0});
-    }
+    this.mainGrid();
+    // this.mainHeader();
+    // this.mainHeader2();
 
     gfc_hideMask();
   }
@@ -1284,72 +1197,70 @@ class INSP_PROC extends Component {
     });
 
     //계량증명서 정보여부
-    const chitInfoYn = await YK_WEB_REQ(`tally_chit.jsp?scaleNumb=${e.scaleNumb}`);
-    if(!chitInfoYn.data.dataSend){
+    
+    const chitInfoYn = await gfc_yk_call_sp('SP_ZM_CHIT', {
+      P_SCALENUMB: e.scaleNumb
+    });
+
+    if(chitInfoYn.data.SUCCESS === 'N'){
       alert('계량증명서 정보가 없습니다.');
       gfc_hideMask();
       return;
     }
 
-    //계량증명서 여부 확인.
+    //계량증명서
     const chitYn = await gfc_ftp_file_yn_YK(e.scaleNumb);
-    
-    // if(chitYn.data === 'N'){
-      gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
-        date     : chitInfoYn.data.dataSend[0].date,
-        scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb,
-        carNumb  : chitInfoYn.data.dataSend[0].carNumb,
-        vender   : chitInfoYn.data.dataSend[0].vendor,
-        itemFlag : e.itemGrade,
-        Wgt      : chitInfoYn.data.dataSend[0].totalWgt,
-        loc      : chitInfoYn.data.dataSend[0].area,
-        user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-        chit     : chitYn.data
-      });
-    // }else{
-    //   gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
-    //     chit     : chitYn.data,
-    //     scaleNumb: chitInfoYn.data.dataSend[0].scaleNumb
-    //   });
-    // }
+    gfs_dispatch('INSP_PROC_MAIN', 'CHIT_INFO', {
+      date     : chitInfoYn.data.ROWS[0].CREATION_DATE,
+      scaleNumb: chitInfoYn.data.ROWS[0].DELIVERY_ID.toString(),
+      carNumb  : chitInfoYn.data.ROWS[0].VEHICLE_NO,
+      vender   : chitInfoYn.data.ROWS[0].VENDOR_NAME,
+      itemFlag : e.itemGrade,
+      Wgt      : chitInfoYn.data.ROWS[0].TOTAL_WEIGHT,
+      loc      : chitInfoYn.data.ROWS[0].AREA,
+      user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+      chit     : chitYn.data
+    });
 
-    //배차정보
-    const dispInfo = await YK_WEB_REQ(`tally_process_f3.jsp?scaleNumb=${e.scaleNumb}`); 
-    // const dispInfo = await YK_WEB_REQ_DIRECT('http://tally.yksteel.co.kr/tally_process_f3.jsp?scaleNumb=202108300001');
-    if(dispInfo.data.dataSend){
+    //배차정보 김경현
+    const dispInfo = await gfc_yk_call_sp('SP_ZM_PROCESS_F3', {
+      P_SCALENUMB: e.scaleNumb
+    });
+
+    if(dispInfo.data.SUCCESS === 'Y'){
       gfs_dispatch('INSP_PROC_MAIN', 'DISP_INFO', {
-        scaleNumb       : chitInfoYn.data.dataSend[0].scaleNumb,
-        scrp_ord_no     : dispInfo.data.dataSend[0].SCRP_ORD_NO,
-        scrp_grd_nm     : dispInfo.data.dataSend[0].SCRP_GRD_NM,
-        real_vender_name: dispInfo.data.dataSend[0].REAL_VENDER_NAME,
-        load_area_nm    : dispInfo.data.dataSend[0].LOAD_AREA_NM,
-        load_area_addr  : dispInfo.data.dataSend[0].LOAD_AREA_ADDR
+        scaleNumb       : chitInfoYn.data.ROWS[0].DELIVERY_ID.toString(),
+        scrp_ord_no     : dispInfo.data.ROWS[0].SCRP_ORD_NO,
+        scrp_grd_nm     : dispInfo.data.ROWS[0].SCRP_GRD_NM,
+        real_vender_name: dispInfo.data.ROWS[0].REAL_VENDER_NAME,
+        load_area_nm    : dispInfo.data.ROWS[0].LOAD_AREA_NM,
+        load_area_addr  : dispInfo.data.ROWS[0].LOAD_AREA_ADDR
       });
 
-      const scrp_ord_no = dispInfo.data.dataSend[0].SCRP_ORD_NO;
+      const scrp_ord_no = dispInfo.data.ROWS[0].SCRP_ORD_NO;
       const yyyy = scrp_ord_no.substr(2, 4);
       const mm = scrp_ord_no.substr(6, 2);
       const dd = scrp_ord_no.substr(8, 2);
 
       gfs_dispatch('INSP_PROC_MAIN', 'DISP_PIC', {
-        scaleNumb           : chitInfoYn.data.dataSend[0].scaleNumb,
-        scrp_ord_no         : dispInfo.data.dataSend[0].SCRP_ORD_NO,
+        scaleNumb           : chitInfoYn.data.ROWS[0].DELIVERY_ID.toString(),
+        scrp_ord_no         : dispInfo.data.ROWS[0].SCRP_ORD_NO,
     
-        empty_front_date    : dispInfo.data.PIC[0].EMPTY_FRONT_DATE,
-        empty_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_FRONT}`,
-        empty_front_gps_addr: dispInfo.data.PIC[0].EMPTY_FRONT_GPS_ADDR,
+        empty_front_date    : dispInfo.data.ROWS[0].EMPTY_FRONT_DATE,
+        empty_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.ROWS[0].EMPTY_FRONT}`,
+        empty_front_gps_addr: dispInfo.data.ROWS[0].EMPTY_FRONT_GPS_ADDR,
         
-        empty_rear_date     : dispInfo.data.PIC[0].EMPTY_REAR_DATE,
-        empty_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].EMPTY_REAR}`,
-        empty_rear_gps_addr : dispInfo.data.PIC[0].EMPTY_REAR_GPS_ADDR,
+        empty_rear_date     : dispInfo.data.ROWS[0].EMPTY_REAR_DATE,
+        empty_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.ROWS[0].EMPTY_REAR}`,
+        empty_rear_gps_addr : dispInfo.data.ROWS[0].EMPTY_REAR_GPS_ADDR,
         
-        cargo_front_date    : dispInfo.data.PIC[0].CARGO_FRONT_DATE,
-        cargo_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_FRONT}`,
-        cargo_front_gps_addr: dispInfo.data.PIC[0].CARGO_FRONT_GPS_ADDR,
+        cargo_front_date    : dispInfo.data.ROWS[0].CARGO_FRONT_DATE,
+        cargo_front         : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.ROWS[0].CARGO_FRONT}`,
+        cargo_front_gps_addr: dispInfo.data.ROWS[0].CARGO_FRONT_GPS_ADDR,
         
-        cargo_rear_date     : dispInfo.data.PIC[0].CARGO_REAR_DATE,
-        cargo_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.PIC[0].CARGO_REAR}`,
-        cargo_rear_gps_addr : dispInfo.data.PIC[0].CARGO_REAR_GPS_ADDR
+        cargo_rear_date     : dispInfo.data.ROWS[0].CARGO_REAR_DATE,
+        cargo_rear          : `http://scrap.yksteel.co.kr:8088/stms/resources/upload/${yyyy}/${mm}/${dd}/${dispInfo.data.ROWS[0].CARGO_REAR}`,
+        cargo_rear_gps_addr : dispInfo.data.ROWS[0].CARGO_REAR_GPS_ADDR
       });
     }
     
@@ -1438,13 +1349,17 @@ class INSP_PROC extends Component {
                             readOnly: true,
                             align : 'center'
                           }),   
-                          columnInput({
-                            name: 'date',
+                          columnDateTime({
+                            name  : 'date',
                             header: '입차시간',
-                            width : 150,
+                            width : 120,
+                            height: 38,
+                            // paddingTop: ''
                             readOnly: true,
-                            align : 'center'
-                          }),   
+                            valign:'middle',
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                            time  : 'HH:mm:ss'
+                          }),
                           columnTextArea({
                             name: 'vendor',
                             header: 'Vendor',
@@ -1619,13 +1534,18 @@ class INSP_PROC extends Component {
                                 display = 'item'
                                 placeholder = '고철등급 검색'
                                 height  = {42}
-                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
+                                oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : 'P005'
+                                })}
                                 onChange = {async (e) => {
                                   const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
                                   combo.setValue(null);
+                                  combo.setDisabled(true);
 
                                   if(e !== undefined && e.value !== ''){
-                                    await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                                    await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                      p_division    : e.value
+                                    })});
                                     combo.setDisabled(false);
                                   }else{
                                     combo.setDisabled(true);
@@ -1648,17 +1568,20 @@ class INSP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감량중량 검색(KG)'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P535'
+                            })}
                             onChange = {async (e) => {
                               const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
                               combo.setValue(null);
+                              combo.setDisabled(true);
 
                               if(e === undefined) return;
 
-                              if(e.value === '0'){
-                                combo.setDisabled(true);
-                              }else{
-                                await combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                              if(e.value !== '0'){
+                                await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : e.value
+                                })});
                                 combo.setDisabled(false);
                               }
                             }}
@@ -1669,7 +1592,9 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량사유 검색'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P620'
+                          })}
                           isDisabled
                     /> 
                   </li>
@@ -1681,7 +1606,9 @@ class INSP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감가내역 검색'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P130'
+                            })}
                             emptyRow
                             onChange = {async (e) => {
                               const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
@@ -1699,40 +1626,40 @@ class INSP_PROC extends Component {
                     </div>
                     <Combobox pgm = {this.props.pgm}
                           id      = 'detail_depr2'
-                          value   = 'code'
-                          display = 'name'
+                          value   = 'CODE'
+                          display = 'NAME'
                           placeholder = '감가비율'
                           isDisabled
                           data    = {[{
-                            'code': '10',
-                            'name': '10%'
+                            'CODE': '10',
+                            'NAME': '10%'
                           },{
-                            'code': '20',
-                            'name': '20%'
+                            'CODE': '20',
+                            'NAME': '20%'
                           },{
-                            'code': '30',
-                            'name': '30%'
+                            'CODE': '30',
+                            'NAME': '30%'
                           },{
-                            'code': '40',
-                            'name': '40%'
+                            'CODE': '40',
+                            'NAME': '40%'
                           },{
-                            'code': '50',
-                            'name': '50%'
+                            'CODE': '50',
+                            'NAME': '50%'
                           },{
-                            'code': '60',
-                            'name': '60%'
+                            'CODE': '60',
+                            'NAME': '60%'
                           },{
-                            'code': '70',
-                            'name': '70%'
+                            'CODE': '70',
+                            'NAME': '70%'
                           },{
-                            'code': '80',
-                            'name': '80%'
+                            'CODE': '80',
+                            'NAME': '80%'
                           },{
-                            'code': '90',
-                            'name': '90%'
+                            'CODE': '90',
+                            'NAME': '90%'
                           },{
-                            'code': '100',
-                            'name': '100%'
+                            'CODE': '100',
+                            'NAME': '100%'
                           }]}
                           // emptyRow
                     />
@@ -1762,7 +1689,9 @@ class INSP_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '차종선택'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P700'
+                          })}
                   />
                   </li>
                   <li>
@@ -1773,7 +1702,9 @@ class INSP_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '일부,전량 선택'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P110'
+                            })}
                             emptyRow
                             onChange = {e => {
                               const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
@@ -1794,7 +1725,9 @@ class INSP_PROC extends Component {
                             id      = 'detail_rtn2'
                             value   = 'itemCode'
                             display = 'item'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P120'
+                            })}
                             isDisabled
                     />
                   </li>
