@@ -530,6 +530,7 @@ class INSP_PROC extends Component {
           DEPT_WAIT    : nowState === undefined ? 0 : nowState.DEPT_WAIT,
           ENTR_WAIT    : nowState === undefined ? 0 : nowState.ENTR_WAIT,
           DRIV_WAIT    : nowState === undefined ? 0 : nowState.DRIV_WAIT,
+          CAR_TOTAL    : nowState === undefined ? 0 : nowState.CAR_TOTAL,
           
           DETAIL_SCALE : nowState === undefined ? '' : nowState.DETAIL_SCALE,
           DETAIL_CARNO : nowState === undefined ? '' : nowState.DETAIL_CARNO,
@@ -612,6 +613,11 @@ class INSP_PROC extends Component {
 
         return Object.assign({}, nowState, {
           RAIN_INFO : action.RAIN_INFO
+        })
+      }else if(action.type === 'CAR_TOTAL'){
+
+        return Object.assign({}, nowState, {
+          CAR_TOTAL : action.CAR_TOTAL
         })
       }else if(action.type === 'MAIN_WAIT'){
 
@@ -865,11 +871,13 @@ class INSP_PROC extends Component {
   
     // const select = await gfc_yk_call_sp('sp_zm_mstr_header');
     const select = await gfc_yk_call_sp('sp_zm_mstr_header');
-    const R_CARSU = select.data.ROWS[0].R_CARSU === null ? 0 : select.data.ROWS[0].R_CARSU;
-    const E_CARSU = select.data.ROWS[0].E_CARSU === null ? 0 : select.data.ROWS[0].E_CARSU;
-    const E_KG = select.data.ROWS[0].E_KG === null ? 0 : select.data.ROWS[0].E_KG;
 
     if(select.data.SUCCESS === 'Y'){
+      const R_CARSU = select.data.ROWS[0].R_CARSU === null ? 0 : select.data.ROWS[0].R_CARSU;
+      const E_CARSU = select.data.ROWS[0].E_CARSU === null ? 0 : select.data.ROWS[0].E_CARSU;
+      const E_KG = select.data.ROWS[0].E_KG === null ? 0 : select.data.ROWS[0].E_KG;
+      const CAR_TOTAL = select.data.ROWS[0].CAR_TOTAL === null ? 0 : select.data.ROWS[0].CAR_TOTAL;
+
       if(R_CARSU !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT'))
         gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: R_CARSU});
 
@@ -878,6 +886,9 @@ class INSP_PROC extends Component {
 
       if(E_KG !== gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT'))
         gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: E_KG});
+
+      if(CAR_TOTAL !== gfs_getStoreValue('INSP_PROC_MAIN', 'CAR_TOTAL'))
+        gfs_dispatch('INSP_PROC_MAIN', 'CAR_TOTAL', {CAR_TOTAL: CAR_TOTAL});
     }else{
       if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WAIT') !== 0)
         gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WAIT', {MAIN_WAIT: 0});
@@ -885,6 +896,8 @@ class INSP_PROC extends Component {
         gfs_dispatch('INSP_PROC_MAIN', 'MAIN_TOTAL', {MAIN_TOTAL: 0});
       if(gfs_getStoreValue('INSP_PROC_MAIN', 'MAIN_WEIGHT') !== 0)
         gfs_dispatch('INSP_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: 0});
+        if(gfs_getStoreValue('INSP_PROC_MAIN', 'CAR_TOTAL') !== 0)
+          gfs_dispatch('INSP_PROC_MAIN', 'CAR_TOTAL', {CAR_TOTAL: 0});
     }
   }
 
@@ -930,7 +943,21 @@ class INSP_PROC extends Component {
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     // await grid.restore();
 
-    // const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT');
+    // //김경현
+    // gfg_appendRow(grid, grid.getRowCount(), {
+    //   scaleNumb: '202110140010',
+    //   carNumb: 'data[i].carNumb',
+    //   itemGrade: 'data[i].itemGrade',
+    //   date: 'data[i].date',
+    //   vendor: 'data[i].vendor',
+    //   rec: '0'
+    // }, 'scaleNumb', false);
+    //   if(grid.getData().length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
+    //     gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: grid.getData().length});
+
+
+
+
     const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT');
     if(select.data.SUCCESS === 'Y'){
       const main = select.data.ROWS;
@@ -1029,28 +1056,9 @@ class INSP_PROC extends Component {
             }
           }
         }
-        await gfc_sleep(1000);
+        
         grid.resetOriginData();
-
-        RecodingList().then(recScaleNumb => {
-          for(let i = 0; i < recScaleNumb.data.Response.length; i++){
-
-            const data = grid.getData().find(e => e.scaleNumb === recScaleNumb.data.Response[i])
-            if(data){
-              //녹화 on만 설정
-              grid.setValue(data.rowKey, 'rec', '1');
-            }
-          }
-
-          const recGrid = grid.getData().filter(e => e.rec === '1');
-          for(let i = 0; i < recGrid.length; i++){
-            const data = recScaleNumb.data.Response.find(e => e === recGrid[i].scaleNumb);
-            if(!data){
-              //녹화 off만 설정
-              grid.setValue(recGrid[i].rowKey, 'rec', '0');
-            }
-          }
-        })
+        grid.restore();
   
         if(data.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
           gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
@@ -1069,10 +1077,32 @@ class INSP_PROC extends Component {
   }
   //#endregion
 
-  componentDidMount(){
-    this.Init();
-    // this.Retrieve();
+  rec = async() => {
 
+    RecodingList().then(recScaleNumb => {
+      const grid = gfg_getGrid(this.props.pgm, 'main10');
+
+      for(let i = 0; i < recScaleNumb.data.Response.length; i++){
+
+        const data = grid.getData().find(e => e.scaleNumb === recScaleNumb.data.Response[i])
+        if(data){
+          //녹화 on만 설정
+          grid.setValue(data.rowKey, 'rec', '1');
+        }
+      }
+
+      const recGrid = grid.getData().filter(e => e.rec === '1');
+      for(let i = 0; i < recGrid.length; i++){
+        const data = recScaleNumb.data.Response.find(e => e === recGrid[i].scaleNumb);
+        if(!data){
+          //녹화 off만 설정
+          grid.setValue(recGrid[i].rowKey, 'rec', '0');
+        }
+      }
+    })
+  }
+
+  componentDidUpdate(){
     // this.mainHeaderInterval = setInterval(e => {
     //   this.mainHeader();
     // }, 2000)
@@ -1083,7 +1113,17 @@ class INSP_PROC extends Component {
 
     this.mainGridInterval = setInterval(e => {
       this.mainGrid();
-    }, 5000)
+    }, 20000)
+
+    this.recInterval = setInterval(e => {
+      this.rec();
+    }, 1000)
+
+    this.Retrieve();
+  }
+
+  componentDidMount(){
+    this.Init();
   }
 
   componentWillUnmount(){
@@ -1202,7 +1242,6 @@ class INSP_PROC extends Component {
     });
 
     //계량증명서 정보여부
-    
     const chitInfoYn = await gfc_yk_call_sp('SP_ZM_CHIT', {
       P_SCALENUMB: e.scaleNumb
     });
@@ -1224,10 +1263,11 @@ class INSP_PROC extends Component {
       Wgt      : chitInfoYn.data.ROWS[0].TOTAL_WEIGHT,
       loc      : chitInfoYn.data.ROWS[0].AREA,
       user     : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
-      chit     : chitYn.data
+      chit     : chitYn.data //김경현
+      // chit     : false
     });
 
-    //배차정보 김경현
+    //배차정보
     const dispInfo = await gfc_yk_call_sp('SP_ZM_PROCESS_F3', {
       P_SCALENUMB: e.scaleNumb
     });
@@ -1328,7 +1368,7 @@ class INSP_PROC extends Component {
                   <Grid pgm={this.props.pgm}
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
-                        // dblclick={(e) => this.dblclick(e)}
+                        dblclick={(e) => this.dblclick(e)}
                         rowHeight={46}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
@@ -1391,7 +1431,8 @@ class INSP_PROC extends Component {
               </div>
             </div>
             <div className='total_info'>
-              <ul>
+              <ul className='four'>
+                <li><span className='title'>운송차량 전체</span><Mainspan reducer='INSP_PROC_MAIN' flag={8} /></li>
                 <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
                 <li onClick={e => {
                   const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');

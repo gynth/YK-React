@@ -2,138 +2,52 @@ const express = require('express');
 const router = express.Router();
 // const axios = require('axios');
 const fs = require('fs');
-var dbConfig = require('../db/Oracle/dbConfig');
+const fsPromises = fs.promises;
+const axios = require('axios');
 
-var oracleDb = require('oracledb');
-oracleDb.autoCommit = true;
+const callSp = async(param) => {
+  const host = 'http://localhost:3001/Oracle/SP';
+  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      param
+    } ,
+    timeout: 10000
+  };
 
-(async() => {
-  await oracleDb.createPool({
-    user         : process.env.NODEORACLEDB_USER || 'YK_IMS',
-    password     : process.env.NODEORACLEDB_PASSWORD || 'wjdqhykims',
-    connectString: process.env.NODEORACLEDB_CONNECTIONSTRING || '10.10.10.11:1521/PROD',
-    poolAlias: 'aiPool',
-    poolMin      : 1,
-    poolMax      : 2
-  });
-})()
-
-const executeSP = async(RowStatus, connection, query, data) => {
-  
-  const queryResult = await connection.execute(query, data);
-  let result = {};
-  
-  let ROWS;
-  let SUCCESS  = queryResult.outBinds['p_SUCCESS'];
-  let MSG_CODE = queryResult.outBinds['p_MSG_CODE'];
-  let MSG_TEXT = queryResult.outBinds['p_MSG_TEXT'];
-  let COL_NAM  = queryResult.outBinds['p_COL_NAM'];
-
-  if(RowStatus === undefined){
-    ROWS = await fetchRowsFromRS(queryResult);
-
-    if(ROWS.length === 0){
-      ROWS     = null;
-      SUCCESS  = 'N';
-      MSG_CODE = 'MSG01';
-      MSG_TEXT = 'MSG01';
-      COL_NAM  = '';
-    }
-  }
-  else if(RowStatus.indexOf('R') >= 0){
-    ROWS = await fetchRowsFromRS(queryResult);
-
-    if(ROWS.length === 0){
-      ROWS     = null;
-      SUCCESS  = 'N';
-      MSG_CODE = 'MSG01';
-      MSG_TEXT = 'MSG01';
-      COL_NAM  = '';
-    }
-  }else{
-    if(SUCCESS !== 'Y'){
-      console.log(result);
-    }
-  }
-
-  result.ROWS     = ROWS;
-  result.SUCCESS  = SUCCESS;
-  result.MSG_CODE = MSG_CODE;
-  result.MSG_TEXT = MSG_TEXT;
-  result.COL_NAM  = COL_NAM;
-
-  return result;
-}
-
-const fetchRowsFromRS = async(result) => {
-  const resultSet = await result.outBinds['p_select'].getRows();
-  const column = await result.outBinds['p_select'].metaData;
-  
-  let data = [];
-  for(let i = 0; i < resultSet.length; i++){
-
-    let col = {};
-    for(let j = 0; j < resultSet[i].length; j++){
-      col[column[j].name] = resultSet[i][j];
-    }
-    data.push(col);
-  }
-
-  return data;
-}
-
-const OracleServerSP = async (param) => {
-  for(let j = 0; j < param.length; j++){
-    let keys = Object.keys(param[j].data);
-    for(let i = 0; i < keys.length; i++){
-      if(param[j].data[keys[i]] === null || param[j].data[keys[i]] === undefined){
-        param[j].data[keys[i]] = '';
-      }
-    }
-  }
-
-  const connection = await oracleDb.getConnection('aiPool');
-  // for(let i = 0; i < param.length; i++){
-  // const connection = await oracleDb.getConnection({
-  //   user         : dbConfig.user,
-  //   password     : dbConfig.password,
-  //   connectString: dbConfig.connectString
-  // });    
-  let query = param[0].sp;
-  let data  = param[0].data;
-  let errSeq = param[0].errSeq;
-  
-  data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
-  data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-  data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-  data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-  data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-
-  try{
-    const result = await executeSP(param[0].data.p_RowStatus, connection, query, data);
-
-  
-    return result;
-  }catch(e){
-
-  }finally{
-    await doRelease(connection);
-  }
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
 }
 
 router.post('/ReRec', async(req, res) => {
   const scaleNumb = req.body.scaleNumb;
   const folder = scaleNumb.substring(0, 8);
 
+  console.log(scaleNumb);
+
   if(fs.existsSync(`F:/IMS/Replay/${folder}/${scaleNumb}`)){
     const root = fs.readdirSync(`F:/IMS/Replay/${folder}`);
     const fileCnt = root.filter(e => e.toString().indexOf(`${scaleNumb}_`) >= 0);
   
-    fs.rename(`F:/IMS/Replay/${folder}/${scaleNumb}`, `F:/IMS/Replay/${folder}/${scaleNumb}_${fileCnt.length + 1}`).then(e => {
+    const rename = await fsPromises.rename(`F:/IMS/Replay/${folder}/${scaleNumb}`, `F:/IMS/Replay/${folder}/${scaleNumb}_${fileCnt.length + 1}`);
+    console.log(rename);
+    // .then(e => {
       res.json({
         Response: 'OK'
       });
-    })
+    // })
   }else{
     res.json({
       Response: 'OK'
@@ -177,9 +91,9 @@ router.post('/MstrWait', async(req, res) => {
 
   console.log(SP, ' ', new Date())
 
-  const select = await OracleServerSP(SP);
+  const select = await callSp(SP);
 
-  res.json(select.ROWS);
+  res.json(select.data.ROWS);
 });
 
 router.post('/Result', async(req, res) => {
@@ -227,9 +141,9 @@ router.post('/Result', async(req, res) => {
           errSeq: 0
         })
       
-        const select = await OracleServerSP(param);
+        const select = await callSp(param);
         
-        if(select.SUCCESS !== 'Y'){
+        if(select.data.SUCCESS !== 'Y'){
           console.log('Ai 녹화시작 실패');
         }
       }
@@ -240,14 +154,5 @@ router.post('/Result', async(req, res) => {
     Response: 'OK'
   });
 });
-
-const doRelease = async (connection) => {
-  // await connection.release(err => {
-  await connection.close(err => {
-    if(err){
-      console.log(err.message);
-    }
-  })
-} 
 
 module.exports = router;

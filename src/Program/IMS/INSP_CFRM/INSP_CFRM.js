@@ -3,10 +3,11 @@ import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
+import DateTime from '../../../Component/Control/DateTime';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_yk_call_sp } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_now, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
-import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getDateTime, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow, gfg_setValue, gfg_appendRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
@@ -277,11 +278,26 @@ class INSP_CFRM extends Component {
     //#endregion
   }
 
+  Init = async() => {
+    gfo_getDateTime(this.props.pgm, 'search_fr_dt').setValue(await gfc_now());
+    gfo_getDateTime(this.props.pgm, 'search_to_dt').setValue(await gfc_now());
+
+    this.Retrieve();
+  }
+
+  componentDidMount(){
+    this.Init();
+  }
+
   Retrieve = async () => {
 
     gfc_showMask();
 
-    const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT');
+
+    const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT', {
+      p_from_date : gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue(),
+      p_to_date : gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue()
+    });
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
@@ -373,6 +389,7 @@ class INSP_CFRM extends Component {
     gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
     gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_RATE);    //감가비율
     gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_out').setValue(dtlInfo.data.ROWS[0].SECTOR_CODE);      //하차구역
     gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);      //반품구분
     gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);     //반품구분사유
     gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
@@ -399,9 +416,14 @@ class INSP_CFRM extends Component {
         <div className='car_manager type4' >
           <div style={{paddingBottom:'0'}} className='car_list'>
             <div className='search_line'>
-              <div className='wp' >
-                <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
-                  <Combobox pgm     = {this.props.pgm}
+              <div className='wp type2' >
+                <div style={{position:'absolute', left:0, top:0, width:'360px', height:'42px', fontSize:'16px'}}>
+                  <div>
+                    <DateTime pgm={this.props.pgm}
+                              id='search_fr_dt' />                  
+                    <DateTime pgm={this.props.pgm}
+                              id='search_to_dt' />
+                  </div>  <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
                             value   = 'CODE'
                             display = 'NAME'
@@ -447,11 +469,11 @@ class INSP_CFRM extends Component {
                           if(e.columnName === 'chk'){
                             const grid = gfg_getGrid(this.props.pgm, 'main10');
                             if(grid.gridEl.dataset.checked === undefined){
-                              grid.gridEl.dataset.checked = true;
+                              grid.gridEl.dataset.checked = 'Y';
                             }else if(grid.gridEl.dataset.checked === 'true'){
-                              grid.gridEl.dataset.checked = false;
+                              grid.gridEl.dataset.checked = 'N';
                             }else{
-                              grid.gridEl.dataset.checked = true;
+                              grid.gridEl.dataset.checked = 'Y';
                             }
     
                             for(let i = 0; i < grid.getRowCount(); i++){
@@ -719,6 +741,18 @@ class INSP_CFRM extends Component {
                           placeholder = '차종선택'
                           oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
                             p_division    : 'P700'
+                          })}
+                  />
+                  </li>
+                  <li>
+                    <h5>하차구역</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_out'
+                          value   = 'itemCode'
+                          display = 'itemCode'
+                          placeholder = '차종선택'
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P530'
                           })}
                   />
                   </li>

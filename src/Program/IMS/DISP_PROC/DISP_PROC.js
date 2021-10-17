@@ -264,10 +264,10 @@ class DISP_PROC extends Component {
 
   
   mainGrid = async() => {
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
 
     const select = await gfc_yk_call_sp('SP_ZM_MSTR_PASS');
-
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+    
     if(select.data.SUCCESS === 'Y'){
       const main = select.data.ROWS;
 
@@ -366,8 +366,9 @@ class DISP_PROC extends Component {
           }
         }
 
-        grid.resetOriginData()
+        grid.resetOriginData();
         grid.restore();
+
         const scaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
         if(scaleNumb !== ''){
           const row = grid.getData().find(e => e.scaleNumb === scaleNumb);
@@ -391,10 +392,11 @@ class DISP_PROC extends Component {
   }
 
   componentDidMount(){
-    // this.Retrieve();
     this.mainGridInterval = setInterval(e => {
       this.mainGrid();
-    }, 5000)
+    }, 20000)
+
+    this.Retrieve();
   }
 
   componentWillUnmount(){
@@ -530,6 +532,7 @@ class DISP_PROC extends Component {
     gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
     // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);    //감가비율
     gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_out').setValue(dtlInfo.data.ROWS[0].SECTOR_CODE);      //하차구역
     gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);      //반품구분
     gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
     gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
@@ -849,6 +852,18 @@ class DISP_PROC extends Component {
                   />
                   </li>
                   <li>
+                    <h5>하차구역</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_out'
+                          value   = 'itemCode'
+                          display = 'itemCode'
+                          placeholder = '차종선택'
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P530'
+                          })}
+                  />
+                  </li>
+                  <li>
                     <h5>반품구분</h5>
                     <div style={{marginBottom:'5px'}}>
                       <Combobox pgm     = {this.props.pgm}
@@ -873,7 +888,7 @@ class DISP_PROC extends Component {
                               }
                             }}
                     />
-                  </div>
+                    </div>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'detail_rtn2'
                             value   = 'itemCode'

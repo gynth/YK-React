@@ -32,7 +32,8 @@ export const Checkbox = (props) => {
   const align     = props.align !== undefined ? props.align : 'left';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
   const resizable = props.resizable !== undefined ? props.resizable : true;
-  const readOnly = props.readOnly !== undefined ? props.readOnly : true;
+  const readOnly  = props.readOnly !== undefined ? props.readOnly : true;
+  const checkedChange = props.checkedChange;
 
   const rtn = {name,
                header,
@@ -42,6 +43,7 @@ export const Checkbox = (props) => {
                align,
                valign,
                resizable,
+               checkedChange
               //  filter:{
               //    type: 'text',
               //    operator: 'OR'
@@ -75,7 +77,8 @@ export const Checkbox = (props) => {
       onRender: props.onRender,
       readOnly,
       color,
-      fontSize
+      fontSize,
+      checkedChange
     }
   }
 
@@ -88,7 +91,8 @@ export const Checkbox = (props) => {
       onRender: props.onRender,
       readOnly,
       color,
-      fontSize
+      fontSize,
+      checkedChange
     }
   }
 
@@ -110,6 +114,10 @@ class CheckboxEditor {
       }else{
         el.value = 'N';
         gfg_setValue(props.grid, props.columnInfo.name, 'N');
+      }
+
+      if(option.checkedChange !== undefined){
+        option.checkedChange();
       }
     })
     el.setAttribute('style', `height: 20px; 
@@ -163,6 +171,7 @@ class CheckboxEditor {
 class CheckboxRenderer {
   constructor(props) {
     const el = document.createElement('input');
+    const option = props.columnInfo.renderer.options;
     el.type = 'checkbox';
     el.addEventListener('click', e => {
       // const value = e.target.checked ? 'on' : 'off';
@@ -174,6 +183,10 @@ class CheckboxRenderer {
       }else{
         el.value = 'N';
         gfg_setValue(props.grid, props.columnInfo.name, 'N');
+      }
+
+      if(option.checkedChange !== undefined){
+        option.checkedChange();
       }
     })
 

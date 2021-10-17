@@ -9,7 +9,8 @@ import LoadingOverlay from 'react-loading-overlay';
 class HLSViewer extends Component {
   state = {
     hlsPlayer: [],
-    MASK     : false
+    MASK     : false,
+    time     : [-1, -1, -1, -1]
   }
 
   showMask = () => {
@@ -61,171 +62,106 @@ class HLSViewer extends Component {
       })
   }
 
-  Init = async() => {
-    let hlsList = [];
+  hlsDel = async(no, name, time) => {
+    this.hlsList.splice(no * 1, 1, await this.hlsMake(
+      no, name, time
+    ));
 
-    const scaleNumb = gfc_getParameter(this.props, 'scaleNumb');
+    this.setState({
+      hlsPlayer: this.hlsList
+    })
+  }
+
+  hlsMake = async(no, name, time) => {
+    return (
+      <>
+        <div key={no.toString()}
+          style={{width:'100%', height:'100%'}} 
+          className='player-wrapper'>
+            <input style={{width: '100%'}} defaultValue={`카메라: ${name}`} disabled/>
+            <ReactHlsPlayer
+              src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${this.scaleNumb.toString().substring(0, 8)}/${this.scaleNumb.toString()}/${encodeURIComponent(name)}/${this.scaleNumb.toString()}.m3u8`}
+              autoPlay={true}
+              controls={true}
+              width='100%'
+              height='100%'
+              muted='muted'
+              // onLoadedData={e => e.target.play()}
+              onError={e => {
+                this.hlsDel(no, name, e.target.currentTime * 1 + 2);
+              }}
+              hlsConfig={{
+                startPosition: time,
+                debug: false,
+                lowLatencyMode: true
+              }}
+            />
+        </div>
+  
+        <div className='file_download' onClick={() => this.movieDown(name)}></div>
+      </>
+    )
+  }
+
+  Init = async() => {
+    this.hlsList = [];
+
+    this.scaleNumb = gfc_getParameter(this.props, 'scaleNumb');
 
     const result1 = await getDynamicSql_Oracle(
       'Common/Common',
       'ZM_IMS_VIDEO_SELECT',
       [{
-        scaleNumb: scaleNumb,
+        scaleNumb: this.scaleNumb,
         seq      : 1
       }]
     )
+    if(result1.data.rows.length > 0){
+      this.hls1 = await this.hlsMake('0', result1.data.rows[0][5], -1);
+      this.hlsList.push(this.hls1);
+    }
 
     const result2 = await getDynamicSql_Oracle(
       'Common/Common',
       'ZM_IMS_VIDEO_SELECT',
       [{
-        scaleNumb: scaleNumb,
+        scaleNumb: this.scaleNumb,
         seq      : 2
       }]
     )
+    if(result2.data.rows.length > 0){
+      this.hls2 = await this.hlsMake('1', result2.data.rows[0][5], -1);
+      this.hlsList.push(this.hls2);
+    }
 
     const result3 = await getDynamicSql_Oracle(
       'Common/Common',
       'ZM_IMS_VIDEO_SELECT',
       [{
-        scaleNumb: scaleNumb,
+        scaleNumb: this.scaleNumb,
         seq      : 3
       }]
     )
+    if(result3.data.rows.length > 0){
+      this.hls3 = await this.hlsMake('2', result3.data.rows[0][5], -1);
+      this.hlsList.push(this.hls3);
+    }
 
     const result4 = await getDynamicSql_Oracle(
       'Common/Common',
       'ZM_IMS_VIDEO_SELECT',
       [{
-        scaleNumb: scaleNumb,
+        scaleNumb: this.scaleNumb,
         seq      : 4
       }]
     )
-
-    if(result1.data.rows.length > 0){
-      hlsList.push(
-        <>
-          <div 
-            style={{width:'100%', height:'100%'}} 
-            className='player-wrapper'>
-              <input style={{width: '100%'}} defaultValue={`카메라: ${result1.data.rows[0][5]}`} disabled/>
-              <ReactHlsPlayer
-                src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result1.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={true}
-                controls={true}
-                width='100%'
-                height='100%'
-                muted='muted'
-                // onLoadedData={e => e.target.play()}
-                // onError={e => console.log(e)}
-                hlsConfig={{
-                  autoStartLoad: true,
-                  startPosition: -1,
-                  debug: false,
-                  lowLatencyMode: true
-                }}
-              />
-          </div>
-
-          <div className='file_download' onClick={() => this.movieDown(result1.data.rows[0][5])}></div>
-        </>
-      )
-    }
-
-    if(result2.data.rows.length > 0){
-      hlsList.push(
-        <>
-          <div 
-            style={{width:'100%', height:'100%'}} 
-            className='player-wrapper'>
-              <input style={{width: '100%'}} defaultValue={`카메라: ${result2.data.rows[0][5]}`} disabled/>
-              <ReactHlsPlayer
-                src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result2.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={true}
-                controls={true}
-                width='100%'
-                height='100%'
-                muted='muted'
-                // onLoadedData={e => e.target.play()}
-                onError={(e) => console.log(e)}
-                hlsConfig={{
-                  // appendErrorMaxRetry:100
-                  // nudgeOffset: 2,
-                  // nudgeMaxRetry: 100
-                  // autoStartLoad: true,
-                  // startPosition: 1,
-                  // debug: false,
-                  // lowLatencyMode: true,
-                  // nudgeOffset: 1
-                }}
-              />
-          </div>
-
-          <div className='file_download' onClick={() => this.movieDown(result2.data.rows[0][5])}></div>
-        </>
-      )
-    }
-
-    if(result3.data.rows.length > 0){
-      hlsList.push(
-        <>
-          <div 
-            style={{width:'100%', height:'100%'}} 
-            className='player-wrapper'>
-              <input style={{width: '100%'}} defaultValue={`카메라: ${result3.data.rows[0][5]}`} disabled/>
-              <ReactHlsPlayer
-                src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result3.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={true}
-                controls={true}
-                width='100%'
-                height='100%'
-                muted='muted'
-                // onLoadedData={e => e.target.play()}
-                hlsConfig={{
-                  autoStartLoad: true,
-                  startPosition: -1,
-                  debug: false,
-                  lowLatencyMode: true
-                }}
-              />
-          </div>
-
-          <div className='file_download' onClick={() => this.movieDown(result3.data.rows[0][5])}></div>
-        </>
-      )
-    }
-
     if(result4.data.rows.length > 0){
-      hlsList.push(
-        <>
-          <div 
-            style={{width:'100%', height:'100%'}} 
-            className='player-wrapper'>
-              <input style={{width: '100%'}} defaultValue={`카메라: ${result4.data.rows[0][5]}`} disabled/>
-              <ReactHlsPlayer
-                src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${scaleNumb.toString().substring(0, 8)}/${scaleNumb.toString()}/${encodeURIComponent(result4.data.rows[0][5])}/${scaleNumb.toString()}.m3u8`}
-                autoPlay={true}
-                controls={true}
-                width='100%'
-                height='100%'
-                muted='muted'
-                // onLoadedData={e => e.target.play()}
-                hlsConfig={{
-                  autoStartLoad: true,
-                  startPosition: -1,
-                  debug: false,
-                  lowLatencyMode: true
-                }}
-              />
-          </div>
-
-          <div className='file_download' onClick={() => this.movieDown(result4.data.rows[0][5])}></div>
-        </>
-      )
+      this.hls4 = await this.hlsMake('3', result4.data.rows[0][5], -1);
+      this.hlsList.push(this.hls4);
     }
 
     this.setState({
-      hlsPlayer: hlsList
+      hlsPlayer: this.hlsList
     })
   }
 

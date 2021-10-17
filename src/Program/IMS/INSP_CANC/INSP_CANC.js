@@ -25,7 +25,6 @@ import Chit from './Chit';
 import TabList from './TabList';
 import RecImage from './RecImage';
 import CompleteBtn from './CompleteBtn';
-import CompleteBtnModify from './CompleteBtnModify';
 //#endregion
 
 class INSP_CANC extends Component {
@@ -347,6 +346,11 @@ class INSP_CANC extends Component {
     gfc_hideMask();
   }
 
+  componentDidMount(){
+
+    this.Retrieve();
+  }
+
   onSelectChange = async (e) => {
     if(e === null) return;
 
@@ -427,11 +431,11 @@ class INSP_CANC extends Component {
                           if(e.columnName === 'chk'){
                             const grid = gfg_getGrid(this.props.pgm, 'main10');
                             if(grid.gridEl.dataset.checked === undefined){
-                              grid.gridEl.dataset.checked = true;
+                              grid.gridEl.dataset.checked = 'Y';
                             }else if(grid.gridEl.dataset.checked === 'true'){
-                              grid.gridEl.dataset.checked = false;
+                              grid.gridEl.dataset.checked = 'N';
                             }else{
-                              grid.gridEl.dataset.checked = true;
+                              grid.gridEl.dataset.checked = 'Y';
                             }
     
                             for(let i = 0; i < grid.getRowCount(); i++){
@@ -643,8 +647,6 @@ class INSP_CANC extends Component {
                   </li>
                 </ul>
               </div>
-              
-              <CompleteBtnModify pgm='INSP_CANC'/>
           </div>
 
           <div className='car_info'>

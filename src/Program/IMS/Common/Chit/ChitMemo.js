@@ -60,7 +60,7 @@ function ChitMemo(props) {
     }    
 
     e.target.value = lines.slice(0, maxRows).join("\n");
-    drawTextBox(e.target.value, 4, 10, 305, 1.2)
+    drawTextBox(e.target.value, 4, 10, 295, 1.2)
   }
   
   function drawTextBox(text, x, y, fieldWidth, spacing) {

@@ -190,6 +190,7 @@ chitImgServer.on('request',
             //http의 헤더정보를 클라이언트쪽으로 출력
             //image/jpg : jpg 이미지 파일을 전송한다
             // write 로 보낼 내용을 입력
+            res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
             res.writeHead(200, { "Context-Type": "image/jpg" });//보낼 헤더를 만듬
             res.write(data);   //본문을 만들고
             res.end();  //클라이언트에게 응답을 전송한다

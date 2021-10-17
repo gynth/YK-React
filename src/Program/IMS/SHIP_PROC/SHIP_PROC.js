@@ -6,18 +6,19 @@ import Input from '../../../Component/Control/Input';
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_sleep, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
-import { gfg_getGrid, gfg_setSelectRow, gfg_setValue, gfg_appendRow } from '../../../Method/Grid';
+import { gfg_getGrid, gfg_setSelectRow, gfg_setValue, gfg_appendRow, gfg_getColumn } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Number as columnNumber } from '../../../Component/Grid/Column/Number';
 import { Checkbox as columnCheckbox } from '../../../Component/Grid/Column/Checkbox';
+import { DateTime as columnDateTime } from '../../../Component/Grid/Column/DateTime';
 
 import Combobox from '../../../Component/Control/Combobox';
 
 // import Mainspan from './Mainspan';
 import Detailspan from '../Common/Detailspan';
-import Botspan from '../Common/Botspan';
+import Botspan from './Botspan';
 import CompleteBtn from './CompleteBtn';
 //#endregion
 
@@ -41,6 +42,7 @@ class SHIP_PROC extends Component {
           MAIN_WAIT    : nowState === undefined ? 0 : nowState.MAIN_WAIT,
           MAIN_TOTAL   : nowState === undefined ? 0 : nowState.MAIN_TOTAL,
           MAIN_WEIGHT  : nowState === undefined ? 0 : nowState.MAIN_WEIGHT,
+          TOTAL_WEIGHT : nowState === undefined ? 0 : nowState.TOTAL_WEIGHT,
           BOT_TOTAL    : nowState === undefined ? 0 : nowState.BOT_TOTAL,
           PROC_WAIT    : nowState === undefined ? 0 : nowState.PROC_WAIT,
           DEPT_WAIT    : nowState === undefined ? 0 : nowState.DEPT_WAIT,
@@ -101,6 +103,11 @@ class SHIP_PROC extends Component {
 
         return Object.assign({}, nowState, {
           MAIN_WEIGHT : action.MAIN_WEIGHT
+        })
+      }else if(action.type === 'TOTAL_WEIGHT'){
+
+        return Object.assign({}, nowState, {
+          TOTAL_WEIGHT : action.TOTAL_WEIGHT
         })
       }else if(action.type === 'BOT_TOTAL'){
 
@@ -270,9 +277,24 @@ class SHIP_PROC extends Component {
 
       const main = mainData.data.ROWS;
     
+      const dataMod = [];
+      main.forEach(e => {
+        dataMod.push({
+          scaleNumb: e['DELIVERY_ID'].toString(),
+          vendorname: e['VENDOR_NAME'],
+          cars_no: e['CARS_NO'],
+          netweight: e['NET_WEIGHT'],
+          deliverydate: e['DELIVERY_DATE'],
+          empty_time: e['EMPTY_TIME'],
+          empty_wgt: e['EMPTY_WGT'],
+          iron_grade: e['IRON_GRADE'],
+          inspect_user: e['INSPECT_USER']
+        })
+      })
+
       if(main){
         
-        grid.resetData(main);
+        grid.resetData(dataMod);
         gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
         
         await gfc_sleep(100);
@@ -288,6 +310,22 @@ class SHIP_PROC extends Component {
     gfc_hideMask();
   }
 
+  sumWeight = () => {
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
+    const data = grid.getData();
+
+    let TOTAL_WEIGHT = 0;
+    for(let i = 0; i < data.length; i++){
+      if(data[i].chk === 'Y'){
+        TOTAL_WEIGHT += data[i].netweight * 1;
+      }
+    }
+
+    
+    gfs_dispatch('SHIP_PROC_MAIN', 'TOTAL_WEIGHT', {
+      TOTAL_WEIGHT
+    })
+  }
 
   onSelectChange = async (e) => {
     if(e === null) return;
@@ -296,6 +334,40 @@ class SHIP_PROC extends Component {
     gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vendorname});
     gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: e.netweight});
     gfs_dispatch('SHIP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: e.deliverydate});
+
+    //기존 등록된 정보
+    const dtlInfo = await gfc_yk_call_sp('SP_ZM_PROCESS_F_SEL', {
+      P_SCALENUMB: e.scaleNumb
+    });
+    
+    if(dtlInfo.data.SUCCESS === 'Y'){
+
+      gfo_getCombo(this.props.pgm, 'detail_grade1').setValue(dtlInfo.data.ROWS[0].IRON_GRADE);   //고철등급
+      const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2');
+      await detail_grade2.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+        p_division    : dtlInfo.data.ROWS[0].IRON_GRADE
+      })});
+      detail_grade2.setValue(dtlInfo.data.ROWS[0].IRON_GRADE_ITEM);   //상세고철등급
+      gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT);     //감량중량
+      gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT_REASON_CODE); //감량사유
+      gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
+      // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);    //감가비율
+      gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
+      gfo_getCombo(this.props.pgm, 'detail_out').setValue(dtlInfo.data.ROWS[0].SECTOR_CODE);      //하차구역
+      gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);      //반품구분
+      gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
+    }else{
+      gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
+      const detail_grade2 = gfo_getCombo(this.props.pgm, 'detail_grade2').setValue('');   //고철등급
+      gfo_getCombo(this.props.pgm, 'detail_subt').setValue('');     //감량중량
+      gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
+      gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
+      // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
+      gfo_getCombo(this.props.pgm, 'detail_car').setValue('');      //차종구분
+      gfo_getCombo(this.props.pgm, 'detail_out').setValue('');      //하차구역
+      gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
+      gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
+    }
   }
 
   render() {
@@ -354,9 +426,18 @@ class SHIP_PROC extends Component {
                               grid.gridEl.dataset.checked = 'Y';
                             }
     
+                            let TOTAL_WEIGHT = 0;
                             for(let i = 0; i < grid.getRowCount(); i++){
                               gfg_setValue(grid, 'chk', grid.gridEl.dataset.checked, i);
+
+                              if(grid.gridEl.dataset.checked === 'Y'){
+                                TOTAL_WEIGHT += grid.getData()[i].netweight * 1;
+                              }
                             }
+
+                            gfs_dispatch('SHIP_PROC_MAIN', 'TOTAL_WEIGHT', {
+                              TOTAL_WEIGHT
+                            })
                           }
                         }}
                         rowHeight={41}
@@ -368,7 +449,10 @@ class SHIP_PROC extends Component {
                             width : 50,
                             readOnly: true,
                             align : 'center',
-                            type: 'checkbox'
+                            type: 'checkbox',
+                            checkedChange: () => {
+                              this.sumWeight()
+                            }
                           }),
                           columnInput({
                             name: 'scaleNumb',
@@ -398,20 +482,25 @@ class SHIP_PROC extends Component {
                             width   : 130, 
                             readOnly: false
                           }),
-                          columnInput({
-                            name: 'deliverydate',
+                          columnDateTime({
+                            name  : 'deliverydate',
                             header: '입차일자',
-                            width : 180,
+                            width : 100,
+                            // paddingTop: ''
                             readOnly: true,
-                            align : 'center',
+                            valign:'middle',
                             format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT')
                           }),
-                          columnInput({
-                            name: 'empty_time',
+                          columnDateTime({
+                            name  : 'empty_time',
                             header: '공차계량시간',
-                            width : 180,
+                            width : 120,
+                            height: 38,
+                            // paddingTop: ''
                             readOnly: true,
-                            align : 'center'
+                            valign:'middle',
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                            time  : 'HH:mm:ss'
                           }),
                           columnNumber({
                             name    : 'empty_wgt', 
@@ -438,7 +527,8 @@ class SHIP_PROC extends Component {
                 </div>
               </div>
               <div className='grid_info'>
-                <span className='title'>전체차량</span><Botspan reducer='SHIP_PROC_MAIN' />
+                <span className='title'>전체차량</span><Botspan column='BOT_TOTAL' reducer='SHIP_PROC_MAIN' />
+                <span className='title' style={{paddingLeft:'50px'}}>입고량</span><Botspan reducer='DAILY_PROC_MAIN' column='TOTAL_WEIGHT' />
               </div>
             </div>
           </div>
@@ -592,7 +682,7 @@ class SHIP_PROC extends Component {
                     <Combobox pgm     = {this.props.pgm}
                           id      = 'detail_out'
                           value   = 'itemCode'
-                          display = 'item'
+                          display = 'itemCode'
                           placeholder = '하차구역 검색(SECTOR)'
                           oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
                             p_division    : 'P530'

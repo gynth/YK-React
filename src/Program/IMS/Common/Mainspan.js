@@ -18,6 +18,8 @@ function Mainspan(props) {
       return e[props.reducer].ENTR_WAIT;
     }else if(props.flag === 7){
       return e[props.reducer].DRIV_WAIT;
+    }else if(props.flag === 8){
+      return e[props.reducer].CAR_TOTAL;
     }
   }, (p, n) => {
     return p === n;

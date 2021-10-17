@@ -5,8 +5,10 @@ import { gfs_getStoreValue } from '../../../Method/Store';
 import { gfc_showMask, gfc_hideMask } from '../../../Method/Comm';
 import { gfo_getCombo } from '../../../Method/Component';
 
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
+import { YK_WEB_REQ, YK_WEB_REQ_RAIN } from '../../../WebReq/WebReq';
 import { gfg_getGrid, gfg_getRow } from '../../../Method/Grid';
+import { getSp_Oracle, getSp_Oracle_YK } from '../../../db/Oracle/Oracle';
+import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
 
 const CompleteBtn = (props) => {
   const value = useSelector((e) => {
@@ -14,6 +16,18 @@ const CompleteBtn = (props) => {
   }, (p, n) => {
     return p.scaleNumb === n.scaleNumb;
   });
+
+
+  const getRain = async() => {
+    const result = await YK_WEB_REQ_RAIN();
+    let value = 0;
+
+    if(result){
+      value = result.data;
+    }
+    
+    return value;
+  }
 
   //#region 검수등록
   const onProcess = async() => {
@@ -111,49 +125,84 @@ const CompleteBtn = (props) => {
 
     
 
-    for(let i = 0; i < grid.getRowCount(); i++){
-      const column = gfg_getRow(grid, i);
-      if(column.chk === null) continue;
+    const rain = await getRain();
+    const data = grid.getData();
+    for(let i = 0; i < data.length; i++){
+      if(data[i].chk === null) continue;
+      if(data[i].chk === undefined) continue;
 
-      if(column.chk.toString() === 'Y'){
-        const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
-                    // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
-                    `dWorker=1989&` + //검수자(ERP ID)
-                    `dWorkerName=${gfs_getStoreValue('USER_REDUCER', 'USER_NAM')}&` + //검수자 이름
-                    `dOutageReasonCode=${detail_subt_leg.getValue() === null ? '' : detail_subt_leg.getValue()}&` + //감량사유
-                    `dOutageWeightCode=${detail_subt.getValue() === null ? '' : detail_subt.getValue()}&` + //감량중량
-                    `dScrapGradeCode=${detail_grade1.getValue()}&` + //등급코드
-                    `dScrapGradeItemCode=${detail_grade2.getValue()}&` + //등급아이템
-                    `dTallyHistoryCode=${detail_depr.getValue() === null ? '' : detail_depr.getValue()}&` + //감가내역
-                    
-                    `dTallyRatio=${detail_depr2.getValue() === null ? '' :detail_depr2.getValue()}&` + //감가비율???
-                    
-                    // `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
-                    // `dScrapAreaCode=E001&` + //하차구역(섹터), 옥내는E001고정
-                    `dScrapAreaCode=${detail_out.getValue()}&` + //하차구역(섹터), 옥내는E001고정
-                    `dReturnDivisionCode=${detail_rtn.getValue() === null ? '' : detail_rtn.getValue()}&` + //반품구분
-                    `dReturnHistoryCode=${detail_rtn2.getValue() === null ? '' : detail_rtn2.getValue()}&` + //반품구분사유
-                    
-                    `dOutageReasonEtcEdit=&` + //기타의견???
+      if(data[i].chk.toString() === 'Y'){
 
-                    `dCarTypeCode=${detail_car.getValue()}&` +
-                    // `dWarning=${detail_warning.getValue() === null ? '' : detail_warning.getValue()}&` +
-                    `dWarning=&` +
-                    `dRain=0`;
+        let param = [];
+        param.push({
+          sp   : `begin 
+                    apps.EMM_INSPECT_MOBILE(
+                      :p_delivery_id,
+                      :p_sector_code,
+                      :p_reduce_code,
+                      :p_reduce_wgt,
+                      :p_return_gubun,
+                      :p_return_code,
+                      :p_file_yn,
+                      :p_iron_grade,
+                      :p_iron_grade_item,
+                      :p_discount_code,
+                      :p_erp_id,
+                      :p_erp_worker,
+                      :p_discount_rate,
+                      :p_cartype,
+                      :p_warning,
+                      :p_rain,
+                      :p_out
+                    );
+                  end;
+                  `,
+          data : {
+            p_delivery_id     : data[i].scaleNumb,
+            p_sector_code     : detail_out.getValue(),
+            p_reduce_code     : (detail_subt_leg.getValue() === null || detail_subt_leg.getValue() === undefined) ? '' : detail_subt_leg.getValue(),
+            p_reduce_wgt      : (detail_subt.getValue() === null || detail_subt.getValue() === undefined) ? '' : detail_subt.getValue(),
+            p_return_gubun    : (detail_rtn.getValue() === null || detail_rtn.getValue() === undefined) ? '' : detail_rtn.getValue(),
+            p_return_code     : (detail_rtn2.getValue() === null || detail_rtn2.getValue() === undefined) ? '' : detail_rtn2.getValue(),
+            p_file_yn         : '',
+            p_iron_grade      : detail_grade1.getValue(),
+            p_iron_grade_item : detail_grade2.getValue(),
+            p_discount_code   : (detail_depr.getValue() === null || detail_depr.getValue() === undefined)? '' : detail_depr.getValue(),
+            p_erp_id          : gfs_getStoreValue('USER_REDUCER', 'ERP_ID'),
+            p_erp_worker      : gfs_getStoreValue('USER_REDUCER', 'USER_NAM'),
+            p_discount_rate   : (detail_depr2.getValue() === null || detail_depr2.getValue() === undefined) ? '' : detail_depr2.getValue(),
+            p_cartype         : detail_car.getValue(),
+            p_warning         : 'N',
+            p_rain            : rain,
+          },
+          errSeq: 0
+        })
+    
+        let result = await getSp_Oracle_YK(
+          param
+        ); 
 
-        const Data = await YK_WEB_REQ(`tally_process_erp_procedure.jsp?${msg}`);
-        console.log(Data);
+        if(result.data.result !== 'OK'){
+          alert('검수수정중 오류가 발생했습니다. > ' + result.data.result);
+          gfc_hideMask();
+
+          return;
+        }else{
+          getDynamicSql_Mysql(scaleNumb, (detail_subt.getValue() === null || detail_subt.getValue() === undefined || detail_subt.getValue() === '') ? 0 : detail_subt.getValue()).then(e => {
+            console.log(e)
+          });
+        }
       }
     }
-
-    //#endregion
-
-    alert('저장되었습니다.');
 
     const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'SHIP_PROC');
     pgm[0].Retrieve();
 
     gfc_hideMask();
+
+    //#endregion
+
+    alert('저장되었습니다.');
   }
   //#endregion
 

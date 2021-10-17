@@ -1,9 +1,7 @@
 var oracleDb = require('oracledb');
-oracleDb.stmtCacheSize = 100;
-oracleDb.queueMax = 500;
 
-// oracleDb.queueMax = 1000;
-// oracleDb.stmtCacheSize = 50;
+oracleDb.queueMax = 1000;
+oracleDb.stmtCacheSize = 50;
 
 // oracleDb.autoCommit = true;
 // var dbConfig = require('../Oracle/dbConfig');
@@ -34,73 +32,55 @@ const executeSPYK = async(connection, query, data) => {
 
 const executeSP = async(RowStatus, connection, query, data) => {
   
+  const queryResult = await connection.execute(query, data);
   let result = {};
+  
+  let ROWS;
+  let SUCCESS  = queryResult.outBinds['p_SUCCESS'];
+  let MSG_CODE = queryResult.outBinds['p_MSG_CODE'];
+  let MSG_TEXT = queryResult.outBinds['p_MSG_TEXT'];
+  let COL_NAM  = queryResult.outBinds['p_COL_NAM'];
+ 
+  //YK sp추가로인한 수정
+  if(RowStatus === undefined){
+    ROWS = await fetchRowsFromRS(queryResult);
 
-  try{
-    const queryResult = await connection.execute(query, data);
-    
-    let ROWS;
-    let SUCCESS  = queryResult.outBinds['p_SUCCESS'];
-    let MSG_CODE = queryResult.outBinds['p_MSG_CODE'];
-    let MSG_TEXT = queryResult.outBinds['p_MSG_TEXT'];
-    let COL_NAM  = queryResult.outBinds['p_COL_NAM'];
-   
-    //YK sp추가로인한 수정
-    if(RowStatus === undefined){
-      ROWS = await fetchRowsFromRS(queryResult);
-  
-      if(ROWS.length === 0){
-        ROWS     = null;
-        SUCCESS  = 'N';
-        MSG_CODE = 'MSG01';
-        MSG_TEXT = 'MSG01';
-        COL_NAM  = '';
-      }
+    if(ROWS.length === 0){
+      ROWS     = null;
+      SUCCESS  = 'N';
+      MSG_CODE = 'MSG01';
+      MSG_TEXT = 'MSG01';
+      COL_NAM  = '';
     }
-    else if(RowStatus.indexOf('R') >= 0){
-      ROWS = await fetchRowsFromRS(queryResult);
-  
-      if(ROWS.length === 0){
-        ROWS     = null;
-        SUCCESS  = 'N';
-        MSG_CODE = 'MSG01';
-        MSG_TEXT = 'MSG01';
-        COL_NAM  = '';
-      }
-    }else{
-      if(SUCCESS !== 'Y'){
-        console.log(result);
-      }
-    }
-  
-    result.ROWS     = ROWS;
-    result.SUCCESS  = SUCCESS;
-    result.MSG_CODE = MSG_CODE;
-    result.MSG_TEXT = MSG_TEXT;
-    result.COL_NAM  = COL_NAM;
-  
-    return result;
-  }catch(e){
-    result.ROWS     = null;
-    result.SUCCESS  = 'N';
-    result.MSG_CODE = 'MSG01';
-    result.MSG_TEXT = 'MSG01';
-    result.COL_NAM  = '';
-    return result;
   }
+  else if(RowStatus.indexOf('R') >= 0){
+    ROWS = await fetchRowsFromRS(queryResult);
+
+    if(ROWS.length === 0){
+      ROWS     = null;
+      SUCCESS  = 'N';
+      MSG_CODE = 'MSG01';
+      MSG_TEXT = 'MSG01';
+      COL_NAM  = '';
+    }
+  }else{
+    if(SUCCESS !== 'Y'){
+      console.log(result);
+    }
+  }
+
+  result.ROWS     = ROWS;
+  result.SUCCESS  = SUCCESS;
+  result.MSG_CODE = MSG_CODE;
+  result.MSG_TEXT = MSG_TEXT;
+  result.COL_NAM  = COL_NAM;
+
+  return result;
 }
 
 const fetchRowsFromRS = async(result) => {
-  const p_select = await result.outBinds['p_select'];
-  const resultSet = await p_select.getRows();
-  const column = await p_select.metaData;
-
-  // let rows;
-  // let row;
-  // while (row = await p_select.getRow()) {
-  //   rows.push(row)
-  // }
-
+  const resultSet = await result.outBinds['p_select'].getRows();
+  const column = await result.outBinds['p_select'].metaData;
   
   let data = [];
   for(let i = 0; i < resultSet.length; i++){
@@ -112,76 +92,111 @@ const fetchRowsFromRS = async(result) => {
     data.push(col);
   }
 
-  await p_select.close();
-
   return data;
 }
 
-let cnt = 0;
-router.post('/SP', async(req, res) => {
-  const connection = await oracleDb.getConnection('oraclePool');
-
-  try{
-    const param = req.body.param;
-    for(let i = 0; i < param.length; i++){
-
-      let query = param[i].sp;
-      let data  = param[i].data;
-      data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
-      data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-      data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-      data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
-      data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+router.post('/SP', (req, res) => {
+  // const connection = await oracleDb.getConnection({
+  //   user         : dbConfig.user,
+  //   password     : dbConfig.password,
+  //   connectString: dbConfig.connectString
+  // });
   
-      let errSeq = param[i].errSeq;
-  
-      cnt++;
-      // console.log(`${cnt} -> call: ${query}`)
-      if(cnt % 10 === 0){
-        console.log(`${cnt}`)
-        const mem = process.memoryUsage()
-        const heapUsed = Math.round(mem.heapUsed / 1024 / 1024 * 100) / 100;
-        const external = Math.round(mem.external / 1024 / 1024 * 100)  / 100;
-        const heapTotal = Math.round(mem.heapTotal / 1024 / 1024 * 100) / 100;
-        const rss = Math.round(mem.rss / 1024 / 1024 * 100) / 100;
-        console.log(`heap used: ${heapUsed} MB, heap total: ${heapTotal} MB, rss: ${rss} MB, external: ${external} MB`);
+  // const connection = await oracleDb.getConnection('oraclePool');
+  // const connection = await oracleDb.getConnection();
+
+  const param = req.body.param;
+  for(let i = 0; i < param.length; i++){
+    let query = param[i].sp;
+    let data  = param[i].data;
+    let errSeq = param[i].errSeq;
+
+
+    // if(query.toUpperCase().indexOf('TEST') > 0){
+
+
+
+
+      oracleDb.getConnection('oraclePool', async (err, connection) => {
+        try{
+          console.log(`call: ${query}`, new Date())
+          if(err){
+            console.log(err);
+          }else{          
+            data.p_select   = { type: oracleDb.CURSOR, dir: oracleDb.BIND_OUT};
+            data.p_SUCCESS  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+            data.p_MSG_CODE = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+            data.p_MSG_TEXT = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+            data.p_COL_NAM  = { type: oracleDb.DB_TYPE_VARCHAR, dir: oracleDb.BIND_OUT};
+          
+            const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
+            if(result.SUCCESS === 'N'){
+              // console.log('3:', new Date())
+              await doRelease(connection);
       
-        if(cnt === 10000) cnt = 0;
-      }
-      const result = await executeSP(param[i].data.p_RowStatus, connection, query, data);
-      if(result.SUCCESS === 'N'){
-        // console.log('3:', new Date())
-  
-        res.json({
-          ROWS    : result.ROWS,
-          SUCCESS : result.SUCCESS,
-          MSG_CODE: result.MSG_CODE,
-          MSG_TEXT: result.MSG_TEXT,
-          COL_NAM : result.COL_NAM,
-          SEQ     : errSeq
-        });
-  
-        return;
+              res.json({
+                ROWS    : result.ROWS,
+                SUCCESS : result.SUCCESS,
+                MSG_CODE: result.MSG_CODE,
+                MSG_TEXT: result.MSG_TEXT,
+                COL_NAM : result.COL_NAM,
+                SEQ     : errSeq
+              });
         
-      }else{
-        if(i === param.length - 1){
-          // console.log('2:', new Date())
+              return;
+              
+            }else{
+              if(i === param.length - 1){
+                // console.log('2:', new Date())
+                await doRelease(connection);
+                
+                res.json({
+                  ROWS    : result.ROWS,
+                  SUCCESS : result.SUCCESS,
+                  MSG_CODE: result.MSG_CODE,
+                  MSG_TEXT: result.MSG_TEXT,
+                  COL_NAM : result.COL_NAM,
+                  SEQ     : errSeq
+                });
+              }
+            }
+          }
+        }catch(e){
+          console.log(e)
           
           res.json({
-            ROWS    : result.ROWS,
-            SUCCESS : result.SUCCESS,
-            MSG_CODE: result.MSG_CODE,
-            MSG_TEXT: result.MSG_TEXT,
-            COL_NAM : result.COL_NAM,
-            SEQ     : errSeq
+            ROWS    : [],
+            SUCCESS : 'N',
+            MSG_CODE: e,
+            MSG_TEXT: e,
+            COL_NAM : '',
+            SEQ     : 0
           });
+        }finally{
+          // await doRelease(connection);
         }
-      }
-    }
-  }catch(e){
+      })
+
+
+
+
+    // }else{
+      
+    //   res.json({
+    //     ROWS    : [],
+    //     SUCCESS : 'N',
+    //     MSG_CODE: 'e',
+    //     MSG_TEXT: 'e',
+    //     COL_NAM : '',
+    //     SEQ     : 0
+    //   });
+    // }
+
+
+
+
+
     
-  }finally{
-    await doRelease(connection);
   }
 });
 

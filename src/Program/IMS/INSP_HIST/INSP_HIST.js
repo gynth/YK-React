@@ -31,12 +31,12 @@ class INSP_HIST extends Component {
 
   onTabChg = async() => {
 
-    await gfc_sleep(200);
-
     const activeWindow = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'activeWindow');
     if(activeWindow.programId !== 'INSP_HIST'){
       return;
     }
+
+    await gfc_sleep(500);
 
     const carNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_CARNO');
     if(carNumb !== undefined && carNumb !== ''){
@@ -300,7 +300,7 @@ class INSP_HIST extends Component {
     //#endregion
   }
 
-  componentDidMount(){
+  componentDidUpdate(){
     gfo_getCombo(this.props.pgm, 'search_tp').setValue('1');
     this.Retrieve();
   }

@@ -51,6 +51,7 @@ const CompleteBtn = (props) => {
     for(let i = 0; i < grid.getRowCount(); i++){
       const column = gfg_getRow(grid, i);
       if(column.chk === null) continue;
+      if(column.chk === undefined) continue;
 
       if(column.chk.toString() === 'Y'){
         param.push({
@@ -90,9 +91,9 @@ const CompleteBtn = (props) => {
       const ROW_KEY = result.data.seq;
       gfg_setSelectRow(grid, '', ROW_KEY);
     }else{
-      alert('확정취소 되었습니다.');
       const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_CANC');
       pgm[0].Retrieve();
+      alert('확정취소 되었습니다.');
     }
 
     //#endregion

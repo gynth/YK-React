@@ -179,24 +179,26 @@ const Common = (fn, param) => {
     `  WHERE menu_id = '${param.programId}'` ;
   }else if(fn === 'EMM_INSPECT_MOBILEY'){
     query = 
-    ` CALL EMM_INSPECT_MOBILEY ( ` +
+    ` CALL EMM_INSPECT_MOBILE ( ` +
     `  '${param.strScaleNumb}',     ` +
-    `  '${param.strErpId}',     ` +
-    `  '${param.strWorker}',     ` +
+    `  '${param.strScrapAreaCode}',     ` +
     `  '${param.strOutageReasonCode}',     ` +
     `  '${param.strOutageWeightCode}',     ` +
-    `  '${param.strScrapGradeCode}',     ` +
-    `  '${param.strScrapGradeItemCode}',     ` +
-    `  '${param.strTallyHistoryCode}',     ` +
-    `  '${param.strTallyRatio}',     ` +
-    `  '${param.strScrapAreaCode}',     ` +
     `  '${param.strReturnDivisionCode}',     ` +
     `  '${param.strReturnHistoryCode}',     ` +
     `  '${param.strOutageReasonEtcEdit}',     ` +
+    `  '${param.strScrapGradeCode}',     ` +
+    `  '${param.strScrapGradeItemCode}',     ` +
+    `  '${param.strTallyHistoryCode}',     ` +
+    `  '${param.strErpId}',     ` +
+    `  '${param.strWorker}',     ` +
+    `  '${param.strTallyRatio}',     ` +
     `  '${param.strCarType}',     ` +
     `  '${param.strWarning}',     ` +
     `  '${param.strRain}'      ` +
     ` )                          ` ;
+
+    console.log(query);
   }else if(fn === 'AUTH_TOTAL'){
     query =
     ` SELECT MENU_ID                                                        ` +

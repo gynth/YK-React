@@ -8,7 +8,6 @@ router.post('/Query', (req, res) => {
   const detail_subt = req.body.detail_subt;
 
   dbPool.getConnection((err, connection) => {
-    console.log(dbPool._allConnections.length);
 
     try{
       if(!err){
@@ -16,6 +15,8 @@ router.post('/Query', (req, res) => {
         const query = ` UPDATE T_SCAL_MSTR ` +
                       `    SET REDUCE_WGT = '${detail_subt}' ` +
                       `  WHERE SCAL_NUMB  = '${scaleNumb}'   ` ;
+                      
+                      console.log(query);
 
         connection.query(query, (err, data) => {
           console.log(query);

@@ -102,33 +102,24 @@ router.post('/YK_Chit_YN', (req, res) => {
   }
 });   
 
-router.get('/YK_Chit_YN_Tally', (req, res) => {
-  const scaleNumb = req.body.scaleNumb;
-  // const host = `http://tally.yksteel.co.kr/Images/scaleChit/${scaleNumb.substring(0, 8)}/${scaleNumb}.jpg`;
-  const host = `http://tally.yksteel.co.kr/Images/scaleChit/20211007/202110070150.jpg`;
-  const option = {
-    url   : host,
-    method: 'GET',
-    headers: {
-      // 'Access-Control-Allow-Origin': '*'
-      // 'Content-Type': 'application/json',
-      // 'Accept': 'application/json'
-    },
-    // data: {
-    //   REC_SCALENUMB
-    // } ,
-    timeout: 10000
-  };
-
-  console.log(host);
-
-  return axios(option)
-    .then(res => {
-      return res
+router.post('/YK_Chit_YN_Tally', (req, res) => {
+  const fileName = req.body.fileName;
+  
+  try{
+    const readFile = fs.readFileSync(`F:/IMS/scaleChit/${fileName.substring(0, 8)}/${fileName}`);
+    const encode = Buffer.from(readFile).toString('base64');
+  
+    res.json({
+      encode
     })
-    .catch(err => {
-      console.log(err)
+  }catch(e){
+
+    res.json({
+      encode: 'N'
     })
+  }finally{
+
+  }
 });   
 
 //#endregion
@@ -203,6 +194,7 @@ router.post('/YK_Chit', async (req, res) => {
   const img = req.body.img.replace('data:image/png;base64,', '');
   const filename = req.body.filename;
   const folder = filename.substring(0, 8);
+  const mobileYn = req.body.mobileYn;
 
   if(!fs.existsSync(`F:/IMS`)){
     fs.mkdirSync(`F:/IMS`);
@@ -214,9 +206,7 @@ router.post('/YK_Chit', async (req, res) => {
     fs.mkdirSync(`F:/IMS/scaleChit/${folder}`);
   }
 
-  // const root4 = `F:/Project/01.YK/Screenshot/20210805/test.png`;
-  // const root5 = `F:/Project/01.YK/Screenshot/20210805/test2.png`;
-  const result = await makeImg(img, folder, filename)
+  const result = await makeImg(img, folder, filename, mobileYn)
   if(result === 'Y'){
 
     let from = fs.createReadStream(`F:/IMS/scaleChit/${folder}/${filename}.jpg`);
@@ -247,12 +237,13 @@ router.post('/YK_Chit', async (req, res) => {
   }
 }); 
 
-const makeImg = async(img, folder, filename) => {
+const makeImg = async(img, folder, filename, mobileYn) => {
 
   const root = `F:/IMS/scaleChit/${folder}/${filename}_temp1.png`;
   const root1 = `F:/IMS/scaleChit/${folder}/${filename}_temp2.png`;
   const root2 = `F:/IMS/scaleChit/${folder}/${filename}_temp3.png`;
   const root3 = `F:/IMS/scaleChit/${folder}/${filename}.jpg`;
+  const root4 = `F:/IMS/scaleChit/${folder}/${filename}_temp.jpg`;
 
   try{
     //1. temp1 생성
@@ -269,10 +260,16 @@ const makeImg = async(img, folder, filename) => {
 
     const buf = Buffer.from(img, 'base64');
 
-    const result1 = await fsPromises.writeFile(root, buf, 'base64');
-    const result2 = await sharp(root).resize({width:1080, height:1650, position:'left top'}).toFile(root1);
-    const result3 = await fsPromises.rename(root1, root3);
-    const result4 = await fsPromises.unlink(root);
+    console.log(mobileYn);
+    if(mobileYn !== 'Y'){
+      const result1 = await fsPromises.writeFile(root, buf, 'base64');
+      const result2 = await sharp(root).resize({width:1080, height:1650, position:'left top'}).toFile(root1);
+      const result3 = await fsPromises.rename(root1, root3);
+      const result4 = await fsPromises.unlink(root);
+    }else{
+      const result1 = await fsPromises.writeFile(root3, buf, 'base64');
+      const result2 = await fsPromises.unlink(root4);
+    }
 
 
 
