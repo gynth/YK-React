@@ -34,7 +34,7 @@ const callSp = async(param) => {
 let procYn = 'N';
 setInterval(async() => {
 
-  await sleep(1000);
+  // await sleep(1000);
   if(procYn === 'N'){
     let param = [];
     param.push({
@@ -69,7 +69,6 @@ setInterval(async() => {
     })
   
     const select = await callSp(param);
-    console.log('query: ', select.data.SUCCESS)
     if(select.data.SUCCESS === 'Y'){
       procYn = 'Y';
 
@@ -145,6 +144,8 @@ setInterval(async() => {
               console.log(`${scaleNumb} : 영상녹화 저장에 성공했습니다.`);
             else
               console.log(`${scaleNumb} : 영상녹화 저장에 실패했습니다. ${Guid}, ${result2.data.MSG_TEXT}`);
+            
+              procYn = 'N';
           }else {
             console.log('영상녹화 파일생성에 실패 했습니다.');
 
@@ -184,17 +185,18 @@ setInterval(async() => {
             if(result3.SUCCESS === 'Y')
               console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
             else
-            console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
+              console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
+            
+            procYn = 'N';
           }
         })
       }catch(e){
-        console.log(e);
-      }finally{
         procYn = 'N';
+        console.log(e);
       }
     }
   }
-}, 3000);
+}, 5000);
 
 const sendScaleNumbList = async() => {
   const host = 'http://10.10.10.136:3128/Ai/GetRecodingList';

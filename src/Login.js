@@ -1,13 +1,14 @@
 import React from 'react';
 
 import Input from './Component/Control/Input';
-import { gfo_getInput } from './Method/Component';
+import { gfo_getCombo, gfo_getInput } from './Method/Component';
 import { getDynamicSql_Oracle } from './db/Oracle/Oracle';
 // import { setSessionCookie, getSessionCookie} from './Cookies';
 import { setSessionCookie} from './Cookies';
 import { gfs_PGM_REDUCER } from './Method/Store';
 import './login.css';
-
+import Combobox from '../src/Component/Control/Combobox';
+import { gfc_yk_call_sp } from './Method/Comm';
 
 gfs_PGM_REDUCER('login');
 
@@ -29,7 +30,9 @@ const onLogin = async(e, user_id, pass_cd) => {
 
     const width = window.screen.availWidth;
     const height = window.screen.availHeight;
+    const areaTp = gfo_getCombo('login', 'areaTp');
     setSessionCookie('login', user_id);
+    setSessionCookie('areaTp', areaTp.getValue());
 
     const winProperties = 'fullscreen=yes, location=no, toolbar=no, menubar=no, resizable=yes, scrollbars=no, addressbar=no, width=' + (width) + ',height=' + (height);
 
@@ -53,6 +56,17 @@ const Login = (props) => {
 
       
       <div className='input_box'>
+        <Combobox pgm     = 'login'
+                  id      = 'areaTp'
+                  value   = 'itemCode'
+                  display = 'item'
+                  placeholder = '사용자 구역'
+                  height  = {42}
+                  oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                    p_division    : 'P530'
+                  })}
+                  emptyRow
+        />
         <div className='input_line'>
           <label>ID</label>
           <Input pgm='login' id='id' type='text' />

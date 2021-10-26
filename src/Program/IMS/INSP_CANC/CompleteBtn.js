@@ -81,19 +81,26 @@ const CompleteBtn = (props) => {
       }
     }
 
-    let result = await getSp_Oracle_YK(
-      param
-    ); 
+    try{
+      let result = await getSp_Oracle_YK(
+        param
+      ); 
+  
+      if(result.data.result !== 'OK'){
+        alert('확정취소중 오류가 발생했습니다. > ' + result.data.result);
+  
+        const ROW_KEY = result.data.seq;
+        gfg_setSelectRow(grid, '', ROW_KEY);
+      }else{
+        alert('확정취소 되었습니다.');
+      }
+    }catch(e){
 
-    if(result.data.result !== 'OK'){
-      alert('확정취소중 오류가 발생했습니다. > ' + result.data.result);
-
-      const ROW_KEY = result.data.seq;
-      gfg_setSelectRow(grid, '', ROW_KEY);
-    }else{
+    }finally{
+      gfc_hideMask();
+      
       const pgm = gfs_getStoreValue('WINDOWFRAME_REDUCER', 'windowState').filter(e => e.programId === 'INSP_CANC');
       pgm[0].Retrieve();
-      alert('확정취소 되었습니다.');
     }
 
     //#endregion

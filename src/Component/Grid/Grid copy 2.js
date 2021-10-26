@@ -13,13 +13,11 @@ import { useEffect, useRef } from 'react';
 import { gfs_getStoreValue, gfs_dispatch } from '../../Method/Store';
 import { useResizeDetector } from 'react-resize-detector';
 
-import { gfc_getMultiLang, gfc_getAtt, gfc_sleep, gfc_showMask, gfc_hideMask } from '../../Method/Comm';
+import { gfc_getMultiLang, gfc_getAtt, gfc_sleep } from '../../Method/Comm';
 import { gfg_getGrid } from '../../Method/Grid';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { getSp_Oracle } from '../../db/Oracle/Oracle';
-import xlsx from 'xlsx';
-import moment from 'moment';
 //#endregion
 
 const RtnGrid = (props) => {
@@ -194,6 +192,77 @@ const RtnGrid = (props) => {
     }
     
     parent.appendChild(contextFixedUl);
+  }
+  //#endregion
+
+  //#region 컬럼숨김(해제)
+  const columnVisible = (id, parent) => {
+    if(id === '_number') return;
+    
+    const contextVisible = document.createElement('li');
+    contextVisible.innerHTML = gfc_getAtt('숨기기');
+    contextVisible.style = 'margin-top: 5px;';
+    contextVisible.onclick = () => {
+      const index = columns.findIndex(e => e.name === id);
+
+      //컬럼순서 때문에 숨김처리시 제일뒤로 보낸다.
+      const from = columns[index];
+
+      columns.splice(index, 1);
+      columns.splice(columns.length, 0, from);
+
+      gridRef.current.getInstance().hideColumn(id);
+      from.hidden = true;
+      gridRef.current.getInstance().setColumns(columns);
+
+      if(frozenCount > index){
+        setFrozenCount(frozenCount - 1);
+        gridRef.current.getInstance().setFrozenColumnCount(frozenCount);
+      }
+    }
+
+    parent.appendChild(contextVisible);
+
+    const hide = columns.filter(e => e.hidden);
+
+    if(hide.length > 0){
+
+      const contextShow = document.createElement('li');
+      contextShow.innerHTML = gfc_getAtt('숨기기 취소');
+      contextShow.style = 'margin-top: 5px;';
+
+      const contextShowUl = document.createElement('ul');
+      contextShowUl.style = 'margin-top: 5px;';
+      contextShow.appendChild(contextShowUl);
+
+      const onShow = (id, parentId) => {
+        
+        const index = columns.findIndex(e => e.name === id);
+        const parentIndex = columns.findIndex(e => e.name === parentId);
+        const from = columns[index];
+
+        columns.splice(index, 1);
+        columns.splice(frozenCount === 0 ? parentIndex + 1 : frozenCount, 0, from);
+
+        gridRef.current.getInstance().showColumn(id);
+        from.hidden = false;
+        gridRef.current.getInstance().setColumns(columns);
+
+        gridRef.current.getInstance().setFrozenColumnCount(frozenCount);
+        setHeaderEach(from.name, from.header, from.width);
+      }
+
+      for(let idx in hide){
+
+        const contextShowUlLi = document.createElement('li');
+        contextShowUlLi.innerHTML = gfc_getAtt(hide[idx].header);
+        contextShowUlLi.style = 'margin-top: 5px;';
+        contextShowUlLi.onclick = (e) => onShow(hide[idx].name, id);
+        contextShowUl.appendChild(contextShowUlLi);
+        
+        parent.appendChild(contextShow);
+      }
+    }
   }
   //#endregion
 
@@ -392,141 +461,6 @@ const RtnGrid = (props) => {
       }
     })
 
-    gridRef.current.getInstance().on('mousedown', (e) => {
-      if(e.targetType !== 'columnHeader'){
-        if(e.nativeEvent.which === 3){
-          const rowCount = gridRef.current.getInstance().getRowCount();
-          if(rowCount < 1) return;
-
-  
-          e.nativeEvent.preventDefault()
-
-          const contextDiv = document.createElement('div');
-          contextDiv.id = props.pgm + '_' + props.id + '_contextmenu';
-          contextDiv.style = 'position:fixed;width:150px; background: #fff;box-shadow:1px 1px 5px 0 rgba(0, 0, 0, 0.54)';
-
-
-          const fDiv = document.getElementById(contextDiv.id);
-          if(fDiv !== null){
-            document.body.removeChild(fDiv);
-          }
-  
-          document.addEventListener('click', () => {
-            const fDiv = document.getElementById(contextDiv.id);
-            if(fDiv !== null){
-              document.body.removeChild(fDiv);
-            }
-          }); 
-          document.body.appendChild(contextDiv);
-          
-          const contextChild = document.createElement('input');
-          contextChild.style = 'width:148px; height:30; text-align:center; margin: 1 0 0 1';
-          contextChild.value = 'Excel';
-          contextChild.addEventListener('click', async() => {
-            // console.log(gridRef.current.getInstance().getColumns())
-            // const tag = gridRef.current.getInstance().getElement(0, 'COP_CD');
-            // console.log(tag)
-            // console.log(tag.firstChild.value)
-            // console.log(gridRef.current.getInstance().getValue(0, 'COP_CD'))
-
-            gfc_showMask();
-
-            
-            gridRef.current.getInstance().off('focusChange');
-
-            let header = [];
-            let headerWidth = [];
-            let column = [];
-            let rowData = [];
-            let colWidth = [];
-            let gridHeader = gridRef.current.getInstance().getColumns();
-            for(let i = 0; i < gridHeader.length; i++){
-              header.push(gridHeader[i].header);
-              headerWidth.push(gridHeader[i].baseWidth)
-              column.push(gridHeader[i].name);
-              colWidth.push({ wpx : gridHeader[i].baseWidth / 2 })
-              columns[i].width  = 2;
-            }
-
-            rowData.push(header);
-            
-            await gridRef.current.getInstance().setColumns(columns);
-            
-            for(let i = 0; i < rowCount; i++){
-              let data = [];
-              await gridRef.current.getInstance().focus(i);
-              await gfc_sleep(1);
-              for(let j = 0; j < header.length; j++){
-                let value = '';
-                let tag;
-                try{
-                  tag = await gridRef.current.getInstance().getElement(i, column[j]);
-                  value = tag.firstChild.value;
-                }catch(e){
-                  value = '';
-                }
-                finally{
-                  data.push(value);
-                }
-              }
-
-              rowData.push(data);
-            }
-
-            for(let i = 0; i < gridHeader.length; i++){
-              columns[i].width  = gridHeader[i].baseWidth;
-            }
-
-            await gridRef.current.getInstance().setColumns(columns);
-
-            gridRef.current.getInstance().on('focusChange', (e) => {
-              if(e.rowKey === e.prevRowKey){
-                return false;
-              }else{
-                if(props.selectionChange !== undefined)
-                  props.selectionChange(gridRef.current.getInstance().getRow(e.rowKey));
-              }
-            })
-
-            gfc_hideMask();
-            
-            const book = xlsx.utils.book_new();
-            const excelExport = xlsx.utils.aoa_to_sheet( rowData );
-            
-            // @breif CELL 넓이 지정
-            
-            excelExport["!cols"] = colWidth;
-            // excelExport["!cols"] = [
-            //       { wpx : 130 }   // A열            
-            //     , { wpx : 100 }   // B열
-            //     , { wpx : 80 }    // C열
-            //     , { wch : 60 }    // D열
-            // ]
-            
-            // @breif 첫번째 시트에 작성한 데이터를 넣는다.
-            
-            xlsx.utils.book_append_sheet( book, excelExport, "IMS" );
-            xlsx.writeFile( book, `${moment(new Date()).format('YYYYMMDD_hhmmss')}.xlsx` ); 
-          }); 
-          contextDiv.appendChild(contextChild);
-  
-          // const contextUl = document.createElement('ul');
-          // contextUl.style = 'width:148px; font-size:13;margin-top: 3px;';
-          // contextDiv.appendChild(contextUl); 
-  
-          // //숨김
-          // columnVisible(id, contextUl);
-          
-          if(e.nativeEvent.which === 3){
-            let x = e.nativeEvent.pageX + 'px'; // 현재 마우스의 X좌표
-            let y = e.nativeEvent.pageY + 'px'; // 현재 마우스의 Y좌표
-            contextDiv.style.left = x;
-            contextDiv.style.top = y;
-          }
-        }
-      }
-    })
-
     const CRTCHR_NO = gfs_getStoreValue('USER_REDUCER', 'USER_ID');
     const PGM_ID    = props.pgm;
     const GRID_ID   = props.id;
@@ -707,7 +641,6 @@ const RtnGrid = (props) => {
         
         <Grid header        = {props.colHeader}
               selectionUnit = 'row'
-              min
               minRowHeight  = {props.rowHeight < 34 ? 34 : props.rowHeight}
               rowHeight     = {props.rowHeight < 34 ? 34 : props.rowHeight}
               bodyHeight    = 'fitToParent'
@@ -716,8 +649,7 @@ const RtnGrid = (props) => {
 
               columns       = {props.columns}
               columnOptions = {{
-                frozenCount: props.frozenCount,
-                minWidth   : 1
+                frozenCount: props.frozenCount
               }}
 
               ref           = {gridRef}

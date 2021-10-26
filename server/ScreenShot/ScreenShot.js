@@ -156,13 +156,17 @@ router.post('/YK_Chit_Mobile', (req, res) => {
     fs.mkdirSync(`F:/IMS/scaleChit/${folder}`);
   }
 
-  if(!fs.existsSync(`F:/IMS/scaleChit/${folder}/${filename}`)){
-    makeImgMobile(img, folder, filename).then(e => {
-      res.json(e);
-    });
-  }else{
-    res.json('OK');
-  }
+  makeImgMobile(img, folder, filename).then(e => {
+    res.json(e);
+  });
+  
+  // if(!fs.existsSync(`F:/IMS/scaleChit/${folder}/${filename}`)){
+  //   makeImgMobile(img, folder, filename).then(e => {
+  //     res.json(e);
+  //   });
+  // }else{
+  //   res.json('OK');
+  // }
 })
 
 router.post('/Ftp_File_Yn', async(req, res) => {
@@ -206,6 +210,7 @@ router.post('/YK_Chit', async (req, res) => {
     fs.mkdirSync(`F:/IMS/scaleChit/${folder}`);
   }
 
+  await makeFolder(folder);
   const result = await makeImg(img, folder, filename, mobileYn)
   if(result === 'Y'){
 
@@ -228,7 +233,7 @@ router.post('/YK_Chit', async (req, res) => {
       res.json(data);
     })
     .then(() => {
-      console.log('22');
+      console.log('FTP Done');
       sftp.end();
     })
     .catch(err => {
@@ -236,6 +241,32 @@ router.post('/YK_Chit', async (req, res) => {
     });
   }
 }); 
+
+const makeFolder = async(folder) => {    
+  let root = `/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}`;
+  let Client = require('ssh2-sftp-client');
+  let sftp = new Client();
+  
+  sftp.connect({
+    host: '10.10.10.139',
+    port: 22,
+    username: 'ims',
+    password: 'wjdqhykims'
+  }).then((e) => {
+    return sftp.exists(root);
+  })
+  .then(data => {
+    if(data === false){
+      return sftp.mkdir(`/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}`, true);
+    }
+  })
+  .then(() => {
+    sftp.end();
+  })
+  .catch(err => {
+    console.error(err.message);
+  });
+}
 
 const makeImg = async(img, folder, filename, mobileYn) => {
 
@@ -260,7 +291,6 @@ const makeImg = async(img, folder, filename, mobileYn) => {
 
     const buf = Buffer.from(img, 'base64');
 
-    console.log(mobileYn);
     if(mobileYn !== 'Y'){
       const result1 = await fsPromises.writeFile(root, buf, 'base64');
       const result2 = await sharp(root).resize({width:1080, height:1650, position:'left top'}).toFile(root1);
@@ -268,7 +298,7 @@ const makeImg = async(img, folder, filename, mobileYn) => {
       const result4 = await fsPromises.unlink(root);
     }else{
       const result1 = await fsPromises.writeFile(root3, buf, 'base64');
-      const result2 = await fsPromises.unlink(root4);
+      // const result2 = await fsPromises.unlink(root4);
     }
 
 
@@ -380,6 +410,35 @@ router.post('/YK_SnapshotList', (req, res) => {
   res.json(root);
 })
 
+router.post('/YK_Chit_List', async(req, res) => {
+  const list = req.body.list;
+  let Client = require('ssh2-sftp-client');
+  let sftp = new Client();
+
+  sftp.connect({
+    host: '10.10.10.139',
+    port: 22,
+    username: 'ims',
+    password: 'wjdqhykims'
+  }).then((e) => {
+    return sftp.list(`/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${list}`);
+  })
+  .then(data => {
+    return data;
+  })
+  .then((data) => {
+    // console.log(data);
+    res.json(data);
+  })
+  .then(() => {
+    sftp.end();
+  })
+  .catch(err => {
+    console.error(err.message);
+    res.json([]);
+  });
+}); 
+
 router.post('/YK_Chit_DEL', (req, res) => {
   const filename = req.body.filename;
   const folder = filename.substring(0, 8);
@@ -400,6 +459,10 @@ router.post('/YK_Chit_DEL', (req, res) => {
     const from = `/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}/${filename}.jpg`;
     const to   = `/data/apache-tomcat-9.0.10/webapps/TALLY/Images/scaleChit/${folder}/${filename}_${copyList.length + 1}.jpg`;
     
+    const root1 = `F:/IMS/scaleChit/${folder}/${filename}.jpg`;
+    const root2 = `F:/IMS/scaleChit/${folder}/${filename}_${copyList.length + 1}.jpg`;
+    fsPromises.rename(root1, root2);
+
     return sftp.rename(from, to);
   })
   .then((data) => {
@@ -439,10 +502,6 @@ const delImg = async(folder, filename) => {
   }
 }
 //#endregion
-
-const sleep = (ms) => {
-  return new Promise(resolve=>setTimeout(resolve, ms));
-}
 
 //#endregion
 

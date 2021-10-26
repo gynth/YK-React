@@ -22,8 +22,6 @@ import Combobox from '../../../Component/Control/Combobox';
 import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
 import Chit from './Chit';
-import TabList from './TabList';
-import RecImage from '../Common/RecImage';
 import CompleteBtn from './CompleteBtn';
 import CompleteBtnModify from './CompleteBtnModify';
 
@@ -291,13 +289,19 @@ class INSP_CFRM extends Component {
 
   Retrieve = async () => {
 
-    gfc_showMask();
+    // gfc_showMask();
 
 
     const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT', {
       p_from_date : gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue(),
       p_to_date : gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue()
     });
+
+    // const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT', {
+    //   p_from_date : gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue(),
+    //   p_to_date : gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue()
+    // });
+
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
@@ -360,7 +364,7 @@ class INSP_CFRM extends Component {
         gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
     }
 
-    gfc_hideMask();
+    // gfc_hideMask();
   }
 
 
@@ -393,6 +397,7 @@ class INSP_CFRM extends Component {
     gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);      //반품구분
     gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);     //반품구분사유
     gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
+    gfo_getInput(this.props.pgm, 'detail_rain').setValue(dtlInfo.data.ROWS[0].RAIN); //강수량
 
     gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('INSP_CFRM_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.vehicle_no});
@@ -423,7 +428,8 @@ class INSP_CFRM extends Component {
                               id='search_fr_dt' />                  
                     <DateTime pgm={this.props.pgm}
                               id='search_to_dt' />
-                  </div>  <Combobox pgm     = {this.props.pgm}
+                  </div>  
+                  <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
                             value   = 'CODE'
                             display = 'NAME'
@@ -470,7 +476,7 @@ class INSP_CFRM extends Component {
                             const grid = gfg_getGrid(this.props.pgm, 'main10');
                             if(grid.gridEl.dataset.checked === undefined){
                               grid.gridEl.dataset.checked = 'Y';
-                            }else if(grid.gridEl.dataset.checked === 'true'){
+                            }else if(grid.gridEl.dataset.checked === 'Y'){
                               grid.gridEl.dataset.checked = 'N';
                             }else{
                               grid.gridEl.dataset.checked = 'Y';
@@ -800,6 +806,14 @@ class INSP_CFRM extends Component {
                               height= '30px'
 
                     />
+                  </li>
+                  <li>
+                    <h5>강수량</h5>
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'detail_rain'
+                             width   = '100%'
+                             disabled
+                      />
                   </li>
                 </ul>
               </div>

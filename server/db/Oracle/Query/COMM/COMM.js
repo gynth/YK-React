@@ -7,7 +7,8 @@ const COMM = (fn, param) => {
     `   FROM zm_ims_code ` +
     `  WHERE COMM_CD = '${param.COMM_CD}'` +
     `    AND COMM_DTL_CD != '*'          ` +
-    `    AND USE_YN = 'Y'                ` ;
+    `    AND USE_YN = 'Y'                ` +
+    `  ORDER BY SORT_SEQ                 ` ;
   }else if(fn === 'ZM_IMS_CODE_SELECT_MAIN10'){
     query = 
     ` SELECT *  ` +

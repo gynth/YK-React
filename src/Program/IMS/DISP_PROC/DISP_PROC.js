@@ -265,129 +265,133 @@ class DISP_PROC extends Component {
   
   mainGrid = async() => {
 
-    const select = await gfc_yk_call_sp('SP_ZM_MSTR_PASS');
-    const grid = gfg_getGrid(this.props.pgm, 'main10');
-    
-    if(select.data.SUCCESS === 'Y'){
-      const main = select.data.ROWS;
-
-      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+    try{
+      const select = await gfc_yk_call_sp('SP_ZM_MSTR_PASS');
+      const grid = gfg_getGrid(this.props.pgm, 'main10');
       
-      const dataMod = [];
-      main.forEach(e => {
-        dataMod.push({
-          scaleNumb: e['DELIVERY_ID'].toString(),
-          carNumb: e['VEHICLE_NO'],
-          preItemGrade: e['PRE_ITEM_GRADE'],
-          itemGrade: e['ITEM_GRADE'],
-          date: e['CREATION_DATE'],
-          lastDate: e['LASTDATE'],
-          vendor: e['VENDOR_NAME']
+      if(select.data.SUCCESS === 'Y'){
+        const main = select.data.ROWS;
+  
+        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+        
+        const dataMod = [];
+        main.forEach(e => {
+          dataMod.push({
+            scaleNumb: e['DELIVERY_ID'].toString(),
+            carNumb: e['VEHICLE_NO'],
+            preItemGrade: e['PRE_ITEM_GRADE'],
+            itemGrade: e['ITEM_GRADE'],
+            date: e['CREATION_DATE'],
+            lastDate: e['LASTDATE'],
+            vendor: e['VENDOR_NAME']
+          })
         })
-      })
-
-      const data = dataMod.filter(e => {
-        if(search_tp !== null && search_tp !== ''){
-          //계근번호
-          if(search_tp === '1'){
-            if(e.scaleNumb.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
+  
+        const data = dataMod.filter(e => {
+          if(search_tp !== null && search_tp !== ''){
+            //계근번호
+            if(search_tp === '1'){
+              if(e.scaleNumb.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //차량번호
+            else if(search_tp === '2'){
+              if(e.carNumb.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //사전등급
+            else if(search_tp === '3'){
+              if(e.itemGrade.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            //업체
+            else if(search_tp === '4'){
+              if(e.vendor.indexOf(search_txt) >= 0){
+                return true;
+              }else{
+                return false;
+              }
+            }
+            
+          }else{
+            return true;
+          }
+        })
+    
+        if(data.length > 0){
+          
+          //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
+          for(let i = 0; i < data.length; i++){
+            const scaleNumb = data[i].scaleNumb;
+  
+            const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
+            if(!oldData){
+              gfg_appendRow(grid, grid.getRowCount(), {
+                scaleNumb,
+                carNumb: data[i].carNumb,
+                preItemGrade: data[i].preItemGrade,
+                itemGrade: data[i].itemGrade,
+                date: data[i].date,
+                lastDate: data[i].lastDate,
+                vendor: data[i].vendor
+              }, 'scaleNumb', false);
             }
           }
-          //차량번호
-          else if(search_tp === '2'){
-            if(e.carNumb.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
+  
+          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
+          for(let i = 0; i < grid.getData().length; i++){
+            const scaleNumb =  grid.getData()[i].scaleNumb;
+  
+            const newData = data.find(e => e.scaleNumb === scaleNumb)
+            if(!newData){
+              grid.removeRow(i);
+  
+              //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
+              const selectScaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
+              if(scaleNumb === selectScaleNumb){
+                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
+                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+              }
             }
           }
-          //사전등급
-          else if(search_tp === '3'){
-            if(e.itemGrade.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
-          }
-          //업체
-          else if(search_tp === '4'){
-            if(e.vendor.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
+  
+          grid.resetOriginData();
+          grid.restore();
+  
+          const scaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
+          if(scaleNumb !== ''){
+            const row = grid.getData().find(e => e.scaleNumb === scaleNumb);
+            if(row){
+              gfg_setSelectRow(grid, 'scaleNumb', row.rowKey, true);
             }
           }
           
+          if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== data.length)
+            gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
         }else{
-          return true;
+          grid.clear();
+          if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
+            gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
         }
-      })
-  
-      if(data.length > 0){
-        
-        //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
-        for(let i = 0; i < data.length; i++){
-          const scaleNumb = data[i].scaleNumb;
-
-          const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
-          if(!oldData){
-            gfg_appendRow(grid, grid.getRowCount(), {
-              scaleNumb,
-              carNumb: data[i].carNumb,
-              preItemGrade: data[i].preItemGrade,
-              itemGrade: data[i].itemGrade,
-              date: data[i].date,
-              lastDate: data[i].lastDate,
-              vendor: data[i].vendor
-            }, 'scaleNumb', false);
-          }
-        }
-
-        //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
-        for(let i = 0; i < grid.getData().length; i++){
-          const scaleNumb =  grid.getData()[i].scaleNumb;
-
-          const newData = data.find(e => e.scaleNumb === scaleNumb)
-          if(!newData){
-            grid.removeRow(i);
-
-            //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
-            const selectScaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
-            if(scaleNumb === selectScaleNumb){
-              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
-              gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-            }
-          }
-        }
-
-        grid.resetOriginData();
-        grid.restore();
-
-        const scaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
-        if(scaleNumb !== ''){
-          const row = grid.getData().find(e => e.scaleNumb === scaleNumb);
-          if(row){
-            gfg_setSelectRow(grid, 'scaleNumb', row.rowKey, true);
-          }
-        }
-        
-        if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== data.length)
-          gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
       }else{
         grid.clear();
         if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
           gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
       }
-    }else{
-      grid.clear();
-      if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
-        gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+    }catch(e){
+
     }
   }
 
@@ -530,12 +534,13 @@ class DISP_PROC extends Component {
     gfo_getCombo(this.props.pgm, 'detail_subt').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT);     //감량중량
     gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(dtlInfo.data.ROWS[0].REDUCE_WGT_REASON_CODE); //감량사유
     gfo_getCombo(this.props.pgm, 'detail_depr').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);     //감가내역
-    // gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_CODE);    //감가비율
+    gfo_getCombo(this.props.pgm, 'detail_depr2').setValue(dtlInfo.data.ROWS[0].DISCOUNT_RATE);    //감가비율
     gfo_getCombo(this.props.pgm, 'detail_car').setValue(dtlInfo.data.ROWS[0].CAR_TYPE);      //차종구분
     gfo_getCombo(this.props.pgm, 'detail_out').setValue(dtlInfo.data.ROWS[0].SECTOR_CODE);      //하차구역
-    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);      //반품구분
-    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
+    gfo_getCombo(this.props.pgm, 'detail_rtn').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);      //반품구분
+    gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_CODE);     //반품구분사유
     gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
+    gfo_getInput(this.props.pgm, 'detail_rain').setValue(dtlInfo.data.ROWS[0].RAIN); //강수량
 
     gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.scaleNumb});
     gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: e.carNumb});
@@ -907,6 +912,14 @@ class DISP_PROC extends Component {
                               height= '30px'
 
                     />
+                  </li>
+                  <li>
+                    <h5>강수량</h5>
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'detail_rain'
+                             width   = '100%'
+                             disabled
+                      />
                   </li>
                 </ul>
               </div>

@@ -978,8 +978,7 @@ class INSP_PROC extends Component {
             itemGrade: e['ITEM_GRADE'],
             date: e['CREATION_DATE'],
             vendor: e['VENDOR_NAME'],
-            warning: e['WARNING'],
-            carType: e['CAR_TYPE']
+            warning: e['WARNING']
           })
         })
   
@@ -1037,7 +1036,6 @@ class INSP_PROC extends Component {
                 itemGrade: data[i].itemGrade,
                 date: data[i].date,
                 vendor: data[i].vendor,
-                carType: data[i].carType,
                 rec: '0'
               }, 'scaleNumb', false);
             }
@@ -1115,6 +1113,13 @@ class INSP_PROC extends Component {
   }
 
   componentDidUpdate(){
+    // this.mainHeaderInterval = setInterval(e => {
+    //   this.mainHeader();
+    // }, 2000)
+
+    // this.mainHeaderInterval2 = setInterval(e => {
+    //   this.mainHeader2();
+    // }, 5000)
 
     this.mainGridInterval = setInterval(e => {
       this.mainGrid();
@@ -1215,7 +1220,7 @@ class INSP_PROC extends Component {
   onSelectChange = async (e) => {
     if(e === null) return;
 
-    // gfc_showMask();
+    gfc_showMask();
 
     document.getElementById('tab1_INSP_PROC').click(0);
     await gfc_sleep(100);
@@ -1227,7 +1232,7 @@ class INSP_PROC extends Component {
     gfo_getCombo(this.props.pgm, 'detail_subt_leg').setValue(''); //감량사유
     gfo_getCombo(this.props.pgm, 'detail_depr').setValue('');     //감가내역
     gfo_getCombo(this.props.pgm, 'detail_depr2').setValue('');    //감가비율
-    gfo_getCombo(this.props.pgm, 'detail_car').setValue(e.carType);      //차종구분
+    gfo_getCombo(this.props.pgm, 'detail_car').setValue(e.cartype);      //차종구분
     gfo_getCombo(this.props.pgm, 'detail_rtn').setValue('');      //반품구분
     gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue('');     //반품구분사유
     gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue('');  //경고
@@ -1315,524 +1320,518 @@ class INSP_PROC extends Component {
       });
     }
     
-    // gfc_hideMask();
+    gfc_hideMask();
   }
 
   render() {
-
 
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
         <div className='car_manager'>
 
-          <Layout split       ='vertical'
-                  minSize     ={[370]}
-                  defaultSize ={1225}
-          >
-            <div style={{width:'100%'}}>
-              <div className='car_list' style={{width:'calc(100% - 365px)',overflow:'hidden'}}>
-                <div className='search_line'>
-                  <div className='wp'>
-                    <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
-                      <Combobox pgm     = {this.props.pgm}
-                                id      = 'search_tp'
-                                value   = 'code'
-                                display = 'name'
-                                width   = {124}
-                                height  = {42}
-                                emptyRow
-                                data    = {[{
-                                  code: '1',
-                                  name: '계근번호'
-                                },{
-                                  code: '2',
-                                  name: '차량번호'
-                                },{
-                                  code: '3',
-                                  name: '사전등급'
-                                },{
-                                  code: '4',
-                                  name: '업체'
-                                }]}
-                      />
-                    </div>
-                    <Input pgm         = {this.props.pgm}
-                          id          = 'search_txt'
-                          height      = '42'
-                          placeHolder = '검색어를 입력하세요'
-                          paddingLeft = '14'
-                          width       = '100%'
-                          type        = 'textarea'
-                          onKeyDown   = {(e) => {
-                            if(e.keyCode === 13){
-                              this.Retrieve()
+          
+          <div className='car_list'>
+            <div className='search_line'>
+              <div className='wp'>
+                <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
+                  <Combobox pgm     = {this.props.pgm}
+                            id      = 'search_tp'
+                            value   = 'code'
+                            display = 'name'
+                            width   = {124}
+                            height  = {42}
+                            emptyRow
+                            data    = {[{
+                              code: '1',
+                              name: '계근번호'
+                            },{
+                              code: '2',
+                              name: '차량번호'
+                            },{
+                              code: '3',
+                              name: '사전등급'
+                            },{
+                              code: '4',
+                              name: '업체'
+                            }]}
+                  />
+                </div>
+                <Input pgm         = {this.props.pgm}
+                       id          = 'search_txt'
+                       height      = '42'
+                       placeHolder = '검색어를 입력하세요'
+                       paddingLeft = '14'
+                       width       = '100%'
+                       type        = 'textarea'
+                       onKeyDown   = {(e) => {
+                        if(e.keyCode === 13){
+                          this.Retrieve()
+                        }
+                       }}
+                      //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
+                        />
+                <button>검색</button>
+              </div>
+            </div>
+            <div className='grid'>
+              <div className='wp'>
+                <div style={{width:'100%', height:'100%', overflow:'auto'}}>
+                  <Grid pgm={this.props.pgm}
+                        id ='main10'
+                        selectionChange={(e) => this.onSelectChange(e)}
+                        dblclick={(e) => this.dblclick(e)}
+                        rowHeight={46}
+                        rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                        columns={[
+                          columnInput({
+                            name: 'scaleNumb',
+                            header: '계근번호',
+                            width : 110,
+                            readOnly: true,
+                            color : '#0063A9',
+                            align : 'center'
+                          }),
+                          columnInput({
+                            name: 'carNumb',
+                            header: '차량번호',
+                            width : 90,
+                            readOnly: true,
+                            align : 'center'
+                          }),   
+                          columnInput({
+                            name: 'itemGrade',
+                            header: '사전등급',
+                            width : 135,
+                            readOnly: true,
+                            align : 'center'
+                          }),   
+                          columnDateTime({
+                            name  : 'date',
+                            header: '입차시간',
+                            width : 120,
+                            height: 38,
+                            // paddingTop: ''
+                            readOnly: true,
+                            valign:'middle',
+                            format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
+                            time  : 'HH:mm:ss'
+                          }),
+                          columnTextArea({
+                            name: 'vendor',
+                            header: 'Vendor',
+                            width : 160,
+                            height: 38,
+                            readOnly: true,
+                            align : 'left'
+                          }),
+                          columnImage({
+                            name: 'rec',
+                            header: '녹화중',
+                            width: 85,
+                            imgItem:[
+                              {'code':'0', 'value': ''},
+                              {'code':'1', 'value': <GifPlayer height='30' width='70' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
+                            ]
+                          }),   
+                          columnCombobox({
+                            name: 'warning', 
+                            header: '경고',
+                            value   : 'COMM_DTL_CD',
+                            display : 'COMM_DTL_NAM',
+                            width   : 80, 
+                            readOnly: true,
+                            oracleData : getDynamicSql_Oracle(
+                              'COMM/COMM',
+                              'ZM_IMS_CODE_SELECT',
+                              [{COMM_CD: '5'}]),
+                            editor: {
+                              value   : 'COMM_DTL_CD',
+                              display : 'COMM_DTL_NAM'
                             }
-                          }}
-                          //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
-                            />
-                    <button>검색</button>
-                  </div>
-                </div>
-                <div className='grid'>
-                  <div className='wp'>
-                    <div style={{width:'100%', height:'100%', overflow:'auto'}}>
-                      <Grid pgm={this.props.pgm}
-                            id ='main10'
-                            selectionChange={(e) => this.onSelectChange(e)}
-                            dblclick={(e) => this.dblclick(e)}
-                            rowHeight={46}
-                            rowHeaders= {[{ type: 'rowNum', width: 40 }]}
-                            columns={[
-                              columnInput({
-                                name: 'scaleNumb',
-                                header: '계근번호',
-                                width : 110,
-                                readOnly: true,
-                                color : '#0063A9',
-                                align : 'center'
-                              }),
-                              columnInput({
-                                name: 'carNumb',
-                                header: '차량번호',
-                                width : 90,
-                                readOnly: true,
-                                align : 'center'
-                              }),   
-                              columnInput({
-                                name: 'itemGrade',
-                                header: '사전등급',
-                                width : 135,
-                                readOnly: true,
-                                align : 'center'
-                              }),   
-                              columnDateTime({
-                                name  : 'date',
-                                header: '입차시간',
-                                width : 120,
-                                height: 38,
-                                // paddingTop: ''
-                                readOnly: true,
-                                valign:'middle',
-                                format: gfs_getStoreValue('USER_REDUCER', 'YMD_FORMAT'),
-                                time  : 'HH:mm:ss'
-                              }),
-                              columnTextArea({
-                                name: 'vendor',
-                                header: 'Vendor',
-                                width : 160,
-                                height: 38,
-                                readOnly: true,
-                                align : 'left'
-                              }),
-                              columnImage({
-                                name: 'rec',
-                                header: '녹화중',
-                                width: 85,
-                                imgItem:[
-                                  {'code':'0', 'value': ''},
-                                  {'code':'1', 'value': <GifPlayer height='30' width='70' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
-                                ]
-                              }),   
-                              columnCombobox({
-                                name: 'warning', 
-                                header: '경고',
-                                value   : 'COMM_DTL_CD',
-                                display : 'COMM_DTL_NAM',
-                                width   : 80, 
-                                readOnly: true,
-                                oracleData : getDynamicSql_Oracle(
-                                  'COMM/COMM',
-                                  'ZM_IMS_CODE_SELECT',
-                                  [{COMM_CD: '5'}]),
-                                editor: {
-                                  value   : 'COMM_DTL_CD',
-                                  display : 'COMM_DTL_NAM'
-                                }
-                              })
-                            ]}
-                      />
-                    </div>
-                  </div>
-                  <div className='grid_info'>
-                    <span className='title'>잔여차량</span><Botspan reducer='INSP_PROC_MAIN' />
-                  </div>
-                </div>
-                <div className='total_info'>
-                  <ul className='four'>
-                    <li><span className='title'>운송차량 전체</span><Mainspan reducer='INSP_PROC_MAIN' flag={8} /></li>
-                    <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
-                    <li onClick={e => {
-                      const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
-                      if(auth.length === undefined || auth.length === 0) return;
-
-                      const openAuth = auth.find(e => e.MENU_ID === 'DAILY_PROC');
-                      if(openAuth !== null){
-                        if(openAuth.PGMAUT_YN === 'Y'){
-
-                          //#region 프로그램 리듀서 생성
-                          gfs_PGM_REDUCER('DAILY_PROC');
-                          //#endregion
-
-                          gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                            ({
-                              windowZindex: 0,
-                              activeWindow: {programId: 'DAILY_PROC',
-                                            programNam: '검수일계표'
-                                            }
-                            })
-                          );
-                        }
-                      }
-                    }}><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
-                    <li onClick={e => {
-                      const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
-                      if(auth.length === undefined || auth.length === 0) return;
-
-                      const openAuth = auth.find(e => e.MENU_ID === 'DAILY_PROC');
-                      if(openAuth !== null){
-                        if(openAuth.PGMAUT_YN === 'Y'){
-
-                          //#region 프로그램 리듀서 생성
-                          gfs_PGM_REDUCER('DAILY_PROC');
-                          //#endregion
-
-                          gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                            ({
-                              windowZindex: 0,
-                              activeWindow: {programId: 'DAILY_PROC',
-                                            programNam: '검수일계표'
-                                            }
-                            })
-                          );
-                        }
-                      }
-                    }}><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
-                  </ul>
-                  <ul className='four'>
-                    <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
-                    <li onClick={e => {
-                      const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
-                      if(auth.length === undefined || auth.length === 0) return;
-
-                      const openAuth = auth.find(e => e.MENU_ID === 'DISP_PROC');
-                      if(openAuth !== null){
-                        if(openAuth.PGMAUT_YN === 'Y'){
-
-                          //#region 프로그램 리듀서 생성
-                          gfs_PGM_REDUCER('DISP_PROC');
-                          //#endregion
-
-                          gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                            ({
-                              windowZindex: 0,
-                              activeWindow: {programId: 'DISP_PROC',
-                                            programNam: '출차대기'
-                                            }
-                            })
-                          );
-                        }
-                      }
-                    }}><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
-                    <li onClick={e => {
-                      const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
-                      if(auth.length === undefined || auth.length === 0) return;
-
-                      const openAuth = auth.find(e => e.MENU_ID === 'ENTR_PROC');
-                      if(openAuth !== null){
-                        if(openAuth.PGMAUT_YN === 'Y'){
-                      
-                          //#region 프로그램 리듀서 생성
-                          gfs_PGM_REDUCER('ENTR_PROC');
-                          //#endregion
-
-                          gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                            ({
-                              windowZindex: 0,
-                              activeWindow: {programId: 'ENTR_PROC',
-                                            programNam: '입차대기'
-                                            }
-                            })
-                          );
-                        }
-                      }
-                    }}><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
-                    <li onClick={e => {
-                      const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
-                      if(auth.length === undefined || auth.length === 0) return;
-
-                      const openAuth = auth.find(e => e.MENU_ID === 'ENTR_PROC');
-                      if(openAuth !== null){
-                        if(openAuth.PGMAUT_YN === 'Y'){
-                      
-                          //#region 프로그램 리듀서 생성
-                          gfs_PGM_REDUCER('ENTR_WAIT');
-                          //#endregion
-
-                          gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
-                            ({
-                              windowZindex: 0,
-                              activeWindow: {programId: 'ENTR_WAIT',
-                                            programNam: '운송대기'
-                                            }
-                            })
-                          );
-                        }
-                      }
-                    }}><span className='title'>운송대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={7} /></li>
-                  </ul>
+                          })
+                        ]}
+                  />
                 </div>
               </div>
-            <div className='car_info' id='car_info'>
-              <div className='title'><span>계근번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
+              <div className='grid_info'>
+                <span className='title'>잔여차량</span><Botspan reducer='INSP_PROC_MAIN' />
+              </div>
+            </div>
+            <div className='total_info'>
+              <ul className='four'>
+                <li><span className='title'>운송차량 전체</span><Mainspan reducer='INSP_PROC_MAIN' flag={8} /></li>
+                <li><span className='title'>잔류 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={1} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
 
-              <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_PROC_MAIN'/>
+                  const openAuth = auth.find(e => e.MENU_ID === 'DAILY_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
 
-              <div className='tab_content' id='tabMain'>
-                <div className='input_list on' id={`content1_${this.props.pgm}`}>
-                  <ul>
-                    <li>
-                      <h5>사전등급</h5>
-                        <Input pgm     = {this.props.pgm}
-                              id      = 'detail_pre_grade'
-                              width   = '100%'
-                              disabled
-                        />
-                    </li>
-                    <li>
-                      <h5>등급책정</h5>
-                      <div style={{marginBottom:'5px'}}>
-                        <Combobox pgm     = {this.props.pgm}
-                                  id      = 'detail_grade1'
-                                  value   = 'itemCode'
-                                  display = 'item'
-                                  placeholder = '고철등급 검색'
-                                  height  = {42}
-                                  oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                    p_division    : 'P005'
-                                  })}
-                                  onChange = {async (e) => {
-                                    const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
-                                    combo.setValue(null);
-                                    combo.setDisabled(true);
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('DAILY_PROC');
+                      //#endregion
 
-                                    if(e !== undefined && e.value !== ''){
-                                      await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                        p_division    : e.value
-                                      })});
-                                      combo.setDisabled(false);
-                                    }else{
-                                      combo.setDisabled(true);
-                                    }
-                                  }}
-                        />
-                      </div>
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'DAILY_PROC',
+                                        programNam: '검수일계표'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>전체 검수 차량</span><Mainspan reducer='INSP_PROC_MAIN' flag={2} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
+
+                  const openAuth = auth.find(e => e.MENU_ID === 'DAILY_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('DAILY_PROC');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'DAILY_PROC',
+                                        programNam: '검수일계표'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>입고량(KG)</span><Mainspan reducer='INSP_PROC_MAIN' flag={3} /></li>
+              </ul>
+              <ul className='four'>
+                <li><span className='title'>검수대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={4} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
+
+                  const openAuth = auth.find(e => e.MENU_ID === 'DISP_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('DISP_PROC');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'DISP_PROC',
+                                        programNam: '출차대기'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>출차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={5} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
+
+                  const openAuth = auth.find(e => e.MENU_ID === 'ENTR_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+                  
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('ENTR_PROC');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'ENTR_PROC',
+                                        programNam: '입차대기'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>입차대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={6} /></li>
+                <li onClick={e => {
+                  const auth = gfs_getStoreValue('USER_REDUCER', 'AUTH');
+                  if(auth.length === undefined || auth.length === 0) return;
+
+                  const openAuth = auth.find(e => e.MENU_ID === 'ENTR_PROC');
+                  if(openAuth !== null){
+                    if(openAuth.PGMAUT_YN === 'Y'){
+                  
+                      //#region 프로그램 리듀서 생성
+                      gfs_PGM_REDUCER('ENTR_WAIT');
+                      //#endregion
+
+                      gfs_dispatch('WINDOWFRAME_REDUCER', 'SELECTWINDOW', 
+                        ({
+                          windowZindex: 0,
+                          activeWindow: {programId: 'ENTR_WAIT',
+                                        programNam: '운송대기'
+                                        }
+                        })
+                      );
+                    }
+                  }
+                }}><span className='title'>운송대기</span><Mainspan reducer='INSP_PROC_MAIN' flag={7} /></li>
+              </ul>
+            </div>
+          </div>
+          <div className='car_info' id='car_info'>
+            <div className='title'><span>계근번호</span><Detailspan reducer='INSP_PROC_MAIN' flag={1} /></div>
+
+            <TabList pgm={this.props.pgm} id={this.props.id} reducer='INSP_PROC_MAIN'/>
+
+            <div className='tab_content' id='tabMain'>
+              <div className='input_list on' id={`content1_${this.props.pgm}`}>
+                <ul>
+                  <li>
+                    <h5>사전등급</h5>
+                      <Input pgm     = {this.props.pgm}
+                             id      = 'detail_pre_grade'
+                             width   = '100%'
+                             disabled
+                      />
+                  </li>
+                  <li>
+                    <h5>등급책정</h5>
+                    <div style={{marginBottom:'5px'}}>
                       <Combobox pgm     = {this.props.pgm}
-                                id      = 'detail_grade2'
+                                id      = 'detail_grade1'
                                 value   = 'itemCode'
                                 display = 'item'
-                                isDisabled
-                      />
-                    </li>
-                    <li>
-                      <h5>감량중량</h5>
-                      <div style={{marginBottom:'5px'}}>
-                        <Combobox pgm     = {this.props.pgm}
-                              id      = 'detail_subt'
-                              value   = 'itemCode'
-                              display = 'item'
-                              placeholder = '감량중량 검색(KG)'
-                              oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                p_division    : 'P535'
-                              })}
-                              onChange = {async (e) => {
-                                const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
-                                combo.setValue(null);
-                                combo.setDisabled(true);
-
-                                if(e === undefined) return;
-
-                                if(e.value !== '0'){
-                                  await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                    p_division    : e.value
-                                  })});
-                                  combo.setDisabled(false);
-                                }
-                              }}
-                        />
-                      </div>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_subt_leg'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '감량사유 검색'
-                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                              p_division    : 'P620'
-                            })}
-                            isDisabled
-                      /> 
-                    </li>
-                    <li>
-                      <h5>감가내역</h5>
-                      <div style={{marginBottom:'5px'}}>
-                        <Combobox pgm     = {this.props.pgm}
-                              id      = 'detail_depr'
-                              value   = 'itemCode'
-                              display = 'item'
-                              placeholder = '감가내역 검색'
-                              oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                p_division    : 'P130'
-                              })}
-                              emptyRow
-                              onChange = {async (e) => {
-                                const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
-                                combo.setValue(null);
-
-                                if(e === undefined) return;
-
-                                if(e !== undefined && e.value !== ''){
-                                  combo.setDisabled(false);
-                                }else{
+                                placeholder = '고철등급 검색'
+                                height  = {42}
+                                oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : 'P005'
+                                })}
+                                onChange = {async (e) => {
+                                  const combo = gfo_getCombo(this.props.pgm, 'detail_grade2');
+                                  combo.setValue(null);
                                   combo.setDisabled(true);
-                                }
-                              }}
-                        />
-                      </div>
-                      <Combobox pgm = {this.props.pgm}
-                            id      = 'detail_depr2'
-                            value   = 'CODE'
-                            display = 'NAME'
-                            placeholder = '감가비율'
-                            isDisabled
-                            data    = {[{
-                              'CODE': '10',
-                              'NAME': '10%'
-                            },{
-                              'CODE': '20',
-                              'NAME': '20%'
-                            },{
-                              'CODE': '30',
-                              'NAME': '30%'
-                            },{
-                              'CODE': '40',
-                              'NAME': '40%'
-                            },{
-                              'CODE': '50',
-                              'NAME': '50%'
-                            },{
-                              'CODE': '60',
-                              'NAME': '60%'
-                            },{
-                              'CODE': '70',
-                              'NAME': '70%'
-                            },{
-                              'CODE': '80',
-                              'NAME': '80%'
-                            },{
-                              'CODE': '90',
-                              'NAME': '90%'
-                            },{
-                              'CODE': '100',
-                              'NAME': '100%'
-                            }]}
-                            // emptyRow
-                      />
-                    </li>
-                    {/* <li>
-                      <h5>하차구역</h5>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_out'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '하차구역 검색(SECTOR)'
-                            data    = ''
-                            onFocus = {ComboCreate => {
-                              YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
-                                .then(res => {
-                                  ComboCreate({data   : res.data.dataSend,
-                                              value  : 'itemCode',
-                                              display: 'item'});
-                                })
-                            }}
-                    />
-                    </li> */}
-                    <li>
-                      <h5>차종구분</h5>
-                      <Combobox pgm     = {this.props.pgm}
-                            id      = 'detail_car'
-                            value   = 'itemCode'
-                            display = 'item'
-                            placeholder = '차종선택'
-                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                              p_division    : 'P700'
-                            })}
-                    />
-                    </li>
-                    <li>
-                      <h5>반품구분</h5>
-                      <div style={{marginBottom:'5px'}}>
-                        <Combobox pgm     = {this.props.pgm}
-                              id      = 'detail_rtn'
-                              value   = 'itemCode'
-                              display = 'item'
-                              placeholder = '일부,전량 선택'
-                              oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                p_division    : 'P110'
-                              })}
-                              emptyRow
-                              onChange = {e => {
-                                const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
-                                combo.setValue(null);
 
-                                if(e === undefined) return;
-
-                                if(e.value === ''){
-                                  combo.setDisabled(true);
-                                }else{
-                                  combo.setDisabled(false);
-                                }
-                                // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
-                              }}
+                                  if(e !== undefined && e.value !== ''){
+                                    await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                      p_division    : e.value
+                                    })});
+                                    combo.setDisabled(false);
+                                  }else{
+                                    combo.setDisabled(true);
+                                  }
+                                }}
                       />
                     </div>
                     <Combobox pgm     = {this.props.pgm}
-                              id      = 'detail_rtn2'
+                              id      = 'detail_grade2'
                               value   = 'itemCode'
                               display = 'item'
-                              oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
-                                p_division    : 'P120'
-                              })}
                               isDisabled
-                      />
-                    </li>
-                    <li>
-                      <h5>경고</h5>
-                      <Checkbox pgm   = {this.props.pgm}
-                                id    = 'detail_warning'
-                                width = '30px'
-                                height= '30px'
+                    />
+                  </li>
+                  <li>
+                    <h5>감량중량</h5>
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_subt'
+                            value   = 'itemCode'
+                            display = 'item'
+                            placeholder = '감량중량 검색(KG)'
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P535'
+                            })}
+                            onChange = {async (e) => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_subt_leg');
+                              combo.setValue(null);
+                              combo.setDisabled(true);
 
-                      />
-                    </li>
-                  </ul>
-                </div>
-                
-                <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_PROC_MAIN'/>
-                
-                <div className='input_list' id={`content3_${this.props.pgm}`}>
-                  <DispInfo pgm={this.props.pgm} />
-                </div>
+                              if(e === undefined) return;
 
-                <div className='input_list' id={`content4_${this.props.pgm}`}>
-                  <DispImg pgm={this.props.pgm} />
-                </div>
+                              if(e.value !== '0'){
+                                await combo.onReset({oracleSpData:  gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : e.value
+                                })});
+                                combo.setDisabled(false);
+                              }
+                            }}
+                      />
+                    </div>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_subt_leg'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '감량사유 검색'
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P620'
+                          })}
+                          isDisabled
+                    /> 
+                  </li>
+                  <li>
+                    <h5>감가내역</h5>
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_depr'
+                            value   = 'itemCode'
+                            display = 'item'
+                            placeholder = '감가내역 검색'
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P130'
+                            })}
+                            emptyRow
+                            onChange = {async (e) => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_depr2');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e !== undefined && e.value !== ''){
+                                combo.setDisabled(false);
+                              }else{
+                                combo.setDisabled(true);
+                              }
+                            }}
+                      />
+                    </div>
+                    <Combobox pgm = {this.props.pgm}
+                          id      = 'detail_depr2'
+                          value   = 'CODE'
+                          display = 'NAME'
+                          placeholder = '감가비율'
+                          isDisabled
+                          data    = {[{
+                            'CODE': '10',
+                            'NAME': '10%'
+                          },{
+                            'CODE': '20',
+                            'NAME': '20%'
+                          },{
+                            'CODE': '30',
+                            'NAME': '30%'
+                          },{
+                            'CODE': '40',
+                            'NAME': '40%'
+                          },{
+                            'CODE': '50',
+                            'NAME': '50%'
+                          },{
+                            'CODE': '60',
+                            'NAME': '60%'
+                          },{
+                            'CODE': '70',
+                            'NAME': '70%'
+                          },{
+                            'CODE': '80',
+                            'NAME': '80%'
+                          },{
+                            'CODE': '90',
+                            'NAME': '90%'
+                          },{
+                            'CODE': '100',
+                            'NAME': '100%'
+                          }]}
+                          // emptyRow
+                    />
+                  </li>
+                  {/* <li>
+                    <h5>하차구역</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_out'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '하차구역 검색(SECTOR)'
+                          data    = ''
+                          onFocus = {ComboCreate => {
+                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
+                              .then(res => {
+                                ComboCreate({data   : res.data.dataSend,
+                                            value  : 'itemCode',
+                                            display: 'item'});
+                              })
+                          }}
+                  />
+                  </li> */}
+                  <li>
+                    <h5>차종구분</h5>
+                    <Combobox pgm     = {this.props.pgm}
+                          id      = 'detail_car'
+                          value   = 'itemCode'
+                          display = 'item'
+                          placeholder = '차종선택'
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P700'
+                          })}
+                  />
+                  </li>
+                  <li>
+                    <h5>반품구분</h5>
+                    <div style={{marginBottom:'5px'}}>
+                      <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_rtn'
+                            value   = 'itemCode'
+                            display = 'item'
+                            placeholder = '일부,전량 선택'
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P110'
+                            })}
+                            emptyRow
+                            onChange = {e => {
+                              const combo = gfo_getCombo(this.props.pgm, 'detail_rtn2');
+                              combo.setValue(null);
+
+                              if(e === undefined) return;
+
+                              if(e.value === ''){
+                                combo.setDisabled(true);
+                              }else{
+                                combo.setDisabled(false);
+                              }
+                              // combo.onReset({etcData:  YK_WEB_REQ(`tally_process_pop.jsp?division=${e.value}`, {})});
+                            }}
+                    />
+                  </div>
+                  <Combobox pgm     = {this.props.pgm}
+                            id      = 'detail_rtn2'
+                            value   = 'itemCode'
+                            display = 'item'
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P120'
+                            })}
+                            isDisabled
+                    />
+                  </li>
+                  <li>
+                    <h5>경고</h5>
+                    <Checkbox pgm   = {this.props.pgm}
+                              id    = 'detail_warning'
+                              width = '30px'
+                              height= '30px'
+
+                    />
+                  </li>
+                </ul>
               </div>
               
-              <CompleteBtn pgm={this.props.pgm}/>
+              <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='INSP_PROC_MAIN'/>
+              
+              <div className='input_list' id={`content3_${this.props.pgm}`}>
+                <DispInfo pgm={this.props.pgm} />
+              </div>
+
+              <div className='input_list' id={`content4_${this.props.pgm}`}>
+                <DispImg pgm={this.props.pgm} />
+              </div>
             </div>
-            </div>
+            
+            <CompleteBtn pgm={this.props.pgm}/>
+          </div>
 
           
-          <div className='cctv_viewer' style={{width:'100%'}}>
+          <div className='cctv_viewer'>
             <h4>실시간 CCTV</h4>
             <div className='manual_record'>
               <h5>수동녹화</h5>
@@ -1912,7 +1911,6 @@ class INSP_PROC extends Component {
               </ul>
             </div>
           </div>
-          </Layout>
         </div>
       </div>
     );

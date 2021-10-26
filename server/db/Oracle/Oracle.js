@@ -5,7 +5,7 @@ oracleDb.queueMax = 500;
 // oracleDb.queueMax = 1000;
 // oracleDb.stmtCacheSize = 50;
 
-// oracleDb.autoCommit = true;
+oracleDb.autoCommit = true;
 // var dbConfig = require('../Oracle/dbConfig');
 const express = require('express');
 const router = express.Router();
@@ -19,8 +19,8 @@ const router = express.Router();
     password     : 'wjdqhykims',
     connectString: '10.10.10.11:1521/PROD',
     poolAlias    : 'oraclePool',
-    // poolMin      : 1,
-    // poolMax      : 2
+    poolMin      : 1,
+    poolMax      : 8
     // events       : false,
     // queueMax     : 1000,
     // stmtCacheSize : 50
@@ -137,7 +137,7 @@ router.post('/SP', async(req, res) => {
   
       cnt++;
       // console.log(`${cnt} -> call: ${query}`)
-      if(cnt % 10 === 0){
+      if(cnt % 100 === 0){
         console.log(`${cnt}`)
         const mem = process.memoryUsage()
         const heapUsed = Math.round(mem.heapUsed / 1024 / 1024 * 100) / 100;
@@ -275,8 +275,125 @@ router.post('/Query', async (req, res) => {
   }finally{
 
   }
+});
 
+router.post('/QueryTran', (req, res) => {
+  oracleDb.getConnection('oraclePool', async (err, connection) => {
+  // oracleDb.getConnection({
+  //   user         : dbConfig.user,
+  //   password     : dbConfig.password,
+  //   connectString: dbConfig.connectString
+  // }, async (err, connection) => {
+    if(err){
+      console.log(err.message);
+      return;
+    }
+
+    const reqGrid      = req.body.grid;
+    const reqRowStatus = req.body.rowStatus;
+    const reqFile      = req.body.file;
+    const reqFn        = req.body.fn;
+    const reqParam     = req.body.param;
+    const reqSeq       = req.body.seq;
+
+    for(let i = 0; i < reqRowStatus.length; i++){
+      let Common;
+      try{
+        Common = require('./Query/' + reqFile[i]);
+      }catch(err){
+        console.log(err);
+      }
   
+      if(typeof(Common) !== 'function'){
+        console.log('Wrong file location');
+        doRelease(connection);
+        res.send({
+          result  : false,
+          grid    : null,
+          data    : null,
+          applyRow: 0,
+          code    : '',
+          message : 'Wrong file location'
+        });
+  
+        return;
+      }
+
+      const fn = reqFn[i];
+      const param = reqParam[i];
+      const query = Common(fn, (param !== null && param !== undefined ) && param);
+
+      connection.execute(query, async (err, result) => {
+        if(err){
+          console.log(err.message);
+          // connection.rollback((err) => {
+          //   if(err !== null)
+          //     console.log('rollback Error: ' + err);
+          // })
+
+          let msg = err;
+          if(reqRowStatus[i] === 'I'){
+            if(err.errorNum === 1){
+              msg = 'MSG03'; // 중복값이 존재합니다.
+            }
+          }
+
+          await doRelease(connection);
+          res.send({
+            result  : false,
+            grid    : reqGrid[i],
+            data    : null,
+            applyRow: (reqSeq !== null && reqSeq !== undefined && reqSeq.length > 0) && reqSeq[i],
+            code    : '',
+            message : msg
+          });
+
+          return;
+        }else{
+          if(i === reqRowStatus.length - 1){
+
+            let msg = '';
+            if(reqRowStatus[i] === 'R'){
+              if(result.rows.length === 0){
+                msg = 'MSG01';
+              }
+            }else if(reqRowStatus[i] === 'U' || reqRowStatus[i] === 'D'){
+              if(result.rowsAffected === 0){
+                msg = 'MSG02'; // '해당건이 없습니다. 다시조회후 처리해주세요.
+            
+                await doRelease(connection);
+                res.send({
+                  result  : false,
+                  grid    : reqGrid[i],
+                  data    : result,
+                  applyRow: 0,
+                  code    : '',
+                  message : msg
+                });
+  
+                return
+              }
+            }
+
+            // connection.commit((err) => {
+            //   if(err !== null)
+            //     console.log('Commit Error: ' + err);
+            // })
+            
+            await doRelease(connection);
+            res.send({
+              result  : msg === '' ? true : false,
+              grid    : reqGrid[i],
+              data    : result,
+              applyRow: 0,
+              code    : '',
+              message : msg
+            });
+          }
+        }
+      })
+    }
+  })
 });
 
 const doRelease = async (connection) => {

@@ -177,6 +177,11 @@ const Common = (fn, param) => {
     ` SELECT * ` +
     `   FROM zm_ims_menu ` +
     `  WHERE menu_id = '${param.programId}'` ;
+  }else if(fn === 'DATE_SEC'){
+    query = 
+    ` SELECT TO_CHAR(TO_DATE('${param.fr_dt}','YYYY-MM-DD') + (LEVEL - 1), 'YYYY-MM-DD') AS DT ` +
+    ` FROM DUAL                                                      ` +
+    ` CONNECT BY LEVEL <= TO_DATE('${param.to_dt}','YYYY-MM-DD') - TO_DATE('${param.fr_dt}','YYYY-MM-DD') + 1 `;
   }else if(fn === 'EMM_INSPECT_MOBILEY'){
     query = 
     ` CALL EMM_INSPECT_MOBILE ( ` +

@@ -385,6 +385,8 @@ class DAILY_PROC extends Component {
     gfo_getCombo(this.props.pgm, 'detail_rtn2').setValue(dtlInfo.data.ROWS[0].RETURN_GUBUN);     //반품구분사유
     gfo_getCheckbox(this.props.pgm, 'detail_warning').setValue(dtlInfo.data.ROWS[0].WARNING);  //경고
 
+    gfs_dispatch('DAILY_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: e.SCALENUMB});
+    
     gfs_dispatch('DAILY_PROC_MAIN', 'CHIT_INFO', {
       scaleNumb: e.SCALENUMB.toString(),
       date     : e.INSPECT_TIME
@@ -686,7 +688,9 @@ class DAILY_PROC extends Component {
                                 isDisabled
                                 placeholder = '고철등급 검색'
                                 height  = {42}
-                                etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P005', {})}
+                                oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                                  p_division    : 'P005'
+                                })}
                       />
                     </div>
                     <Combobox pgm     = {this.props.pgm}
@@ -704,7 +708,9 @@ class DAILY_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감량중량 검색(KG)'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P535', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P535'
+                            })}
                             isDisabled
                       />
                     </div>
@@ -713,7 +719,9 @@ class DAILY_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '감량사유 검색'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P620', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P620'
+                          })}
                           isDisabled
                     /> 
                   </li>
@@ -725,68 +733,64 @@ class DAILY_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '감가내역 검색'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P130', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P130'
+                            })}
                             isDisabled
                       />
                     </div>
                     <Combobox pgm = {this.props.pgm}
                           id      = 'detail_depr2'
-                          value   = 'code'
-                          display = 'name'
+                          value   = 'CODE'
+                          display = 'NAME'
                           placeholder = '감가비율'
                           isDisabled
                           data    = {[{
-                            'code': '10',
-                            'name': '10%'
+                            'CODE': '10',
+                            'NAME': '10%'
                           },{
-                            'code': '20',
-                            'name': '20%'
+                            'CODE': '20',
+                            'NAME': '20%'
                           },{
-                            'code': '30',
-                            'name': '30%'
+                            'CODE': '30',
+                            'NAME': '30%'
                           },{
-                            'code': '40',
-                            'name': '40%'
+                            'CODE': '40',
+                            'NAME': '40%'
                           },{
-                            'code': '50',
-                            'name': '50%'
+                            'CODE': '50',
+                            'NAME': '50%'
                           },{
-                            'code': '60',
-                            'name': '60%'
+                            'CODE': '60',
+                            'NAME': '60%'
                           },{
-                            'code': '70',
-                            'name': '70%'
+                            'CODE': '70',
+                            'NAME': '70%'
                           },{
-                            'code': '80',
-                            'name': '80%'
+                            'CODE': '80',
+                            'NAME': '80%'
                           },{
-                            'code': '90',
-                            'name': '90%'
+                            'CODE': '90',
+                            'NAME': '90%'
                           },{
-                            'code': '100',
-                            'name': '100%'
+                            'CODE': '100',
+                            'NAME': '100%'
                           }]}
                           // emptyRow
                     />
                   </li>
-                  {/* <li>
+                  <li>
                     <h5>하차구역</h5>
                     <Combobox pgm     = {this.props.pgm}
                           id      = 'detail_out'
                           value   = 'itemCode'
-                          display = 'item'
-                          placeholder = '하차구역 검색(SECTOR)'
-                          data    = ''
-                          onFocus = {ComboCreate => {
-                            YK_WEB_REQ('tally_process_pop.jsp?division=P530', {})
-                              .then(res => {
-                                ComboCreate({data   : res.data.dataSend,
-                                            value  : 'itemCode',
-                                            display: 'item'});
-                              })
-                          }}
+                          display = 'itemCode'
+                          placeholder = '차종선택'
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P530'
+                          })}
                   />
-                  </li> */}
+                  </li>
                   <li>
                     <h5>차종구분</h5>
                     <Combobox pgm     = {this.props.pgm}
@@ -794,7 +798,9 @@ class DAILY_PROC extends Component {
                           value   = 'itemCode'
                           display = 'item'
                           placeholder = '차종선택'
-                          etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P700', {})}
+                          oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                            p_division    : 'P700'
+                          })}
                           isDisabled
                   />
                   </li>
@@ -806,7 +812,9 @@ class DAILY_PROC extends Component {
                             value   = 'itemCode'
                             display = 'item'
                             placeholder = '일부,전량 선택'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P110', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P110'
+                            })}
                             isDisabled
                     />
                   </div>
@@ -814,7 +822,9 @@ class DAILY_PROC extends Component {
                             id      = 'detail_rtn2'
                             value   = 'itemCode'
                             display = 'item'
-                            etcData = {YK_WEB_REQ('tally_process_pop.jsp?division=P120', {})}
+                            oracleSpData = {gfc_yk_call_sp('SP_ZM_PROCESS_POP', {
+                              p_division    : 'P120'
+                            })}
                             isDisabled
                     />
                   </li>

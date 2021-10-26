@@ -95,6 +95,7 @@ const CompleteBtnModify = (props) => {
     }
 
     const detail_warning = gfo_getCheckbox(props.pgm, 'detail_warning'); //경고
+    const detail_rain = gfo_getInput(props.pgm, 'detail_rain');
     
     // const msg = `dScaleNumb=${scaleNumb}&` + //검수번호(계근번호)
     // `dWorker=${gfs_getStoreValue('USER_REDUCER', 'USER_ID')}&` + //검수자(ERP ID)
@@ -159,7 +160,7 @@ const CompleteBtnModify = (props) => {
         p_discount_rate   : (detail_depr2.getValue() === null || detail_depr2.getValue() === undefined) ? '' : detail_depr2.getValue(),
         p_cartype         : detail_car.getValue(),
         p_warning         : detail_warning.getValue() === true ? 'Y' : 'N',
-        p_rain            : '0',
+        p_rain            : (detail_rain.getValue() === null || detail_rain.getValue() === undefined) ? 0 : detail_rain.getValue(),
       },
       errSeq: 0
     })

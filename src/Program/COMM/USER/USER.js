@@ -84,6 +84,7 @@ class USER extends Component {
                     :p_RowStatus,
   
                     :p_COP_CD,
+                    :p_COP_CD_ORIG,
                     :p_IMS_ID,
                     :p_USER_NAM,
                     :p_USER_PWD,
@@ -103,17 +104,18 @@ class USER extends Component {
                 end;
                 `,
         data : {
-          p_RowStatus : 'D',
-          p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-          p_IMS_ID    : selectRow.IMS_ID,
-          p_USER_NAM  : '',
-          p_USER_PWD  : '',
-          p_DEPT_NAM  : '',
-          p_ERP_ID    : '',
-          p_AREA_TP   : '',
-          p_AUT_TP    : '',
-          p_USE_YN    : '',
-          p_USER_ID   : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
+          p_RowStatus  : 'D',
+          p_COP_CD     : selectRow.COP_CD,
+          p_COP_CD_ORIG: selectRow.COP_CD_ORIG,
+          p_IMS_ID     : selectRow.IMS_ID,
+          p_USER_NAM   : '',
+          p_USER_PWD   : '',
+          p_DEPT_NAM   : '',
+          p_ERP_ID     : '',
+          p_AREA_TP    : '',
+          p_AUT_TP     : '',
+          p_USE_YN     : '',
+          p_USER_ID    : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
         },
         errSeq: 0
       })
@@ -155,6 +157,7 @@ class USER extends Component {
                     :p_RowStatus,
 
                     :p_COP_CD,
+                    :p_COP_CD_ORIG,
                     :p_IMS_ID,
                     :p_USER_NAM,
                     :p_USER_PWD,
@@ -174,17 +177,18 @@ class USER extends Component {
                 end;
                 `,
         data : {
-          p_RowStatus : e.rowStatus,
-          p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-          p_IMS_ID    : e.IMS_ID,
-          p_USER_NAM  : e.USER_NAM,
-          p_USER_PWD  : e.USER_PWD,
-          p_DEPT_NAM  : e.DEPT_NAM,
-          p_ERP_ID    : e.ERP_ID,
-          p_AREA_TP   : e.AREA_TP,
-          p_AUT_TP   : e.AUT_TP,
-          p_USE_YN    : e.USE_YN,
-          p_USER_ID   : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
+          p_RowStatus  : e.rowStatus,
+          p_COP_CD     : e.COP_CD,
+          p_COP_CD_ORIG: e.COP_CD_ORIG,
+          p_IMS_ID     : e.IMS_ID,
+          p_USER_NAM   : e.USER_NAM,
+          p_USER_PWD   : e.USER_PWD,
+          p_DEPT_NAM   : e.DEPT_NAM,
+          p_ERP_ID     : e.ERP_ID,
+          p_AREA_TP    : e.AREA_TP,
+          p_AUT_TP     : e.AUT_TP,
+          p_USE_YN     : e.USE_YN,
+          p_USER_ID    : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
         },
         errSeq: e.rowKey
       })
@@ -224,6 +228,7 @@ class USER extends Component {
                   :p_RowStatus,
 
                   :p_COP_CD,
+                  :p_COP_CD_ORIG,
                   :p_IMS_ID,
                   :p_USER_NAM,
                   :p_USER_PWD,
@@ -243,17 +248,18 @@ class USER extends Component {
               end;
               `,
       data : {
-        p_RowStatus : 'R',
-        p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-        p_IMS_ID    : '',
-        p_USER_NAM  : '',
-        p_USER_PWD  : '',
-        p_DEPT_NAM  : '',
-        p_ERP_ID    : '',
-        p_AREA_TP   : '',
-        p_AUT_TP    : '',
-        p_USE_YN    : '',
-        p_USER_ID   : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
+        p_RowStatus  : 'R',
+        p_COP_CD     : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+        p_COP_CD_ORIG: gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+        p_IMS_ID     : '',
+        p_USER_NAM   : '',
+        p_USER_PWD   : '',
+        p_DEPT_NAM   : '',
+        p_ERP_ID     : '',
+        p_AREA_TP    : '',
+        p_AUT_TP     : '',
+        p_USE_YN     : '',
+        p_USER_ID    : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
       },
       errSeq: 0
     })
@@ -268,6 +274,16 @@ class USER extends Component {
 
     mainGrid.clear();
 
+    // const test = [];
+    // let row = 0;
+    // for(let i = 0; i < 10000; i++){
+    //   if(row > 7) row = 0;
+    //   test.push(result.data.ROWS[row]);
+    //   row += 1;
+    // }
+
+    // mainGrid.resetData(test);
+    
     mainGrid.resetData(result.data.ROWS);
     mainGrid.resetOriginData()
     mainGrid.restore();
@@ -326,6 +342,30 @@ class USER extends Component {
                         rowHeight={30}
                         rowHeaders= {[{ type: 'rowNum', width: 40 }]}
                         columns={[
+                          columnCombobox({
+                            name: 'COP_CD', 
+                            header: '회사코드',
+                            value   : 'COMM_DTL_CD',
+                            display : 'COMM_DTL_NAM',
+                            width   : 150, 
+                            fontSize: '18',
+                            readOnly: false,
+                            oracleData : getDynamicSql_Oracle(
+                              'COMM/COMM',
+                              'ZM_IMS_CODE_SELECT',
+                              [{COMM_CD: '6'}]),
+                            editor: {
+                              value   : 'COMM_DTL_CD',
+                              display : 'COMM_DTL_NAM'
+                            },
+                            onRender: (value, control, rows) => {
+                              if(rows.phantom){
+                                control.isDisabled = false;
+                              }else{
+                                control.isDisabled = true;
+                              }
+                            }
+                          }),
                           columnInput({
                             name: 'IMS_ID',
                             header: '사용자ID',

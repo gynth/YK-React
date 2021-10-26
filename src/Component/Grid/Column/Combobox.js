@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
 
 import { gfc_sleep } from '../../../Method/Comm';
+import { gfg_getRow } from '../../../Method/Grid';
 
 /**
  * name : 컬럼명
@@ -57,7 +58,7 @@ export const Combobox = (props) => {
   const fontSize  = props.fontSize !== undefined ? props.fontSize : '13';
   const align     = props.align !== undefined ? props.align : 'center';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
-  const resizable = props.resizable !== undefined ? props.resizable : false;
+  const resizable = props.resizable !== undefined ? props.resizable : true;
   const data      = props.data !== undefined ? props.data : undefined;
   const etcData   = props.etcData !== undefined ? props.etcData : undefined;
   const editor    = props.editor;
@@ -261,7 +262,10 @@ class ComboEditor {
         // const onRender = option.onRender;
         // const rows = gfg_getRow(props.grid, props.rowKey);
         // onRender(props.value, combo.ref.current, rows);
-        combo.ref.current.select.isDisabled = true;
+        // this.ref.current.select.isDisabled = true;
+        const onRender = option.onRender;
+        const rows = gfg_getRow(props.grid, props.rowKey);
+        onRender(props.value, this.ref.current.select, rows);
       }
 
       const input = combo._self.el.getElementsByTagName('input');

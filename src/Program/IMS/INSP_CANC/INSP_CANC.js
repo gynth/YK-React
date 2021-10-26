@@ -432,7 +432,7 @@ class INSP_CANC extends Component {
                             const grid = gfg_getGrid(this.props.pgm, 'main10');
                             if(grid.gridEl.dataset.checked === undefined){
                               grid.gridEl.dataset.checked = 'Y';
-                            }else if(grid.gridEl.dataset.checked === 'true'){
+                            }else if(grid.gridEl.dataset.checked === 'Y'){
                               grid.gridEl.dataset.checked = 'N';
                             }else{
                               grid.gridEl.dataset.checked = 'Y';

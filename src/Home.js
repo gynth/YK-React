@@ -15,7 +15,7 @@ import LoadingOverlay from 'react-loading-overlay';
 
 let isSession = false;
 
-const defaultData = async(user_id) => {
+const defaultData = async(user_id, areaTp) => {
 
   const userReducer = (nowState, action) => {
     if(action.reducer !== 'USER_REDUCER') {
@@ -88,7 +88,7 @@ const defaultData = async(user_id) => {
     NUM_FORMAT: '0,0',
     NUM_ROUND : '2R',
     ERP_ID    : data[0].ERP_ID,
-    AREA_TP   : data[0].AREA_TP,
+    AREA_TP   : (areaTp === '' || areaTp === null || areaTp === 'null') ? data[0].AREA_TP : areaTp,
     AUTH      : {},
     CAMERA_NO : data[0].CAMERA_NO
   });
@@ -106,7 +106,7 @@ const defaultData = async(user_id) => {
     AUTH      : data2
   });
 
-  defaultOpen();
+  // defaultOpen(); //김경현
 }
 
 const onActiveWindow = (e) => {
@@ -212,7 +212,7 @@ const defaultOpen = async() => {
 
 const Home = (props) => {  
   const user_id = getSessionCookie('login');
-
+  const areaTp = getSessionCookie('areaTp');
 
   // const session = getSessionCookie('session');
   // if (session === 'SUCCESS')
@@ -263,7 +263,7 @@ const Home = (props) => {
     gfs_WINDOWFRAME_REDUCER();
     //#endregion
 
-    defaultData(user_id);
+    defaultData(user_id, areaTp);
 
 
     // return() => {

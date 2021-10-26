@@ -67,8 +67,8 @@ var options = {
     stopNodes: ["parse-me-as-string"] 
   };
 
-let dt = new Date();
 setInterval(e => {
+  let dt = new Date();
   const date = moment(dt).format('YYYYMMDDHHmm');
   const time = date.substr(8, 4);
 
@@ -79,6 +79,7 @@ setInterval(e => {
   `base_date=${date.substring(0, 8)}&` +
   `base_time=${time}&` +
   `nx=96&ny=73`;
+
   const option = {
     url   : host,
     method: 'GET',
@@ -97,13 +98,21 @@ setInterval(e => {
       if( parser.validate(xml) === true) { 
         var jsonObj = parser.parse(xml,options); 
         const rain = jsonObj.response.body.items.item.filter(e => e.category === 'RN1');
-        global.RAIN = rain[0].obsrValue;
+        if(global.RAIN > 0){
+          global.RAIN = rain[0].obsrValue;
+        }else{
+          global.RAIN = 0;
+        }
+      }else{
+        global.RAIN = 0;
       }
     })
     .catch(err => {
+      console.log('Raint Error')
       // console.log(err)
+      // global.RAIN = 0;
     })
-}, 10000)
+}, 60000 * 20)
 
 router.post('/Rain', (req, res) => {
     res.json(global.RAIN)

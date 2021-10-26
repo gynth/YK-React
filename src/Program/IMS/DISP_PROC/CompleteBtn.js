@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { gfs_getStoreValue, gfs_dispatch } from '../../../Method/Store';
 import { gfc_showMask, gfc_hideMask, gfc_screenshot_srv_YK, gfc_ftp_file_yn_YK, gfc_sleep, gfc_screenshot_del_yk } from '../../../Method/Comm';
-import { gfo_getCombo, gfo_getCheckbox } from '../../../Method/Component';
+import { gfo_getCombo, gfo_getCheckbox, gfo_getInput } from '../../../Method/Component';
 
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
@@ -143,6 +143,7 @@ const CompleteBtn = (props) => {
     }
 
     const detail_warning = gfo_getCheckbox(props.pgm, 'detail_warning'); //경고
+    const detail_rain = gfo_getInput(props.pgm, 'detail_rain');
     
     //#endregion
     
@@ -256,7 +257,7 @@ const CompleteBtn = (props) => {
         p_discount_rate   : (detail_depr2.getValue() === null || detail_depr2.getValue() === undefined) ? '' : detail_depr2.getValue(),
         p_cartype         : detail_car.getValue(),
         p_warning         : detail_warning.getValue() === true ? 'Y' : 'N',
-        p_rain            : '0',
+        p_rain            : (detail_rain.getValue() === null || detail_rain.getValue() === undefined) ? 0 : detail_rain.getValue(),
       },
       errSeq: 0
     })
