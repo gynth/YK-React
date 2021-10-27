@@ -19,8 +19,10 @@ import Combobox from '../../../Component/Control/Combobox';
 // import Botspan from '../Common/Botspan';
 
 import { getDynamicSql_OracleTran } from '../../../db/Oracle/Oracle';
+import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 //#endregion
 
+let retData = [];
 class COMM extends Component {
   constructor(props){
     super(props)
@@ -49,7 +51,9 @@ class COMM extends Component {
   }
 
   componentDidMount(){
-    
+    setTimeout(() => {
+      this.Retrieve();
+    }, 500);
   }
 
   callOracle = async(grid, rowStatus, file, fn, param, seq) => {
@@ -287,46 +291,75 @@ class COMM extends Component {
 
   Retrieve = async () => {
 
-    gfc_showMask();
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
     const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
     mainGrid.clear();
     dtlGrid.clear();
 
-    gfs_dispatch('COMM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
 
-    let reqGrid     = ['main10'];
-    let reqRowStaus = ['R'];
-    let reqFile     = ['COMM/COMM'];
-    let reqFn       = ['ZM_IMS_CODE_SELECT_MAIN10'];
-    let reqParam    = [{COMM_DTL_CD: '*'}];
-    let reqSeq      = [];
-
-    let result = await this.callOracle(
-      reqGrid,
-      reqRowStaus,
-      reqFile,
-      reqFn,
-      reqParam,
-      reqSeq
-    ); 
-
-    if(result.data.result !== true){
-      alert(gfc_getAtt(result.data.message));
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      let main = retData.filter(e => {
+        //코드
+        if(search_tp === '1'){
+          if(e.COMM_CD.toString().indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //코드명
+        else if(search_tp === '2'){
+          if(e.COMM_NAM.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+      })
+      mainGrid.resetData(main);
+      mainGrid.resetOriginData()
+      mainGrid.restore();
+    }else{
+      gfc_showMask();
+  
+      gfs_dispatch('COMM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+  
+      let reqGrid     = ['main10'];
+      let reqRowStaus = ['R'];
+      let reqFile     = ['COMM/COMM'];
+      let reqFn       = ['ZM_IMS_CODE_SELECT_MAIN10'];
+      let reqParam    = [{COMM_DTL_CD: '*'}];
+      let reqSeq      = [];
+  
+      let result = await this.callOracle(
+        reqGrid,
+        reqRowStaus,
+        reqFile,
+        reqFn,
+        reqParam,
+        reqSeq
+      ); 
+  
+      if(result.data.result !== true){
+        alert(gfc_getAtt(result.data.message));
+        gfc_hideMask();
+  
+        return;
+      }
+      
+      let data = gfc_oracleRetrieve(result);
+      
+      mainGrid.resetData(data);
+      mainGrid.resetOriginData()
+      mainGrid.restore();
+  
+      gfg_setSelectRow(mainGrid);
+      retData = mainGrid.getData();
+  
       gfc_hideMask();
-
-      return;
     }
-    
-    let data = gfc_oracleRetrieve(result);
-    
-    mainGrid.resetData(data);
-    mainGrid.resetOriginData()
-    mainGrid.restore();
-
-    gfg_setSelectRow(mainGrid);
-
-    gfc_hideMask();
   }
 
 
@@ -384,20 +417,17 @@ class COMM extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '카메라IP'
+                              CODE: '1',
+                              NAME: '코드'
                             },{
-                              code: '2',
-                              name: 'RTSP주소'
-                            },{
-                              code: '3',
-                              name: 'RTSP포트'
+                              CODE: '2',
+                              NAME: '코드명'
                             }]}
                   />
                 </div>
@@ -408,7 +438,9 @@ class COMM extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       readOnly
+                       onChange    = {(e) => {
+                         this.Retrieve()
+                       }}
                       //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                 />
               </div>

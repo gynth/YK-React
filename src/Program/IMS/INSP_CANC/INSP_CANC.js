@@ -2,12 +2,11 @@
 import React, { Component } from 'react';
 
 import Input from '../../../Component/Control/Input';
-import Checkbox from '../../../Component/Control/Checkbox';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_yk_call_sp } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch, gfs_subscribe } from '../../../Method/Store';
-import { gfo_getCombo, gfo_getInput, gfo_getCheckbox } from '../../../Method/Component';
-import { gfg_getGrid, gfg_setSelectRow, gfg_setValue, gfg_appendRow } from '../../../Method/Grid';
+import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
+import { gfg_getGrid, gfg_setValue } from '../../../Method/Grid';
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 
 import Grid from '../../../Component/Grid/Grid';
@@ -22,11 +21,10 @@ import Combobox from '../../../Component/Control/Combobox';
 import Detailspan from '../Common/Detailspan';
 import Botspan from '../Common/Botspan';
 import Chit from './Chit';
-import TabList from './TabList';
-import RecImage from './RecImage';
 import CompleteBtn from './CompleteBtn';
 //#endregion
 
+let retData = [];
 class INSP_CANC extends Component {
 
   state = {
@@ -278,77 +276,121 @@ class INSP_CANC extends Component {
 
   Retrieve = async () => {
 
-    gfc_showMask();
 
-    const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_CANCEL');
-    
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     grid.clear();
 
-    gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(''); //사전등급
-    gfo_getInput(this.props.pgm, 'iron_grade').setValue('');   //고철등급
-    gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue('');   //상세고철등급
-    gfo_getInput(this.props.pgm, 'reduce_wgt').setValue('');     //감량중량
-    gfo_getInput(this.props.pgm, 'reduce_name').setValue(''); //감량사유
-    gfo_getCombo(this.props.pgm, 'return_code').setValue('');      //반품구분
-    gfo_getInput(this.props.pgm, 'return_gubun_name').setValue('');     //반품구분사유
-    gfo_getCombo(this.props.pgm, 'return_reason').setValue('');      //취소사유
-    gfo_getInput(this.props.pgm, 'return_reason_desc').setValue('');     //취소사유
-
-    gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-    gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-    gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
-    gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-
-    gfs_dispatch('INSP_CANC_MAIN', 'GRID_SCALE', {GRID_SCALE: ''});
-
-    //계량증명서 여부 확인.
-    gfs_dispatch('INSP_CANC_MAIN', 'CHIT_INFO', {
-      scaleNumb: ''
-    });
-
-    if(mainData.data.SUCCESS === 'Y'){
-      const main = mainData.data.ROWS;
-      if(main){
-        const dataMod = [];
-        main.forEach(e => {
-          dataMod.push({
-            scaleNumb: e['DELIVERY_ID'],
-            vehicle_no: e['VEHICLE_NO'],
-            pre_item_grade: e['PRE_ITEM_GRADE'],
-            iron_grade: e['IRON_GRADE'],
-            iron_grade_item_name: e['IRON_GRADE_ITEM_NAME'],
-            reduce_name	: e['REDUCE_NAME'],
-            reduce_wgt: e['REDUCE_WGT'],
-            return_gubun: e['RETURN_GUBUN'],
-            return_gubun_name: e['RETURN_GUBUN_NAME'],
-            inspector: e['INSPECTOR'],
-            delivery_date: e['DELIVERY_DATE'],
-            vendor_name: e['VENDOR_NAME'],
-            inspect_time: e['INSPECT_TIME']
-          })
-        })
-
-        grid.resetData(dataMod);
-        gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
-        
-        await gfc_sleep(100);
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      let main = retData.filter(e => {
+        //계근번호
+        if(search_tp === '1'){
+          if(e.scaleNumb.toString().indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //차량번호
+        else if(search_tp === '2'){
+          if(e.vehicle_no.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //사전등급
+        else if(search_tp === '3'){
+          if(e.pre_item_grade.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //업체
+        else if(search_tp === '4'){
+          if(e.vendor_name.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+      })
+      grid.resetData(main);
+      grid.resetOriginData()
+      grid.restore();
+    }else{
+      gfc_showMask();
+      const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_CANCEL');
+      
+      gfo_getInput(this.props.pgm, 'pre_item_grade').setValue(''); //사전등급
+      gfo_getInput(this.props.pgm, 'iron_grade').setValue('');   //고철등급
+      gfo_getInput(this.props.pgm, 'iron_grade_item_name').setValue('');   //상세고철등급
+      gfo_getInput(this.props.pgm, 'reduce_wgt').setValue('');     //감량중량
+      gfo_getInput(this.props.pgm, 'reduce_name').setValue(''); //감량사유
+      gfo_getCombo(this.props.pgm, 'return_code').setValue('');      //반품구분
+      gfo_getInput(this.props.pgm, 'return_gubun_name').setValue('');     //반품구분사유
+      gfo_getCombo(this.props.pgm, 'return_reason').setValue('');      //취소사유
+      gfo_getInput(this.props.pgm, 'return_reason_desc').setValue('');     //취소사유
   
-        gfg_setSelectRow(grid);
+      gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+      gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+      gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: ''});
+      gfs_dispatch('INSP_CANC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+  
+      gfs_dispatch('INSP_CANC_MAIN', 'GRID_SCALE', {GRID_SCALE: ''});
+  
+      //계량증명서 여부 확인.
+      gfs_dispatch('INSP_CANC_MAIN', 'CHIT_INFO', {
+        scaleNumb: ''
+      });
+  
+      if(mainData.data.SUCCESS === 'Y'){
+        const main = mainData.data.ROWS;
+        if(main){
+          const dataMod = [];
+          main.forEach(e => {
+            dataMod.push({
+              scaleNumb: e['DELIVERY_ID'],
+              vehicle_no: e['VEHICLE_NO'],
+              pre_item_grade: e['PRE_ITEM_GRADE'],
+              iron_grade: e['IRON_GRADE'],
+              iron_grade_item_name: e['IRON_GRADE_ITEM_NAME'],
+              reduce_name	: e['REDUCE_NAME'],
+              reduce_wgt: e['REDUCE_WGT'],
+              return_gubun: e['RETURN_GUBUN'],
+              return_gubun_name: e['RETURN_GUBUN_NAME'],
+              inspector: e['INSPECTOR'],
+              delivery_date: e['DELIVERY_DATE'],
+              vendor_name: e['VENDOR_NAME'],
+              inspect_time: e['INSPECT_TIME']
+            })
+          })
+  
+          grid.resetData(dataMod);
+          gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+          
+          // await gfc_sleep(100);
+    
+          // gfg_setSelectRow(grid);
+        }else{
+          gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        }
+  
+        retData = grid.getData();
       }else{
         gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
       }
-    }else{
-      gfs_dispatch('INSP_CANC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+
+      gfc_hideMask();
     }
-
-
-    gfc_hideMask();
   }
 
   componentDidMount(){
-
-    this.Retrieve();
+    setTimeout(() => {
+      this.Retrieve();
+    }, 500);
   }
 
   onSelectChange = async (e) => {
@@ -414,7 +456,9 @@ class INSP_CANC extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       readOnly
+                       onChange    = {(e) => {
+                         this.Retrieve()
+                       }}
                       //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                 />
               </div>

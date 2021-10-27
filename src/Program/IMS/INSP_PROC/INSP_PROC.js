@@ -39,6 +39,7 @@ import { setSessionCookie } from '../../../Cookies';
 import { getDynamicSql_Mysql } from '../../../db/Mysql/Mysql';
 //#endregion
 
+let retData = [];
 class INSP_PROC extends Component {
 
   state = {
@@ -943,6 +944,9 @@ class INSP_PROC extends Component {
   mainGrid = async() => {
     try{
       const grid = gfg_getGrid(this.props.pgm, 'main10');
+      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+
       // await grid.restore();
   
       // //김경현
@@ -957,124 +961,121 @@ class INSP_PROC extends Component {
       //   if(grid.getData().length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
       //     gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: grid.getData().length});
   
-  
-  
-  
-      const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT');
-      if(select.data.SUCCESS === 'Y'){
-        const main = select.data.ROWS;
-          
-        if(main.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
-          gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: main.length});
-  
-        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-    
-        const dataMod = [];
-        main.forEach(e => {
-          dataMod.push({
-            scaleNumb: e['DELIVERY_ID'].toString(),
-            carNumb: e['VEHICLE_NO'],
-            itemGrade: e['ITEM_GRADE'],
-            date: e['CREATION_DATE'],
-            vendor: e['VENDOR_NAME'],
-            warning: e['WARNING'],
-            carType: e['CAR_TYPE']
-          })
+      if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+        let main = retData.filter(e => {
+          //계근번호
+          if(search_tp === '1'){
+            if(e.scaleNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //차량번호
+          else if(search_tp === '2'){
+            if(e.carNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //사전등급
+          else if(search_tp === '3'){
+            if(e.itemGrade.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //업체
+          else if(search_tp === '4'){
+            if(e.vendor.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
         })
-  
-        let data = dataMod.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
+        grid.resetData(main);
+        grid.resetOriginData()
+        grid.restore();
+      }else{
+        const select = await gfc_yk_call_sp('SP_ZM_MSTR_WAIT');
+        if(select.data.SUCCESS === 'Y'){
+          let main = select.data.ROWS;
+      
+          const dataMod = [];
+          main.forEach(e => {
+            dataMod.push({
+              scaleNumb: e['DELIVERY_ID'].toString(),
+              carNumb: e['VEHICLE_NO'],
+              itemGrade: e['ITEM_GRADE'],
+              date: e['CREATION_DATE'],
+              vendor: e['VENDOR_NAME'],
+              warning: e['WARNING'],
+              carType: e['CAR_TYPE'],
+              scrpOrdNo: e['SCRP_ORD_NO']
+            })
+          })
+
+          if(dataMod.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'PROC_WAIT'))
+            gfs_dispatch('INSP_PROC_MAIN', 'PROC_WAIT', {PROC_WAIT: dataMod.length});
+    
+          if(dataMod.length > 0){
+            
+            //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
+            for(let i = 0; i < dataMod.length; i++){
+              const scaleNumb = dataMod[i].scaleNumb;
+    
+              const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
+              if(!oldData){
+                gfg_appendRow(grid, grid.getRowCount(), {
+                  scaleNumb,
+                  carNumb: dataMod[i].carNumb,
+                  itemGrade: dataMod[i].itemGrade,
+                  date: dataMod[i].date,
+                  vendor: dataMod[i].vendor,
+                  carType: dataMod[i].carType,
+                  scrpOrdNo: dataMod[i].scrpOrdNo,
+                  rec: '0'
+                }, 'scaleNumb', false);
               }
             }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
+    
+            //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
+            for(let i = 0; i < grid.getData().length; i++){
+              const scaleNumb =  grid.getData()[i].scaleNumb;
+    
+              const newData = dataMod.find(e => e.scaleNumb === scaleNumb)
+              if(!newData){
+                grid.removeRow(i);
+    
+                //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
+                const selectScaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
+                if(scaleNumb === selectScaleNumb){
+                  gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+                  gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+                  gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
+                  gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+                }
               }
             }
             
-          }else{
-            return true;
+            grid.resetOriginData();
+            grid.restore();
+      
+            if(dataMod.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
+              gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: dataMod.length});
+            
+            retData = grid.getData();
+            // await grid.resetOriginData();
+            // await grid.refreshLayout();
           }
-        })
-  
-        if(data.length > 0){
-          
-          //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
-          for(let i = 0; i < data.length; i++){
-            const scaleNumb = data[i].scaleNumb;
-  
-            const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
-            if(!oldData){
-              gfg_appendRow(grid, grid.getRowCount(), {
-                scaleNumb,
-                carNumb: data[i].carNumb,
-                itemGrade: data[i].itemGrade,
-                date: data[i].date,
-                vendor: data[i].vendor,
-                carType: data[i].carType,
-                rec: '0'
-              }, 'scaleNumb', false);
-            }
-          }
-  
-          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
-          for(let i = 0; i < grid.getData().length; i++){
-            const scaleNumb =  grid.getData()[i].scaleNumb;
-  
-            const newData = data.find(e => e.scaleNumb === scaleNumb)
-            if(!newData){
-              grid.removeRow(i);
-  
-              //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
-              const selectScaleNumb = gfs_getStoreValue('INSP_PROC_MAIN', 'DETAIL_SCALE');
-              if(scaleNumb === selectScaleNumb){
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
-                gfs_dispatch('INSP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-              }
-            }
-          }
-          
-          grid.resetOriginData();
-          grid.restore();
-    
-          if(data.length !== gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL'))
-            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-          
-          // await grid.resetOriginData();
-          // await grid.refreshLayout();
+        }else{
+          grid.clear();
+          if(gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL') !== 0)
+            gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
         }
-      }else{
-        grid.clear();
-        if(gfs_getStoreValue('INSP_PROC_MAIN', 'BOT_TOTAL') !== 0)
-          gfs_dispatch('INSP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
       }
   
       await this.mainHeader();
@@ -1118,7 +1119,7 @@ class INSP_PROC extends Component {
 
     this.mainGridInterval = setInterval(e => {
       this.mainGrid();
-    }, 20000)
+    }, 5000)
 
     this.recInterval = setInterval(e => {
       this.rec();
@@ -1275,7 +1276,7 @@ class INSP_PROC extends Component {
 
     //배차정보
     const dispInfo = await gfc_yk_call_sp('SP_ZM_PROCESS_F3', {
-      P_SCALENUMB: e.scaleNumb
+      P_SCALENUMB: e.scrpOrdNo
     });
 
     if(dispInfo.data.SUCCESS === 'Y'){
@@ -1336,23 +1337,23 @@ class INSP_PROC extends Component {
                     <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                       <Combobox pgm     = {this.props.pgm}
                                 id      = 'search_tp'
-                                value   = 'code'
-                                display = 'name'
+                                value   = 'CODE'
+                                display = 'NAME'
                                 width   = {124}
                                 height  = {42}
                                 emptyRow
                                 data    = {[{
-                                  code: '1',
-                                  name: '계근번호'
+                                  CODE: '1',
+                                  NAME: '계근번호'
                                 },{
-                                  code: '2',
-                                  name: '차량번호'
+                                  CODE: '2',
+                                  NAME: '차량번호'
                                 },{
-                                  code: '3',
-                                  name: '사전등급'
+                                  CODE: '3',
+                                  NAME: '사전등급'
                                 },{
-                                  code: '4',
-                                  name: '업체'
+                                  CODE: '4',
+                                  NAME: '업체'
                                 }]}
                       />
                     </div>
@@ -1363,10 +1364,14 @@ class INSP_PROC extends Component {
                           paddingLeft = '14'
                           width       = '100%'
                           type        = 'textarea'
-                          onKeyDown   = {(e) => {
-                            if(e.keyCode === 13){
+                          // onKeyDown   = {(e) => {
+                          //   if(e.keyCode === 13){
+                          //     this.Retrieve()
+                          //   }
+                          // }}
+                          onChange    = {(e) => {
+                            if(e.target.value.length > 0)
                               this.Retrieve()
-                            }
                           }}
                           //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                             />

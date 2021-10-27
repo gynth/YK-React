@@ -25,6 +25,7 @@ import TabList from './TabList';
 import RecImage from '../Common/RecImage';
 //#endregion
 
+let retData = [];
 class DISP_PROC extends Component {
 
   state = {
@@ -266,130 +267,134 @@ class DISP_PROC extends Component {
   mainGrid = async() => {
 
     try{
-      const select = await gfc_yk_call_sp('SP_ZM_MSTR_PASS');
       const grid = gfg_getGrid(this.props.pgm, 'main10');
+      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
       
-      if(select.data.SUCCESS === 'Y'){
-        const main = select.data.ROWS;
-  
-        const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-        const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-        
-        const dataMod = [];
-        main.forEach(e => {
-          dataMod.push({
-            scaleNumb: e['DELIVERY_ID'].toString(),
-            carNumb: e['VEHICLE_NO'],
-            preItemGrade: e['PRE_ITEM_GRADE'],
-            itemGrade: e['ITEM_GRADE'],
-            date: e['CREATION_DATE'],
-            lastDate: e['LASTDATE'],
-            vendor: e['VENDOR_NAME']
-          })
+
+      if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+        let main = retData.filter(e => {
+          //계근번호
+          if(search_tp === '1'){
+            if(e.scaleNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //차량번호
+          else if(search_tp === '2'){
+            if(e.carNumb.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //사전등급
+          else if(search_tp === '3'){
+            if(e.preItemGrade.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
+          //업체
+          else if(search_tp === '4'){
+            if(e.vendor.indexOf(search_txt) >= 0){
+              return true;
+            }else{
+              return false;
+            }
+          }
         })
-  
-        const data = dataMod.filter(e => {
-          if(search_tp !== null && search_tp !== ''){
-            //계근번호
-            if(search_tp === '1'){
-              if(e.scaleNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
+        grid.resetData(main);
+        grid.resetOriginData()
+        grid.restore();
+      }else{
+        const select = await gfc_yk_call_sp('SP_ZM_MSTR_PASS');
+        if(select.data.SUCCESS === 'Y'){
+          const main = select.data.ROWS;
+    
+          
+          const dataMod = [];
+          main.forEach(e => {
+            dataMod.push({
+              scaleNumb: e['DELIVERY_ID'].toString(),
+              carNumb: e['VEHICLE_NO'],
+              preItemGrade: e['PRE_ITEM_GRADE'],
+              itemGrade: e['ITEM_GRADE'],
+              date: e['CREATION_DATE'],
+              lastDate: e['LASTDATE'],
+              vendor: e['VENDOR_NAME']
+            })
+          })
+      
+          if(dataMod.length > 0){
+            
+            //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
+            for(let i = 0; i < dataMod.length; i++){
+              const scaleNumb = dataMod[i].scaleNumb;
+    
+              const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
+              if(!oldData){
+                gfg_appendRow(grid, grid.getRowCount(), {
+                  scaleNumb,
+                  carNumb: dataMod[i].carNumb,
+                  preItemGrade: dataMod[i].preItemGrade,
+                  itemGrade: dataMod[i].itemGrade,
+                  date: dataMod[i].date,
+                  lastDate: dataMod[i].lastDate,
+                  vendor: dataMod[i].vendor
+                }, 'scaleNumb', false);
               }
             }
-            //차량번호
-            else if(search_tp === '2'){
-              if(e.carNumb.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
+    
+            //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
+            for(let i = 0; i < grid.getData().length; i++){
+              const scaleNumb =  grid.getData()[i].scaleNumb;
+    
+              const newData = dataMod.find(e => e.scaleNumb === scaleNumb)
+              if(!newData){
+                grid.removeRow(i);
+    
+                //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
+                const selectScaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
+                if(scaleNumb === selectScaleNumb){
+                  gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
+                  gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
+                  gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
+                  gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
+                }
               }
             }
-            //사전등급
-            else if(search_tp === '3'){
-              if(e.itemGrade.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
-              }
-            }
-            //업체
-            else if(search_tp === '4'){
-              if(e.vendor.indexOf(search_txt) >= 0){
-                return true;
-              }else{
-                return false;
+    
+            retData = grid.getData();
+            grid.resetOriginData();
+            grid.restore();
+    
+            const scaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
+            if(scaleNumb !== ''){
+              const row = grid.getData().find(e => e.scaleNumb === scaleNumb);
+              if(row){
+                gfg_setSelectRow(grid, 'scaleNumb', row.rowKey, true);
               }
             }
             
+            if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== dataMod.length)
+              gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: dataMod.length});
           }else{
-            return true;
+            grid.clear();
+            if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
+              gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
           }
-        })
-    
-        if(data.length > 0){
-          
-          //기존 그리드에서 scaleNumb기준으로 데이터가 없으면 추가한다.
-          for(let i = 0; i < data.length; i++){
-            const scaleNumb = data[i].scaleNumb;
-  
-            const oldData = grid.getData().find(e => e.scaleNumb === scaleNumb);
-            if(!oldData){
-              gfg_appendRow(grid, grid.getRowCount(), {
-                scaleNumb,
-                carNumb: data[i].carNumb,
-                preItemGrade: data[i].preItemGrade,
-                itemGrade: data[i].itemGrade,
-                date: data[i].date,
-                lastDate: data[i].lastDate,
-                vendor: data[i].vendor
-              }, 'scaleNumb', false);
-            }
-          }
-  
-          //새로운 정보 기준으로 데이터가 지워졌으면 삭제한다.
-          for(let i = 0; i < grid.getData().length; i++){
-            const scaleNumb =  grid.getData()[i].scaleNumb;
-  
-            const newData = data.find(e => e.scaleNumb === scaleNumb)
-            if(!newData){
-              grid.removeRow(i);
-  
-              //지워진 데이터가 기존에 선택된 데이터 이면 초기화 한다.
-              const selectScaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
-              if(scaleNumb === selectScaleNumb){
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_SCALE', {DETAIL_SCALE: ''});
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_CARNO', {DETAIL_CARNO: ''});
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_WEIGHT', {DETAIL_WEIGHT: '0'});
-                gfs_dispatch('DISP_PROC_MAIN', 'DETAIL_DATE', {DETAIL_DATE: ''});
-              }
-            }
-          }
-  
-          grid.resetOriginData();
-          grid.restore();
-  
-          const scaleNumb = gfs_getStoreValue('DISP_PROC_MAIN', 'DETAIL_SCALE');
-          if(scaleNumb !== ''){
-            const row = grid.getData().find(e => e.scaleNumb === scaleNumb);
-            if(row){
-              gfg_setSelectRow(grid, 'scaleNumb', row.rowKey, true);
-            }
-          }
-          
-          if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== data.length)
-            gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
         }else{
           grid.clear();
           if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
             gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
         }
-      }else{
-        grid.clear();
-        if(gfs_getStoreValue('DISP_PROC_MAIN', 'BOT_TOTAL') !== 0)
-          gfs_dispatch('DISP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
       }
+
+      
     }catch(e){
 
     }
@@ -398,7 +403,7 @@ class DISP_PROC extends Component {
   componentDidMount(){
     this.mainGridInterval = setInterval(e => {
       this.mainGrid();
-    }, 20000)
+    }, 5000)
 
     this.Retrieve();
   }
@@ -574,23 +579,23 @@ class DISP_PROC extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '계근번호'
+                              CODE: '1',
+                              NAME: '계근번호'
                             },{
-                              code: '2',
-                              name: '차량번호'
+                              CODE: '2',
+                              NAME: '차량번호'
                             },{
-                              code: '3',
-                              name: '사전등급'
+                              CODE: '3',
+                              NAME: '사전등급'
                             },{
-                              code: '4',
-                              name: '업체'
+                              CODE: '4',
+                              NAME: '업체'
                             }]}
                   />
                 </div>
@@ -601,10 +606,14 @@ class DISP_PROC extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       onKeyDown   = {(e) => {
-                        if(e.keyCode === 13){
-                          this.Retrieve()
-                        }
+                       // onKeyDown   = {(e) => {
+                       //   if(e.keyCode === 13){
+                       //     this.Retrieve()
+                       //   }
+                       // }}
+                       onChange    = {(e) => {
+                         if(e.target.value.length > 0)
+                           this.Retrieve()
                        }}
                 />
               </div>

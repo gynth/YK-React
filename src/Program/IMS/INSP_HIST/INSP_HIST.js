@@ -483,7 +483,17 @@ class INSP_HIST extends Component {
                             width : 40,
                             readOnly: true,
                             align : 'center',
-                            fontSize: '12'
+                            fontSize: '12',
+                            onBackGround: (value, control) => {
+                              if(value === 'Y'){
+                                control.style.backgroundColor = 'yellow';
+                              }
+                              // if(rows.phantom){
+                              //   control.isDisabled = false;
+                              // }else{
+                              //   control.isDisabled = true;
+                              // }
+                            }
                           }),
                           columnInput({
                             name: 'rtn',

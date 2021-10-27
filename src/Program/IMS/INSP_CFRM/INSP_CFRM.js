@@ -27,6 +27,7 @@ import CompleteBtnModify from './CompleteBtnModify';
 
 //#endregion
 
+let retData = [];
 class INSP_CFRM extends Component {
 
   state = {
@@ -283,8 +284,11 @@ class INSP_CFRM extends Component {
     this.Retrieve();
   }
 
+  
   componentDidMount(){
-    this.Init();
+    setTimeout(() => {
+      this.Init();
+    }, 500);
   }
 
   Retrieve = async () => {
@@ -292,16 +296,9 @@ class INSP_CFRM extends Component {
     // gfc_showMask();
 
 
-    const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT', {
-      p_from_date : gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue(),
-      p_to_date : gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue()
-    });
 
-    // const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT', {
-    //   p_from_date : gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue(),
-    //   p_to_date : gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue()
-    // });
-
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.clear();
     
@@ -329,39 +326,84 @@ class INSP_CFRM extends Component {
       scaleNumb: ''
     });
 
-    if(mainData.data.SUCCESS === 'Y'){
-      const main = mainData.data.ROWS;
-
-      if(main){
-        const dataMod = [];
-        main.forEach(e => {
-          dataMod.push({
-            scaleNumb: e['DELIVERY_ID'],
-            vehicle_no: e['VEHICLE_NO'],
-            pre_item_grade: e['PRE_ITEM_GRADE'],
-            iron_grade: e['IRON_GRADE'],
-            iron_grade_item_name: e['IRON_GRADE_ITEM_NAME'],
-            reduce_name	: e['REDUCE_NAME'],
-            reduce_wgt: e['REDUCE_WGT'],
-            return_gubun_name: e['RETURN_GUBUN_NAME'],
-            inspector: e['INSPECTOR'],
-            delivery_date: e['DELIVERY_DATE'],
-            vendor_name: e['VENDOR_NAME'],
-            inspect_time: e['INSPECT_TIME']
-          })
-        })
-
-        grid.resetData(dataMod);
-        gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
-        
-        await gfc_sleep(100);
-  
-        gfg_setSelectRow(grid);
-      }else{
-        gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-      }
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      let main = retData.filter(e => {
+        //계근번호
+        if(search_tp === '1'){
+          if(e.scaleNumb.toString().indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //차량번호
+        else if(search_tp === '2'){
+          if(e.vehicle_no.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //사전등급
+        else if(search_tp === '3'){
+          if(e.pre_item_grade.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //업체
+        else if(search_tp === '4'){
+          if(e.vendor_name.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+      })
+      grid.resetData(main);
+      grid.resetOriginData()
+      grid.restore();
     }else{
-        gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      const mainData = await gfc_yk_call_sp('SP_ZM_APPROVE_WAIT', {
+        p_from_date : gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue(),
+        p_to_date : gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue()
+      });
+  
+      if(mainData.data.SUCCESS === 'Y'){
+        const main = mainData.data.ROWS;
+  
+        if(main){
+          const dataMod = [];
+          main.forEach(e => {
+            dataMod.push({
+              scaleNumb: e['DELIVERY_ID'],
+              vehicle_no: e['VEHICLE_NO'],
+              pre_item_grade: e['PRE_ITEM_GRADE'],
+              iron_grade: e['IRON_GRADE'],
+              iron_grade_item_name: e['IRON_GRADE_ITEM_NAME'],
+              reduce_name	: e['REDUCE_NAME'],
+              reduce_wgt: e['REDUCE_WGT'],
+              return_gubun_name: e['RETURN_GUBUN_NAME'],
+              inspector: e['INSPECTOR'],
+              delivery_date: e['DELIVERY_DATE'],
+              vendor_name: e['VENDOR_NAME'],
+              inspect_time: e['INSPECT_TIME']
+            })
+          })
+  
+          grid.resetData(dataMod);
+          gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+          
+          // gfg_setSelectRow(grid);
+          
+          retData = grid.getData();
+        }else{
+          gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        }
+      }else{
+          gfs_dispatch('INSP_CFRM_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+      }
     }
 
     // gfc_hideMask();
@@ -458,7 +500,9 @@ class INSP_CFRM extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       readOnly
+                       onChange    = {(e) => {
+                         this.Retrieve()
+                       }}
                       //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                 />
               </div>

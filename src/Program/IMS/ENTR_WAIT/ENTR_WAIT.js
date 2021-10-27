@@ -19,6 +19,7 @@ import Botspan from '../Common/Botspan';
 
 //#endregion
 
+let retData = [];
 class ENTR_WAIT extends Component {
   constructor(props){
     super(props)
@@ -46,10 +47,10 @@ class ENTR_WAIT extends Component {
     //#endregion
   }
 
-  
-
   componentDidMount(){
-    this.Retrieve();
+    setTimeout(() => {
+      this.Retrieve();
+    }, 500);
   }
 
   // componentWillUnmount(){
@@ -58,80 +59,73 @@ class ENTR_WAIT extends Component {
 
   Retrieve = async () => {
 
-    gfc_showMask();
     gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-
-    const mainData = await gfc_yk_call_sp(`SP_ZM_MSTR_DRIVE_WAIT`);
+    
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     grid.clear();
 
-    if(mainData.data.SUCCESS === 'Y'){
-      const main = mainData.data.ROWS;
-      
-      if(!main) {
-        gfc_hideMask();
-        return;
-      }
-
-      const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
-      const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
-  
-      const data = main.filter(e => {
-        if(search_tp !== null && search_tp !== ''){
-          //계근번호
-          if(search_tp === '1'){
-            if(e.scaleNumb.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      let main = retData.filter(e => {
+        //계근번호
+        if(search_tp === '1'){
+          if(e.SCRP_ORD_NO.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
           }
-          //차량번호
-          else if(search_tp === '2'){
-            if(e.carNumb.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
+        }
+        //공급사
+        else if(search_tp === '2'){
+          if(e.VENDOR.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
           }
-          //사전등급
-          else if(search_tp === '3'){
-            if(e.itemGrade.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
+        }
+        //차량번호
+        else if(search_tp === '3'){
+          if(e.VEHL_NO.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
           }
-          //업체
-          else if(search_tp === '4'){
-            if(e.vendor.indexOf(search_txt) >= 0){
-              return true;
-            }else{
-              return false;
-            }
-          }
-          
-        }else{
-          return true;
         }
       })
-  
-      if(data.length > 0){
-  
-        grid.resetData(data);
-        gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+      grid.resetData(main);
+      grid.resetOriginData()
+      grid.restore();
+    }else{
+      gfc_showMask();
+      const mainData = await gfc_yk_call_sp(`SP_ZM_MSTR_DRIVE_WAIT`);
+      if(mainData.data.SUCCESS === 'Y'){
+        const main = mainData.data.ROWS;
         
-        await gfc_sleep(100);
-  
-        gfg_setSelectRow(grid);
+        if(!main) {
+          gfc_hideMask();
+          return;
+        }
+    
+        if(main.length > 0){
+    
+          grid.resetData(main);
+          gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+          
+          await gfc_sleep(100);
+    
+          gfg_setSelectRow(grid);
+        }else{
+          gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        }
+        
+        retData = grid.getData();
+    
+        gfc_hideMask();
       }else{
         gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        gfc_hideMask();
       }
-  
-      gfc_hideMask();
-    }else{
-      gfs_dispatch('ENTR_WAIT_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-      gfc_hideMask();
     }
   }
 
@@ -146,23 +140,20 @@ class ENTR_WAIT extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '배차번호'
+                              CODE: '1',
+                              NAME: '배차번호'
                             },{
-                              code: '2',
-                              name: '차량번호'
+                              CODE: '2',
+                              NAME: '공급사'
                             },{
-                              code: '3',
-                              name: '사전등급'
-                            },{
-                              code: '4',
-                              name: '업체'
+                              CODE: '3',
+                              NAME: '차량번호'
                             }]}
                   />
                 </div>
@@ -173,10 +164,13 @@ class ENTR_WAIT extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       onKeyDown   = {(e) => {
-                        if(e.keyCode === 13){
-                          this.Retrieve()
-                        }
+                       // onKeyDown   = {(e) => {
+                       //   if(e.keyCode === 13){
+                       //     this.Retrieve()
+                       //   }
+                       // }}
+                       onChange    = {(e) => {
+                         this.Retrieve()
                        }}
                 />
               </div>

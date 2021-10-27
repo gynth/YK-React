@@ -1,11 +1,10 @@
 //#region import
 import React, { Component } from 'react';
-import lodash  from 'lodash';
 import Input from '../../../Component/Control/Input';
 import Checkbox from '../../../Component/Control/Checkbox';
 import DateTime from '../../../Component/Control/DateTime';
 
-import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_chit_yn_YK, gfc_sleep, gfc_now, gfc_oracleRetrieve, gfc_yk_call_sp } from '../../../Method/Comm';
+import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_now, gfc_yk_call_sp } from '../../../Method/Comm';
 import { gfs_getStoreValue, gfs_injectAsyncReducer, gfs_dispatch } from '../../../Method/Store';
 import { gfo_getCombo, gfo_getInput, gfo_getCheckbox, gfo_getDateTime } from '../../../Method/Component';
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
@@ -29,6 +28,7 @@ import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 //#endregion
 
+let retData = [];
 class DAILY_PROC extends Component {
 
   state = {
@@ -274,12 +274,13 @@ class DAILY_PROC extends Component {
   }
 
   componentDidMount(){
-    this.Init();
+    setTimeout(() => {
+      this.Init();
+    }, 500);
   }
   
   Retrieve = async () => {
 
-    gfc_showMask();
 
     gfo_getInput(this.props.pgm, 'detail_pre_grade').setValue(''); //사전등급
     gfo_getCombo(this.props.pgm, 'detail_grade1').setValue('');   //고철등급
@@ -304,49 +305,85 @@ class DAILY_PROC extends Component {
 
     const fr_dt = gfo_getDateTime(this.props.pgm, 'search_fr_dt').getValue();
     const to_dt = gfo_getDateTime(this.props.pgm, 'search_to_dt').getValue();
+
+    const grid = gfg_getGrid(this.props.pgm, 'main10');
     const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
     const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+    grid.clear();
 
     // console.log(fr_dt.replace('-', '').replace('-', ''), to_dt.replace('-', '').replace('-', ''), car_no)
 
-    getDynamicSql_Oracle(
-      'Common/Common',
-      'DAILY_PROC_MAIN',
-      [{
-        fr_dt: fr_dt.replace('-', '').replace('-', ''),
-        to_dt: to_dt.replace('-', '').replace('-', ''),
-        car_no: search_tp === '1' ? search_txt === '' ? '%' : search_txt : '%',
-        vendor: search_tp === '2' ? search_txt === '' ? '%' : search_txt : '%'
-      }]
-    ).then(e => {
-      let data = [];
-      let sum = 0;
-      for(let i = 0; i < e.data.rows.length; i++){
-  
-        let col = {};
-        for(let j = 0; j < e.data.rows[i].length; j++){
-          col[e.data.metaData[j].name] = e.data.rows[i][j];
-          if(e.data.metaData[j].name === 'NET_WEIGHT'){
-            sum += e.data.rows[i][j] * 1;
+    
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      let main = retData.filter(e => {
+        //계근번호
+        if(search_tp === '1'){
+          if(e.SCALENUMB.toString().indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
           }
         }
-        data.push(col);
-      }
-
-      const grid = gfg_getGrid(this.props.pgm, 'main10');
-      grid.clear();
-
-      gfc_hideMask();
-
-      if(data.length > 0){
-        grid.resetData(data);
-
-        gfs_dispatch('DAILY_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
-        gfs_dispatch('DAILY_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: sum})
-        
-        gfg_setSelectRow(grid);
-      }
-    })
+        //차량번호
+        else if(search_tp === '2'){
+          if(e.VEHICLE_NO.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //업체명
+        else if(search_tp === '3'){
+          if(e.VENDOR_NAME.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+      })
+      grid.resetData(main);
+      grid.resetOriginData()
+      grid.restore();
+    }else{
+      gfc_showMask();
+      getDynamicSql_Oracle(
+        'Common/Common',
+        'DAILY_PROC_MAIN',
+        [{
+          fr_dt: fr_dt.replace('-', '').replace('-', ''),
+          to_dt: to_dt.replace('-', '').replace('-', ''),
+          car_no: search_tp === '1' ? search_txt === '' ? '%' : search_txt : '%',
+          vendor: search_tp === '2' ? search_txt === '' ? '%' : search_txt : '%'
+        }]
+      ).then(e => {
+        let data = [];
+        let sum = 0;
+        for(let i = 0; i < e.data.rows.length; i++){
+    
+          let col = {};
+          for(let j = 0; j < e.data.rows[i].length; j++){
+            col[e.data.metaData[j].name] = e.data.rows[i][j];
+            if(e.data.metaData[j].name === 'NET_WEIGHT'){
+              sum += e.data.rows[i][j] * 1;
+            }
+          }
+          data.push(col);
+        }
+  
+        gfc_hideMask();
+  
+        if(data.length > 0){
+          grid.resetData(data);
+  
+          gfs_dispatch('DAILY_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+          gfs_dispatch('DAILY_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: sum})
+          
+          gfg_setSelectRow(grid);
+        }
+  
+        retData = grid.getData();
+      })
+    }
   }
 
 
@@ -417,9 +454,12 @@ class DAILY_PROC extends Component {
                             emptyRow
                             data    = {[{
                               CODE: '1',
-                              NAME: '차량번호'
+                              NAME: '계근번호'
                             },{
                               CODE: '2',
+                              NAME: '차량번호'
+                            },{
+                              CODE: '3',
                               NAME: '업체명'
                             }]}
                   />
@@ -431,10 +471,8 @@ class DAILY_PROC extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       onKeyDown   = {(e) => {
-                        if(e.keyCode === 13){
-                          this.Retrieve()
-                        }
+                       onChange    = {(e) => {
+                         this.Retrieve()
                        }}
                 />
               </div>

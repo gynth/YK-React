@@ -12,6 +12,8 @@ import { gfg_getRow } from '../../../Method/Grid';
  * 
  * onRender: {(value, el, rows)}
  * 
+ * onBackGround: {(value, el)}
+ * 
  * readOnly(true): 리드온리
  * 
  * align(center | left(기본) | right) : 좌우정렬
@@ -73,6 +75,7 @@ export const Input = (props) => {
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
+      onBackGround: props.onBackGround,
       readOnly,
       color,
       fontSize
@@ -86,6 +89,7 @@ export const Input = (props) => {
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
+      onBackGround: props.onBackGround,
       readOnly,
       color,
       fontSize
@@ -172,7 +176,9 @@ class InputRenderer {
 
     let backGround = 'white';
     if(!password){
-      if(String(org) !== String(props.value === null ? '' : props.value)) backGround = 'greenYellow'
+      if(String(org) !== String(props.value === null ? '' : props.value)) {
+        backGround = 'greenYellow'
+      }
     }
 
     this.el.type  = password ? 'password' : 'text';
@@ -187,6 +193,11 @@ class InputRenderer {
                                    color:${option['color']};
                                    font-size:${option['fontSize']}; 
                                    `)
+
+    if(option['onBackGround'] !== undefined){
+      const onBackGround = option.onBackGround;
+      onBackGround(props.value, this.el);
+    }
 
     let value = String((props.value === null || props.value === undefined) ? '' : props.value);
     if(password){

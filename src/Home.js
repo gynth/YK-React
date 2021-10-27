@@ -106,7 +106,7 @@ const defaultData = async(user_id, areaTp) => {
     AUTH      : data2
   });
 
-  // defaultOpen(); //김경현
+  defaultOpen();
 }
 
 const onActiveWindow = (e) => {

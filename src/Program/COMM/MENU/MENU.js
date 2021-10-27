@@ -6,6 +6,7 @@ import Input from '../../../Component/Control/Input';
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_getAtt } from '../../../Method/Comm';
 import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
 import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_getModyfiedRow, gfg_setSelectRow, gfg_getRowCount } from '../../../Method/Grid';
+import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 
 import Grid from '../../../Component/Grid/Grid';
 import Layout from '../../../Component/Layout/Layout';
@@ -21,9 +22,9 @@ import Combobox from '../../../Component/Control/Combobox';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 import { getSp_Oracle } from '../../../db/Oracle/Oracle';
-import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 //#endregion
 
+let retData = [];
 class MENU extends Component {
   constructor(props){
     super(props)
@@ -50,9 +51,11 @@ class MENU extends Component {
     gfs_injectAsyncReducer('MENU_MAIN', MENU_MAIN);
     //#endregion
   }
-
+  
   componentDidMount(){
-    
+    setTimeout(() => {
+      this.Retrieve();
+    }, 500);
   }
 
   callOracle = async(file, fn, param) => {
@@ -274,53 +277,71 @@ class MENU extends Component {
   }
 
   Retrieve = async () => {
-    gfc_showMask();
 
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
     const dtlGrid  = gfg_getGrid(this.props.pgm, 'detail10');
     mainGrid.clear();
     dtlGrid.clear();
 
-    let param = [];
-    param.push({
-      sp   : `begin 
-                SP_ZM_IMS_MENU_MAIN10(
-                  :p_COP_CD,
-                  :p_RowStatus,
-                  
-                  :p_select,
-                  :p_SUCCESS,
-                  :p_MSG_CODE,
-                  :p_MSG_TEXT,
-                  :p_COL_NAM
-                );
-              end;
-              `,
-      data : {
-        p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-        p_RowStatus : 'R'
-      },
-      errSeq: 0
-    })
-    
-    const result = await getSp_Oracle(param);
-    if(result.data.SUCCESS !== 'Y'){
-      alert(gfc_getAtt(result.data.MSG_CODE));
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      let main = retData.filter(e => {
+        //메뉴그룹명
+        if(search_tp === '1'){
+          if(e.MENU_NAM.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+      })
+      mainGrid.resetData(main);
+      mainGrid.resetOriginData()
+      mainGrid.restore();
+    }else{
+      gfc_showMask();
+      let param = [];
+      param.push({
+        sp   : `begin 
+                  SP_ZM_IMS_MENU_MAIN10(
+                    :p_COP_CD,
+                    :p_RowStatus,
+                    
+                    :p_select,
+                    :p_SUCCESS,
+                    :p_MSG_CODE,
+                    :p_MSG_TEXT,
+                    :p_COL_NAM
+                  );
+                end;
+                `,
+        data : {
+          p_COP_CD    : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+          p_RowStatus : 'R'
+        },
+        errSeq: 0
+      })
+      
+      const result = await getSp_Oracle(param);
+      if(result.data.SUCCESS !== 'Y'){
+        alert(gfc_getAtt(result.data.MSG_CODE));
+        gfc_hideMask();
+  
+        return;
+      }
+  
+      mainGrid.clear();
+  
+      mainGrid.resetData(result.data.ROWS);
+      mainGrid.resetOriginData()
+      mainGrid.restore();
+  
+      gfg_setSelectRow(mainGrid);
+      retData = mainGrid.getData();
+  
       gfc_hideMask();
-
-      return;
     }
-
-    mainGrid.clear();
-
-    mainGrid.resetData(result.data.ROWS);
-    mainGrid.resetOriginData()
-    mainGrid.restore();
-
-    gfg_setSelectRow(mainGrid);
-    // gfg_setSelectRow(mainGrid);
-
-    gfc_hideMask();
   }
   
   onSelectChange = async (e) => {
@@ -400,20 +421,14 @@ class MENU extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '카메라IP'
-                            },{
-                              code: '2',
-                              name: 'RTSP주소'
-                            },{
-                              code: '3',
-                              name: 'RTSP포트'
+                              CODE: '1',
+                              NAME: '메뉴그룹명'
                             }]}
                   />
                 </div>
@@ -424,7 +439,9 @@ class MENU extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       readOnly
+                       onChange    = {(e) => {
+                         this.Retrieve()
+                       }}
                       //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                 />
               </div>

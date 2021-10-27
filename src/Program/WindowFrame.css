@@ -12,16 +12,45 @@
 .car_manager {height:calc(100vh - 109px);}
 .car_manager .car_list {position:relative; padding-top:67px; padding-bottom:161px; float:left; width:820px; height:100%; box-sizing:border-box; border-right:1px solid #E1E7EF}
 .car_list .search_line {position:absolute; left:0; top:0; width:100%; box-sizing:border-box; padding:8px;}
-.car_list .search_line .wp {position:relative; padding-left:124px; padding-right:60px; border-bottom:1px solid #415294; padding-bottom:8px}
+.car_list .search_line .wp {position:relative; padding-left:124px; height:40px; padding-right:60px; border-bottom:1px solid #415294; padding-bottom:8px}
 .car_list .search_line .wp.type2 {padding-left:494px;}
 .car_list .search_line select{position:absolute; left:0; top:0; width:124px; height:42px; font-size:16px; padding-left:10px;}
 .car_list .search_line input{height:40px; width:calc(100% - 20px); padding-bottom:2px; padding-left:14px; border:none; font-size:22px; }
 .car_list .search_line input::placeholder {color:#A0ABB4}
-.car_list .search_line button {cursor:pointer; position:absolute; right:0; top:0; width:60px; height:42px; background:url(../Image/carsearch_bu@2x.png) no-repeat 50% 50%; background-size:28px 28px; border:none; text-indent:-9999px; }
+.car_list .search_line button {cursor:pointer; position:absolute; right:0; top:0; width:60px; height:42px; background:url('../Image/carsearch_bu@2x.png') no-repeat 50% 50%; background-size:28px 28px; border:none; text-indent:-9999px; }
 
 .car_list .search_line .wp.type2 .tui-datepicker-input {height: 42px; border-radius: 5px; box-sizing: border-box;}
 .car_list .search_line .wp.type2>div>.item {position: absolute; left: 360px;}
 .car_list .search_line .wp.type2>div>div>.item {float:left; margin-right:10px}
+
+
+.car_manager.notice .car_list {width:calc(100% - 600px); padding-bottom:0;}
+
+.car_manager.notice .notice_detail {position:relative; width:600px; box-sizing:border-box; padding:0 30px; float:left;}
+.car_manager.notice .notice_detail .title {font-size:18px; margin-top:15px; margin-bottom:13px;}
+.car_manager.notice .notice_detail input.subject {width:100%; border:1px solid #A6B6CC}
+.car_manager.notice .notice_detail textarea {padding:15px; height:350px; box-sizing:border-box; border:1px solid #A6B6CC}
+.car_manager.notice .notice_detail .file_download {border-radius:5px;}
+
+.car_manager.notice .notice_detail .title .date {float:right;}
+.car_manager.notice .notice_detail .title .date input {position:relative; top:-3px; width:80px; text-align:center; height:24px; background:#f2f5f7}
+
+table.file_list {width:100%; font-size:14px; border-collapse: collapse;  }
+table.file_list thead tr th {text-align:center; height:32px; font-weight:bold; border:1px solid #A6B6CC; border-width:1px 0px 1px 0px; border-radius:5px; background:url('../Image/table_head_bg.png') repeat-x 0 0;}
+table.file_list thead tr th:first-child {border-left:1px solid #A6B6CC; padding-left:10px;}
+table.file_list thead tr th:last-child {border-right:1px solid #A6B6CC; padding-right:5px;}
+table.file_list tbody tr td {text-align:center; height:36px; border-bottom:1px solid #C9CBCF}
+table.file_list tbody tr td:first-child {padding-left:10px;}
+table.file_list tbody tr td:last-child {padding-right:5px;}
+
+.file_btn {float:right; margin:10px 0 5px; border-radius:3px; border:none; background:#294a74; color:#fff; cursor:pointer; height:26px; line-height:26px; padding:0 10px;}
+
+.notice .car_list .search_line .wp {padding-left:252px}
+.notice .car_list .search_line .date {position:absolute; left:0; top:0; text-align:center; box-sizing: border-box; border:1px solid #A6B6CC; width:115px; height:42px; font-size:16px; padding-left:10px;}
+.notice .car_list .search_line .start {left:0;}
+.notice .car_list .search_line .end {left:137px;}
+.notice .car_list .search_line .sep {position:absolute; left:121px; top:0; height:42px; line-height:42px; font-size:18px}
+
 
 
 .car_list .grid {position:relative; padding:0 0 40px; height:100%; box-sizing:border-box;}

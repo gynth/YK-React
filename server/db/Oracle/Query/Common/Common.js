@@ -84,7 +84,10 @@ const Common = (fn, param) => {
     `    AND seq       = ${param.seq}` ;
   }else if(fn === 'ZM_IMS_CAMERA_SELECT'){
     query = 
-    ` SELECT * FROM ZM_IMS_CAMERA ORDER BY SEQ     `;
+    ` SELECT * FROM ZM_IMS_CAMERA ` +
+    `  WHERE AREA_TP   LIKE '${param.AREA_TP}'` + 
+    `    AND CAMERA_IP LIKE '${param.CAMERA_IP}'` + 
+    ` ORDER BY SEQ     `;
   }else if(fn === 'ZM_IMS_CAMERA_INSERT'){
     query = 
     ` INSERT INTO ZM_IMS_CAMERA      ` +

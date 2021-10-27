@@ -393,94 +393,82 @@ class NOTICE extends Component {
 
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
-        <div className='car_manager type3'>
-          <div style={{paddingBottom:'0'}} className='car_list'>
-            <div className='search_line'>
-              <div className='wp type2' >
-                <div style={{position:'absolute', left:0, top:0, width:'360px', height:'42px', fontSize:'16px'}}>
-                  <div>
-                    <DateTime pgm={this.props.pgm}
-                              id='search_fr_dt' />                  
-                    <DateTime pgm={this.props.pgm}
-                              id='search_to_dt' />
-                  </div>  
-                  <Combobox pgm     = {this.props.pgm}
-                            id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
-                            width   = {124}
-                            height  = {42}
-                            emptyRow
-                            data    = {[{
-                              code: '1',
-                              name: '작성자'
-                            },{
-                              code: '2',
-                              name: '제목'
-                            }]}
-                  />
-                </div>
-                <Input pgm         = {this.props.pgm}
-                       id          = 'search_txt'
-                       height      = '42'
-                       placeHolder = '검색어를 입력하세요'
-                       paddingLeft = '14'
-                       width       = '100%'
-                       type        = 'textarea'
-                />
+        <div className='car_manager notice'>
+          <div className="car_list">
+            <div className="search_line">
+              <div className="wp">
+                <input type="text" className="start date" value="2021-09-09"/>
+                <span className="sep">~</span>
+                <input type="text" className="end date" value="2021-09-09"/>
               </div>
             </div>
-            <div className='grid' style={{paddingBottom:'0'}}>
-              <div className='wp'>
-                <div style={{width:'100%', height:'100%', overflow:'auto'}}>
-                  <Layout split       ='vertical'
-                          minSize     ={[54]}
-                          defaultSize ={'30%'}
-                  >
-                    <Grid pgm={this.props.pgm}
-                          id ='main10'
-                          selectionChange={(e) => {
-                            this.onSelectChange(e);
-                          }}
-                          rowHeight={30}
-                          rowHeaders= {[{ type: 'rowNum', width: 40 }]}
-                          columns={[
-                            columnCombobox({
-                              name: 'NOTICE_ID', 
-                              header: '메뉴그룹',
-                              value   : 'COMM_DTL_CD',
-                              display : 'COMM_DTL_NAM',
-                              width   : 150, 
-                              readOnly: true,
-                              oracleData : getDynamicSql_Oracle(
-                                'COMM/COMM',
-                                'ZM_IMS_CODE_SELECT',
-                                [{COMM_CD: '1'}]),
-                              editor: {
-                                value   : 'COMM_DTL_CD',
-                                display : 'COMM_DTL_NAM'
-                              }
-                            }),
-                            columnInput({
-                              name: 'NOTICE_NAM',
-                              header: '메뉴그룹명',
-                              width : 250,
-                              readOnly: true,
-                              align : 'left',
-                            })
-                          ]}
-                    />
-
-                    <div style={{width:'50%', height:'100%', background:'yellow'}}>
-                      <div style={{width:'100%', height:'30px'}}>
-                        <span style={{width:'100%', height:'30px'}}>작성자</span>
-                      </div>
-                    </div>
-                  </Layout>
-                </div>
+            <div className="grid">
+              <div className="wp">
+              <table>
+                <thead>
+                  <tr>
+                    <th>NO</th>
+                    <th>공지사항 제목</th>
+                    <th>게시시작일</th>
+                    <th>게시종료일</th>
+                    <th>생성자</th>
+                    <th>생성일</th>
+                    <th>수정자</th>
+                    <th>수정일</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0</td>
+                    <td>제목</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  
+                </tbody>
+              </table>
               </div>
             </div>
           </div>
+          <div className="notice_detail">
+              <div className='title'>공지사항 제목
+                <div className="date">
+                  <input type="text" value="2021-09-09" readonly />
+                  <span>~</span>
+                  <input type="text" value="2021-09-09" readonly/>
+                </div>
+              </div>
+              <input type="text" className="subject" />
+              <div className='title'>공지사항 내용</div>
+              <textarea></textarea>
+              
+              <button type="button" className="file_btn">다운로드</button>
+              <div className="file_box">
+                <table className="file_list">
+                  <thead>
+                    <tr>
+                      <th><input type="checkbox"/></th>
+                      <th>파일명</th>
+                      <th>등록일자</th>
+                      <th>크기</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><input type="checkbox"/></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
         </div>
       </div>
     );

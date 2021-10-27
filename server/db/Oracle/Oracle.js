@@ -138,7 +138,7 @@ router.post('/SP', async(req, res) => {
       cnt++;
       // console.log(`${cnt} -> call: ${query}`)
       if(cnt % 100 === 0){
-        console.log(`${cnt}`)
+        console.log(`${cnt}  ${new Date()}`)
         const mem = process.memoryUsage()
         const heapUsed = Math.round(mem.heapUsed / 1024 / 1024 * 100) / 100;
         const external = Math.round(mem.external / 1024 / 1024 * 100)  / 100;

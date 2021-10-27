@@ -22,6 +22,7 @@ import Botspan from './Botspan';
 import CompleteBtn from './CompleteBtn';
 //#endregion
 
+let retData = [];
 class SHIP_PROC extends Component {
 
   state = {
@@ -262,52 +263,90 @@ class SHIP_PROC extends Component {
   }
 
   componentDidMount(){
-    this.Retrieve();
+    setTimeout(() => {
+      this.Retrieve();
+    }, 500);
   }
 
   Retrieve = async () => {
 
-    gfc_showMask();
 
-    const mainData = await gfc_yk_call_sp(`SP_ZM_SHIP_WAIT`);
     const grid = gfg_getGrid(this.props.pgm, 'main10');
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
     grid.clear();
 
-    if(mainData.data.SUCCESS === 'Y'){
-
-      const main = mainData.data.ROWS;
-    
-      const dataMod = [];
-      main.forEach(e => {
-        dataMod.push({
-          scaleNumb: e['DELIVERY_ID'].toString(),
-          vendorname: e['VENDOR_NAME'],
-          cars_no: e['CARS_NO'],
-          netweight: e['NET_WEIGHT'],
-          deliverydate: e['DELIVERY_DATE'],
-          empty_time: e['EMPTY_TIME'],
-          empty_wgt: e['EMPTY_WGT'],
-          iron_grade: e['IRON_GRADE'],
-          inspect_user: e['INSPECT_USER']
-        })
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      let main = retData.filter(e => {
+        //계근번호
+        if(search_tp === '1'){
+          if(e.scaleNumb.toString().indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //차량번호
+        else if(search_tp === '2'){
+          if(e.cars_no.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
+        //업체
+        else if(search_tp === '3'){
+          if(e.vendorname.indexOf(search_txt) >= 0){
+            return true;
+          }else{
+            return false;
+          }
+        }
       })
-
-      if(main){
-        
-        grid.resetData(dataMod);
-        gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
-        
-        await gfc_sleep(100);
+      grid.resetData(main);
+      grid.resetOriginData()
+      grid.restore();
+    }else{
+      gfc_showMask();
+      const mainData = await gfc_yk_call_sp(`SP_ZM_SHIP_WAIT`);
+      if(mainData.data.SUCCESS === 'Y'){
   
-        gfg_setSelectRow(grid);
+        const main = mainData.data.ROWS;
+      
+        const dataMod = [];
+        main.forEach(e => {
+          dataMod.push({
+            scaleNumb: e['DELIVERY_ID'].toString(),
+            vendorname: e['VENDOR_NAME'],
+            cars_no: e['CARS_NO'],
+            netweight: e['NET_WEIGHT'],
+            deliverydate: e['DELIVERY_DATE'],
+            empty_time: e['EMPTY_TIME'],
+            empty_wgt: e['EMPTY_WGT'],
+            iron_grade: e['IRON_GRADE'],
+            inspect_user: e['INSPECT_USER']
+          })
+        })
+  
+        if(main){
+          
+          grid.resetData(dataMod);
+          gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
+          
+          await gfc_sleep(100);
+    
+          gfg_setSelectRow(grid);
+        }else{
+          gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
+        }
+  
+        retData = grid.getData();
       }else{
         gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-      }
-    }else{
-      gfs_dispatch('SHIP_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-    } 
-
-    gfc_hideMask();
+      } 
+  
+      gfc_hideMask();
+    }
   }
 
   sumWeight = () => {
@@ -381,20 +420,20 @@ class SHIP_PROC extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '계근번호'
+                              CODE: '1',
+                              NAME: '계근번호'
                             },{
-                              code: '2',
-                              name: '차량번호'
+                              CODE: '2',
+                              NAME: '차량번호'
                             },{
-                              code: '3',
-                              name: '업체'
+                              CODE: '3',
+                              NAME: '업체'
                             }]}
                   />
                 </div>

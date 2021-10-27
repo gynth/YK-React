@@ -18,6 +18,7 @@ import Botspan from '../Common/Botspan';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 import { TOKEN, YK_WEB_REQ } from '../../../WebReq/WebReq';
+import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 //#endregion
 
 class CAMR_SETTING extends Component {
@@ -48,7 +49,9 @@ class CAMR_SETTING extends Component {
   }
 
   componentDidMount(){
-    
+    setTimeout(() => {
+      this.Retrieve();
+    }, 500);
   }
 
   callOracle = async(file, fn, param) => {
@@ -137,7 +140,24 @@ class CAMR_SETTING extends Component {
     gfc_showMask();
     gfs_dispatch('CAMR_SETTING_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
 
-    const result = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT', []);
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+
+    let AREA_TP = '%';
+    let CAMERA_IP = '%';
+
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      if(search_tp === '1'){
+        AREA_TP = `%${search_txt}%`;
+      }else{
+        CAMERA_IP = `%${search_txt}%`;
+      }
+    }
+
+    const result = await this.callOracle('Common/Common', 'ZM_IMS_CAMERA_SELECT', [{
+      AREA_TP,
+      CAMERA_IP
+    }]);
     
     let data = [];
     for(let i = 0; i < result.data.rows.length; i++){
@@ -151,20 +171,6 @@ class CAMR_SETTING extends Component {
     
     const grid = gfg_getGrid(this.props.pgm, 'main10');
     grid.resetData(data);
-
-    // const mainData = await YK_WEB_REQ(`tally_mstr_drive.jsp`);
-    // const main = mainData.data.dataSend;
-    // if(main){
-
-    //   grid.resetData(main);
-    //   gfs_dispatch('CAMR_SETTING_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
-      
-    //   await gfc_sleep(100);
-
-    //   gfg_setSelectRow(grid);
-    // }else{
-    //   gfs_dispatch('CAMR_SETTING_MAIN', 'BOT_TOTAL', {BOT_TOTAL: 0});
-    // }
 
     gfc_hideMask();
   }
@@ -180,20 +186,17 @@ class CAMR_SETTING extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '카메라IP'
+                              CODE: '1',
+                              NAME: '하차구역'
                             },{
-                              code: '2',
-                              name: 'RTSP주소'
-                            },{
-                              code: '3',
-                              name: 'RTSP포트'
+                              CODE: '2',
+                              NAME: '카메라IP'
                             }]}
                   />
                 </div>
@@ -205,7 +208,9 @@ class CAMR_SETTING extends Component {
                         paddingLeft = '14'
                         width       = '90%'
                         type        = 'textarea'
-                        readOnly
+                        onChange    = {(e) => {
+                          this.Retrieve()
+                        }}
                         //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                   />
                 </div>

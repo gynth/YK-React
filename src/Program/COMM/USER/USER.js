@@ -4,26 +4,22 @@ import React, { Component } from 'react';
 import Input from '../../../Component/Control/Input';
 
 import { gfc_initPgm, gfc_showMask, gfc_hideMask, gfc_getAtt } from '../../../Method/Comm';
-import { gfs_injectAsyncReducer, gfs_dispatch, gfs_getStoreValue } from '../../../Method/Store';
+import { gfs_injectAsyncReducer, gfs_getStoreValue } from '../../../Method/Store';
 import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_getModyfiedRow, gfg_setSelectRow, gfg_getRowCount } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
-import Layout from '../../../Component/Layout/Layout';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
-import { Number as columnNumber} from '../../../Component/Grid/Column/Number';
-import { Checkbox as columnCheckbox } from '../../../Component/Grid/Column/Checkbox';
 
 import Combobox from '../../../Component/Control/Combobox';
-
-// import Mainspan from './Mainspan';
-// import Botspan from '../Common/Botspan';
 
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 import { getSp_Oracle } from '../../../db/Oracle/Oracle';
 import { YK_WEB_REQ } from '../../../WebReq/WebReq';
+import { gfo_getCombo, gfo_getInput } from '../../../Method/Component';
 //#endregion
 
+let retData = [];
 class USER extends Component {
   constructor(props){
     super(props)
@@ -52,7 +48,9 @@ class USER extends Component {
   }
 
   componentDidMount(){
-    
+    setTimeout(() => {
+      this.Retrieve();
+    }, 500);
   }
 
   callOracle = async(file, fn, param) => {
@@ -218,8 +216,28 @@ class USER extends Component {
   Retrieve = async () => {
     gfc_showMask();
 
+    const search_tp = gfo_getCombo(this.props.pgm, 'search_tp').getValue();
+    const search_txt = gfo_getInput(this.props.pgm, 'search_txt').getValue();
+
     const mainGrid = gfg_getGrid(this.props.pgm, 'main10');
     mainGrid.clear();
+
+    let COP_CD = '%';
+    let IMS_ID = '%';
+    let USER_NAM = '%';
+    let AREA_TP = '%';
+
+    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+      if(search_tp === '1'){
+        COP_CD = `%${search_txt}%`;
+      }else if(search_tp === '2'){
+        IMS_ID = `%${search_txt}%`;
+      }else if(search_tp === '3'){
+        USER_NAM = `%${search_txt}%`;
+      }else{
+        AREA_TP = `%${search_txt}%`;
+      }
+    }
 
     let param = [];
     param.push({
@@ -249,14 +267,14 @@ class USER extends Component {
               `,
       data : {
         p_RowStatus  : 'R',
-        p_COP_CD     : gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
+        p_COP_CD     : COP_CD,
         p_COP_CD_ORIG: gfs_getStoreValue('USER_REDUCER', 'COP_CD'),
-        p_IMS_ID     : '',
-        p_USER_NAM   : '',
+        p_IMS_ID     : IMS_ID,
+        p_USER_NAM   : USER_NAM,
         p_USER_PWD   : '',
         p_DEPT_NAM   : '',
         p_ERP_ID     : '',
-        p_AREA_TP    : '',
+        p_AREA_TP    : AREA_TP,
         p_AUT_TP     : '',
         p_USE_YN     : '',
         p_USER_ID    : gfs_getStoreValue('USER_REDUCER', 'USER_ID')
@@ -266,29 +284,19 @@ class USER extends Component {
     
     const result = await getSp_Oracle(param);
     if(result.data.SUCCESS !== 'Y'){
-      alert(gfc_getAtt(result.data.MSG_CODE));
+      // alert(gfc_getAtt(result.data.MSG_CODE));
       gfc_hideMask();
 
       return;
     }
 
     mainGrid.clear();
-
-    // const test = [];
-    // let row = 0;
-    // for(let i = 0; i < 10000; i++){
-    //   if(row > 7) row = 0;
-    //   test.push(result.data.ROWS[row]);
-    //   row += 1;
-    // }
-
-    // mainGrid.resetData(test);
     
     mainGrid.resetData(result.data.ROWS);
     mainGrid.resetOriginData()
     mainGrid.restore();
 
-    gfg_setSelectRow(mainGrid);
+    // gfg_setSelectRow(mainGrid);
     // gfg_setSelectRow(mainGrid);
 
     gfc_hideMask();
@@ -305,20 +313,23 @@ class USER extends Component {
                 <div style={{position:'absolute', left:0, top:0, width:'124px', height:'42px', fontSize:'16px'}}>
                   <Combobox pgm     = {this.props.pgm}
                             id      = 'search_tp'
-                            value   = 'code'
-                            display = 'name'
+                            value   = 'CODE'
+                            display = 'NAME'
                             width   = {124}
                             height  = {42}
                             emptyRow
                             data    = {[{
-                              code: '1',
-                              name: '카메라IP'
+                              CODE: '1',
+                              NAME: '회사코드'
                             },{
-                              code: '2',
-                              name: 'RTSP주소'
+                              CODE: '2',
+                              NAME: '사용자ID'
                             },{
-                              code: '3',
-                              name: 'RTSP포트'
+                              CODE: '3',
+                              NAME: '사용자명'
+                            },{
+                              CODE: '4',
+                              NAME: '검수구역'
                             }]}
                   />
                 </div>
@@ -329,7 +340,9 @@ class USER extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       readOnly
+                       onChange    = {(e) => {
+                         this.Retrieve()
+                       }}
                       //  padding-bottom:2px; padding-left:14px; border:none; font-size:22px;
                 />
               </div>
