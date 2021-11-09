@@ -10,6 +10,7 @@ import { gfo_getCombo, gfo_getInput, gfo_getCheckbox, gfo_getDateTime } from '..
 import { gfg_getGrid, gfg_setSelectRow } from '../../../Method/Grid';
 
 import Grid from '../../../Component/Grid/Grid';
+import Layout from '../../../Component/Layout/Layout';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Number as columnNumber } from '../../../Component/Grid/Column/Number';
 import { Combobox as columnCombobox } from '../../../Component/Grid/Column/Combobox';
@@ -28,7 +29,6 @@ import { YK_WEB_REQ } from '../../../WebReq/WebReq';
 import { getDynamicSql_Oracle } from '../../../db/Oracle/Oracle';
 //#endregion
 
-let retData = [];
 class DAILY_PROC extends Component {
 
   state = {
@@ -314,37 +314,37 @@ class DAILY_PROC extends Component {
     // console.log(fr_dt.replace('-', '').replace('-', ''), to_dt.replace('-', '').replace('-', ''), car_no)
 
     
-    if(search_tp !== null && search_tp !== '' && search_txt !== ''){
-      let main = retData.filter(e => {
-        //계근번호
-        if(search_tp === '1'){
-          if(e.SCALENUMB.toString().indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //차량번호
-        else if(search_tp === '2'){
-          if(e.VEHICLE_NO.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-        //업체명
-        else if(search_tp === '3'){
-          if(e.VENDOR_NAME.indexOf(search_txt) >= 0){
-            return true;
-          }else{
-            return false;
-          }
-        }
-      })
-      grid.resetData(main);
-      grid.resetOriginData()
-      grid.restore();
-    }else{
+    // if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+    //   let main = retData.filter(e => {
+    //     //계근번호
+    //     if(search_tp === '1'){
+    //       if(e.SCALENUMB.toString().indexOf(search_txt) >= 0){
+    //         return true;
+    //       }else{
+    //         return false;
+    //       }
+    //     }
+    //     //차량번호
+    //     else if(search_tp === '2'){
+    //       if(e.VEHICLE_NO.indexOf(search_txt) >= 0){
+    //         return true;
+    //       }else{
+    //         return false;
+    //       }
+    //     }
+    //     //업체명
+    //     else if(search_tp === '3'){
+    //       if(e.VENDOR_NAME.indexOf(search_txt) >= 0){
+    //         return true;
+    //       }else{
+    //         return false;
+    //       }
+    //     }
+    //   })
+    //   grid.resetData(main);
+    //   grid.resetOriginData()
+    //   grid.restore();
+    // }else{
       gfc_showMask();
       getDynamicSql_Oracle(
         'Common/Common',
@@ -352,10 +352,16 @@ class DAILY_PROC extends Component {
         [{
           fr_dt: fr_dt.replace('-', '').replace('-', ''),
           to_dt: to_dt.replace('-', '').replace('-', ''),
-          car_no: search_tp === '1' ? search_txt === '' ? '%' : search_txt : '%',
-          vendor: search_tp === '2' ? search_txt === '' ? '%' : search_txt : '%'
+          car_no: '%',
+          vendor: '%'
         }]
       ).then(e => {
+        if(e.data === undefined){
+          alert(e);
+          gfc_hideMask();
+          return;
+        }
+
         let data = [];
         let sum = 0;
         for(let i = 0; i < e.data.rows.length; i++){
@@ -373,17 +379,54 @@ class DAILY_PROC extends Component {
         gfc_hideMask();
   
         if(data.length > 0){
-          grid.resetData(data);
+          let main;
+          if(search_tp !== null && search_tp !== '' && search_txt !== ''){
+            main = data.filter(e => {
+              //계근번호
+              if(search_tp === '1'){
+                console.log(e.SCALENUMB.toString())
+                if(e.SCALENUMB.toString().indexOf(search_txt) >= 0){
+                  return true;
+                }else{
+                  return false;
+                }
+              }
+              //차량번호
+              else if(search_tp === '2'){
+                if(e.VEHICLE_NO.indexOf(search_txt) >= 0){
+                  return true;
+                }else{
+                  return false;
+                }
+              }
+              //업체명
+              else if(search_tp === '3'){
+                if(e.VENDOR_NAME.indexOf(search_txt) >= 0){
+                  return true;
+                }else{
+                  return false;
+                }
+              }
+            })
+          }else{
+            main = data;
+          }
+
+          grid.resetData(main);
+          grid.resetOriginData()
+          grid.restore();
   
-          gfs_dispatch('DAILY_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: data.length});
+          gfs_dispatch('DAILY_PROC_MAIN', 'BOT_TOTAL', {BOT_TOTAL: main.length});
           gfs_dispatch('DAILY_PROC_MAIN', 'MAIN_WEIGHT', {MAIN_WEIGHT: sum})
           
           gfg_setSelectRow(grid);
         }
-  
-        retData = grid.getData();
+      }).catch(e => {
+        console.log(e)
+        alert(e);
+        gfc_hideMask();
       })
-    }
+    // }
   }
 
 
@@ -435,7 +478,12 @@ class DAILY_PROC extends Component {
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
         <div className='car_manager' >
-          <div style={{paddingBottom:'0'}} className='car_list'>
+        <Layout split       ='vertical'
+                  minSize     ={[370]}
+                  defaultSize ={1225}
+          >
+          <div style={{width:'100%'}}>
+          <div  style={{width:'calc(100% - 365px)',overflow:'hidden', paddingBottom:0}} className='car_list'>
             <div className='search_line'>
               <div className='wp type2' >
                 <div style={{position:'absolute', left:0, top:0, width:'360px', height:'42px', fontSize:'16px'}}>
@@ -471,8 +519,10 @@ class DAILY_PROC extends Component {
                        paddingLeft = '14'
                        width       = '100%'
                        type        = 'textarea'
-                       onChange    = {(e) => {
-                         this.Retrieve()
+                       onKeyDown   = {(e) => {
+                         if(e.keyCode === 13){
+                           this.Retrieve()
+                         }
                        }}
                 />
               </div>
@@ -484,7 +534,7 @@ class DAILY_PROC extends Component {
                         id ='main10'
                         selectionChange={(e) => this.onSelectChange(e)}
                         rowHeight={41}
-                        rowHeaders= {[{ type: 'rowNum', width: 40 }]}
+                        rowHeaders= {[{ type: 'rowNum', width: 50 }]}
                         columns={[
                           columnInput({
                             name: 'SCALENUMB',
@@ -881,16 +931,10 @@ class DAILY_PROC extends Component {
               
               <Chit pgm={this.props.pgm} id={'chit_memo'} reducer='DAILY_PROC_MAIN'/>
               
-
-
-              
             </div>
-
-
-
-
+            </div>
           </div>
-            <div className='cctv_viewer'>
+            <div className='cctv_viewer' style={{width:'100%'}}>
               <h4>녹화영상</h4>
               <div className='cctv_list'>
                   <RecImage 
@@ -909,6 +953,7 @@ class DAILY_PROC extends Component {
                     image   = 'DUM_CAM_IMG'/> 
               </div>
             </div>
+          </Layout>
         </div>
       </div>
     );

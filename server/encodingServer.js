@@ -18,7 +18,7 @@ const callSp = async(param) => {
     data: {
       param
     } ,
-    timeout: 10000
+    timeout: 30000
   };
 
   return axios(option)
@@ -33,6 +33,7 @@ const callSp = async(param) => {
 
 let procYn = 'N';
 setInterval(async() => {
+  console.log('Encoding...', new Date());
 
   // await sleep(1000);
   if(procYn === 'N'){
@@ -68,132 +69,136 @@ setInterval(async() => {
       errSeq: 0
     })
   
-    const select = await callSp(param);
-    if(select.data.SUCCESS === 'Y'){
-      procYn = 'Y';
-
-      try{
-        const ROWS = select.data.ROWS;
-        const cnt = ROWS.length;
-                    
-        const scaleNumb   = ROWS[0].SCALENUMB;
-
-        const seq         = ROWS[0].SEQ;
-        const rec_fr_dttm = moment(ROWS[0].REC_FR_DTTM).format('yyyy-MM-DD HH:mm:ss');
-        const rec_to_dttm = moment(ROWS[0].REC_TO_DTTM).format('yyyy-MM-DD HH:mm:ss');
-        const Guid        = ROWS[0].CAMERA_GUID;
-        const Name        = ROWS[0].CAMERA_NAME;
-    
-        //설정된 메서드가 없으면 생성.
-        if(global.MILESTONE_REPLAY[Guid] === undefined){
-          let Connect = edge.func({
-            assemblyFile:`${__dirname}/Milestone/Milestone.dll`,
-            methodName: 'Connect'
-          });
-            
-          Connect([Guid, Guid, 'Start', '', scaleNumb, '', Name], (error, result) => { 
-            if(result[1] === 'Y') {
-              global.MILESTONE_REPLAY[Guid] = {
-                method : Connect,
-                recYn  : 'N'
+    try{
+      const select = await callSp(param);
+      if(select.data.SUCCESS === 'Y'){
+        procYn = 'Y';
+  
+        try{
+          const ROWS = select.data.ROWS;
+          const cnt = ROWS.length;
+                      
+          const scaleNumb   = ROWS[0].SCALENUMB;
+  
+          const seq         = ROWS[0].SEQ;
+          const rec_fr_dttm = moment(ROWS[0].REC_FR_DTTM).format('yyyy-MM-DD HH:mm:ss');
+          const rec_to_dttm = moment(ROWS[0].REC_TO_DTTM).format('yyyy-MM-DD HH:mm:ss');
+          const Guid        = ROWS[0].CAMERA_GUID;
+          const Name        = ROWS[0].CAMERA_NAME;
+      
+          //설정된 메서드가 없으면 생성.
+          if(global.MILESTONE_REPLAY[Guid] === undefined){
+            let Connect = edge.func({
+              assemblyFile:`${__dirname}/Milestone/Milestone.dll`,
+              methodName: 'Connect'
+            });
+              
+            Connect([Guid, Guid, 'Start', '', scaleNumb, '', Name], (error, result) => { 
+              if(result[1] === 'Y') {
+                global.MILESTONE_REPLAY[Guid] = {
+                  method : Connect,
+                  recYn  : 'N'
+                }
               }
+            })
+          }
+          
+          console.log('make1: ', new Date())
+          await global.MILESTONE_REPLAY[Guid].method([Guid, Guid, 'Video', '', scaleNumb, '', Name, '', rec_fr_dttm, rec_to_dttm], async (error, result) => { 
+            if(result === '0') {
+              console.log('make2: ', new Date())
+              console.log('seq:', seq);
+  
+              let param2 = [];
+              param2.push({
+                sp   : `begin 
+                          SP_ZM_IMS_REC(
+                            :p_RowStatus,
+                            :p_scaleNumb,
+                            :p_seq,
+                            :p_cameraNo,
+                            :p_cameraDevice,
+                            :p_cameraName,
+                            :p_UserId,
+                            
+                            :p_select,
+                            :p_SUCCESS,
+                            :p_MSG_CODE,
+                            :p_MSG_TEXT,
+                            :p_COL_NAM
+                          );
+                        end;
+                        `,
+                data : {
+                  p_RowStatus    : 'D',
+                  p_scaleNumb    : scaleNumb,
+                  p_seq          : seq,
+                  p_cameraNo     : '',
+                  p_cameraDevice : Guid,
+                  p_cameraName   : '',
+                  p_UserId       : 'Encoding'
+                },
+                errSeq: 0
+              })
+            
+              const result2 = await callSp(param2);
+              if(result2.data.SUCCESS === 'Y')
+                console.log(`${scaleNumb} : 영상녹화 저장에 성공했습니다.`);
+              else
+                console.log(`${scaleNumb} : 영상녹화 저장에 실패했습니다. ${Guid}, ${result2.data.MSG_TEXT}`);
+              
+                procYn = 'N';
+            }else {
+              console.log('영상녹화 파일생성에 실패 했습니다.');
+  
+              let param2 = [];
+              param2.push({
+                sp   : `begin 
+                          SP_ZM_IMS_REC(
+                            :p_RowStatus,
+                            :p_scaleNumb,
+                            :p_seq,
+                            :p_cameraNo,
+                            :p_cameraDevice,
+                            :p_cameraName,
+                            :p_UserId,
+                            
+                            :p_select,
+                            :p_SUCCESS,
+                            :p_MSG_CODE,
+                            :p_MSG_TEXT,
+                            :p_COL_NAM
+                          );
+                        end;
+                        `,
+                data : {
+                  p_RowStatus    : 'D2',
+                  p_scaleNumb    : scaleNumb,
+                  p_seq          : seq,
+                  p_cameraNo     : '',
+                  p_cameraDevice : '',
+                  p_cameraName   : '',
+                  p_UserId       : 'Encoding'
+                },
+                errSeq: 0
+              })
+            
+              const result3 = await callSp(param2);
+              if(result3.SUCCESS === 'Y')
+                console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
+              else
+                console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
+              
+              procYn = 'N';
             }
           })
+        }catch(e){
+          procYn = 'N';
+          console.log(e);
         }
-        
-        console.log('make1: ', new Date())
-        await global.MILESTONE_REPLAY[Guid].method([Guid, Guid, 'Video', '', scaleNumb, '', Name, '', rec_fr_dttm, rec_to_dttm], async (error, result) => { 
-          if(result === '0') {
-            console.log('make2: ', new Date())
-            console.log('seq:', seq);
-
-            let param2 = [];
-            param2.push({
-              sp   : `begin 
-                        SP_ZM_IMS_REC(
-                          :p_RowStatus,
-                          :p_scaleNumb,
-                          :p_seq,
-                          :p_cameraNo,
-                          :p_cameraDevice,
-                          :p_cameraName,
-                          :p_UserId,
-                          
-                          :p_select,
-                          :p_SUCCESS,
-                          :p_MSG_CODE,
-                          :p_MSG_TEXT,
-                          :p_COL_NAM
-                        );
-                      end;
-                      `,
-              data : {
-                p_RowStatus    : 'D',
-                p_scaleNumb    : scaleNumb,
-                p_seq          : seq,
-                p_cameraNo     : '',
-                p_cameraDevice : Guid,
-                p_cameraName   : '',
-                p_UserId       : 'Encoding'
-              },
-              errSeq: 0
-            })
-          
-            const result2 = await callSp(param2);
-            if(result2.data.SUCCESS === 'Y')
-              console.log(`${scaleNumb} : 영상녹화 저장에 성공했습니다.`);
-            else
-              console.log(`${scaleNumb} : 영상녹화 저장에 실패했습니다. ${Guid}, ${result2.data.MSG_TEXT}`);
-            
-              procYn = 'N';
-          }else {
-            console.log('영상녹화 파일생성에 실패 했습니다.');
-
-            let param2 = [];
-            param2.push({
-              sp   : `begin 
-                        SP_ZM_IMS_REC(
-                          :p_RowStatus,
-                          :p_scaleNumb,
-                          :p_seq,
-                          :p_cameraNo,
-                          :p_cameraDevice,
-                          :p_cameraName,
-                          :p_UserId,
-                          
-                          :p_select,
-                          :p_SUCCESS,
-                          :p_MSG_CODE,
-                          :p_MSG_TEXT,
-                          :p_COL_NAM
-                        );
-                      end;
-                      `,
-              data : {
-                p_RowStatus    : 'D2',
-                p_scaleNumb    : scaleNumb,
-                p_seq          : seq,
-                p_cameraNo     : '',
-                p_cameraDevice : '',
-                p_cameraName   : '',
-                p_UserId       : 'Encoding'
-              },
-              errSeq: 0
-            })
-          
-            const result3 = await callSp(param2);
-            if(result3.SUCCESS === 'Y')
-              console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
-            else
-              console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
-            
-            procYn = 'N';
-          }
-        })
-      }catch(e){
-        procYn = 'N';
-        console.log(e);
       }
+    }catch(e){
+
     }
   }
 }, 5000);
@@ -258,28 +263,32 @@ setInterval(async() => {
     errSeq: 0
   })
 
-  const result = await callSp(param);
-  if(result.data.SUCCESS === 'Y'){
-      
-    const ROWS = result.data.ROWS;
-    for(let i = 0; i < ROWS.length; i++){
-      const scaleNumb = ROWS[i].SCALENUMB;
-      const oldData = REC_SCALENUMB.find(e => e === scaleNumb);
-      if(!oldData){
-        REC_SCALENUMB.push(scaleNumb);
+  try{
+    const result = await callSp(param);
+    if(result.data.SUCCESS === 'Y'){
+        
+      const ROWS = result.data.ROWS;
+      for(let i = 0; i < ROWS.length; i++){
+        const scaleNumb = ROWS[i].SCALENUMB;
+        const oldData = REC_SCALENUMB.find(e => e === scaleNumb);
+        if(!oldData){
+          REC_SCALENUMB.push(scaleNumb);
+        }
       }
-    }
-
-    for(let i = 0; i < REC_SCALENUMB.length; i++){
-      const scaleNumb = REC_SCALENUMB[i];
-      const newData = ROWS.find(e => e.SCALENUMB === scaleNumb);
-
-      if(!newData){
-        REC_SCALENUMB = REC_SCALENUMB.filter(e => e !== scaleNumb);
+  
+      for(let i = 0; i < REC_SCALENUMB.length; i++){
+        const scaleNumb = REC_SCALENUMB[i];
+        const newData = ROWS.find(e => e.SCALENUMB === scaleNumb);
+  
+        if(!newData){
+          REC_SCALENUMB = REC_SCALENUMB.filter(e => e !== scaleNumb);
+        }
       }
+    }else{
+      REC_SCALENUMB = [];
     }
-  }else{
-    REC_SCALENUMB = [];
+  }catch(e){
+
   }
   
 }, 2000);

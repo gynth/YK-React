@@ -169,19 +169,19 @@ export const gfc_unNumberFormat = (value) => {
 }
 
 export const gfc_getParameter = (props, name) => {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)'),
       results = regex.exec(props.location.search);
-  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
 export const gfc_lpad = (str, padLen, padStr) => { 
   if (padStr.length > padLen) {
-      console.log("LENGTH ERROR");
+      console.log('LENGTH ERROR');
       return str;
   }
-  str += ""; // 문자로
-  padStr += ""; // 문자로
+  str += ''; // 문자로
+  padStr += ''; // 문자로
   while (str.length < padLen)
       str = padStr + str;
   str = str.length >= padLen ? str.substring(0, padLen) : str;
@@ -190,11 +190,11 @@ export const gfc_lpad = (str, padLen, padStr) => {
 
 export const gfc_rpad = (str, padLen, padStr) => {
   if (padStr.length > padLen) {
-    console.log("LENGTH ERROR");
-      return str + "";
+    console.log('LENGTH ERROR');
+      return str + '';
   }
-  str += ""; // 문자로
-  padStr += ""; // 문자로
+  str += ''; // 문자로
+  padStr += ''; // 문자로
   while (str.length < padLen)
       str += padStr;
   str = str.length >= padLen ? str.substring(0, padLen) : str;
@@ -218,13 +218,13 @@ export const gfc_hideMask = () => {
 }
 
 export const gfc_addClass = (element, className) => {
-	element.className += " " + className;
+	element.className += ' ' + className;
 	
 }
 
 export const gfc_removeClass = (element, className) => {
-	var check = new RegExp("(\\s|^)" + className + "(\\s|$)");
-	element.className = element.className.replace(check, " ").trim();
+	var check = new RegExp('(\\s|^)' + className + '(\\s|$)');
+	element.className = element.className.replace(check, ' ').trim();
 }
 
 export const gfc_hasClass = (element, className) => {
@@ -506,4 +506,85 @@ export const gfc_set_oracle_column = (result) => {
   }
 
   return data;
+}
+
+export const gfc_file_upload = async(file, NOTICE_NO) => {
+  let formData = new FormData();
+  formData.append('body', NOTICE_NO);
+  for (const key of Object.keys(file)) {
+    //순서중요 body랑 file가 바뀌면 안됨.
+    formData.append('file', file[key]);
+  }
+
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/File/Upload';
+  // const host = 'http://211.231.136.182:3001/File/Upload';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    data: formData
+  }; 
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
+export const gfc_folder_delete = async(NOTICE_NO) => {
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/File/Delete';
+  // const host = 'http://211.231.136.182:3001/File/Upload';
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+      // 'Content-Type': 'multipart/form-data'
+    // },
+    data: {
+      NOTICE_NO
+    }
+  }; 
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
+export const gfc_file_delete = async(NOTICE_NO, FILE) => {
+  const host = 'http://ims.yksteel.co.kr:90/WebServer/File/DeleteFile';
+  // const host = 'http://211.231.136.182:3001/File/Upload';
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+      // 'Content-Type': 'multipart/form-data'
+    // },
+    data: {
+      NOTICE_NO,
+      FILE
+    }
+  }; 
+
+  return axios(option)
+    .then(res => {
+      // console.log(res);
+      return res;
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
 }

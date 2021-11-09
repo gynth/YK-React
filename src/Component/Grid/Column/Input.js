@@ -34,7 +34,8 @@ export const Input = (props) => {
   const align     = props.align !== undefined ? props.align : 'left';
   const valign    = props.valign !== undefined ? props.valign : 'middle';
   const resizable = props.resizable !== undefined ? props.resizable : true;
-  const readOnly = props.readOnly !== undefined ? props.readOnly : true;
+  const readOnly  = props.readOnly !== undefined ? props.readOnly : true;
+  const type      = props.type !== undefined ? props.type : 'text';
 
   const rtn = {name,
                header,
@@ -75,7 +76,9 @@ export const Input = (props) => {
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
+      onChange: props.onChange,
       onBackGround: props.onBackGround,
+      type,
       readOnly,
       color,
       fontSize
@@ -89,7 +92,10 @@ export const Input = (props) => {
       align : props.align,
       valign: props.valign,
       onRender: props.onRender,
+      onChange: props.onChange,
       onBackGround: props.onBackGround,
+      onShow: props.onShow,
+      type,
       readOnly,
       color,
       fontSize
@@ -115,8 +121,9 @@ class InputEditor {
                               ` )
 
     const password = option['password'];
+    const type = option['type'];
 
-    el.type  = password ? 'password' : 'text';
+    el.type  = password ? 'password' : type;
     el.value = String(props.value === null ? '' : props.value);
     if(password){
       el.passwordValue = el.value !== '><DF^K)AD*' && '><DF^K)AD*';
@@ -124,6 +131,10 @@ class InputEditor {
     }
 
     if(option['readOnly']) el.readOnly = true;
+
+    // if(option['onChange'] !== undefined){
+    //   el.addEventListener('change', option['onChange']);
+    // }
 
     if(option['onRender'] !== undefined){
       const onRender = option.onRender;
@@ -173,6 +184,7 @@ class InputRenderer {
     let org = orgData.length <= props.rowKey ? '' : props.grid.dataManager.getOriginData()[props.rowKey][props.columnInfo.name];
     if(org === null) org = '';
     const password = option['password'];
+    const type = option['type'];
 
     let backGround = 'white';
     if(!password){
@@ -181,7 +193,7 @@ class InputRenderer {
       }
     }
 
-    this.el.type  = password ? 'password' : 'text';
+    this.el.type  = password ? 'password' : type;
     // this.el.setAttribute('style', `height: 100%; 
     this.el.setAttribute('style', `height: ${height - 1}px; 
                                    width:100%; 
@@ -194,9 +206,18 @@ class InputRenderer {
                                    font-size:${option['fontSize']}; 
                                    `)
 
+    if(option['onChange'] !== undefined){
+      this.el.addEventListener('change', (e) => option['onChange'](e));
+    }
+
     if(option['onBackGround'] !== undefined){
       const onBackGround = option.onBackGround;
       onBackGround(props.value, this.el);
+    }
+
+    if(option['onShow'] !== undefined){
+      const rows = gfg_getRow(props.grid, props.rowKey);
+      option['onShow'](this.el, props.value, rows);
     }
 
     let value = String((props.value === null || props.value === undefined) ? '' : props.value);

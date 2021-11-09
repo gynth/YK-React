@@ -61,36 +61,38 @@ function RecImageDtl(props) {
       })
   }
 
-  const [playUrl, setPlayUrl] = useState('');
-  const [name, setName] = useState('');
+  const [hls, setHls] = useState(null);
+  let name = '';
 
-  useEffect(() => { 
+  const Init = async() => {
     if(value.toString() !== ''){
-      callOracle(
+      const reault = await callOracle(
         'Common/Common',
         'ZM_IMS_VIDEO_SELECT',
         [{
           scaleNumb: value.toString(),
           seq      : props.seq
         }]
-      ).then(e => {
-        if(e.data.rows.length > 0){
-          setName(e.data.rows[0][5]);
-          setPlayUrl(`http://ims.yksteel.co.kr:90/WebServer/Replay/${value.toString().substring(0, 8)}/${value.toString()}/${encodeURIComponent(e.data.rows[0][5])}/${value.toString()}.m3u8`);
-        }else{
-          setName('');
-          setPlayUrl('');
-        }
-      }).catch(e => {
-        console.log('DISP_PROC>' + e);
-      })
+      );
+
+      if(reault.data.rows.length > 0){
+        name = reault.data.rows[0][5];
+        setHls(await hlsMake(-1));
+      }else{
+        name = '';
+        setHls(null);
+      }
     }
+  }
+
+  useEffect(() => { 
+    Init();
   }, [props.seq, value])
 
   const onActiveWindow = () => {
     if(movieRef.current === undefined) return; 
     if(value.toString() === '') return;
-    if(playUrl === '') return;
+    if(hls === null) return;
     
     const isActive = gfs_getStoreValue('MASK_REDUCER', 'ON_ACTIVE');
 
@@ -106,6 +108,38 @@ function RecImageDtl(props) {
       }
     }
   }
+
+  const hlsDel = async(time) => {
+    const hlsPlayer = await hlsMake(time);
+
+    setHls(hlsPlayer);
+  }
+
+  const hlsMake = async(time) => {
+    return (
+      <>
+        <ReactHlsPlayer
+          src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${value.toString().substring(0, 8)}/${value.toString()}/${encodeURIComponent(name)}/${value.toString()}.m3u8`}
+          autoPlay={true}
+          controls={true}
+          width='100%'
+          height='100%'
+          muted='muted'
+          // onLoadedData={e => e.target.play()}
+          onError={e => {
+            hlsDel(e.target.currentTime * 1 + 2);
+          }}
+          hlsConfig={{
+            startPosition: time,
+            debug: false,
+            lowLatencyMode: true
+          }}
+        />
+  
+        <div className='file_download' onClick={() => this.movieDown(name)}></div>
+      </>
+    )
+  }
   
   useEffect(() => {
     gfs_subscribe(onActiveWindow);
@@ -114,27 +148,12 @@ function RecImageDtl(props) {
 
   return (
     <>
-    {(value.toString() !== '' && playUrl.toString() !== '') &&
+    {(value.toString() !== '' && hls !== null) &&
       <>
         <div 
           style={{width:'100%', height:'100%'}} 
           className='player-wrapper'>
-            <ReactHlsPlayer
-              playerRef={movieRef}
-              src={playUrl}
-              autoPlay={false}
-              controls={true}
-              width='100%'
-              height='100%'
-              muted='muted'
-              onLoadedData={e => e.target.play()}
-              hlsConfig={{
-                autoStartLoad: true,
-                startPosition: -1,
-                debug: false,
-                lowLatencyMode: true
-              }}
-            />
+            {hls}
         </div>
 
         <div className='file_download' onClick={() => movieDown()}></div>

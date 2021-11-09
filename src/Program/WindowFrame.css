@@ -29,11 +29,13 @@
 .car_manager.notice .notice_detail {position:relative; width:600px; box-sizing:border-box; padding:0 30px; float:left;}
 .car_manager.notice .notice_detail .title {font-size:18px; margin-top:15px; margin-bottom:13px;}
 .car_manager.notice .notice_detail input.subject {width:100%; border:1px solid #A6B6CC}
-.car_manager.notice .notice_detail textarea {padding:15px; height:350px; box-sizing:border-box; border:1px solid #A6B6CC}
+.car_manager.notice .notice_detail textarea {resize: none; padding:15px; height:350px; box-sizing:border-box; border:1px solid #A6B6CC}
 .car_manager.notice .notice_detail .file_download {border-radius:5px;}
 
 .car_manager.notice .notice_detail .title .date {float:right;}
-.car_manager.notice .notice_detail .title .date input {position:relative; top:-3px; width:80px; text-align:center; height:24px; background:#f2f5f7}
+.car_manager.notice .notice_detail .title .date input {height:28px}
+.car_manager.notice .notice_detail .title .date .item {float:left}
+.car_manager.notice .notice_detail .title .date>span {float:left}
 
 table.file_list {width:100%; font-size:14px; border-collapse: collapse;  }
 table.file_list thead tr th {text-align:center; height:32px; font-weight:bold; border:1px solid #A6B6CC; border-width:1px 0px 1px 0px; border-radius:5px; background:url('../Image/table_head_bg.png') repeat-x 0 0;}
@@ -45,12 +47,17 @@ table.file_list tbody tr td:last-child {padding-right:5px;}
 
 .file_btn {float:right; margin:10px 0 5px; border-radius:3px; border:none; background:#294a74; color:#fff; cursor:pointer; height:26px; line-height:26px; padding:0 10px;}
 
-.notice .car_list .search_line .wp {padding-left:252px}
+.notice .car_list .search_line .wp {padding-left:0px}
+.notice .car_list .search_line .wp .item {float:left; height:38px;}
+.notice .car_list .search_line .wp .item>div {height:38px;}
+.notice .car_list .search_line .wp .item input { height:38px;}
+.notice .car_list .search_line .wp .sep {float:left;  height:38px; line-height:38px; margin:0px 4px}
+/*
 .notice .car_list .search_line .date {position:absolute; left:0; top:0; text-align:center; box-sizing: border-box; border:1px solid #A6B6CC; width:115px; height:42px; font-size:16px; padding-left:10px;}
 .notice .car_list .search_line .start {left:0;}
 .notice .car_list .search_line .end {left:137px;}
 .notice .car_list .search_line .sep {position:absolute; left:121px; top:0; height:42px; line-height:42px; font-size:18px}
-
+*/
 
 
 .car_list .grid {position:relative; padding:0 0 40px; height:100%; box-sizing:border-box;}

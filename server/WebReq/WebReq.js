@@ -68,9 +68,10 @@ var options = {
   };
 
 setInterval(e => {
-  let dt = new Date();
+  let dt = moment(new Date()).subtract(5, 'minute');
   const date = moment(dt).format('YYYYMMDDHHmm');
   const time = date.substr(8, 4);
+
 
   const host = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?` +
   `serviceKey=O%2F9eo84VDzROhcmBNa%2B1zTS2hP8rVKtuKRfa2H93v8n4ot43RLo36CUx4X%2BV8%2B9ciQ4hJoZnTJpeB96XGiGE0Q%3D%3D&` +
@@ -98,21 +99,22 @@ setInterval(e => {
       if( parser.validate(xml) === true) { 
         var jsonObj = parser.parse(xml,options); 
         const rain = jsonObj.response.body.items.item.filter(e => e.category === 'RN1');
-        if(global.RAIN > 0){
-          global.RAIN = rain[0].obsrValue;
-        }else{
-          global.RAIN = 0;
-        }
+
+        global.RAIN = rain[0].obsrValue;
       }else{
         global.RAIN = 0;
       }
+
+      console.log(`Rain: ${global.RAIN}mm`)
     })
     .catch(err => {
+      console.log(err)
       console.log('Raint Error')
       // console.log(err)
       // global.RAIN = 0;
     })
-}, 60000 * 20)
+}, 60000 * 5)/////
+// }, 6000)
 
 router.post('/Rain', (req, res) => {
     res.json(global.RAIN)

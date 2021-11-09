@@ -77,6 +77,12 @@ class Input extends Component{
     return this.inputRef.current.value === undefined ? '' : this.inputRef.current.value
   }
 
+  setFocus = () => {
+    setTimeout(() => {
+      this.inputRef.current.focus();
+    }, 10);
+  }
+
   setBackGroundColor = (e) => {
     this.setState({
       background: e

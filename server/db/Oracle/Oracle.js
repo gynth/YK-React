@@ -81,10 +81,12 @@ const executeSP = async(RowStatus, connection, query, data) => {
   
     return result;
   }catch(e){
+    console.log(e.message);
+
     result.ROWS     = null;
     result.SUCCESS  = 'N';
-    result.MSG_CODE = 'MSG01';
-    result.MSG_TEXT = 'MSG01';
+    result.MSG_CODE = e.message;
+    result.MSG_TEXT = e.message;
     result.COL_NAM  = '';
     return result;
   }

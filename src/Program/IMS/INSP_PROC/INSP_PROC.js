@@ -1037,6 +1037,7 @@ class INSP_PROC extends Component {
                   vendor: dataMod[i].vendor,
                   carType: dataMod[i].carType,
                   scrpOrdNo: dataMod[i].scrpOrdNo,
+                  warning: dataMod[i].warning,
                   rec: '0'
                 }, 'scaleNumb', false);
               }
@@ -1437,21 +1438,23 @@ class INSP_PROC extends Component {
                                   {'code':'0', 'value': ''},
                                   {'code':'1', 'value': <GifPlayer height='30' width='70' gif={require('../../../Image/yk_rec01.gif').default} autoplay/>}
                                 ]
-                              }),   
-                              columnCombobox({
-                                name: 'warning', 
+                              }),
+                              columnInput({
+                                name: 'warning',
                                 header: '경고',
-                                value   : 'COMM_DTL_CD',
-                                display : 'COMM_DTL_NAM',
-                                width   : 80, 
+                                width : 40,
                                 readOnly: true,
-                                oracleData : getDynamicSql_Oracle(
-                                  'COMM/COMM',
-                                  'ZM_IMS_CODE_SELECT',
-                                  [{COMM_CD: '5'}]),
-                                editor: {
-                                  value   : 'COMM_DTL_CD',
-                                  display : 'COMM_DTL_NAM'
+                                align : 'center',
+                                fontSize: '12',
+                                onBackGround: (value, control) => {
+                                  if(value === 'Y'){
+                                    control.style.backgroundColor = 'yellow';
+                                  }
+                                  // if(rows.phantom){
+                                  //   control.isDisabled = false;
+                                  // }else{
+                                  //   control.isDisabled = true;
+                                  // }
                                 }
                               })
                             ]}

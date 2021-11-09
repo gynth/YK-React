@@ -88,6 +88,16 @@ const Common = (fn, param) => {
     `  WHERE AREA_TP   LIKE '${param.AREA_TP}'` + 
     `    AND CAMERA_IP LIKE '${param.CAMERA_IP}'` + 
     ` ORDER BY SEQ     `;
+  }else if(fn === 'ZM_IMS_CAMERA_SELECT2'){
+    query = 
+    ` SELECT a.SCALENUMB ` +
+    `       ,b.SNAPSHOT_TIME ` +
+    `   FROM zm_ims_rec a    ` +
+    `        INNER JOIN zm_ims_camera b  ON b.MILESTONE_GUID = a.CAMERA_GUID ` +
+    `  WHERE a.SCALENUMB = '${param.SCALENUMB}' ` +
+    `    AND a.REC_YN    IN ('N', 'M') ` +
+    `  GROUP BY a.SCALENUMB ` +
+    `          ,b.SNAPSHOT_TIME ` ;
   }else if(fn === 'ZM_IMS_CAMERA_INSERT'){
     query = 
     ` INSERT INTO ZM_IMS_CAMERA      ` +
@@ -98,6 +108,7 @@ const Common = (fn, param) => {
     ` ,SEQ        ` +
     ` ,CAMERA_PORT` +
     ` ,CAMERA_NUMBER` +
+    ` ,SNAPSHOT_TIME` +
     ` ,REC_YN` +
     ` ,USE_YN     ` +
     ` ,MILESTONE_GUID     ` +
@@ -110,6 +121,7 @@ const Common = (fn, param) => {
     ` ,${param.SEQ}` +
     ` ,${param.CAMERA_PORT}` +
     ` ,${param.CAMERA_NUMBER}` +
+    ` ,${param.SNAPSHOT_TIME}` +
     ` ,'${param.REC_YN}'` +
     ` ,'${param.USE_YN}'` +
     ` ,'${param.MILESTONE_GUID}'` +
@@ -117,10 +129,11 @@ const Common = (fn, param) => {
   }else if(fn === 'ZM_IMS_CAMERA_UPDATE'){
     query = 
     ` UPDATE ZM_IMS_CAMERA      ` +
-    `    SET USE_YN   = '${param.USE_YN}'` +
-    `       ,REC_YN   = '${param.REC_YN}'` +
+    `    SET USE_YN        = '${param.USE_YN}'` +
+    `       ,REC_YN        = '${param.REC_YN}'` +
     `       ,CAMERA_NUMBER = ${param.CAMERA_NUMBER}` +
-    `       ,SEQ      = ${param.SEQ}` +
+    `       ,SEQ           = ${param.SEQ}` +
+    `       ,SNAPSHOT_TIME = ${param.SNAPSHOT_TIME}` +
     `  WHERE CAMERA_IP = '${param.CAMERA_IP}'` ;
   }else if(fn === 'ZM_IMS_CAMERA_UPDATE2'){
     query = 
@@ -185,7 +198,14 @@ const Common = (fn, param) => {
     ` SELECT TO_CHAR(TO_DATE('${param.fr_dt}','YYYY-MM-DD') + (LEVEL - 1), 'YYYY-MM-DD') AS DT ` +
     ` FROM DUAL                                                      ` +
     ` CONNECT BY LEVEL <= TO_DATE('${param.to_dt}','YYYY-MM-DD') - TO_DATE('${param.fr_dt}','YYYY-MM-DD') + 1 `;
-  }else if(fn === 'EMM_INSPECT_MOBILEY'){
+  }else if(fn === 'NOTICE_SEQ'){
+    query = 
+    ` SELECT LPAD(COUNT(1) + 1, 4, '0') AS seq ` +
+    `   FROM zm_ims_notice                     ` +
+    `  WHERE COP_CD     = '${param.COP_CD}'                 ` +
+    `    AND APPL_FR_DT = TO_DATE('${param.APPL_FR_DT}', 'YYYY-MM-DD') `;
+  }
+  else if(fn === 'EMM_INSPECT_MOBILEY'){
     query = 
     ` CALL EMM_INSPECT_MOBILE ( ` +
     `  '${param.strScaleNumb}',     ` +

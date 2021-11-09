@@ -10,6 +10,7 @@ import { gfg_getGrid, gfg_getRow, gfg_appendRow, gfg_getModyfiedRow } from '../.
 import Grid from '../../../Component/Grid/Grid';
 import { Input as columnInput } from '../../../Component/Grid/Column/Input';
 import { Combobox as columnCombobox }  from '../../../Component/Grid/Column/Combobox';
+import { Number as columnNumber }  from '../../../Component/Grid/Column/Number';
 
 import Combobox from '../../../Component/Control/Combobox';
 
@@ -116,6 +117,7 @@ class CAMR_SETTING extends Component {
           SEQ: e.SEQ,
           CAMERA_PORT: e.CAMERA_PORT,
           CAMERA_NUMBER: e.CAMERA_NUMBER,
+          SNAPSHOT_TIME: e.SNAPSHOT_TIME,
           REC_YN : e.REC_YN,
           USE_YN : e.USE_YN,
           MILESTONE_GUID: e.MILESTONE_GUID,
@@ -329,6 +331,13 @@ class CAMR_SETTING extends Component {
                             width : 120,
                             readOnly: false,
                             align : 'right',
+                            fontSize: '18'
+                          }),
+                          columnNumber({
+                            name    : 'SNAPSHOT_TIME', 
+                            header  : '스냅샷주기', 
+                            width   : 100, 
+                            readOnly: false,
                             fontSize: '18'
                           }),   
                           columnCombobox({

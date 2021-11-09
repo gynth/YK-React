@@ -6,6 +6,7 @@ const Mysql = require('./db/Mysql/Mysql')
 const Milestone = require('./Milestone/Milestone');
 const WebReq = require('./WebReq/WebReq');
 const ScreenShot = require('./ScreenShot/ScreenShot');
+const FileUpload = require('./fileUpload');
 const cors = require('cors');
 var edge = require('edge-js');
 const fs = require('fs');
@@ -39,9 +40,12 @@ app3002.use(cors());
 
 // app3001.use('/Ai', Ai);
 
-//#region YK스틸 웹요청
+//#region YK스틸 웹요청 사용안하는데 혹시몰라 그냥둠
 app3001.use('/YK', WebReq);
 //#endregion 
+
+//#region 공지사항 파일 업로드
+app3001.use('/File', FileUpload);
  
 //#region 오라클
 app3001.use('/Oracle', Oracle);
