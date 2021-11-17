@@ -11,6 +11,7 @@ router.post('/Milestone', (req, res) => {
   let device = req.body.device;
   let scaleNo = req.body.scaleNo;
   let folder = scaleNo.substring(0, 8);
+  let fileName = req.body.fileName;
 
   // if(!fs.existsSync(`${__dirname}/Screenshot`)){
   //   fs.mkdirSync(`${__dirname}/Screenshot`);
@@ -45,7 +46,11 @@ router.post('/Milestone', (req, res) => {
       // const img = `data:image/JPEG;base64,${r.JPEGGetLiveResult.Data}`;
       const img = `${r.JPEGGetLiveResult.Data}`;
       if(e === null){
-        const filename = `${getCurrentDate()}.jpg`;
+        let filename = `${getCurrentDate()}.jpg`;
+        if(fileName !== undefined && fileName !== null && fileName !== ''){
+          filename = `${getCurrentDate()}${fileName}.jpg`;
+        }
+
         fs.writeFile(`${root}/${filename}`, img, 'base64', function(err) {
           if(err === null){
             res.json({Result: 'OK'})

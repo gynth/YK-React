@@ -325,6 +325,13 @@ class CAMR_SETTING extends Component {
                               }
                             }
                           }),   
+                          columnNumber({
+                            name    : 'SNAPSHOT_TIME', 
+                            header  : '스냅샷주기', 
+                            width   : 100, 
+                            readOnly: false,
+                            fontSize: '18'
+                          }),   
                           columnInput({
                             name: 'SEQ',
                             header: '구성순서',
@@ -333,13 +340,6 @@ class CAMR_SETTING extends Component {
                             align : 'right',
                             fontSize: '18'
                           }),
-                          columnNumber({
-                            name    : 'SNAPSHOT_TIME', 
-                            header  : '스냅샷주기', 
-                            width   : 100, 
-                            readOnly: false,
-                            fontSize: '18'
-                          }),   
                           columnCombobox({
                             name: 'USE_YN', 
                             header: '사용여부',

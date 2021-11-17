@@ -173,7 +173,7 @@ chitImgServer.listen(3129, 'localhost', 100, () => {
 
 chitImgServer.on('connection',
   function (socket) {
-      console.log('클라이언트가 접속');
+      // console.log('클라이언트가 접속');
   }
 );
 
@@ -184,8 +184,6 @@ chitImgServer.on('request',
       // const folder1 = url.substring(0, url.indexOf('/'));
       // const folder2 = url.substring(url.indexOf('/'), url.indexOf('/') + 1 + 8);
       const file = url.substring(0, url.indexOf('.jpg') + 4);
-
-      console.log(file)
 
       fs.readFile(`F:/IMS/${file}`,              //파일 읽기
         function (err, data)

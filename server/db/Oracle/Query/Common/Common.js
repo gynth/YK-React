@@ -92,12 +92,15 @@ const Common = (fn, param) => {
     query = 
     ` SELECT a.SCALENUMB ` +
     `       ,b.SNAPSHOT_TIME ` +
+    `       ,b.MILESTONE_GUID` +
     `   FROM zm_ims_rec a    ` +
     `        INNER JOIN zm_ims_camera b  ON b.MILESTONE_GUID = a.CAMERA_GUID ` +
     `  WHERE a.SCALENUMB = '${param.SCALENUMB}' ` +
     `    AND a.REC_YN    IN ('N', 'M') ` +
+    `    AND b.SNAPSHOT_TIME >= 10000 `  +
     `  GROUP BY a.SCALENUMB ` +
-    `          ,b.SNAPSHOT_TIME ` ;
+    `          ,b.SNAPSHOT_TIME ` +
+    `          ,b.MILESTONE_GUID ` ;
   }else if(fn === 'ZM_IMS_CAMERA_INSERT'){
     query = 
     ` INSERT INTO ZM_IMS_CAMERA      ` +
@@ -135,6 +138,7 @@ const Common = (fn, param) => {
     `       ,SEQ           = ${param.SEQ}` +
     `       ,SNAPSHOT_TIME = ${param.SNAPSHOT_TIME}` +
     `  WHERE CAMERA_IP = '${param.CAMERA_IP}'` ;
+    console.log(param)
   }else if(fn === 'ZM_IMS_CAMERA_UPDATE2'){
     query = 
     ` UPDATE ZM_IMS_CAMERA      ` +

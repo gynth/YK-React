@@ -33,7 +33,7 @@ const callSp = async(param) => {
 
 let procYn = 'N';
 setInterval(async() => {
-  console.log('Encoding...', new Date());
+  console.log(`Encoding...${procYn}`, new Date());
 
   // await sleep(1000);
   if(procYn === 'N'){
@@ -198,7 +198,8 @@ setInterval(async() => {
         }
       }
     }catch(e){
-
+      if(procYn === 'Y')
+        procYn = 'N';
     }
   }
 }, 5000);
@@ -227,6 +228,8 @@ const sendScaleNumbList = async() => {
     })
 }
 
+
+//인코딩 작업 때문에 여기가 영향을 받으면 이건 AI쪽으로 빼던지 해야함.
 let REC_SCALENUMB = [];
 setInterval(async() => {
   await sendScaleNumbList();

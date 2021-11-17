@@ -68,10 +68,26 @@ var options = {
   };
 
 setInterval(e => {
-  let dt = moment(new Date()).subtract(5, 'minute');
-  const date = moment(dt).format('YYYYMMDDHHmm');
-  const time = date.substr(8, 4);
+  let now = new Date();
+  let chkMinute = moment(now).format('mm');
+  let dt;
+  let date;
+  let time;
 
+  //현재시간이 40분 이전이면 1시간전 정각시간으로
+  //40분 초과이면 현재시간으로 계산
+  //기상청에서 40분 이후로 데이터를 보냄
+  if((chkMinute * 1) <= 40){
+    dt = moment(now).subtract(1, 'hour');
+    date = moment(dt).format('YYYYMMDDHH59');
+    time = date.substr(8, 4);
+    console.log(`bef 40 ${date}, ${time}`);
+  }else{
+    dt = moment(now).subtract(5, 'minute');
+    date = moment(dt).format('YYYYMMDDHHmm');
+    time = date.substr(8, 4);
+    console.log(`aft 40 ${date}, ${time}`);
+  }
 
   const host = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?` +
   `serviceKey=O%2F9eo84VDzROhcmBNa%2B1zTS2hP8rVKtuKRfa2H93v8n4ot43RLo36CUx4X%2BV8%2B9ciQ4hJoZnTJpeB96XGiGE0Q%3D%3D&` +
@@ -113,7 +129,7 @@ setInterval(e => {
       // console.log(err)
       // global.RAIN = 0;
     })
-}, 60000 * 5)/////
+}, 60000)/////
 // }, 6000)
 
 router.post('/Rain', (req, res) => {

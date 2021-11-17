@@ -36,9 +36,9 @@ const callSp = async(param) => {
 }
 
 const callQuery = async(file, fn, param) => {
-  const host = 'http://211.231.136.182:3001/Oracle/Query';
-  // const host = 'http://10.10.10.136:3001/Oracle/Query';
-  // const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/Query'; //김경현
+  // const host = 'http://211.231.136.182:3001/Oracle/Query';
+  const host = 'http://10.10.10.136:3001/Oracle/Query';
+  // const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/Query';
   const option = {
     url   : host,
     method: 'POST',
@@ -100,35 +100,89 @@ router.post('/GetRecodingList', async(req, res) => {
   const REC_SCALENUMB = req.body.REC_SCALENUMB;
   global.REC_SCALENUMB = REC_SCALENUMB;
 
-  if(REC_SCALENUMB.length > 0){
-    for(let i = 0; i < global.REC_SCALENUMB.length; i++){
-      //SNAPSHOT_LIST여기에 SCALE_NUMB로 생성된 interval이 없으면 한번 실행 후 생성
-
-      const interval = SNAPSHOT_LIST.filter(e => {
-        if(e.SCALE_NUMB === global.REC_SCALENUMB[i])
-          return true;
-      })
-
-      if(interval === null || interval === undefined){
-        const result = await callQuery('Common/Common', '')
-      }
-    }
-  }
-
   res.json({
     Response: 'OK'
   });
 });
 
-setInterval(() => {
-  for(let i = 0; i < global.REC_SCALENUMB.length; i++){
-    
-  }
+setInterval(async () => {
+  try{
+    for(let i = 0; i < global.REC_SCALENUMB.length; i++){
+      const interval = SNAPSHOT_LIST.filter(e => {
+        if(e.SCALENUMB === global.REC_SCALENUMB[i])
+          return true;
+      })
 
-  for(let i = 0; i < SNAPSHOT_LIST.length; i++){
+      if(interval === undefined || interval === null || interval.length === 0){
+        const result = await callQuery('Common/Common', 'ZM_IMS_CAMERA_SELECT2', [{SCALENUMB: global.REC_SCALENUMB[i]}]);
+        
+        if(result.data.rows.length > 0){
 
+          for(let j = 0; j < result.data.rows.length; j++){
+            const scaleNumb = global.REC_SCALENUMB[i];
+            const time =  result.data.rows[j][1];
+            const device = result.data.rows[j][2];
+            
+            await SNAPSHOT(device, scaleNumb, `_${j + 1}`)
+
+            const camInterval = setInterval(async() => {
+              await SNAPSHOT(device, scaleNumb, `_${j + 1}`)
+            }, time);
+
+            SNAPSHOT_LIST.push({SCALENUMB: global.REC_SCALENUMB[i],
+                                interval : camInterval,
+                                time     : time,
+                                device   : device
+            })
+          }
+        }
+      }
+    }
+  
+    for(let i = 0; i < SNAPSHOT_LIST.length; i++){
+      const find = global.REC_SCALENUMB.find(e => e === SNAPSHOT_LIST[i].SCALENUMB);
+      if(find === undefined || find === null || find.length === 0){
+        const clear = SNAPSHOT_LIST.filter(e => e.SCALENUMB === SNAPSHOT_LIST[i].SCALENUMB);
+        for(let j = 0; j < clear.length; j++){
+          clearInterval(
+            clear[j].interval
+          )
+        }
+
+        SNAPSHOT_LIST = SNAPSHOT_LIST.filter(e => e.SCALENUMB !== SNAPSHOT_LIST[i].SCALENUMB)
+      }
+    }
+
+    // for(let i = 0; i < SNAPSHOT_LIST.length; i++){
+    //   console.log(SNAPSHOT_LIST[i])
+    // }
+  }catch(e){
+    console.log(e);
   }
-}, 5000);
+}, 1000);
+
+const SNAPSHOT = (device, scaleNo, fileName) => {
+  const host = `http://localhost:3001/ScreenShot/Milestone`;
+  const option = {
+    url   : host,
+    method: 'POST',
+    // headers: {
+    //   'Access-Control-Allow-Origin': '*'
+    // },
+    data: {
+      device, scaleNo, fileName
+    } 
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
 
 router.post('/MstrWait', async(req, res) => {
 
