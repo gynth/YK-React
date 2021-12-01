@@ -31,31 +31,45 @@ const server = app3003.listen(port3003, function(){
 new hls(server, {
   provider: {
     exists: (req, cb) => {
-      // console.log(decodeURIComponent(req.url));
-
-      fs.access('F:/IMS/Replay' + decodeURIComponent(req.url), fs.constants.F_OK, (err) => {
-        if(err){
-          return cb(null, false);
-        }  
-        cb(null, true); 
-      });
+      try{
+        fs.access('F:/IMS/Replay' + decodeURIComponent(req.url), fs.constants.F_OK, (err) => {
+          if(err){
+            return cb(null, false);
+          }  
+          cb(null, true); 
+        });
+      }catch(e){
+        console.log(e)
+      }
     },
     getManifestStream: (req, cb) => {
-      const stream = fs.createReadStream('F:/IMS/Replay' + decodeURIComponent(req.url));
-      cb(null, stream);
+      try{
+        const stream = fs.createReadStream('F:/IMS/Replay' + decodeURIComponent(req.url));
+        cb(null, stream);
+      }catch(e){
+        console.log(e)
+      }
     },
     getSegmentStream: (req, cb) => {
-      const stream = fs.createReadStream('F:/IMS/Replay' + decodeURIComponent(req.url));
-      cb(null, stream);
+      try{
+        const stream = fs.createReadStream('F:/IMS/Replay' + decodeURIComponent(req.url));
+        cb(null, stream);
+      }catch(e){
+        console.log(e)
+      }
     }
   }    
 })  
 
 function hlsMiddleware (req, res, next) {
   // set your headers here
-  res.setHeader('Accept-Ranges', 'bytes');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  next() 
+  try{
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    next() 
+  }catch(e){
+    console.log(e)
+  }
 }
 
 httpAttach(server, hlsMiddleware)

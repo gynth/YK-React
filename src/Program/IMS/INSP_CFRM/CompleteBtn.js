@@ -21,6 +21,7 @@ const CompleteBtn = (props) => {
     for(let i = 0; i < grid.getRowCount(); i++){
       const column = gfg_getRow(grid, i);
       if(column.chk === null) continue;
+      if(column.chk === undefined) continue;
 
       if(column.chk.toString() === 'Y'){
         chkCnt += 1;

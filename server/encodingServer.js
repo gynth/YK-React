@@ -2,8 +2,34 @@ const axios = require('axios');
 const moment = require('moment');
 var edge = require('edge-js');
 
-
 global.MILESTONE_REPLAY = {};
+
+const callLog = async(folder, msg) => {
+  const host = 'http://localhost:3001/Log';
+  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      folder,
+      msg
+    } ,
+    timeout: 30000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
 
 const callSp = async(param) => {
   const host = 'http://localhost:3001/Oracle/SP';
@@ -33,7 +59,7 @@ const callSp = async(param) => {
 
 let procYn = 'N';
 setInterval(async() => {
-  console.log(`Encoding...${procYn}`, new Date());
+  // callLog('Encoding', `${procYn} ${new Date()}`);
 
   // await sleep(1000);
   if(procYn === 'N'){
@@ -142,14 +168,19 @@ setInterval(async() => {
               })
             
               const result2 = await callSp(param2);
-              if(result2.data.SUCCESS === 'Y')
+              if(result2.data.SUCCESS === 'Y'){
                 console.log(`${scaleNumb} : 영상녹화 저장에 성공했습니다.`);
-              else
+                callLog('Encoding', `${scaleNumb} : 영상녹화 저장에 성공했습니다.`);
+              }
+              else{
                 console.log(`${scaleNumb} : 영상녹화 저장에 실패했습니다. ${Guid}, ${result2.data.MSG_TEXT}`);
+                callLog('Encoding', `${scaleNumb} : 영상녹화 저장에 실패했습니다. ${Guid}, ${result2.data.MSG_TEXT}`);
+              }
               
-                procYn = 'N';
+              procYn = 'N';
             }else {
               console.log('영상녹화 파일생성에 실패 했습니다.');
+              callLog('Encoding', '영상녹화 파일생성에 실패 했습니다.');
   
               let param2 = [];
               param2.push({
@@ -184,16 +215,21 @@ setInterval(async() => {
               })
             
               const result3 = await callSp(param2);
-              if(result3.SUCCESS === 'Y')
+              if(result3.SUCCESS === 'Y'){
                 console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
-              else
+                callLog('Encoding', `${scaleNumb} : 영상녹화 실패 삭제1.`);
+              }
+              else{
                 console.log(`${scaleNumb} : 영상녹화 실패 삭제.`);
+                callLog('Encoding', `${scaleNumb} : 영상녹화 실패 삭제2.`);
+              }
               
               procYn = 'N';
             }
           })
         }catch(e){
           procYn = 'N';
+          callLog('Encoding', e);
           console.log(e);
         }
       }
@@ -224,6 +260,7 @@ const sendScaleNumbList = async() => {
       return res
     })
     .catch(err => {
+      callLog('Encoding', `sendScaleNumbList: ${err}`);
       console.log(err)
     })
 }
@@ -291,7 +328,7 @@ setInterval(async() => {
       REC_SCALENUMB = [];
     }
   }catch(e){
-
+    callLog('Encoding', `setInterval: ${e}`);
   }
   
 }, 2000);
@@ -301,4 +338,3 @@ const sleep = (ms) => {
 }
 
 console.log('Encoding Server Start');
-

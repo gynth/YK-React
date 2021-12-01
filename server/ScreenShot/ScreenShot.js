@@ -7,6 +7,33 @@ const sharp = require('sharp');
 const axios = require('axios');
 const ftp = require("basic-ftp");
 
+const callLog = async(folder, msg) => {
+  const host = 'http://localhost:3001/Log';
+  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      folder,
+      msg
+    } ,
+    timeout: 30000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
 router.post('/Milestone', (req, res) => {
   let device = req.body.device;
   let scaleNo = req.body.scaleNo;
@@ -55,10 +82,12 @@ router.post('/Milestone', (req, res) => {
           if(err === null){
             res.json({Result: 'OK'})
           }else{
+            callLog('ScreenShot', `createClient1: ${err}`);
             res.json({Result: err});
           }
         }); 
       }else {
+        callLog('ScreenShot', `createClient2: ${err}`);
         res.json({Result: e});
       }
     }) 
@@ -118,7 +147,7 @@ router.post('/YK_Chit_YN_Tally', (req, res) => {
       encode
     })
   }catch(e){
-
+    callLog('ScreenShot', `YK_Chit_YN_Tally: ${e}`);
     res.json({
       encode: 'N'
     })
@@ -194,6 +223,7 @@ router.post('/Ftp_File_Yn', async(req, res) => {
     sftp.end();
   })
   .catch(err => {
+    callLog('ScreenShot', `YK_Chit_YN_Tally: ${err.message}`);
     console.error(err.message);
   });
 })
@@ -242,6 +272,7 @@ router.post('/YK_Chit', async (req, res) => {
       sftp.end();
     })
     .catch(err => {
+      callLog('ScreenShot', `YK_Chit: ${err.message}`);
       console.error(err.message);
     });
   }
@@ -269,6 +300,7 @@ const makeFolder = async(folder) => {
     sftp.end();
   })
   .catch(err => {
+    callLog('ScreenShot', `makeFolder: ${err.message}`);
     console.error(err.message);
   });
 }
@@ -354,6 +386,7 @@ const makeImg = async(img, folder, filename, mobileYn) => {
     
     return 'Y';
   }catch(e) {
+    callLog('ScreenShot', `makeImg: ${e}`);
     return e;
   }
 }
@@ -401,6 +434,7 @@ const makeImgMobile = async(img, folder, filename) => {
     
     return 'Y';
   }catch(e) {
+    callLog('ScreenShot', `makeImgMobile: ${e}`);
     return e;
   }
 }
@@ -439,6 +473,7 @@ router.post('/YK_Chit_List', async(req, res) => {
     sftp.end();
   })
   .catch(err => {
+    callLog('ScreenShot', `YK_Chit_List: ${err.message}`);
     console.error(err.message);
     res.json([]);
   });
@@ -478,6 +513,7 @@ router.post('/YK_Chit_DEL', (req, res) => {
     sftp.end();
   })
   .catch(err => {
+    callLog('ScreenShot', `YK_Chit_DEL: ${err.message}`);
     console.error(err.message);
   });
 
@@ -503,6 +539,7 @@ const delImg = async(folder, filename) => {
 
     return 'Y';
   }catch(e){
+    callLog('ScreenShot', `delImg: ${e}`);
     return e;
   }
 }

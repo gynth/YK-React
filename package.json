@@ -139,6 +139,7 @@
     "webpack-manifest-plugin": "2.2.0",
     "websocket": "^1.0.34",
     "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5",
     "workbox-webpack-plugin": "5.1.4",
     "ws": "^8.2.2",
     "xlsx": "^0.17.3"
@@ -146,7 +147,6 @@
   "scripts": {
     "start": "npm-run-all -p starts:**",
     "starts:client": "node scripts/start.js",
-    "starts:server": "nodemon ./server/webServer.js",
     "build": "set \"GENERATE_SOURCEMAP=false\" && node scripts/build.js"
   },
   "eslintConfig": {

@@ -3,6 +3,33 @@ const router = express.Router();
 const axios = require('axios');
 const moment = require('moment');
 
+const callLog = async(folder, msg) => {
+  const host = 'http://localhost:3001/Log';
+  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      folder,
+      msg
+    } ,
+    timeout: 30000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
 //#region YK스틸 웹요청
 const yk_req = (request, URL) => {
   let response;
@@ -11,7 +38,7 @@ const yk_req = (request, URL) => {
 
     })
   }catch(e){
-
+    callLog('WebReq', `yk_req: ${e}`);
   }
 
   return response;
@@ -28,6 +55,7 @@ router.post('/', (req, res) => {
     })
     .catch(err => {
       // console.log(err);
+      callLog('WebReq', `/: ${err}`);
       res.json(err);
     })
 });
@@ -41,6 +69,7 @@ router.post('/DIRECT', (req, res) => {
     })
     .catch(err => {
       // console.log(err);
+      callLog('WebReq', `DIRECT: ${err}`);
       res.json(err);
     })
 }); 
@@ -81,12 +110,12 @@ setInterval(e => {
     dt = moment(now).subtract(1, 'hour');
     date = moment(dt).format('YYYYMMDDHH59');
     time = date.substr(8, 4);
-    console.log(`bef 40 ${date}, ${time}`);
+    callLog('WebReq', `bef 40 ${date}, ${time}`);
   }else{
-    dt = moment(now).subtract(5, 'minute');
+    dt = moment(now).subtract(1, 'minute');
     date = moment(dt).format('YYYYMMDDHHmm');
     time = date.substr(8, 4);
-    console.log(`aft 40 ${date}, ${time}`);
+    callLog('WebReq', `aft 40 ${date}, ${time}`);
   }
 
   const host = `http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?` +
@@ -121,11 +150,11 @@ setInterval(e => {
         global.RAIN = 0;
       }
 
-      console.log(`Rain: ${global.RAIN}mm`)
+      callLog('WebReq', `Rain1: ${global.RAIN}mm`);
     })
     .catch(err => {
       console.log(err)
-      console.log('Raint Error')
+      callLog('WebReq', `Rain2: ${err}mm`);
       // console.log(err)
       // global.RAIN = 0;
     })

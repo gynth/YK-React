@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 export function OracleServerQuery(file, fn, param){
-  // const host = 'http://211.231.136.182:3001/Oracle/Query';
+  const host = 'http://211.231.136.182:3001/Oracle/Query';
   // const host = 'http://10.10.10.136:3001/Oracle/Query';
-  const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/Query'; //김경현11
+  // const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/Query'; //김경현11
   const option = {
     url   : host,
     method: 'POST',
@@ -30,9 +30,9 @@ export function OracleServerQuery(file, fn, param){
 };
 
 export function OracleServerQueryTran(grid, rowStatus, file, fn, param, seq){
-  // const host = 'http://211.231.136.182:3001/Oracle/QueryTran';
+  const host = 'http://211.231.136.182:3001/Oracle/QueryTran';
   // const host = 'http://10.10.10.136:3001/Oracle/Query';
-  const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/QueryTran';
+  // const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/QueryTran';
   const option = {
     url   : host,
     method: 'POST',
@@ -62,9 +62,9 @@ export function OracleServerQueryTran(grid, rowStatus, file, fn, param, seq){
 };
 
 export function OracleServerSP_YN(param){
-  // const host = 'http://211.231.136.182:3001/Oracle/SPYK';
+  const host = 'http://211.231.136.182:3001/Oracle/SPYK';
   // const host = 'http://10.10.10.136:3001/Oracle/SPYK';
-  const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/SPYK';
+  // const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/SPYK';
   const option = {
     url   : host,
     method: 'POST',
@@ -98,8 +98,8 @@ export function OracleServerSP(param){
     }
   }
   
-  const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/SP'; //김경현
-  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  // const host = 'http://ims.yksteel.co.kr:90/WebServer/Oracle/SP'; //김경현
+  const host = 'http://211.231.136.182:3001/Oracle/SP';
   const option = {
     url   : host,
     method: 'POST',

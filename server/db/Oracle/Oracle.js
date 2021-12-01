@@ -1,3 +1,4 @@
+const axios = require('axios');
 var oracleDb = require('oracledb');
 oracleDb.stmtCacheSize = 100;
 oracleDb.queueMax = 500;
@@ -9,6 +10,33 @@ oracleDb.autoCommit = true;
 // var dbConfig = require('../Oracle/dbConfig');
 const express = require('express');
 const router = express.Router();
+
+const callLog = async(folder, msg) => {
+  const host = 'http://localhost:3001/Log';
+  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      folder,
+      msg
+    } ,
+    timeout: 30000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
 
 (async() => {
   await oracleDb.createPool({
@@ -69,6 +97,7 @@ const executeSP = async(RowStatus, connection, query, data) => {
       }
     }else{
       if(SUCCESS !== 'Y'){
+        callLog('Oracle', `executeSP: ${result}`);
         console.log(result);
       }
     }
@@ -81,7 +110,7 @@ const executeSP = async(RowStatus, connection, query, data) => {
   
     return result;
   }catch(e){
-    console.log(e.message);
+    callLog('Oracle', `executeSP: ${e.message}`);
 
     result.ROWS     = null;
     result.SUCCESS  = 'N';
@@ -146,7 +175,7 @@ router.post('/SP', async(req, res) => {
         const external = Math.round(mem.external / 1024 / 1024 * 100)  / 100;
         const heapTotal = Math.round(mem.heapTotal / 1024 / 1024 * 100) / 100;
         const rss = Math.round(mem.rss / 1024 / 1024 * 100) / 100;
-        console.log(`heap used: ${heapUsed} MB, heap total: ${heapTotal} MB, rss: ${rss} MB, external: ${external} MB`);
+        callLog('Oracle', `heap used: ${heapUsed} MB, heap total: ${heapTotal} MB, rss: ${rss} MB, external: ${external} MB`);
       
         if(cnt === 10000) cnt = 0;
       }
@@ -221,6 +250,7 @@ router.post('/SPYK', async(req, res) => {
               result   : 'OK'});
   }catch(e){
     console.log(e)
+    callLog('Oracle', `SPYK: ${e}`);
   
     res.json({scaleNumb: '',
               seq      : 0,
@@ -247,7 +277,7 @@ router.post('/Query', async (req, res) => {
     try{
       Common = require('./Query/' + file);
     }catch(err){
-      console.log(err);
+      callLog('Oracle', `SPYK: ${err}`);
     }
   
     if(typeof(Common) !== 'function'){
@@ -272,7 +302,7 @@ router.post('/Query', async (req, res) => {
     await doRelease(connection);
     res.send(result);
   }catch(e){
-    console.log(e)
+    callLog('Oracle', `SPYK: ${e}`);
     res.send('NG');
   }finally{
 
@@ -327,6 +357,7 @@ router.post('/QueryTran', (req, res) => {
 
       connection.execute(query, async (err, result) => {
         if(err){
+          callLog('Oracle', `QueryTran: ${err}`);
           console.log(err.message);
           // connection.rollback((err) => {
           //   if(err !== null)

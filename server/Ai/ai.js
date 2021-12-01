@@ -9,6 +9,33 @@ const moment = require('moment');
 let REC_CAR_COUNT = [];
 let SNAPSHOT_LIST = [];
 
+const callLog = async(folder, msg) => {
+  const host = 'http://localhost:3001/Log';
+  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      folder,
+      msg
+    } ,
+    timeout: 30000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
+
 const callSp = async(param) => {
   const host = 'http://localhost:3001/Oracle/SP';
   // const host = 'http://211.231.136.182:3001/Oracle/SP';
@@ -30,7 +57,7 @@ const callSp = async(param) => {
       return res
     })
     .catch(err => {
-      console.log(err)
+      callLog('AI', `callSp: ${err}`);
       return err;
     })
 }
@@ -59,7 +86,7 @@ const callQuery = async(file, fn, param) => {
       return res
     })
     .catch(err => {
-      console.log(err)
+      callLog('AI', `callQuery: ${err}`);
       return err;
     })
 };
@@ -68,7 +95,7 @@ router.post('/ReRec', async(req, res) => {
   const scaleNumb = req.body.scaleNumb;
   const folder = scaleNumb.substring(0, 8);
 
-  console.log(scaleNumb);
+  callLog('AI', `ReRec: ${scaleNumb}`);
 
   if(fs.existsSync(`F:/IMS/Replay/${folder}/${scaleNumb}`)){
     const root = fs.readdirSync(`F:/IMS/Replay/${folder}`);
@@ -157,7 +184,7 @@ setInterval(async () => {
     //   console.log(SNAPSHOT_LIST[i])
     // }
   }catch(e){
-    console.log(e);
+    callLog('AI', `setInterval: ${e}`);
   }
 }, 1000);
 
@@ -179,7 +206,7 @@ const SNAPSHOT = (device, scaleNo, fileName) => {
       return res
     })
     .catch(err => {
-      console.log(err)
+      callLog('AI', `SNAPSHOT: ${err}`);
       return err;
     })
 }
@@ -206,6 +233,7 @@ router.post('/MstrWait', async(req, res) => {
     const select = await callSp(SP);
     res.json(select.data.ROWS);
   }catch(e){
+    callLog('AI', `MstrWait: ${e}`);
     res.json('');
   }
 
@@ -233,8 +261,6 @@ router.post('/Result', async(req, res) => {
           Count: 0,
           Date: new Date()
         };
-
-        console.log('Rec Wait', new Date());
       }else{
         //계속 0이 들어오는경우에 기존의 Date보다 10초가 지난경우면 녹화종료 처리
         const befDate = REC_CAR_COUNT[CameraNo].Date;
@@ -280,9 +306,9 @@ router.post('/Result', async(req, res) => {
               const select = await callSp(param);
               
               if(select.data.SUCCESS !== 'Y'){
-                console.log('Ai 녹화시작 실패');
+                callLog('AI', 'Ai 녹화시작 실패');
               }else{
-                console.log('Rec Stop!!', new Date());
+                callLog('AI', 'Rec Stop!!', new Date());
               }
             }catch(e){
     
@@ -345,10 +371,10 @@ router.post('/Result', async(req, res) => {
           const select = await callSp(param);
           
           if(select.data.SUCCESS !== 'Y'){
-            console.log('Ai 녹화시작 실패');
+            callLog('AI', 'Ai 녹화시작 실패');
           }
         }catch(e){
-
+          callLog('AI', `Ai 녹화시작 실패: ${e}`);
         }
       }else{
         
