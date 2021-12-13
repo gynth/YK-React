@@ -78,13 +78,17 @@ class HLSViewer extends Component {
         <div key={no.toString()}
           style={{width:'100%', height:'100%'}} 
           className='player-wrapper'>
-            <input style={{width: '100%'}} defaultValue={`카메라: ${name}`} disabled/>
+  
+            <div style={{width: '100%'}}>
+              카메라: ${name}
+              <button onClick={() => this.movieDown(name)}>다운로드</button>
+            </div>
             <ReactHlsPlayer
               src={`http://ims.yksteel.co.kr:90/WebServer/Replay/${this.scaleNumb.toString().substring(0, 8)}/${this.scaleNumb.toString()}/${encodeURIComponent(name)}/${this.scaleNumb.toString()}.m3u8`}
               autoPlay={true}
               controls={true}
               width='100%'
-              height='100%'
+              height='95%'
               muted='muted'
               // onLoadedData={e => e.target.play()}
               onError={e => {
@@ -97,8 +101,6 @@ class HLSViewer extends Component {
               }}
             />
         </div>
-  
-        <div className='file_download' onClick={() => this.movieDown(name)}></div>
       </>
     )
   }

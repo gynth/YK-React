@@ -26,8 +26,28 @@ function RecImageDtl(props) {
     return result;
   }
 
-  const movieDown = () => {
+  const movieDown = async() => {
     gfc_showMask();
+
+    let name = '';
+
+    if(value.toString() !== ''){
+      const reault = await callOracle(
+        'Common/Common',
+        'ZM_IMS_VIDEO_SELECT',
+        [{
+          scaleNumb: value.toString(),
+          seq      : props.seq
+        }]
+      );
+
+      if(reault.data.rows.length > 0){
+        name = reault.data.rows[0][5];
+      }else{
+        name = '';
+      }
+    }
+
     // const host = `http://10.10.10.136:3003/MovieDown`;
     const host = 'http://ims.yksteel.co.kr:90/WebServer/MovieDown';
     const option = {

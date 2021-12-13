@@ -2,6 +2,7 @@ const express = require('express');
 const app3000 = express();
 const cors = require('cors');
 const Stream = require('node-rtsp-stream');
+const axios = require('axios');
 // const Stream = require('rtsp-multi-stream');
 
 global.MILESTONE_RTSP = {};
@@ -13,6 +14,33 @@ const port3000 = 3000;
 app3000.listen(port3000, function(){
   console.log(`RTSP on port: ${port3000}..`)
 });
+
+const callLog = async(folder, msg) => {
+  const host = 'http://localhost:3001/Log';
+  // const host = 'http://211.231.136.182:3001/Oracle/SP';
+  const option = {
+    url   : host,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    data: {
+      folder,
+      msg
+    } ,
+    timeout: 30000
+  };
+
+  return axios(option)
+    .then(res => {
+      return res
+    })
+    .catch(err => {
+      console.log(err)
+      return err;
+    })
+}
 
 app3000.post('/getEmptyPort', (req, res) => {
   const device = req.body.device;
@@ -138,6 +166,7 @@ app3000.post('/RTSPStart', (req, res) => {
      
     res.json('OK') ;
   }catch(e){
+    callLog('RTSP', `${e}`);
     res.json(e) ; 
   }
 });
@@ -157,6 +186,7 @@ app3000.post('/RTSPStop', (req, res) => {
      
     res.json('OK') ;   
   }catch (e){
+    callLog('RTSP', `${e}`);
     res.json(e) ; 
   }
 });  

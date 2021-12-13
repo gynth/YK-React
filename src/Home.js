@@ -210,7 +210,7 @@ const defaultOpen = async() => {
     }
 }
 
-const Home = (props) => {  
+const Home = (props) => {
   const user_id = getSessionCookie('login');
   const areaTp = getSessionCookie('areaTp');
 

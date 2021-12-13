@@ -59,7 +59,7 @@ const callSp = async(param) => {
 
 let procYn = 'N';
 setInterval(async() => {
-  // callLog('Encoding', `${procYn} ${new Date()}`);
+  callLog('Encoding', `${procYn} ${new Date()}`);
 
   // await sleep(1000);
   if(procYn === 'N'){

@@ -945,23 +945,25 @@ class DISP_PROC extends Component {
 
 
           </div>
-            <div className='cctv_viewer'>
+            <div className='cctv_viewer' style={{overflow: 'auto'}}>
               <h4>녹화영상</h4>
               <div className='cctv_list'>
                   <RecImage 
                     seq     = {1}
                     reducer = 'DISP_PROC_MAIN'
-                    cam     = 'STD_CAM_OPEN' 
-                    focus   = 'STD_CAM_FOCUS' 
-                    rec     = 'STD_CAM_REC' 
-                    image   = 'STD_CAM_IMG'/> 
+                    rec     = 'STD_CAM_REC'/> 
                   <RecImage 
                     seq     = {2}
                     reducer = 'DISP_PROC_MAIN'
-                    cam     = 'DUM_CAM_OPEN' 
-                    focus   = 'DUM_CAM_FOCUS' 
-                    rec     = 'DUM_CAM_REC' 
-                    image   = 'DUM_CAM_IMG'/> 
+                    rec     = 'DUM_CAM_REC'/> 
+                  <RecImage 
+                    seq     = {3}
+                    reducer = 'DISP_PROC_MAIN'
+                    rec     = 'DUM_CAM_REC'/> 
+                  <RecImage 
+                    seq     = {4}
+                    reducer = 'DISP_PROC_MAIN'
+                    rec     = 'DUM_CAM_REC'/> 
               </div>
             </div>
         </div>

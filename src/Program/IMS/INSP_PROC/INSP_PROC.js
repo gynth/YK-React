@@ -1321,8 +1321,6 @@ class INSP_PROC extends Component {
   }
 
   render() {
-
-
     return (
       <div className='win_body' style={{borderRadius:'0px', borderWidth:'0px 1px 0px 1px'}}>
         <div className='car_manager'>

@@ -6,7 +6,7 @@ function RecImage(props) {
   return (
     <div id={props.rec} className='cctv rec'>
       <div className='viewer'>
-        <div style={{width:'100%', height:'100%'}}>
+        <div style={{width:'100%', height:'100%', marginTop:'16px'}}>
           <ReactImageDtl 
             seq     = {props.seq}
             reducer = {props.reducer}
