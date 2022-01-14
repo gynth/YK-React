@@ -244,7 +244,7 @@ router.post('/Result', async(req, res) => {
   const Result = req.body.Result;
   const CameraNo = 1;
   if(Count !== undefined){
-    console.log(Count)
+    // console.log(Count)
     
     if(REC_CAR_COUNT[CameraNo] === undefined){
       REC_CAR_COUNT[CameraNo] = {
@@ -332,7 +332,8 @@ router.post('/Result', async(req, res) => {
   if(Result !== undefined){
 
     for(let i = 0; i < Result.length; i++){
-      console.log(Result[i]);
+      // console.log(Result[i]);
+      callLog('AI', `callSp: ${Result.length}`);
       if(Result[i].procYn === 'Y'){
 
         let param = [];
